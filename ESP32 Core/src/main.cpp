@@ -3,12 +3,11 @@
 #include <WiFi.h>
 
 const char* ssid     = "Datanet";  //Network Name
-const char* password = "******"; //Network Password
+const char* password = "Berry143"; //Network Password
 const char* host = "192.168.1.28"; //Device IP
 const int port = 8088;
 byte dataByte = 0;
-
-boolean alreadyConnected = false; // whether or not the client was connected previously
+boolean Connected = false;
 String inData;
 
 WiFiClient client;
@@ -39,32 +38,22 @@ void setup()
   }
 }
 
-// void loop(){
-//   dataByte = client.read();
-//   Serial.println(dataByte);
-//   client.print(dataByte);
-//   delay(2000);
-// }
-
 void loop() {
-  // when the client sends the first byte, say hello:
   if (client) {
-    if (!alreadyConnected) {
-      // clead out the input buffer:
-      client.flush();    
-      Serial.println("We have a new client");
-      client.println("Hello, client!"); 
-      alreadyConnected = true;
+    if (!Connected) {
+      client.flush();                         //Clear Buffer
+      Serial.println("Client Connected to Host");
+      client.println("Hello From :" + WiFi.localIP()); 
+      Connected = true;
     } 
 
     if (client.available() > 0) { 
-      // read the bytes incoming from the client:
+      
+      //Read Incoming Byte Stream
       char thisChar = client.read();
       inData += thisChar; 
-      // echo the bytes back to the client:
-      client.write(thisChar);
-      // echo the bytes to the server as well:
-      Serial.write(thisChar);
+      client.write(thisChar); //Echo to Host
+      Serial.write(thisChar); //Print to log
     
       // echo to the server what's been received to confirm we have the string
       if (thisChar == '\n'){
