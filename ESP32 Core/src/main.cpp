@@ -2,13 +2,15 @@
 
 #include <WiFi.h>
 
-const char* ssid     = "Datanet";  //Network Name
-const char* password = "Berry143"; //Network Password
-const char* host = "192.168.1.28"; //Device IP
+const char* ssid     = "SSID";  //Network Name
+const char* password = "Password"; //Network Password
+const char* host = "IP"; //Device IP
 const int port = 8088;
-byte dataByte = 0;
+
 boolean Connected = false;
-String inData;
+String charData;
+const int BUFFER_SIZE = 10;
+byte buf[BUFFER_SIZE];
 
 WiFiClient client;
 
@@ -43,23 +45,37 @@ void loop() {
     if (!Connected) {
       client.flush();                         //Clear Buffer
       Serial.println("Client Connected to Host");
-      client.println("Hello From :" + WiFi.localIP()); 
+      client.print("Hello From :" + WiFi.localIP()); 
       Connected = true;
     } 
 
+
     if (client.available() > 0) { 
-      
+
       //Read Incoming Byte Stream
       char thisChar = client.read();
-      inData += thisChar; 
-      client.write(thisChar); //Echo to Host
+    charData += thisChar; 
       Serial.write(thisChar); //Print to log
+
+      // int msgLength = client.read(buf,BUFFER_SIZE);
+      // Serial.print("Length msgLength = ");
+      // Serial.println(msgLength);
+      
+
+      //Print Bytes
+      // for(int i = 0; i < msgLength; i++){ 
+      //   Serial.print(buf[i],BIN);    
+      //   Serial.print(" | ");    
+      //   client.write(buf[i]); //Echo to Host
+      // }
+      // Serial.println();
     
-      // echo to the server what's been received to confirm we have the string
+
+      //Print Characters
       if (thisChar == '\n'){
         Serial.print("\nreceived:");
-        Serial.print(inData);
-        inData = "";          
+        Serial.print(charData);
+      charData = "";          
       }
     }
   }
