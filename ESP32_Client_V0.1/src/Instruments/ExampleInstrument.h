@@ -3,13 +3,13 @@
 #include "Instruments/InstrumentController.h"
 #include <stdint.h>
 
-class FloppyDrives : public InstrumentController{
+class ExampleInstrument : public InstrumentController{
 
 public: 
     void SetUp() override;
-    void Tick() override;
+    void Tick();
 
-    void Reset();
+    void Reset(uint8_t instrument) override;
     void ResetAll() override;
     void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
     void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
@@ -19,15 +19,17 @@ public:
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
 
 private:
+
     //Controller Attributes
     
     //[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
-    uint8_t _activeNotes[32];
+    uint8_t _activeNotes[32][16];
+    uint8_t _numActiveNotes[32];
 
 
     //Instrument Attributes
-    uint8_t floppyHeadPosition[32];
-    uint8_t floppyNotePeriod[32];
-    uint8_t floppyCurrentPeriod[32];
-    uint8_t floppyCurrentTick[32];
+    uint8_t NotePeriod[32][16];
+    uint8_t CurrentPeriod[32][16];
+    uint8_t CurrentTick[32];
+
 };

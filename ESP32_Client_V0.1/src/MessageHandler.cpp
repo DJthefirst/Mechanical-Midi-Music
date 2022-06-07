@@ -26,11 +26,11 @@ void MessageHandler::processMessage(uint8_t message[])
             break;
 
         case(SysStop):
-
+            //Not Yet Implemented
             break;
 
         case(SysReset):
-
+            //Not Yet Implemented
             break;
         }
     }
@@ -61,7 +61,7 @@ void MessageHandler::DistributeMessage(uint8_t message[])
 
 void MessageHandler::ProcessSysEXE(uint8_t _message[])
 {
-
+    //Not Yet Implemented
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

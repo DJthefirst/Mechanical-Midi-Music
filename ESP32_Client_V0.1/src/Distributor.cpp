@@ -1,10 +1,8 @@
 #include "Distributor.h"
-#include "Instruments/FloppyDrives.h"
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
     ptr_InstrumentController = ptrInstrumentController;
-    //FloppyDrives instrumentController = ptr_InstrumentController*;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +55,6 @@ void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
     if(instrument != 0xFF){
         (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
     }
- 
 }
 
 void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
@@ -82,22 +79,22 @@ void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
 
 void Distributor::ControlChangeEvent(uint8_t Controller, uint8_t Value)
 {
-    
+    //Not Yet Implemented
 }
 
 void Distributor::ProgramChangeEvent(uint8_t Program)
 {
-    
+    //Not Yet Implemented
 }
 
 void Distributor::ChannelPressureEvent(uint8_t Velocity)
 {
-    
+    //Not Yet Implemented
 }
 
 void Distributor::PitchBendEvent(uint16_t PitchBend)
 {
-    
+    //Not Yet Implemented
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +180,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
     switch(_distributionMethod){
 
     case(StrightThrough):
-        if((*ptr_InstrumentController).isNotActive(currentChannel, note)){
+        if((*ptr_InstrumentController).isNoteActive(currentChannel, note)){
             return currentChannel;
         }
         return 0xFF;
@@ -196,7 +193,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
             //Check if valid instrument
             if(_instruments & (1 << nextInstrument) != 0){
-                if((*ptr_InstrumentController).isNotActive(nextInstrument, note)){
+                if((*ptr_InstrumentController).isNoteActive(nextInstrument, note)){
                     return nextInstrument;
                 }
             }
@@ -208,7 +205,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
             //Check if valid instrument
             if(_instruments & (1 << i) != 0){
-                if((*ptr_InstrumentController).isNotActive(i, note)){
+                if((*ptr_InstrumentController).isNoteActive(i, note)){
                     return i;
                 }
             }
@@ -220,7 +217,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
             //Check if valid instrument
             if(_instruments & (1 << i) != 0){
-                if((*ptr_InstrumentController).isNotActive(i, note)){
+                if((*ptr_InstrumentController).isNoteActive(i, note)){
                     return i;
                 }
             }
