@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include "Constants.h"
-#include "InstrumentController.h"
+#include "Instruments/InstrumentController.h"
 
 
 //Algorythmic Methods to Distribute Notes Amoungst Instruments.
@@ -38,7 +38,7 @@ private:
     //Local Atributes
     uint8_t currentChannel;
     uint8_t currentInstrument;
-    InstrumentController instrumentController;
+    InstrumentController* ptr_InstrumentController;
 
     //Each Bit Represents an Enabled Channel/Instrument
     uint16_t _channels;
@@ -47,7 +47,7 @@ private:
     //Settings
     bool _noteOverwrite = false;
     uint8_t _minNote, _maxNote;
-    uint8_t _numPolyphonicNotes = 1;
+    uint8_t _numPolyphonicNotes = 0;
     DistributionMethod _distributionMethod;
 
     //Midi Message Events

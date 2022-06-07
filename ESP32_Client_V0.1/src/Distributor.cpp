@@ -1,9 +1,15 @@
 #include "Distributor.h"
+#include "Instruments/FloppyDrives.h"
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
-    instrumentController = *ptrInstrumentController;
+    ptr_InstrumentController = ptrInstrumentController;
+    //FloppyDrives instrumentController = ptr_InstrumentController*;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Message Processor
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Distributor::processMessage(uint8_t message[])
 {
@@ -41,24 +47,36 @@ void Distributor::processMessage(uint8_t message[])
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Event Handlers
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
 {
     uint8_t instrument = CheckForNote(Note);
     if(instrument != 0xFF){
-        instrumentController.PlayNote(instrument, Note, Velocity);
+        (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
     }
  
 }
 
-void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity){
-    
+void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
+{
+    uint8_t instrument = CheckForNote(Note);
+
+    if((Velocity == 0) && (instrument != 0xFF)){
+        (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
+    }
+    else if(instrument != 0xFF){
+        (*ptr_InstrumentController).PlayNote(instrument, Note, Velocity);
+    }
 }
 
 void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
     uint8_t instrument = CheckForNote(Note);
     if(instrument != 0xFF){
-        instrumentController.SetKeyPressure(instrument, Note, Velocity);
+        (*ptr_InstrumentController).SetKeyPressure(instrument, Note, Velocity);
     }
 }
 
@@ -82,10 +100,14 @@ void Distributor::PitchBendEvent(uint16_t PitchBend)
     
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Helper Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 uint8_t Distributor::NextInstrument()
 {
-    uint8_t insturmentLeastActive;
-    uint8_t leastActiveNotes;
+    uint8_t insturmentLeastActive = 0;
+    uint8_t leastActiveNotes = 255;
 
     switch(_distributionMethod){
 
@@ -111,13 +133,11 @@ uint8_t Distributor::NextInstrument()
 
 
     case(Accending):
-        insturmentLeastActive = 0;
-        leastActiveNotes = 255;
 
         for(int i = 0; (i < 32); i++){
             if(_instruments & (1 << i) != 0)
             {
-                uint8_t activeNotes = instrumentController.getNumActiveNotes(i);
+                uint8_t activeNotes = (*ptr_InstrumentController).getNumActiveNotes(i);
 
                 if(activeNotes == 0)
                 {
@@ -134,13 +154,11 @@ uint8_t Distributor::NextInstrument()
         return insturmentLeastActive;
 
     case(Decending):
-        insturmentLeastActive = 0;
-        leastActiveNotes = 255;
 
         for(int i = 31; (i >= 0); i--){
             if(_instruments & (1 << i) != 0)
             {
-                uint8_t activeNotes = instrumentController.getNumActiveNotes(i);
+                uint8_t activeNotes = (*ptr_InstrumentController).getNumActiveNotes(i);
 
                 if(activeNotes == 0)
                 {
@@ -160,35 +178,60 @@ uint8_t Distributor::NextInstrument()
 
 uint8_t Distributor::CheckForNote(uint8_t note)
 {
+    uint8_t nextInstrument = currentInstrument;
+
     switch(_distributionMethod){
 
     case(StrightThrough):
-
-        break;
+        if((*ptr_InstrumentController).isNotActive(currentChannel, note)){
+            return currentChannel;
+        }
+        return 0xFF;
 
     case(RoundRobin):
-
         for(int i = 0; i < 32; i++){
-            currentInstrument--;
+            nextInstrument--;
 
-            currentInstrument = (currentInstrument < 0) ? 31 : currentInstrument;
+            nextInstrument = (nextInstrument < 0) ? 31 : nextInstrument;
 
             //Check if valid instrument
-            if(_instruments & (1 << currentInstrument) != 0){
-                //if ;
+            if(_instruments & (1 << nextInstrument) != 0){
+                if((*ptr_InstrumentController).isNotActive(nextInstrument, note)){
+                    return nextInstrument;
+                }
             }
         }
-        return currentInstrument;
+        return 0xFF;
 
     case(Accending):
+        for(int i = 0; i < 32; i++){
 
-        break;
+            //Check if valid instrument
+            if(_instruments & (1 << i) != 0){
+                if((*ptr_InstrumentController).isNotActive(i, note)){
+                    return i;
+                }
+            }
+        }
+        return 0xFF;
 
     case(Decending):
+        for(int i = 31; i >= 0; i--){
 
-        break;
+            //Check if valid instrument
+            if(_instruments & (1 << i) != 0){
+                if((*ptr_InstrumentController).isNotActive(i, note)){
+                    return i;
+                }
+            }
+        }
+        return 0xFF;
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Getters
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //output Array = uint8_t[9]
 void Distributor::getDistributor(uint8_t* outputArray)

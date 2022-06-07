@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include "NetworkUDP.h"
-#include "InstrumentController.h"
 #include "MessageHandler.h"
 
-InstrumentController instrumentController;
+#include "Instruments/InstrumentController.h"
+#include "Instruments/FloppyDrives.h"
+
+
+FloppyDrives* instrumentController;
 MessageHandler messageHandler = MessageHandler();
 NetworkUDP connection = NetworkUDP();
 
 void setup() {
-  messageHandler.initalize(&instrumentController);
+  messageHandler.initalize(instrumentController);
   connection.initalize(&messageHandler);
   connection.begin();
   delay(100);

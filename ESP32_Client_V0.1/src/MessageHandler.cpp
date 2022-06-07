@@ -1,12 +1,16 @@
 #include "MessageHandler.h"
-#include "InstrumentController.h"
+#include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
 MessageHandler::MessageHandler() {}
 
-void MessageHandler::initalize(InstrumentController* instrumentController){
-
+void MessageHandler::initalize(InstrumentController* ptrInstrumentController){
+    ptr_instrumentController = ptrInstrumentController;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Process Messages
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MessageHandler::processMessage(uint8_t message[])
 {   
@@ -36,6 +40,10 @@ void MessageHandler::processMessage(uint8_t message[])
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Distribute MIDI Messages
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MessageHandler::DistributeMessage(uint8_t message[])
 {  
     for(uint8_t i=0; i < distributors.size(); i++)
@@ -47,7 +55,25 @@ void MessageHandler::DistributeMessage(uint8_t message[])
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Process SysEXE Messages
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MessageHandler::ProcessSysEXE(uint8_t _message[])
 {
 
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Manage Distributors
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MessageHandler::addDistributor()
+{
+    Distributor newDistributor = Distributor(ptr_instrumentController);
+    distributors.push_back(newDistributor);
+}
+
+Distributor* MessageHandler::getDistributor(uint8_t index){
+    return &(distributors[index]);
 }
