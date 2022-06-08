@@ -9,7 +9,6 @@ class InstrumentController{
 
 public: 
     virtual void SetUp() = 0;
-    virtual void Tick(){};
 
     virtual void Reset(uint8_t instrument) = 0;
     virtual void ResetAll() = 0;

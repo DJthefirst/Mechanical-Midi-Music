@@ -7,7 +7,7 @@ void ExampleInstrument::SetUp()
 {
     //Settup pins
     for(uint8_t i=0; i < sizeof(pins); i++){
-        pinMode(i, OUTPUT);
+        pinMode(pins[i], OUTPUT);
     }
 
     // With all pins setup, let's do a first run reset
@@ -33,6 +33,7 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
     for(int8_t i = 0; i < 16; i++){
         if(_activeNotes[instrument][i] & MSB_BITMASK !=1){
             _activeNotes[instrument][i] = (0x80 & note);
+            _currentPeriod[instrument][i] = notePeriods[note];
             return;
         }
     }
@@ -46,6 +47,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
             if((_activeNotes[instrument][i] & (~MSB_BITMASK)) == note)
             {
                 _activeNotes[instrument][i] = 0;
+                _currentPeriod[instrument][i] = 0;
                 return;
             }
         }
@@ -59,6 +61,10 @@ void ExampleInstrument::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t
 {
     //Not Yet Implemented
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Tick
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
@@ -74,11 +80,38 @@ void ICACHE_RAM_ATTR ExampleInstrument::Tick()
 void ExampleInstrument::tick()
 #endif
 {
-    //Not Yet Implemented
+    for (int i = 0; i < 32; i++) {
+        for (int n = 0; n < 16; n++){
+            if (_currentPeriod[i][n] > 0) {
+                _currentTick[i][n]++;
+            
+                if (_currentTick[i][n] >= _currentPeriod[i][n]) {
+                    togglePin(i);
+                    _currentTick[i][n] = 0;
+
+                }
+            }
+        }
+    }
 }
 
 
+#ifdef ARDUINO_ARCH_ESP32
+void ICACHE_RAM_ATTR ExampleInstrument::togglePin(uint8_t instrument) {
+#else
+void ExampleInstrument::togglePin(byte driveNum, byte pin) {
+#endif
 
+    //Pulse the control pin
+    _currentState[instrument] = ~_currentState[instrument];
+    digitalWrite(pins[instrument], _currentState[instrument]);
+        
+}
+#pragma GCC pop_options
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Getters and Setters
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
 {

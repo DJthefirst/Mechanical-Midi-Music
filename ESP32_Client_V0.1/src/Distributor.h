@@ -61,6 +61,5 @@ private:
 
     //Returns Instrument ID
     uint8_t NextInstrument();
-    uint8_t PreviousInstrument();
     uint8_t CheckForNote(uint8_t note);
 };

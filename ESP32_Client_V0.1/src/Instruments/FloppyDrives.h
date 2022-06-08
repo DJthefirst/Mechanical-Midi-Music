@@ -7,7 +7,7 @@ class FloppyDrives : public InstrumentController{
 
 public: 
     void SetUp() override;
-    void Tick() override;
+    static void Tick();
 
     void Reset();
     void ResetAll() override;

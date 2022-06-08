@@ -7,7 +7,7 @@ class ExampleInstrument : public InstrumentController{
 
 public: 
     void SetUp() override;
-    void Tick();
+    static void Tick();
 
     void Reset(uint8_t instrument) override;
     void ResetAll() override;
@@ -28,8 +28,10 @@ private:
 
 
     //Instrument Attributes
-    uint8_t NotePeriod[32][16];
-    uint8_t CurrentPeriod[32][16];
-    uint8_t CurrentTick[32];
+    static uint8_t _currentPeriod[32][16];
+    static uint8_t _currentTick[32][16];
+    static bool _currentState[32];
+
+    static void togglePin(uint8_t instrument);
 
 };

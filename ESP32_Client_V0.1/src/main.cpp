@@ -1,20 +1,29 @@
 #include <Arduino.h>
 #include "NetworkUDP.h"
 #include "MessageHandler.h"
+#include "Distributor.h"
 
 #include "Instruments/InstrumentController.h"
 #include "Instruments/FloppyDrives.h"
+#include "Instruments/ExampleInstrument.h"
 
 
-FloppyDrives* instrumentController;
-MessageHandler messageHandler = MessageHandler();
-NetworkUDP connection = NetworkUDP();
+ExampleInstrument* instrumentController;
+MessageHandler* messageHandler;
+NetworkUDP connection;
 
 void setup() {
-  messageHandler.initalize(instrumentController);
-  connection.initalize(&messageHandler);
+  messageHandler -> initalize(instrumentController);
+  connection.initalize(messageHandler);
   connection.begin();
   delay(100);
+
+  //Testing
+  //messageHandler -> addDistributor();
+  //Distributor* distributor = messageHandler -> getDistributor(0);
+  //distributor -> setChannels(0xFFFF); // 1-16
+  //distributor -> setInstruments(0x0000000F); // 1-4
+
 }
 
 void loop() {

@@ -4,7 +4,9 @@
  */
 #pragma once
 
+#include <stdint.h>
+
 class InterruptTimer {
 public:
-    static void initialize(unsigned long microseconds, void (*isr)());
+    static void initialize(uint32_t microseconds, void (*isr)());
 };
