@@ -1,0 +1,2 @@
+C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\mmk\obj\Debug\mmk.csproj.AssemblyReference.cache
+C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\mmk\obj\Debug\mmk.csproj.CoreCompileInputs.cache

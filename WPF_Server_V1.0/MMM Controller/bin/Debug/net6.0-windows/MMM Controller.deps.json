@@ -1,0 +1,45 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "MMM Controller/1.0.0": {
+        "dependencies": {
+          "managed-midi": "1.9.14"
+        },
+        "runtime": {
+          "MMM Controller.dll": {}
+        }
+      },
+      "managed-midi/1.9.14": {
+        "runtime": {
+          "lib/netcoreapp2.1/Commons.Music.Midi.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "lib/netcoreapp2.1/alsa-sharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MMM Controller/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "managed-midi/1.9.14": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-m5hB1cxnSeNMxxbe0Jb6Gm0JmSZbrXINJFyhPXL6P94hdtP/+cCYPEsFiDOH3i0qjGrq4JfU+wSkRfQHFvlsYQ==",
+      "path": "managed-midi/1.9.14",
+      "hashPath": "managed-midi.1.9.14.nupkg.sha512"
+    }
+  }
+}

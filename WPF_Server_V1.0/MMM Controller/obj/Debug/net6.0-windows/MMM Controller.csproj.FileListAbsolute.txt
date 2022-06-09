@@ -1,0 +1,24 @@
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\MMM Controller.exe
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\MMM Controller.deps.json
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\MMM Controller.runtimeconfig.json
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\MMM Controller.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\ref\MMM Controller.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\MMM Controller.pdb
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.csproj.AssemblyReference.cache
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MainWindow.g.cs
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\App.g.cs
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller_MarkupCompile.cache
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller_MarkupCompile.lref
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MainWindow.baml
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.g.resources
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.AssemblyInfoInputs.cache
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.AssemblyInfo.cs
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.csproj.CoreCompileInputs.cache
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\ref\MMM Controller.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.pdb
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.genruntimeconfig.cache
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\Commons.Music.Midi.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\bin\Debug\net6.0-windows\alsa-sharp.dll
+C:\Users\djber\source\repos\MMM Controller\MMM Controller\obj\Debug\net6.0-windows\MMM Controller.csproj.CopyComplete

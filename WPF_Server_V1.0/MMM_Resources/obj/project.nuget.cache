@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "m/MsvmSPhRW8lX//8IGdmrZqiOax23QyODPzvIvTGvnCX6YrIluHjGarq6mEBtM7P/y7MAZmtpSoVEnsc0By3Q==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\MMM Controller\\MMM_Resources\\MMM_Resources.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\djber\\.nuget\\packages\\managed-midi\\1.9.14\\managed-midi.1.9.14.nupkg.sha512"
+  ],
+  "logs": []
+}

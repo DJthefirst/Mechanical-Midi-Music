@@ -1,0 +1,4 @@
+C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\managed-midi-player-console\obj\Debug\managed-midi-player-console.csproj.AssemblyReference.cache
+C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\managed-midi-player-console\obj\Debug\managed-midi-player-console.csproj.CoreCompileInputs.cache
+C:\Users\djber\source\repos\MMM Controller\managed-midi-player-console\obj\Debug\managed-midi-player-console.csproj.AssemblyReference.cache
+C:\Users\djber\source\repos\MMM Controller\managed-midi-player-console\obj\Debug\managed-midi-player-console.csproj.CoreCompileInputs.cache
