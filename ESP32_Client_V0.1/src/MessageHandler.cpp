@@ -2,10 +2,12 @@
 #include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
+InstrumentController* ptr_instrumentController;
+
 MessageHandler::MessageHandler() {}
 
 void MessageHandler::initalize(InstrumentController* ptrInstrumentController){
-    ptr_instrumentController = ptrInstrumentController;
+    ptr_instrumentController = ptrInstrumentController; //This Line Causes Crash
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +39,7 @@ void MessageHandler::processMessage(uint8_t message[])
 
     else{
         DistributeMessage(message);
+
     }
 }
 
@@ -48,10 +51,12 @@ void MessageHandler::DistributeMessage(uint8_t message[])
 {  
     for(uint8_t i=0; i < distributors.size(); i++)
     {
+        
         if((distributors[i].getChannels() & (1 << msg_channel)) != (0))
         {
             distributors[i].processMessage(message);
         }
+
     }
 }
 

@@ -26,12 +26,6 @@ private:
     uint8_t _activeNotes[32][16];
     uint8_t _numActiveNotes[32];
 
-
-    //Instrument Attributes
-    static uint8_t _currentPeriod[32][16];
-    static uint8_t _currentTick[32][16];
-    static bool _currentState[32];
-
     static void togglePin(uint8_t instrument);
 
 };

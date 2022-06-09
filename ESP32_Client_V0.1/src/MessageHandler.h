@@ -29,7 +29,6 @@ private:
     uint8_t msg_type;
     uint8_t msg_channel;
 
-    InstrumentController* ptr_instrumentController;
     std::vector<Distributor> distributors;
 
     void DistributeMessage(uint8_t message[]);

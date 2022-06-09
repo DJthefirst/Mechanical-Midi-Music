@@ -109,9 +109,9 @@ void NetworkUDP::readMessages() {
         //Serial.print("From ");
         IPAddress remote = MulticastUDP.remoteIP();
         //for (int i = 0; i < 4; i++) {
-            //Serial.print(remote[i], DEC);
+        //    Serial.print(remote[i], DEC);
         //    if (i < 3) {
-                //Serial.print(".");
+        //        Serial.print(".");
         //    }
         //}
         //Serial.print(", port ");
@@ -128,6 +128,13 @@ void NetworkUDP::readMessages() {
             Serial.println(messageBuffer[0]);
             Serial.println(messageLength);
         }
+
+        //DEBUG
+        // for(int i = 0; i < messageLength; i++){
+        //     Serial.printf("%02x", (messageBuffer[i]));
+        //     Serial.print(" ");
+        // }
+        Serial.println("");
 
         MulticastUDP.flush(); // Just incase we got a really long packet
     }

@@ -1,4 +1,5 @@
 #include "Distributor.h"
+#include "Arduino.h"
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
@@ -11,6 +12,15 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 
 void Distributor::processMessage(uint8_t message[])
 {
+
+    //Debug
+    Serial.print("Distributor->Instrument: ");
+    for(int i = 0; i < 3; i++){
+        Serial.printf("%02x", (message[i]));
+        Serial.print(" ");
+    }
+    Serial.println("");
+
     currentChannel = (message[0] & 0b00001111);
 
     //Determine Type of Msg and Call Associated Event
@@ -20,9 +30,11 @@ void Distributor::processMessage(uint8_t message[])
 
     case(NoteOff):
         NoteOffEvent(message[1],message[2]);
+        Serial.println("Note Off");
         break; 
     case(NoteOn):
         NoteOnEvent(message[1],message[2]);
+        Serial.println("Note On");
         break;
     case(KeyPressure):
         KeyPressureEvent(message[1],message[2]);
@@ -59,12 +71,13 @@ void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
 
 void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = CheckForNote(Note);
-
-    if((Velocity == 0) && (instrument != 0xFF)){
-        (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
+    //Check if note has 0 velocity for note off
+    if((Velocity == 0)){
+        NoteOffEvent(Note, Velocity);
     }
-    else if(instrument != 0xFF){
+    else if(Velocity != 0){
+        uint8_t instrument = NextInstrument();
+
         (*ptr_InstrumentController).PlayNote(instrument, Note, Velocity);
     }
 }

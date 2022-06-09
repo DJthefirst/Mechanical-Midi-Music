@@ -8,8 +8,8 @@
 #include "Instruments/ExampleInstrument.h"
 
 
-ExampleInstrument* instrumentController;
-MessageHandler* messageHandler;
+ExampleInstrument* instrumentController = new(ExampleInstrument);
+MessageHandler* messageHandler = new(MessageHandler);
 NetworkUDP connection;
 
 void setup() {
@@ -19,10 +19,10 @@ void setup() {
   delay(100);
 
   //Testing
-  //messageHandler -> addDistributor();
-  //Distributor* distributor = messageHandler -> getDistributor(0);
-  //distributor -> setChannels(0xFFFF); // 1-16
-  //distributor -> setInstruments(0x0000000F); // 1-4
+  messageHandler -> addDistributor();
+  Distributor* distributor = messageHandler -> getDistributor(0);
+  distributor -> setChannels(0xFFFF); // 1-16
+  distributor -> setInstruments(0x0000000F); // 1-4
 
 }
 

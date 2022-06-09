@@ -48,7 +48,7 @@ private:
     bool _noteOverwrite = false;
     uint8_t _minNote, _maxNote;
     uint8_t _numPolyphonicNotes = 0;
-    DistributionMethod _distributionMethod;
+    DistributionMethod _distributionMethod = StrightThrough;
 
     //Midi Message Events
     void NoteOnEvent(uint8_t Key, uint8_t Velocity);

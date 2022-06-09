@@ -3,6 +3,11 @@
 #include "Constants.h"
 #include "Arduino.h"
 
+//Instrument Attributes
+static uint8_t _currentPeriod[32][16];
+static uint8_t _currentTick[32][16];
+static bool _currentState[32];
+
 void ExampleInstrument::SetUp()
 {
     //Settup pins
@@ -34,6 +39,19 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
         if(_activeNotes[instrument][i] & MSB_BITMASK !=1){
             _activeNotes[instrument][i] = (0x80 & note);
             _currentPeriod[instrument][i] = notePeriods[note];
+
+            //Debug
+            Serial.print("Instrumet Number: ");
+            Serial.println(instrument);
+            Serial.print("Note Location: ");
+            Serial.println(i);
+            Serial.print("ActiveNotes: ");
+            Serial.println(_activeNotes[instrument][i]);
+            Serial.print("CurrentTick: ");
+            Serial.println(_currentTick[instrument][i]);
+            Serial.print("CurrentPeriod: ");
+            Serial.println(_currentPeriod[instrument][i]);
+
             return;
         }
     }
