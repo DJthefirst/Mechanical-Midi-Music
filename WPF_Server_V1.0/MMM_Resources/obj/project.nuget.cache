@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "m/MsvmSPhRW8lX//8IGdmrZqiOax23QyODPzvIvTGvnCX6YrIluHjGarq6mEBtM7P/y7MAZmtpSoVEnsc0By3Q==",
+  "dgSpecHash": "/xYHWNn3Twpgy7GYLWZqhUbx+lAclOwTL9croYe1YGKsjWUTYzXRyAunozkxjOzfcaZ5f9M12CPl5iBsisJ0Lg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\MMM Controller\\MMM_Resources\\MMM_Resources.csproj",
+  "projectFilePath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\WPF_Server_V1.0\\MMM_Resources\\MMM_Resources.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\djber\\.nuget\\packages\\managed-midi\\1.9.14\\managed-midi.1.9.14.nupkg.sha512"
   ],

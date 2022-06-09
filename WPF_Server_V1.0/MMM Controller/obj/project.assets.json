@@ -62,11 +62,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\MMM Controller\\MMM Controller\\MMM Controller.csproj",
+      "projectUniqueName": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\WPF_Server_V1.0\\MMM Controller\\MMM Controller.csproj",
       "projectName": "MMM Controller",
-      "projectPath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\MMM Controller\\MMM Controller\\MMM Controller.csproj",
+      "projectPath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\WPF_Server_V1.0\\MMM Controller\\MMM Controller.csproj",
       "packagesPath": "C:\\Users\\djber\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\MMM Controller\\MMM Controller\\obj\\",
+      "outputPath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Masters\\Mechanical-Midi-Masters\\WPF_Server_V1.0\\MMM Controller\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
