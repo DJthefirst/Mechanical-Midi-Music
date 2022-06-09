@@ -3,6 +3,12 @@
 #include "Constants.h"
 #include "Arduino.h"
 
+//Controller Attributes
+    
+//[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
+static uint8_t _activeNotes[32][16] = {0};
+static uint8_t _numActiveNotes[32];
+
 //Instrument Attributes
 static uint8_t _currentPeriod[32][16];
 static uint8_t _currentTick[32][16];
@@ -36,13 +42,12 @@ void ExampleInstrument::ResetAll()
 void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     for(int8_t i = 0; i < 16; i++){
-        if(_activeNotes[instrument][i] & MSB_BITMASK !=1){
-            _activeNotes[instrument][i] = (0x80 & note);
+
+        if((_activeNotes[instrument][i] & MSB_BITMASK) == 0){
+            _activeNotes[instrument][i] = (0x80 | note);
             _currentPeriod[instrument][i] = notePeriods[note];
 
             //Debug
-            Serial.print("Instrumet Number: ");
-            Serial.println(instrument);
             Serial.print("Note Location: ");
             Serial.println(i);
             Serial.print("ActiveNotes: ");
@@ -59,13 +64,28 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
 
 void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
+    Serial.println("Stopping Note");
+
     for(int8_t i = 0; i < 16; i++){
-        if((_activeNotes[instrument][i] & MSB_BITMASK) == 1)
+        if((_activeNotes[instrument][i] & MSB_BITMASK) == MSB_BITMASK)
         {
+
             if((_activeNotes[instrument][i] & (~MSB_BITMASK)) == note)
             {
                 _activeNotes[instrument][i] = 0;
                 _currentPeriod[instrument][i] = 0;
+
+                //Debug
+                Serial.print("Note Location: ");
+                Serial.println(i);
+                Serial.print("Note Location: ");
+                Serial.println(i);
+                Serial.print("ActiveNotes: ");
+                Serial.println(_activeNotes[instrument][i]);
+                Serial.print("CurrentTick: ");
+                Serial.println(_currentTick[instrument][i]);
+                Serial.print("CurrentPeriod: ");
+                Serial.println(_currentPeriod[instrument][i]);
                 return;
             }
         }
@@ -135,17 +155,25 @@ uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
 {
     return _numActiveNotes[instrument];
 }
-
+ 
 bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    for(uint8_t i=0; i<16; i++){
 
-        if ((_activeNotes[instrument][i] & (~ MSB_BITMASK)) == note){
+    //Debug
+    Serial.print("Note ");
+    Serial.print(note);
+
+    for(uint8_t n=0; n<16; n++){
+
+        if ((_activeNotes[instrument][n] & (~ MSB_BITMASK)) == note){
+            Serial.print(" is Active at ");
+            Serial.println(n);
             return true;
         }
-        else if((_activeNotes[instrument][i] & MSB_BITMASK) == 0){
-            return false;
-        }
+        //else if((_activeNotes[instrument][n] & MSB_BITMASK) == 0){
+        //    return false;
+        //}
     }
+    Serial.println(" is inActive");
     return false;
 }

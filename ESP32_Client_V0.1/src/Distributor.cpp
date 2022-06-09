@@ -29,12 +29,12 @@ void Distributor::processMessage(uint8_t message[])
     switch(msg_type){
 
     case(NoteOff):
-        NoteOffEvent(message[1],message[2]);
         Serial.println("Note Off");
+        NoteOffEvent(message[1],message[2]);
         break; 
     case(NoteOn):
-        NoteOnEvent(message[1],message[2]);
         Serial.println("Note On");
+        NoteOnEvent(message[1],message[2]);
         break;
     case(KeyPressure):
         KeyPressureEvent(message[1],message[2]);
@@ -64,6 +64,8 @@ void Distributor::processMessage(uint8_t message[])
 void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
 {
     uint8_t instrument = CheckForNote(Note);
+    Serial.print("Note On Instrument ");
+    Serial.println(instrument);
     if(instrument != 0xFF){
         (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
     }
@@ -77,7 +79,6 @@ void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
     }
     else if(Velocity != 0){
         uint8_t instrument = NextInstrument();
-
         (*ptr_InstrumentController).PlayNote(instrument, Note, Velocity);
     }
 }

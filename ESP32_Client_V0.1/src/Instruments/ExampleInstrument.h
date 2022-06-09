@@ -20,12 +20,6 @@ public:
 
 private:
 
-    //Controller Attributes
-    
-    //[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
-    uint8_t _activeNotes[32][16];
-    uint8_t _numActiveNotes[32];
-
     static void togglePin(uint8_t instrument);
 
 };
