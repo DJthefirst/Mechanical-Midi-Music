@@ -7,12 +7,13 @@
     
 //[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
 static uint8_t _activeNotes[32][16] = {0};
-static uint8_t _numActiveNotes[32];
+static uint8_t _numActiveNotes[32] = {0};
 
 //Instrument Attributes
-static uint8_t _currentPeriod[32][16];
-static uint8_t _currentTick[32][16];
-static bool _currentState[32];
+static uint16_t _currentPeriod[32][16] = {0};  //Notes
+static uint8_t _currentSlot[32] = {0}; //Polyphonic
+static uint8_t _currentTick[32]; //Timeing
+static bool _currentState[32] = {0}; //IO
 
 void ExampleInstrument::SetUp()
 {
@@ -41,11 +42,11 @@ void ExampleInstrument::ResetAll()
 
 void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
-    for(int8_t i = 0; i < 16; i++){
+    for(uint8_t i = 0; i < 16; i++){
 
         if((_activeNotes[instrument][i] & MSB_BITMASK) == 0){
             _activeNotes[instrument][i] = (0x80 | note);
-            _currentPeriod[instrument][i] = notePeriods[note];
+            _currentPeriod[instrument][i] = noteDoubleTicks[note];
 
             //Debug
             Serial.print("Note Location: ");
@@ -53,7 +54,7 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
             Serial.print("ActiveNotes: ");
             Serial.println(_activeNotes[instrument][i]);
             Serial.print("CurrentTick: ");
-            Serial.println(_currentTick[instrument][i]);
+            Serial.println(_currentTick[instrument]);
             Serial.print("CurrentPeriod: ");
             Serial.println(_currentPeriod[instrument][i]);
 
@@ -66,7 +67,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
 {
     Serial.println("Stopping Note");
 
-    for(int8_t i = 0; i < 16; i++){
+    for(uint8_t i = 0; i < 16; i++){
         if((_activeNotes[instrument][i] & MSB_BITMASK) == MSB_BITMASK)
         {
 
@@ -74,6 +75,8 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
             {
                 _activeNotes[instrument][i] = 0;
                 _currentPeriod[instrument][i] = 0;
+                //_currentTick[instrument][i];
+               //_currentState[instrument];
 
                 //Debug
                 Serial.print("Note Location: ");
@@ -83,7 +86,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
                 Serial.print("ActiveNotes: ");
                 Serial.println(_activeNotes[instrument][i]);
                 Serial.print("CurrentTick: ");
-                Serial.println(_currentTick[instrument][i]);
+                Serial.println(_currentTick[instrument]);
                 Serial.print("CurrentPeriod: ");
                 Serial.println(_currentPeriod[instrument][i]);
                 return;
@@ -119,17 +122,30 @@ void ExampleInstrument::tick()
 #endif
 {
     for (int i = 0; i < 32; i++) {
-        for (int n = 0; n < 16; n++){
-            if (_currentPeriod[i][n] > 0) {
-                _currentTick[i][n]++;
-            
-                if (_currentTick[i][n] >= _currentPeriod[i][n]) {
-                    togglePin(i);
-                    _currentTick[i][n] = 0;
+        uint8_t s = _currentSlot[i];
 
-                }
+        //for (int x = 0; x < 16; x++){
+        //   s++;
+        //    if (s >= 16){
+        //        s = 0;
+        //    }
+        //    if((_currentPeriod[i][s] & MSB_BITMASK) != 0){
+        //        break;
+        //    }
+        //}
+
+        //_currentSlot[i]++;
+
+        if (_currentPeriod[i][s] > 0) {
+            _currentTick[i]++;
+            
+            if (_currentTick[i] >= _currentPeriod[i][s]) {
+                togglePin(i);
+                _currentTick[i] = 0;
+
             }
         }
+        
     }
 }
 
@@ -141,7 +157,7 @@ void ExampleInstrument::togglePin(byte driveNum, byte pin) {
 #endif
 
     //Pulse the control pin
-    _currentState[instrument] = ~_currentState[instrument];
+    _currentState[instrument] = !_currentState[instrument];
     digitalWrite(pins[instrument], _currentState[instrument]);
         
 }
