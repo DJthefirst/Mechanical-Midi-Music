@@ -18,6 +18,23 @@ enum DistributionMethod
 };
 
 class Distributor{
+private:
+
+    //Local Atributes
+    uint8_t _currentChannel;
+    uint8_t _currentInstrument;
+    InstrumentController* _ptrInstrumentController;
+
+    //Each Bit Represents an Enabled Channel/Instrument
+    uint16_t _channels;
+    uint32_t _instruments;
+
+    //Settings
+    bool _noteOverwrite = false;
+    uint8_t _minNote, _maxNote;
+    uint8_t _numPolyphonicNotes = 0;
+    DistributionMethod _distributionMethod = StrightThrough;
+
 public:
 
     Distributor(InstrumentController* ptrInstrumentController);
@@ -34,21 +51,6 @@ public:
     void setInstruments(uint32_t instruments);
 
 private:
-
-    //Local Atributes
-    uint8_t currentChannel;
-    uint8_t currentInstrument;
-    InstrumentController* ptr_InstrumentController;
-
-    //Each Bit Represents an Enabled Channel/Instrument
-    uint16_t _channels;
-    uint32_t _instruments;
-
-    //Settings
-    bool _noteOverwrite = false;
-    uint8_t _minNote, _maxNote;
-    uint8_t _numPolyphonicNotes = 0;
-    DistributionMethod _distributionMethod = StrightThrough;
 
     //Midi Message Events
     void NoteOnEvent(uint8_t Key, uint8_t Velocity);

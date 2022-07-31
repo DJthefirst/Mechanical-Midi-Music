@@ -3,7 +3,7 @@
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
-    ptr_InstrumentController = ptrInstrumentController;
+    _ptrInstrumentController = ptrInstrumentController;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,14 +14,14 @@ void Distributor::processMessage(uint8_t message[])
 {
 
     //Debug
-    Serial.print("Distributor->Instrument: ");
-    for(int i = 0; i < 3; i++){
-        Serial.printf("%02x", (message[i]));
-        Serial.print(" ");
-    }
-    Serial.println("");
+    // Serial.print("Distributor->Instrument: ");
+    // for(int i = 0; i < 3; i++){
+    //     Serial.printf("%02x", (message[i]));
+    //     Serial.print(" ");
+    // }
+    // Serial.println("");
 
-    currentChannel = (message[0] & 0b00001111);
+    _currentChannel = (message[0] & 0b00001111);
 
     //Determine Type of Msg and Call Associated Event
     uint8_t msg_type = (message[0] & 0b11110000);
@@ -67,7 +67,7 @@ void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
     Serial.print("Note On Instrument ");
     Serial.println(instrument);
     if(instrument != 0xFF){
-        (*ptr_InstrumentController).StopNote(instrument, Note, Velocity);
+        (*_ptrInstrumentController).StopNote(instrument, Note, Velocity);
     }
 }
 
@@ -79,7 +79,7 @@ void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
     }
     else if(Velocity != 0){
         uint8_t instrument = NextInstrument();
-        (*ptr_InstrumentController).PlayNote(instrument, Note, Velocity);
+        (*_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
     }
 }
 
@@ -87,7 +87,7 @@ void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
     uint8_t instrument = CheckForNote(Note);
     if(instrument != 0xFF){
-        (*ptr_InstrumentController).SetKeyPressure(instrument, Note, Velocity);
+        (*_ptrInstrumentController).SetKeyPressure(instrument, Note, Velocity);
     }
 }
 
@@ -123,24 +123,24 @@ uint8_t Distributor::NextInstrument()
     switch(_distributionMethod){
 
     case(StrightThrough):
-        currentInstrument = currentChannel;
-        return currentInstrument;
+        _currentInstrument = _currentChannel;
+        return _currentInstrument;
 
 
     case(RoundRobin):
 
         for(int i = 0; i < 32; i++){
-            currentInstrument++;
+            _currentInstrument++;
 
             //Loop to first instrument if end is reached
-            currentInstrument = (currentInstrument >= 32) ? 0 : currentInstrument;
+            _currentInstrument = (_currentInstrument >= 32) ? 0 : _currentInstrument;
 
             //Check if valid instrument
-            if(_instruments & (1 << currentInstrument) != 0){
-                return currentInstrument;
+            if(_instruments & (1 << _currentInstrument) != 0){
+                return _currentInstrument;
             }
         }
-        return currentInstrument;
+        return _currentInstrument;
 
 
     case(Accending):
@@ -148,7 +148,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = 0; (i < 32); i++){
             if(_instruments & (1 << i) != 0)
             {
-                uint8_t activeNotes = (*ptr_InstrumentController).getNumActiveNotes(i);
+                uint8_t activeNotes = (*_ptrInstrumentController).getNumActiveNotes(i);
 
                 if(activeNotes == 0)
                 {
@@ -169,7 +169,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = 31; (i >= 0); i--){
             if(_instruments & (1 << i) != 0)
             {
-                uint8_t activeNotes = (*ptr_InstrumentController).getNumActiveNotes(i);
+                uint8_t activeNotes = (*_ptrInstrumentController).getNumActiveNotes(i);
 
                 if(activeNotes == 0)
                 {
@@ -189,13 +189,13 @@ uint8_t Distributor::NextInstrument()
 
 uint8_t Distributor::CheckForNote(uint8_t note)
 {
-    uint8_t nextInstrument = currentInstrument;
+    uint8_t nextInstrument = _currentInstrument;
 
     switch(_distributionMethod){
 
     case(StrightThrough):
-        if((*ptr_InstrumentController).isNoteActive(currentChannel, note)){
-            return currentChannel;
+        if((*_ptrInstrumentController).isNoteActive(_currentChannel, note)){
+            return _currentChannel;
         }
         return 0xFF;
 
@@ -203,11 +203,12 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = 0; i < 32; i++){
             nextInstrument--;
 
-            nextInstrument = (nextInstrument < 0) ? 31 : nextInstrument;
+            //Only works bc 255 % 32 = 31
+            nextInstrument = nextInstrument % 32;
 
             //Check if valid instrument
             if(_instruments & (1 << nextInstrument) != 0){
-                if((*ptr_InstrumentController).isNoteActive(nextInstrument, note)){
+                if((*_ptrInstrumentController).isNoteActive(nextInstrument, note)){
                     return nextInstrument;
                 }
             }
@@ -219,7 +220,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
             //Check if valid instrument
             if(_instruments & (1 << i) != 0){
-                if((*ptr_InstrumentController).isNoteActive(i, note)){
+                if((*_ptrInstrumentController).isNoteActive(i, note)){
                     return i;
                 }
             }
@@ -231,7 +232,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
             //Check if valid instrument
             if(_instruments & (1 << i) != 0){
-                if((*ptr_InstrumentController).isNoteActive(i, note)){
+                if((*_ptrInstrumentController).isNoteActive(i, note)){
                     return i;
                 }
             }

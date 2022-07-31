@@ -12,6 +12,12 @@
 #define MOPPY_MAX_PACKET_LENGTH 259
 
 class MessageHandler{
+private:
+    uint8_t _msgType;
+    uint8_t _msgChannel;
+
+    std::vector<Distributor> _distributors;
+
 public:
     MessageHandler();
     void initalize(InstrumentController* instrumentController);
@@ -26,10 +32,6 @@ public:
     Distributor* getDistributor(uint8_t id);
 
 private:
-    uint8_t msg_type;
-    uint8_t msg_channel;
-
-    std::vector<Distributor> distributors;
 
     void DistributeMessage(uint8_t message[]);
     void ProcessSysEXE(uint8_t _message[]);

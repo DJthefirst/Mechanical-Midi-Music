@@ -13,9 +13,9 @@ WiFiUDP UnicastUDP;
  */
 NetworkUDP::NetworkUDP(){}
 
-void NetworkUDP::initalize(MessageHandler* message_handler)
+void NetworkUDP::initalize(MessageHandler* ptrMessageHandler)
 {
-    _message_handler = message_handler;
+    _ptrMessageHandler = ptrMessageHandler;
 }
 
 void NetworkUDP::begin() {
@@ -118,14 +118,14 @@ void NetworkUDP::readMessages() {
         //Serial.println(MulticastUDP.remotePort());
 
         // read the packet into messageBuffer
-        int messageLength = MulticastUDP.read(messageBuffer, MOPPY_MAX_PACKET_LENGTH);
+        int messageLength = MulticastUDP.read(_messageBuffer, MOPPY_MAX_PACKET_LENGTH);
 
         if (messageLength > 1 && messageLength <= 8){
-            (*_message_handler).processMessage(messageBuffer);
+            (*_ptrMessageHandler).processMessage(_messageBuffer);
         }
         else{
             Serial.println("PacketSize Out of Scope");
-            Serial.println(messageBuffer[0]);
+            Serial.println(_messageBuffer[0]);
             Serial.println(messageLength);
         }
 

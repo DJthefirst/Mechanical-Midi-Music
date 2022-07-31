@@ -2,12 +2,12 @@
 #include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
-InstrumentController* ptr_instrumentController;
+InstrumentController* _ptrInstrumentController;
 
 MessageHandler::MessageHandler() {}
 
 void MessageHandler::initalize(InstrumentController* ptrInstrumentController){
-    ptr_instrumentController = ptrInstrumentController; //This Line Causes Crash
+    _ptrInstrumentController = ptrInstrumentController; //This Line Causes Crash
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,12 +16,13 @@ void MessageHandler::initalize(InstrumentController* ptrInstrumentController){
 
 void MessageHandler::processMessage(uint8_t message[])
 {   
-    msg_type = message[0] & 0b11110000;
-    msg_channel = message[0] & 0b00001111;
+    _msgType = message[0] & 0b11110000;
+    _msgChannel = message[0] & 0b00001111;
 
-    if(msg_type == SysCommon)
+    if(_msgType == SysCommon)
     {
-        switch(msg_channel){
+        //Messgae type for SysCommon
+        switch(_msgChannel){
 
         case(SysEXE):
             ProcessSysEXE(message);
@@ -49,14 +50,10 @@ void MessageHandler::processMessage(uint8_t message[])
 
 void MessageHandler::DistributeMessage(uint8_t message[])
 {  
-    for(uint8_t i=0; i < distributors.size(); i++)
-    {
-        
-        if((distributors[i].getChannels() & (1 << msg_channel)) != (0))
-        {
-            distributors[i].processMessage(message);
-        }
-
+    for(uint8_t i=0; i < _distributors.size(); i++)
+    {   
+        if((_distributors[i].getChannels() & (1 << _msgChannel)) != (0))
+            _distributors[i].processMessage(message);
     }
 }
 
@@ -75,10 +72,10 @@ void MessageHandler::ProcessSysEXE(uint8_t _message[])
 
 void MessageHandler::addDistributor()
 {
-    Distributor newDistributor = Distributor(ptr_instrumentController);
-    distributors.push_back(newDistributor);
+    Distributor newDistributor = Distributor(_ptrInstrumentController);
+    _distributors.push_back(newDistributor);
 }
 
 Distributor* MessageHandler::getDistributor(uint8_t index){
-    return &(distributors[index]);
+    return &(_distributors[index]);
 }

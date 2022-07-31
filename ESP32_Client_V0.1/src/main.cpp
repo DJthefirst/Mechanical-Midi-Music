@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "NetworkUDP.h"
+#include "NetworkUSB.h"
 #include "MessageHandler.h"
 #include "Distributor.h"
 
@@ -10,7 +11,8 @@
 
 ExampleInstrument* instrumentController = new(ExampleInstrument);
 MessageHandler* messageHandler = new(MessageHandler);
-NetworkUDP connection;
+NetworkUSB connection;
+//NetworkUDP connection;
 
 void setup() {
   messageHandler -> initalize(instrumentController);

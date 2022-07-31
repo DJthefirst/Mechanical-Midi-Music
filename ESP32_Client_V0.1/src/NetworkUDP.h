@@ -29,17 +29,19 @@
 #define MOPPY_MAX_PACKET_LENGTH 259
 
 class NetworkUDP{
+private:
+    MessageHandler* _ptrMessageHandler;
+
+    uint8_t _messagePos = 0;                         // Track current message read position
+    uint8_t _messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
+
 public:
     NetworkUDP();
-    void initalize(MessageHandler* message_handler);
+    void initalize(MessageHandler* ptrMessageHandler);
     void begin();
     void readMessages();
 
 private:
-    MessageHandler* _message_handler;
-
-    uint8_t messagePos = 0;                         // Track current message read position
-    uint8_t messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
     void startOTA();
     bool startUDP();
     void parseMessage(uint8_t message[], int length);

@@ -3,17 +3,17 @@
 #include "Constants.h"
 #include "Arduino.h"
 
-//Controller Attributes
-    
-//[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
-static uint8_t _activeNotes[32][16] = {0};
-static uint8_t _numActiveNotes[32] = {0};
 
+//Controller Attributes
+
+//[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
+static uint8_t _activeNotes[32][16];
+static uint8_t _numActiveNotes[32];
 //Instrument Attributes
-static uint16_t _currentPeriod[32][16] = {0};  //Notes
-static uint8_t _currentSlot[32] = {0}; //Polyphonic
+static uint16_t _currentPeriod[32][16];  //Notes
+static uint8_t _currentSlot[32]; //Polyphonic
 static uint8_t _currentTick[32]; //Timeing
-static bool _currentState[32] = {0}; //IO
+static bool _currentState[32]; //IO
 
 void ExampleInstrument::SetUp()
 {
@@ -123,6 +123,8 @@ void ExampleInstrument::tick()
 {
     for (int i = 0; i < 32; i++) {
         uint8_t s = _currentSlot[i];
+
+        //Bug Here makes loop slow
 
         //for (int x = 0; x < 16; x++){
         //   s++;
