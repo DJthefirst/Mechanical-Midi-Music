@@ -9,8 +9,6 @@
 
 #include "MessageHandler.h"
 
-#define MULTICASTPORT 65534
-#define UNICASTPORT 65534
 #define MOPPY_MAX_PACKET_LENGTH 259
 
 class NetworkUSB{

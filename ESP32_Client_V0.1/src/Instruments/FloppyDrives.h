@@ -24,7 +24,15 @@ public:
     void ResetAll() override;
     void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
     void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void StopAll() override;
     void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+
+    void SetModulationWheel(uint8_t value) override;
+    void SetFootPedal(uint8_t value) override;
+    void SetVolume(uint8_t value) override;
+    void SetExpression(uint8_t value) override;
+    void SetEffectCrtl_1(uint8_t value) override;
+    void SetEffectCrtl_2(uint8_t value) override;
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;

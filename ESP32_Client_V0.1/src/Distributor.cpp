@@ -12,15 +12,6 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 
 void Distributor::processMessage(uint8_t message[])
 {
-
-    //Debug
-    // Serial.print("Distributor->Instrument: ");
-    // for(int i = 0; i < 3; i++){
-    //     Serial.printf("%02x", (message[i]));
-    //     Serial.print(" ");
-    // }
-    // Serial.println("");
-
     _currentChannel = (message[0] & 0b00001111);
 
     //Determine Type of Msg and Call Associated Event
@@ -28,30 +19,28 @@ void Distributor::processMessage(uint8_t message[])
     
     switch(msg_type){
 
-    case(NoteOff):
-        Serial.println("Note Off");
+    case(MIDI_NoteOff):
         NoteOffEvent(message[1],message[2]);
         break; 
-    case(NoteOn):
-        Serial.println("Note On");
+    case(MIDI_NoteOn):
         NoteOnEvent(message[1],message[2]);
         break;
-    case(KeyPressure):
+    case(MIDI_KeyPressure):
         KeyPressureEvent(message[1],message[2]);
         break;
-    case(ControlChange):
+    case(MIDI_ControlChange):
         ControlChangeEvent(message[1],message[2]);
         break;
-    case(ProgramChange):
+    case(MIDI_ProgramChange):
         ProgramChangeEvent(message[1]);
         break;
-    case(ChannelPressure):
+    case(MIDI_ChannelPressure):
         ChannelPressureEvent(message[1]);
         break;
-    case(PitchBend):
+    case(MIDI_PitchBend):
         PitchBendEvent((message[2] << 8) & message[1]);
         break;
-    case(SysCommon):
+    case(MIDI_SysCommon):
         break;
     }
 
@@ -93,7 +82,7 @@ void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
 
 void Distributor::ControlChangeEvent(uint8_t Controller, uint8_t Value)
 {
-    //Not Yet Implemented
+
 }
 
 void Distributor::ProgramChangeEvent(uint8_t Program)
@@ -255,6 +244,14 @@ void Distributor::getDistributor(uint8_t* outputArray)
 
 uint16_t Distributor::getChannels(){
     return _channels;
+}
+
+void Distributor::setDamperPedal(bool damper){
+    //Not Yet Implemented
+}
+
+void Distributor::setPolyphonic(bool polyphonic){
+    //Not Yet Implemented
 }
 
 void Distributor::setNoteOverwrite(bool noteOverwrite)

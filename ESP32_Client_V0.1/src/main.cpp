@@ -8,11 +8,26 @@
 #include "Instruments/FloppyDrives.h"
 #include "Instruments/ExampleInstrument.h"
 
-
-ExampleInstrument* instrumentController = new(ExampleInstrument);
+//Create a new message handler
 MessageHandler* messageHandler = new(MessageHandler);
+
+
+//---------- Uncomment Your Selected Instrument Type ----------
+
+ExampleInstrument* instrumentController = 
+  new(ExampleInstrument);
+//new(FloppyDrives);
+//new(PWMDriver);
+//new(StepperMotors);
+//new(ShiftRegister);
+
+
+//---------- Uncomment Your Selected COM Type ----------
+
 NetworkUSB connection;
 //NetworkUDP connection;
+//NetworkDIN connection;
+
 
 void setup() {
   messageHandler -> initalize(instrumentController);
@@ -21,7 +36,8 @@ void setup() {
   delay(100);
 
   instrumentController->SetUp();
-  //Testing
+
+  //Testing Demo Setup Config
   messageHandler -> addDistributor();
   Distributor* distributor = messageHandler -> getDistributor(0);
   distributor -> setChannels(0xFFFF); // 1-16
@@ -29,5 +45,6 @@ void setup() {
 }
 
 void loop() {
+  //Periodicaly Read Incomming Messages
   connection.readMessages();
 }

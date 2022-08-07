@@ -30,6 +30,8 @@ private:
     uint32_t _instruments;
 
     //Settings
+    bool _damperPedal = false;
+    bool _polyphonic = true;
     bool _noteOverwrite = false;
     uint8_t _minNote, _maxNote;
     uint8_t _numPolyphonicNotes = 0;
@@ -44,6 +46,8 @@ public:
     uint16_t getChannels();
 
     void setDistributor(uint8_t profile[]);
+    void setDamperPedal(bool);
+    void setPolyphonic(bool);
     void setNoteOverwrite(bool noteOverwrite);
     void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
     void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);

@@ -15,9 +15,11 @@ static uint8_t _currentSlot[32]; //Polyphonic
 static uint8_t _currentTick[32]; //Timeing
 static bool _currentState[32]; //IO
 
+
+
 void ExampleInstrument::SetUp()
 {
-    //Settup pins
+    //Setup pins
     for(uint8_t i=0; i < sizeof(pins); i++){
         pinMode(pins[i], OUTPUT);
     }
@@ -47,17 +49,6 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
         if((_activeNotes[instrument][i] & MSB_BITMASK) == 0){
             _activeNotes[instrument][i] = (0x80 | note);
             _currentPeriod[instrument][i] = noteDoubleTicks[note];
-
-            //Debug
-            Serial.print("Note Location: ");
-            Serial.println(i);
-            Serial.print("ActiveNotes: ");
-            Serial.println(_activeNotes[instrument][i]);
-            Serial.print("CurrentTick: ");
-            Serial.println(_currentTick[instrument]);
-            Serial.print("CurrentPeriod: ");
-            Serial.println(_currentPeriod[instrument][i]);
-
             return;
         }
     }
@@ -78,23 +69,26 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
                 //_currentTick[instrument][i];
                //_currentState[instrument];
 
-                //Debug
-                Serial.print("Note Location: ");
-                Serial.println(i);
-                Serial.print("Note Location: ");
-                Serial.println(i);
-                Serial.print("ActiveNotes: ");
-                Serial.println(_activeNotes[instrument][i]);
-                Serial.print("CurrentTick: ");
-                Serial.println(_currentTick[instrument]);
-                Serial.print("CurrentPeriod: ");
-                Serial.println(_currentPeriod[instrument][i]);
                 return;
             }
         }
         else{
             return;
         }
+    }
+}
+
+void ExampleInstrument::StopAll(){
+    std::fill(&_activeNotes[0][0],&_activeNotes[0][0]+sizeof(_activeNotes),0);
+    std::fill(&_numActiveNotes[0],&_numActiveNotes[0]+sizeof(_numActiveNotes),0);
+    std::fill(&_currentPeriod[0][0],&_currentPeriod[0][0]+sizeof(_currentPeriod),0);
+    std::fill(&_currentSlot[0],&_currentSlot[0]+sizeof(_currentSlot),0);
+    std::fill(&_currentTick[0],&_currentTick[0]+sizeof(_currentTick),0);
+    std::fill(&_currentState[0],&_currentState[0]+sizeof(_currentState),0);
+
+    uint8_t i = 0;
+    for(i = 0; (i < sizeof(pins)); i++){
+        digitalWrite(pins[i], LOW);
     }
 }
 
@@ -176,11 +170,6 @@ uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
  
 bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
 {
-
-    //Debug
-    Serial.print("Note ");
-    Serial.print(note);
-
     for(uint8_t n=0; n<16; n++){
 
         if ((_activeNotes[instrument][n] & (~ MSB_BITMASK)) == note){
@@ -194,4 +183,24 @@ bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
     }
     Serial.println(" is inActive");
     return false;
+}
+
+
+void ExampleInstrument::SetModulationWheel(uint8_t value){
+    //Not Yet Implemented
+}
+void ExampleInstrument::SetFootPedal(uint8_t value){
+    //Not Yet Implemented
+}
+void ExampleInstrument::SetVolume(uint8_t value){
+    //Not Yet Implemented
+}
+void ExampleInstrument::SetExpression(uint8_t value){
+    //Not Yet Implemented
+}
+void ExampleInstrument::SetEffectCrtl_1(uint8_t value){
+    //Not Yet Implemented
+}
+void ExampleInstrument::SetEffectCrtl_2(uint8_t value){
+    //Not Yet Implemented
 }

@@ -8,26 +8,60 @@ const uint8_t MSB_BITMASK = 0x80;
 //2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33
 
 //Pinnouts
-const uint8_t pins[] = {2,4,16,17,19,19,21,22,13,12,23,25,26,27,32,33};
+const uint8_t pins[] = {2,4,16,17,18,19,21,22,13,12,23,25,26,27,32,33};
+//const uint8_t pins[] = {4,16,17,18,19,21,22,13,12,23,25,26,27,32,33};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //MIDI Constants
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Midi Msg Types
-const uint8_t NoteOff = 0x80;
-const uint8_t NoteOn = 0x90;
-const uint8_t KeyPressure = 0xA0;
-const uint8_t ControlChange = 0xB0;
-const uint8_t ProgramChange = 0xC0;
-const uint8_t ChannelPressure = 0xD0;
-const uint8_t PitchBend = 0xE0;
-const uint8_t SysCommon = 0xF0;
+const uint8_t MIDI_NoteOff            = 0x80;
+const uint8_t MIDI_NoteOn             = 0x90;
+const uint8_t MIDI_KeyPressure        = 0xA0;
+const uint8_t MIDI_ControlChange      = 0xB0;
+const uint8_t MIDI_ProgramChange      = 0xC0;
+const uint8_t MIDI_ChannelPressure    = 0xD0;
+const uint8_t MIDI_PitchBend          = 0xE0;
+const uint8_t MIDI_SysCommon          = 0xF0;
+
+struct MidiMsg{
+    uint8_t Type;
+    uint8_t DataByte_1;
+    uint8_t DataByte_2;
+};
+
+//CC Controller Types (Handled across all active channels)
+//const uint8_t MIDI_CC_BankSelect = 0;
+const uint8_t MIDI_CC_ModulationWheel = 1;
+//const uint8_t MIDI_CC_BreathControl = 2;
+const uint8_t MIDI_CC_FootPedal = 4;
+//const uint8_t MIDI_CC_PortamentoTime = 5;
+const uint8_t MIDI_CC_Volume = 7;
+//const uint8_t MIDI_CC_Pan = 10;
+const uint8_t MIDI_CC_Expression = 11;
+const uint8_t MIDI_CC_EffectCrtl_1 = 12;
+const uint8_t MIDI_CC_EffectCrtl_2 = 13;
+const uint8_t MIDI_CC_DamperPedal = 64;
+//const uint8_t MIDI_CC_Portamento = 65;
+//const uint8_t MIDI_CC_Sostenuto = 66;
+//const uint8_t MIDI_CC_SoftPedal = 67;
+//const uint8_t MIDI_CC_Legato = 68;
+//const uint8_t MIDI_CC_Hold2 = 69;
+
+//CC Channel Mode Messages(Handled across all active channels)
+const uint8_t MIDI_CC_Mute = 120;
+const uint8_t MIDI_CC_Reset = 121;
+const uint8_t MIDI_CC_AllNotesOff = 123;
+const uint8_t MIDI_CC_OmniModeOff = 124;
+const uint8_t MIDI_CC_OmniModeOn = 125;
+const uint8_t MIDI_CC_Monophonic = 126;
+const uint8_t MIDI_CC_Polyphonic = 127;
 
 //SysCommon Midi Msg Types
-const uint8_t SysEXE = 0x00;
-const uint8_t SysStop = 0x0A;
-const uint8_t SysReset = 0x0F;
+const uint8_t MIDI_SysEXE = 0x00;
+const uint8_t MIDI_SysStop = 0x0A;
+const uint8_t MIDI_SysReset = 0x0F;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Timer Constants

@@ -11,6 +11,9 @@
 
 #define MOPPY_MAX_PACKET_LENGTH 259
 
+/* 
+A Class to convert incoming data into MIDI events
+*/
 class MessageHandler{
 private:
     uint8_t _msgType;
@@ -19,6 +22,7 @@ private:
     std::vector<Distributor> _distributors;
 
 public:
+    //Msg Handler 
     MessageHandler();
     void initalize(InstrumentController* instrumentController);
     void processMessage(uint8_t _message[]);
@@ -32,8 +36,10 @@ public:
     Distributor* getDistributor(uint8_t id);
 
 private:
+    bool _OmniMode = false;
 
     void DistributeMessage(uint8_t message[]);
+    void ProcessCC(uint8_t _message[]);
     void ProcessSysEXE(uint8_t _message[]);
  
 };
