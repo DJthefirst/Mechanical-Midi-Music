@@ -159,7 +159,7 @@ uint8_t Distributor::NextInstrument()
         }
         return insturmentLeastActive;
 
-    case(Decending):
+    case(Descending):
 
         for(int i = 31; (i >= 0); i--){
             if(_instruments & (1 << i) != 0)
@@ -223,7 +223,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         }
         return NONE;
 
-    case(Decending):
+    case(Descending):
         for(int i = 31; i >= 0; i--){
 
             //Check if valid instrument

@@ -14,8 +14,6 @@ static uint8_t _currentSlot[MAX_NUM_INSTRUMENTS]; //Polyphonic
 static uint8_t _currentTick[MAX_NUM_INSTRUMENTS]; //Timeing
 static bool _currentState[MAX_NUM_INSTRUMENTS]; //IO
 
-
-
 void ExampleInstrument::SetUp()
 {
     //Setup pins
@@ -64,22 +62,12 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
 
 void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
-    Serial.println("Stopping Note");
-
     for(uint8_t i = 0; i < MAX_POLYPHONIC_NOTES; i++){
-        if((_activeNotes[instrument][i] & MSB_BITMASK) == MSB_BITMASK)
-        {
-
-            if((_activeNotes[instrument][i] & (~MSB_BITMASK)) == note)
-            {
-                _activeNotes[instrument][i] = 0;
-                _currentPeriod[instrument][i] = 0;
-                _numActiveNotes[instrument]--;
-
-                return;
-            }
-        }
-        else{
+        if((_activeNotes[instrument][i] & (~MSB_BITMASK)) == note){
+            _activeNotes[instrument][i] = 0;
+            _currentPeriod[instrument][i] = 0;
+            _modCurrentPeriod[instrument][i] = 0;
+            _numActiveNotes[instrument]--;
             return;
         }
     }
@@ -89,6 +77,7 @@ void ExampleInstrument::StopAll(){
     std::fill(&_activeNotes[0][0],&_activeNotes[0][0]+sizeof(_activeNotes),0);
     std::fill(&_numActiveNotes[0],&_numActiveNotes[0]+sizeof(_numActiveNotes),0);
     std::fill(&_currentPeriod[0][0],&_currentPeriod[0][0]+sizeof(_currentPeriod),0);
+    std::fill(&_modCurrentPeriod[0][0],&_modCurrentPeriod[0][0]+sizeof(_modCurrentPeriod),0);
     std::fill(&_currentSlot[0],&_currentSlot[0]+sizeof(_currentSlot),0);
     std::fill(&_currentTick[0],&_currentTick[0]+sizeof(_currentTick),0);
     std::fill(&_currentState[0],&_currentState[0]+sizeof(_currentState),0);

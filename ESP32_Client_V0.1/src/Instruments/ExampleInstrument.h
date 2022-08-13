@@ -5,6 +5,20 @@
 #include <stdint.h>
 
 class ExampleInstrument : public InstrumentController{
+public:
+
+private:
+
+    static void togglePin(uint8_t instrument);
+
+    //Local CC Effect Atributes
+    uint16_t _PitchBend[MAX_NUM_INSTRUMENTS];
+    uint16_t _ModulationWheel = 0;
+    uint16_t _FootPedal = 0;
+    uint16_t _Volume = 127;
+    uint16_t _Expression = 0;
+    uint16_t _EffectCrtl_1 = 0;
+    uint16_t _EffectCrtl_2 = 0;
 
 public: 
     void SetUp() override;
@@ -27,17 +41,4 @@ public:
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
-
-private:
-
-    static void togglePin(uint8_t instrument);
-
-    //Local CC Effect Atributes
-    uint16_t _PitchBend[MAX_NUM_INSTRUMENTS];
-    uint16_t _ModulationWheel = 0;
-    uint16_t _FootPedal = 0;
-    uint16_t _Volume = 127;
-    uint16_t _Expression = 0;
-    uint16_t _EffectCrtl_1 = 0;
-    uint16_t _EffectCrtl_2 = 0;
 };

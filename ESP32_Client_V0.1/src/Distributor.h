@@ -15,7 +15,7 @@ enum DistributionMethod
     RoundRobin,         //Distributes Notes in a circular manner.
     RoundRobinBalance,  //Distributes Notes in a circular manner (Balances Notes across Instruments).
     Accending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
-    Decending,          //Plays Note on highest available Instrument (Balances Notes across Instruments).
+    Descending,         //Plays Note on highest available Instrument (Balances Notes across Instruments).
     Stack               //Play Notes Polyphonicaly on lowest available Instrument until full.
 };
 
