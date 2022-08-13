@@ -1,3 +1,6 @@
+/*
+The Message Handler Recives Midi messages and routes them to the appropiate distributor by MIDI channel.
+*/
 #include "MessageHandler.h"
 #include "Instruments/InstrumentController.h"
 #include "Constants.h"

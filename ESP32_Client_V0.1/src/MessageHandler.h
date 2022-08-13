@@ -16,9 +16,13 @@ A Class to convert incoming data into MIDI events
 */
 class MessageHandler{
 private:
+    //Handler Config
+    bool _OmniMode = false;
+
+    //Msg Data
     uint8_t _msgType;
     uint8_t _msgChannel;
-
+    
     std::vector<Distributor> _distributors;
 
 public:
@@ -36,8 +40,6 @@ public:
     Distributor* getDistributor(uint8_t id);
 
 private:
-    bool _OmniMode = false;
-
     void DistributeMessage(uint8_t message[]);
     void ProcessCC(uint8_t _message[]);
     void ProcessSysEXE(uint8_t _message[]);

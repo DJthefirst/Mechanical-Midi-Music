@@ -17,6 +17,7 @@ public:
     virtual void StopAll() = 0;
     virtual void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){};
 
+    virtual void SetPitchBend(uint8_t instrument, uint16_t value) = 0;
     virtual void SetModulationWheel(uint8_t value) = 0;
     virtual void SetFootPedal(uint8_t value) = 0;
     virtual void SetVolume(uint8_t value) = 0;

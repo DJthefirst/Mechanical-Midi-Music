@@ -1,12 +1,16 @@
 #include <Arduino.h>
-#include "NetworkUDP.h"
-#include "NetworkUSB.h"
 #include "MessageHandler.h"
 #include "Distributor.h"
+#include "Networks/NetworkUDP.h"
+#include "Networks/NetworkUSB.h"
+#include "Networks/NetworkDIN.h"
 
 #include "Instruments/InstrumentController.h"
-#include "Instruments/FloppyDrives.h"
 #include "Instruments/ExampleInstrument.h"
+//#include "Instruments/FloppyDrives.h"
+//#include "Instruments/PWMDriver.h"
+//#include "Instruments/StepperMotors.h"
+//#include "Instruments/ShiftRegister.h"
 
 //Create a new message handler
 MessageHandler* messageHandler = new(MessageHandler);

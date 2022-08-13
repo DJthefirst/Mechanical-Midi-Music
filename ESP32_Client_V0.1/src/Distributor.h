@@ -12,9 +12,11 @@
 enum DistributionMethod
 { 
     StrightThrough = 0, //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
-    RoundRobin,         //Distributes Notes in a circular manner. 
-    Accending,          //Plays Note on lowest available Instrument.
-    Decending           //Plays Note on highest available Instrument.
+    RoundRobin,         //Distributes Notes in a circular manner.
+    RoundRobinBalance,  //Distributes Notes in a circular manner (Balances Notes across Instruments).
+    Accending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
+    Decending,          //Plays Note on highest available Instrument (Balances Notes across Instruments).
+    Stack               //Play Notes Polyphonicaly on lowest available Instrument until full.
 };
 
 class Distributor{
@@ -25,16 +27,16 @@ private:
     uint8_t _currentInstrument;
     InstrumentController* _ptrInstrumentController;
 
-    //Each Bit Represents an Enabled Channel/Instrument
-    uint16_t _channels;
-    uint32_t _instruments;
+    //Each Bit Represents an Enabled Channel/Instrument (limits max number of instruments to 32)
+    uint16_t _channels; //Represents Enabled MIDI Channels
+    uint32_t _instruments; //Represents Enabled Instruments
 
     //Settings
     bool _damperPedal = false;
     bool _polyphonic = true;
     bool _noteOverwrite = false;
     uint8_t _minNote, _maxNote;
-    uint8_t _numPolyphonicNotes = 0;
+    uint8_t _numPolyphonicNotes = 4;
     DistributionMethod _distributionMethod = StrightThrough;
 
 public:

@@ -10,7 +10,7 @@ void NetworkUSB::initalize(MessageHandler* ptrMessageHandler)
 }
 
 void NetworkUSB::begin() {
-    Serial.begin(115200); // For debugging
+    Serial.begin(115200);
     startUSB();
 }
 
@@ -41,7 +41,7 @@ void NetworkUSB::readMessages() {
         if (messageLength > 1 && messageLength <= 8){
             (*_ptrMessageHandler).processMessage(_messageBuffer);
         }
-         else{
+        else{
             Serial.println("PacketSize Out of Scope");
             Serial.println(_messageBuffer[0]);
             Serial.println(messageLength);

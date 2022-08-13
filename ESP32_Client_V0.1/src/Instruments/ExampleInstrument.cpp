@@ -3,17 +3,16 @@
 #include "Constants.h"
 #include "Arduino.h"
 
-
-//Controller Attributes
-
 //[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
-static uint8_t _activeNotes[32][16];
-static uint8_t _numActiveNotes[32];
+static uint8_t _activeNotes[MAX_NUM_INSTRUMENTS][MAX_POLYPHONIC_NOTES];
+static uint8_t _numActiveNotes[MAX_NUM_INSTRUMENTS];
+
 //Instrument Attributes
-static uint16_t _currentPeriod[32][16];  //Notes
-static uint8_t _currentSlot[32]; //Polyphonic
-static uint8_t _currentTick[32]; //Timeing
-static bool _currentState[32]; //IO
+static uint16_t _currentPeriod[MAX_NUM_INSTRUMENTS][MAX_POLYPHONIC_NOTES];  //Notes
+static uint16_t _modCurrentPeriod[MAX_NUM_INSTRUMENTS][MAX_POLYPHONIC_NOTES];  //Notes
+static uint8_t _currentSlot[MAX_NUM_INSTRUMENTS]; //Polyphonic
+static uint8_t _currentTick[MAX_NUM_INSTRUMENTS]; //Timeing
+static bool _currentState[MAX_NUM_INSTRUMENTS]; //IO
 
 
 
@@ -30,6 +29,9 @@ void ExampleInstrument::SetUp()
 
     // Setup timer to handle interrupts for floppy driving
     InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
+
+    //Initalize Default values
+    std::fill_n(_PitchBend, MAX_NUM_INSTRUMENTS, MIDI_Control_Mid);
 }
 
 void ExampleInstrument::Reset(uint8_t instrument)
@@ -44,11 +46,17 @@ void ExampleInstrument::ResetAll()
 
 void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
-    for(uint8_t i = 0; i < 16; i++){
+    for(uint8_t i = 0; i < MAX_POLYPHONIC_NOTES; i++){
 
+        //Use MSB in note to indicate if a note is active.
         if((_activeNotes[instrument][i] & MSB_BITMASK) == 0){
-            _activeNotes[instrument][i] = (0x80 | note);
+            _activeNotes[instrument][i] = (MSB_BITMASK | note);
             _currentPeriod[instrument][i] = noteDoubleTicks[note];
+
+            double bendDeflection = ((double)_PitchBend[instrument] - (double)MIDI_Control_Mid) / (double)MIDI_Control_Mid;
+            _modCurrentPeriod[instrument][i] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+
+            _numActiveNotes[instrument]++;
             return;
         }
     }
@@ -58,7 +66,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
 {
     Serial.println("Stopping Note");
 
-    for(uint8_t i = 0; i < 16; i++){
+    for(uint8_t i = 0; i < MAX_POLYPHONIC_NOTES; i++){
         if((_activeNotes[instrument][i] & MSB_BITMASK) == MSB_BITMASK)
         {
 
@@ -66,8 +74,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
             {
                 _activeNotes[instrument][i] = 0;
                 _currentPeriod[instrument][i] = 0;
-                //_currentTick[instrument][i];
-               //_currentState[instrument];
+                _numActiveNotes[instrument]--;
 
                 return;
             }
@@ -115,33 +122,23 @@ void ICACHE_RAM_ATTR ExampleInstrument::Tick()
 void ExampleInstrument::tick()
 #endif
 {
-    for (int i = 0; i < 32; i++) {
-        uint8_t s = _currentSlot[i];
+    for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
+        if(_numActiveNotes[i] == 0)continue;
 
-        //Bug Here makes loop slow
+        if(_currentSlot[i] >= MAX_POLYPHONIC_NOTES) _currentSlot[i] = 0;
 
-        //for (int x = 0; x < 16; x++){
-        //   s++;
-        //    if (s >= 16){
-        //        s = 0;
-        //    }
-        //    if((_currentPeriod[i][s] & MSB_BITMASK) != 0){
-        //        break;
-        //    }
-        //}
-
-        //_currentSlot[i]++;
-
-        if (_currentPeriod[i][s] > 0) {
-            _currentTick[i]++;
-            
-            if (_currentTick[i] >= _currentPeriod[i][s]) {
+        if (_modCurrentPeriod[i][_currentSlot[i]] > 0){
+            if (_currentTick[i] >= _modCurrentPeriod[i][_currentSlot[i]]) {
                 togglePin(i);
+                _currentSlot[i]++;
                 _currentTick[i] = 0;
-
+                continue;
             }
+        _currentTick[i]++;
         }
-        
+        else{
+        _currentSlot[i]++;
+        }
     }
 }
 
@@ -170,7 +167,7 @@ uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
  
 bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    for(uint8_t n=0; n<16; n++){
+    for(uint8_t n=0; n < MAX_POLYPHONIC_NOTES; n++){
 
         if ((_activeNotes[instrument][n] & (~ MSB_BITMASK)) == note){
             Serial.print(" is Active at ");
@@ -185,7 +182,17 @@ bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
     return false;
 }
 
+void ExampleInstrument::SetPitchBend(uint8_t instrument, uint16_t bend){
+    _PitchBend[instrument] = bend;
+    
+    for(uint8_t i=0; i < MAX_POLYPHONIC_NOTES; i++){
+        if(_currentPeriod[instrument][i] == 0) continue;
+        //Calculate Pitch Bend
+        double bendDeflection = ((double)bend - (double)MIDI_Control_Mid) / (double)MIDI_Control_Mid;
+        _modCurrentPeriod[instrument][i] = _currentPeriod[instrument][i] / pow(2.0, BEND_OCTAVES * bendDeflection);
 
+    }
+}
 void ExampleInstrument::SetModulationWheel(uint8_t value){
     //Not Yet Implemented
 }

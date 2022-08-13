@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include "Instruments/InstrumentController.h"
@@ -37,3 +38,4 @@ public:
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
 };
+*/

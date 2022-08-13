@@ -2,14 +2,19 @@
 #include <stdint.h>
 
 
+//Absolute max number of Polyphonic notes is 16
+#define MAX_POLYPHONIC_NOTES 16
+//Absolute max number of Instruments is 32
+#define MAX_NUM_INSTRUMENTS 32
+
+
 //Bit Masks
-const uint8_t MSB_BITMASK = 0x80; 
+const uint8_t MSB_BITMASK = 0x80;
 
-//2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33
+const uint8_t NONE = -1;
 
-//Pinnouts
+//Pinnouts  ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
 const uint8_t pins[] = {2,4,16,17,18,19,21,22,13,12,23,25,26,27,32,33};
-//const uint8_t pins[] = {4,16,17,18,19,21,22,13,12,23,25,26,27,32,33};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //MIDI Constants
@@ -25,29 +30,28 @@ const uint8_t MIDI_ChannelPressure    = 0xD0;
 const uint8_t MIDI_PitchBend          = 0xE0;
 const uint8_t MIDI_SysCommon          = 0xF0;
 
-struct MidiMsg{
-    uint8_t Type;
-    uint8_t DataByte_1;
-    uint8_t DataByte_2;
-};
+//SysCommon Midi Msg Types
+const uint8_t MIDI_SysEXE   = 0x00;
+const uint8_t MIDI_SysStop  = 0x0A;
+const uint8_t MIDI_SysReset = 0x0F;
 
 //CC Controller Types (Handled across all active channels)
-//const uint8_t MIDI_CC_BankSelect = 0;
+const uint8_t MIDI_CC_BankSelect = 0;
 const uint8_t MIDI_CC_ModulationWheel = 1;
-//const uint8_t MIDI_CC_BreathControl = 2;
+const uint8_t MIDI_CC_BreathControl = 2;
 const uint8_t MIDI_CC_FootPedal = 4;
-//const uint8_t MIDI_CC_PortamentoTime = 5;
+const uint8_t MIDI_CC_PortamentoTime = 5;
 const uint8_t MIDI_CC_Volume = 7;
-//const uint8_t MIDI_CC_Pan = 10;
+const uint8_t MIDI_CC_Pan = 10;
 const uint8_t MIDI_CC_Expression = 11;
 const uint8_t MIDI_CC_EffectCrtl_1 = 12;
 const uint8_t MIDI_CC_EffectCrtl_2 = 13;
 const uint8_t MIDI_CC_DamperPedal = 64;
-//const uint8_t MIDI_CC_Portamento = 65;
-//const uint8_t MIDI_CC_Sostenuto = 66;
-//const uint8_t MIDI_CC_SoftPedal = 67;
-//const uint8_t MIDI_CC_Legato = 68;
-//const uint8_t MIDI_CC_Hold2 = 69;
+const uint8_t MIDI_CC_Portamento = 65;
+const uint8_t MIDI_CC_Sostenuto = 66;
+const uint8_t MIDI_CC_SoftPedal = 67;
+const uint8_t MIDI_CC_Legato = 68;
+const uint8_t MIDI_CC_Hold2 = 69;
 
 //CC Channel Mode Messages(Handled across all active channels)
 const uint8_t MIDI_CC_Mute = 120;
@@ -58,16 +62,14 @@ const uint8_t MIDI_CC_OmniModeOn = 125;
 const uint8_t MIDI_CC_Monophonic = 126;
 const uint8_t MIDI_CC_Polyphonic = 127;
 
-//SysCommon Midi Msg Types
-const uint8_t MIDI_SysEXE = 0x00;
-const uint8_t MIDI_SysStop = 0x0A;
-const uint8_t MIDI_SysReset = 0x0F;
+//MIDI Constants
+const uint16_t MIDI_Control_Mid = 0x2000;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Timer Constants
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Number of octaves to bend notes by at full-deflection (MIDI pitch bending is weird).
+// Number of octaves to bend notes by at full-deflection.
 // Described as cents/cents-in-an-octave
 #define BEND_OCTAVES 200/(float)1200
 

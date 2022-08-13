@@ -1,3 +1,6 @@
+/*
+Distributors serve to route midi notes to varrious instrument groups. ex. Midi ch 2 & 3 -> instruments 4-8
+*/
 #include "Distributor.h"
 #include "Arduino.h"
 
@@ -14,7 +17,7 @@ void Distributor::processMessage(uint8_t message[])
 {
     _currentChannel = (message[0] & 0b00001111);
 
-    //Determine Type of Msg and Call Associated Event
+    //Determine Type of MIDI Msg and Call Associated Event
     uint8_t msg_type = (message[0] & 0b11110000);
     
     switch(msg_type){
@@ -38,12 +41,11 @@ void Distributor::processMessage(uint8_t message[])
         ChannelPressureEvent(message[1]);
         break;
     case(MIDI_PitchBend):
-        PitchBendEvent((message[2] << 8) & message[1]);
+        PitchBendEvent((message[2] << 7) | message[1]);
         break;
     case(MIDI_SysCommon):
         break;
     }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,10 +54,8 @@ void Distributor::processMessage(uint8_t message[])
 
 void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = CheckForNote(Note);
-    Serial.print("Note On Instrument ");
-    Serial.println(instrument);
-    if(instrument != 0xFF){
+    uint8_t instrument = CheckForNote(Note); //returns -1 if no instrument found
+    if(instrument != NONE){ 
         (*_ptrInstrumentController).StopNote(instrument, Note, Velocity);
     }
 }
@@ -68,21 +68,23 @@ void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
     }
     else if(Velocity != 0){
         uint8_t instrument = NextInstrument();
-        (*_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
+        if(instrument != NONE){ 
+            (*_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
+        }
     }
 }
 
 void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
     uint8_t instrument = CheckForNote(Note);
-    if(instrument != 0xFF){
+    if(instrument != NONE){
         (*_ptrInstrumentController).SetKeyPressure(instrument, Note, Velocity);
     }
 }
 
 void Distributor::ControlChangeEvent(uint8_t Controller, uint8_t Value)
 {
-
+    //Implemented in MessageHandler
 }
 
 void Distributor::ProgramChangeEvent(uint8_t Program)
@@ -95,9 +97,13 @@ void Distributor::ChannelPressureEvent(uint8_t Velocity)
     //Not Yet Implemented
 }
 
-void Distributor::PitchBendEvent(uint16_t PitchBend)
+void Distributor::PitchBendEvent(uint16_t pitchBend)
 {
-    //Not Yet Implemented
+    for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        if((_instruments & (1 << i)) != 0){
+            (*_ptrInstrumentController).SetPitchBend(i, pitchBend);
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +182,7 @@ uint8_t Distributor::NextInstrument()
     }
 }
 
+//returns -1 if no instrument found
 uint8_t Distributor::CheckForNote(uint8_t note)
 {
     uint8_t nextInstrument = _currentInstrument;
@@ -186,7 +193,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         if((*_ptrInstrumentController).isNoteActive(_currentChannel, note)){
             return _currentChannel;
         }
-        return 0xFF;
+        return NONE;
 
     case(RoundRobin):
         for(int i = 0; i < 32; i++){
@@ -202,7 +209,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return 0xFF;
+        return NONE;
 
     case(Accending):
         for(int i = 0; i < 32; i++){
@@ -214,7 +221,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return 0xFF;
+        return NONE;
 
     case(Decending):
         for(int i = 31; i >= 0; i--){
@@ -226,7 +233,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return 0xFF;
+        return NONE;
     }
 }
 
@@ -247,11 +254,11 @@ uint16_t Distributor::getChannels(){
 }
 
 void Distributor::setDamperPedal(bool damper){
-    //Not Yet Implemented
+    _damperPedal = damper;
 }
 
 void Distributor::setPolyphonic(bool polyphonic){
-    //Not Yet Implemented
+    _polyphonic = polyphonic;
 }
 
 void Distributor::setNoteOverwrite(bool noteOverwrite)

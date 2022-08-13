@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Constants.h"
 #include "Instruments/InstrumentController.h"
 #include <stdint.h>
 
@@ -16,6 +17,7 @@ public:
     void StopAll() override;
     void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity) override;
 
+    void SetPitchBend(uint8_t instrument, uint16_t value) override;
     void SetModulationWheel(uint8_t value) override;
     void SetFootPedal(uint8_t value) override;
     void SetVolume(uint8_t value) override;
@@ -31,6 +33,7 @@ private:
     static void togglePin(uint8_t instrument);
 
     //Local CC Effect Atributes
+    uint16_t _PitchBend[MAX_NUM_INSTRUMENTS];
     uint16_t _ModulationWheel = 0;
     uint16_t _FootPedal = 0;
     uint16_t _Volume = 127;
