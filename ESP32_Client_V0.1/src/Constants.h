@@ -1,6 +1,10 @@
+/*
+ * Constants.h
+ *
+ */
+
 #pragma once
 #include <stdint.h>
-
 
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16

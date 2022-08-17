@@ -7,8 +7,6 @@
 #if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
 // For now, this will only work with ESP8266 or ESP32
 #else
-#ifndef SRC_MOPPYNETWORKS_MOPPYUDP_H_
-#define SRC_MOPPYNETWORKS_MOPPYUDP_H_
 
 #include "Arduino.h"
 #include <ArduinoOTA.h>
@@ -30,24 +28,23 @@
 
 class NetworkUDP{
 private:
-    MessageHandler* _ptrMessageHandler;
+    MessageHandler* m_ptrMessageHandler;
 
-    uint8_t _messagePos = 0;                         // Track current message read position
-    uint8_t _messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
+    uint8_t m_messagePos = 0;                         // Track current message read position
+    uint8_t m_messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
 
 public:
     NetworkUDP();
-    void initalize(MessageHandler* ptrMessageHandler);
-    void begin();
-    void readMessages();
+    void Initalize(MessageHandler* ptrMessageHandler);
+    void Begin();
+    void ReadMessages();
 
 private:
-    void startOTA();
-    bool startUDP();
-    void parseMessage(uint8_t message[], int length);
-    void sendData(uint8_t message[], int length);
-    void sendPong();
+    void StartOTA();
+    bool StartUDP();
+    void ParseMessage(uint8_t message[], int length);
+    void SendData(uint8_t message[], int length);
+    void SendPong();
 };
 
-#endif /* SRC_MOPPYNETWORKS_MOPPYUDP_H_ */
 #endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */

@@ -1,6 +1,10 @@
-//
-// Distributors distribute Midi Messages to instruments.
-//
+/* 
+ * Distributor.h
+ *
+ * Distributors distribute Midi Messages to instruments.
+ *
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -23,50 +27,50 @@ class Distributor{
 private:
 
     //Local Atributes
-    uint8_t _currentChannel;
-    uint8_t _currentInstrument;
-    InstrumentController* _ptrInstrumentController;
+    uint8_t m_currentChannel;
+    uint8_t m_currentInstrument;
+    InstrumentController* m_ptrInstrumentController;
 
     //Each Bit Represents an Enabled Channel/Instrument (limits max number of instruments to 32)
-    uint16_t _channels; //Represents Enabled MIDI Channels
-    uint32_t _instruments; //Represents Enabled Instruments
+    uint16_t m_channels; //Represents Enabled MIDI Channels
+    uint32_t m_instruments; //Represents Enabled Instruments
 
     //Settings
-    bool _damperPedal = false;
-    bool _polyphonic = true;
-    bool _noteOverwrite = false;
-    uint8_t _minNote, _maxNote;
-    uint8_t _numPolyphonicNotes = 4;
-    DistributionMethod _distributionMethod = StrightThrough;
+    bool m_damperPedal = false;
+    bool m_polyphonic = true;
+    bool m_noteOverwrite = false;
+    uint8_t m_minNote, m_maxNote;
+    uint8_t m_numPolyphonicNotes = 4;
+    DistributionMethod m_distributionMethod = StrightThrough;
 
 public:
 
     Distributor(InstrumentController* ptrInstrumentController);
-    void processMessage(uint8_t message[]);
+    void ProcessMessage(uint8_t message[]);
 
-    void getDistributor(uint8_t profile[]);
-    uint16_t getChannels();
+    void GetDistributor(uint8_t profile[]);
+    uint16_t GetChannels();
 
-    void setDistributor(uint8_t profile[]);
-    void setDistributionMethod(DistributionMethod);
-    void setDamperPedal(bool);
-    void setPolyphonic(bool);
-    void setNoteOverwrite(bool noteOverwrite);
-    void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
-    void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
-    void setChannels(uint16_t channels);
-    void setInstruments(uint32_t instruments);
+    void SetDistributor(uint8_t profile[]);
+    void SetDistributionMethod(DistributionMethod);
+    void SetDamperPedal(bool);
+    void SetPolyphonic(bool);
+    void SetNoteOverwrite(bool noteOverwrite);
+    void SetMinMaxNote(uint8_t minNote, uint8_t maxNote);
+    void SetNumPolyphonicNotes(uint8_t numPolyphonicNotes);
+    void SetChannels(uint16_t channels);
+    void SetInstruments(uint32_t instruments);
 
 private:
 
     //Midi Message Events
-    void NoteOnEvent(uint8_t Key, uint8_t Velocity);
-    void NoteOffEvent(uint8_t Key, uint8_t Velocity);
-    void KeyPressureEvent(uint8_t Key, uint8_t Velocity);
-    void ControlChangeEvent(uint8_t Controller, uint8_t Value);
-    void ProgramChangeEvent(uint8_t Program);
-    void ChannelPressureEvent( uint8_t Velocity);
-    void PitchBendEvent(uint16_t PitchBend);
+    void NoteOnEvent(uint8_t key, uint8_t velocity);
+    void NoteOffEvent(uint8_t key, uint8_t velocity);
+    void KeyPressureEvent(uint8_t key, uint8_t velocity);
+    void ControlChangeEvent(uint8_t controller, uint8_t value);
+    void ProgramChangeEvent(uint8_t program);
+    void ChannelPressureEvent( uint8_t velocity);
+    void PitchBendEvent(uint16_t pitchBend);
 
     //Returns Instrument ID
     uint8_t NextInstrument();

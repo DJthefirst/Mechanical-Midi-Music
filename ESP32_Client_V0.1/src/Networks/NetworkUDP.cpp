@@ -1,3 +1,7 @@
+/*
+ * MoppyUDP.cpp
+ *
+ */
 #include "NetworkUDP.h"
 #include "MessageHandler.h"
 
@@ -13,12 +17,12 @@ WiFiUDP UnicastUDP;
  */
 NetworkUDP::NetworkUDP(){}
 
-void NetworkUDP::initalize(MessageHandler* ptrMessageHandler)
+void NetworkUDP::Initalize(MessageHandler* ptrMessageHandler)
 {
-    _ptrMessageHandler = ptrMessageHandler;
+    m_ptrMessageHandler = ptrMessageHandler;
 }
 
-void NetworkUDP::begin() {
+void NetworkUDP::Begin() {
     Serial.begin(115200); // For debugging
 
     // Setup and connect to WiFi
@@ -26,13 +30,13 @@ void NetworkUDP::begin() {
     DNSServer dns;
     AsyncWiFiManager wifiManager(&server, &dns);
     wifiManager.autoConnect("FloppyDrives", "m0ppydrives");
-    startOTA();
-    startUDP();
+    StartOTA();
+    StartUDP();
 }
 
 
 // connect to UDP – returns true if successful or false if not
-bool NetworkUDP::startUDP() {
+bool NetworkUDP::StartUDP() {
     bool connected = false;
 
     Serial.println("");
@@ -56,7 +60,7 @@ bool NetworkUDP::startUDP() {
     return connected;
 }
 
-void NetworkUDP::startOTA() {
+void NetworkUDP::StartOTA() {
     ArduinoOTA.setPort(8377);
     ArduinoOTA.setPassword("flashdrive");
 
@@ -95,7 +99,7 @@ void NetworkUDP::startOTA() {
 }
 
 
-void NetworkUDP::readMessages() {
+void NetworkUDP::ReadMessages() {
     // Handle OTA
     ArduinoOTA.handle();
 
@@ -118,14 +122,14 @@ void NetworkUDP::readMessages() {
         //Serial.println(MulticastUDP.remotePort());
 
         // read the packet into messageBuffer
-        int messageLength = MulticastUDP.read(_messageBuffer, MOPPY_MAX_PACKET_LENGTH);
+        int messageLength = MulticastUDP.read(m_messageBuffer, MOPPY_MAX_PACKET_LENGTH);
 
         if (messageLength > 1 && messageLength <= 8){
-            (*_ptrMessageHandler).processMessage(_messageBuffer);
+            (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
         }
         else{
             Serial.println("PacketSize Out of Scope");
-            Serial.println(_messageBuffer[0]);
+            Serial.println(m_messageBuffer[0]);
             Serial.println(messageLength);
         }
 
@@ -158,14 +162,14 @@ void NetworkUDP::readMessages() {
     // }
     //Serial.println();
 
-void NetworkUDP::sendData(uint8_t message[], int length) {
+void NetworkUDP::SendData(uint8_t message[], int length) {
 
     UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);
     UnicastUDP.write(message, length);
     UnicastUDP.endPacket();
 }
 
-void NetworkUDP::sendPong() {
+void NetworkUDP::SendPong() {
     static int i = 0;
     i += 1;
     UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);

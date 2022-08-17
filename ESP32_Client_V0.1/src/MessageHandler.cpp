@@ -1,32 +1,37 @@
-/*
-The Message Handler Recives Midi messages and routes them to the appropiate distributor by MIDI channel.
-*/
+/* 
+ * MessgaeHandler.cpp
+ *
+ * The Message Handler Recives Midi messages and routes them to the appropiate distributor by MIDI 
+ * channel.
+ * 
+ */
+
 #include "MessageHandler.h"
 #include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
-InstrumentController* _ptrInstrumentController;
+InstrumentController* m_ptrInstrumentController;
 
 MessageHandler::MessageHandler() {}
 
-void MessageHandler::initalize(InstrumentController* ptrInstrumentController){
-    _ptrInstrumentController = ptrInstrumentController;
+void MessageHandler::Initalize(InstrumentController* ptrInstrumentController){
+    m_ptrInstrumentController = ptrInstrumentController;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Process Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MessageHandler::processMessage(uint8_t message[])
+void MessageHandler::ProcessMessage(uint8_t message[])
 {   
-    _msgType = message[0] & 0b11110000;     // 4 MSB Represent MIDI MsgType
-    _msgChannel = message[0] & 0b00001111;  // 4 LSB Represent MIDI Channel
+    m_msgType = message[0] & 0b11110000;     // 4 MSB Represent MIDI MsgType
+    m_msgChannel = message[0] & 0b00001111;  // 4 LSB Represent MIDI Channel
 
     //Handle System Common Msg or Send to Distributors
-    if(_msgType == MIDI_SysCommon)
+    if(m_msgType == MIDI_SysCommon)
     {
         //_msgChannel repeesents the message type for SysCommon
-        switch(_msgChannel){
+        switch(m_msgChannel){
 
         case(MIDI_SysEXE):
             ProcessSysEXE(message);
@@ -41,7 +46,7 @@ void MessageHandler::processMessage(uint8_t message[])
             break;
         }
     }
-    else if(_msgType == MIDI_ControlChange){
+    else if(m_msgType == MIDI_ControlChange){
         ProcessCC(message);
     }
     else{
@@ -53,7 +58,7 @@ void MessageHandler::processMessage(uint8_t message[])
 //Process SysEXE Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MessageHandler::ProcessSysEXE(uint8_t _message[])
+void MessageHandler::ProcessSysEXE(uint8_t message[])
 {
     //Not Yet Implemented
 }
@@ -64,57 +69,56 @@ void MessageHandler::ProcessSysEXE(uint8_t _message[])
 
 void MessageHandler::ProcessCC(uint8_t message[])
 {
-    for(uint8_t i=0; i < _distributors.size(); i++)
+    for(uint8_t i=0; i < m_distributors.size(); i++)
     {   
-        if((_distributors[i].getChannels() & (1 << _msgChannel)) != (0)){
+        if((m_distributors[i].GetChannels() & (1 << m_msgChannel)) != (0)){
             switch(message[1]){
 
             case(MIDI_CC_ModulationWheel):
-                (*_ptrInstrumentController).SetModulationWheel(message[2]);
+                (*m_ptrInstrumentController).SetModulationWheel(message[2]);
                 break;
             case(MIDI_CC_FootPedal):
-                (*_ptrInstrumentController).SetFootPedal(message[2]);
+                (*m_ptrInstrumentController).SetFootPedal(message[2]);
                 break;
             case(MIDI_CC_Volume):
-                (*_ptrInstrumentController).SetVolume(message[2]);
+                (*m_ptrInstrumentController).SetVolume(message[2]);
                 break;
             case(MIDI_CC_Expression):
-                (*_ptrInstrumentController).SetExpression(message[2]);
+                (*m_ptrInstrumentController).SetExpression(message[2]);
                 break;
             case(MIDI_CC_EffectCrtl_1):
-                (*_ptrInstrumentController).SetEffectCrtl_1(message[2]);
+                (*m_ptrInstrumentController).SetEffectCrtl_1(message[2]);
                 break;
             case(MIDI_CC_EffectCrtl_2):
-                (*_ptrInstrumentController).SetEffectCrtl_2(message[2]);
+                (*m_ptrInstrumentController).SetEffectCrtl_2(message[2]);
                 break;
             case(MIDI_CC_DamperPedal):
-                if(message[2] < 64)_distributors[i].setDamperPedal(false);
-                else _distributors[i].setDamperPedal(true);
+                m_distributors[i].SetDamperPedal(message[2] < 64);
                 break;
             case(MIDI_CC_Mute):
-                (*_ptrInstrumentController).StopAll();
+                (*m_ptrInstrumentController).StopAll();
                 break;
             case(MIDI_CC_Reset):
-                (*_ptrInstrumentController).ResetAll();
+                (*m_ptrInstrumentController).ResetAll();
                 break;
             case(MIDI_CC_AllNotesOff):
-                (*_ptrInstrumentController).StopAll();
+                (*m_ptrInstrumentController).StopAll();
                 break;
             case(MIDI_CC_OmniModeOff):
-                (*_ptrInstrumentController).StopAll();
-                _OmniMode = false;
+                (*m_ptrInstrumentController).StopAll();
+                m_OmniMode = false;
                 break;
             case(MIDI_CC_OmniModeOn):
-                (*_ptrInstrumentController).StopAll();
-                _OmniMode = true;
+                (*m_ptrInstrumentController).StopAll();
+                m_OmniMode = true;
                 break;
             case(MIDI_CC_Monophonic):
-                _distributors[i].setPolyphonic(false);
-                (*_ptrInstrumentController).StopAll();
+                m_distributors[i].SetPolyphonic(false);
+                (*m_ptrInstrumentController).StopAll();
                 break;
             case(MIDI_CC_Polyphonic):
-                (*_ptrInstrumentController).StopAll();
-                _distributors[i].setPolyphonic(true);
+                (*m_ptrInstrumentController).StopAll();
+                m_distributors[i].SetPolyphonic(true);
                 break;
             }
             return;
@@ -128,10 +132,10 @@ void MessageHandler::ProcessCC(uint8_t message[])
 
 void MessageHandler::DistributeMessage(uint8_t message[])
 {  
-    for(uint8_t i=0; i < _distributors.size(); i++)
+    for(uint8_t i=0; i < m_distributors.size(); i++)
     {   
-        if((_distributors[i].getChannels() & (1 << _msgChannel)) != (0))
-            _distributors[i].processMessage(message);
+        if((m_distributors[i].GetChannels() & (1 << m_msgChannel)) != (0))
+            m_distributors[i].ProcessMessage(message);
     }
 }
 
@@ -139,27 +143,27 @@ void MessageHandler::DistributeMessage(uint8_t message[])
 //Manage Distributors
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MessageHandler::addDistributor()
+void MessageHandler::AddDistributor()
 {
-    Distributor newDistributor = Distributor(_ptrInstrumentController);
-    _distributors.push_back(newDistributor);
+    Distributor newDistributor = Distributor(m_ptrInstrumentController);
+    m_distributors.push_back(newDistributor);
 }
 
-void addDistributor(uint8_t data[])
-{
-    //Not Yet Implemented
-}
-
-void addDistributor(Distributor distributor)
+void MessageHandler::AddDistributor(uint8_t data[])
 {
     //Not Yet Implemented
 }
 
-void removeDistributor(uint8_t id)
+void MessageHandler::AddDistributor(Distributor distributor)
 {
     //Not Yet Implemented
 }
 
-Distributor* MessageHandler::getDistributor(uint8_t index){
-    return &(_distributors[index]);
+void MessageHandler::RemoveDistributor(uint8_t id)
+{
+    //Not Yet Implemented
+}
+
+Distributor* MessageHandler::GetDistributor(uint8_t index){
+    return &(m_distributors[index]);
 }

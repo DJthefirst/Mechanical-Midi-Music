@@ -1,4 +1,4 @@
-#include "Instruments/ShiftRegisterInstrument.h"
+#include "Instruments/ShiftRegister.h"
 #include "InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"

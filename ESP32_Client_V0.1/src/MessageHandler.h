@@ -1,6 +1,11 @@
-//
-// Messgae Handler Converts Midi Packets into Commands
-//
+/* 
+ * MessgaeHandler.h
+ *
+ * The Message Handler Recives Midi messages and routes them to the appropiate distributor by MIDI 
+ * channel.
+ * 
+ */
+
 #pragma once
 
 #include "Arduino.h"
@@ -17,31 +22,31 @@ A Class to convert incoming data into MIDI events
 class MessageHandler{
 private:
     //Handler Config
-    bool _OmniMode = false;
+    bool m_OmniMode = false;
 
     //Msg Data
-    uint8_t _msgType;
-    uint8_t _msgChannel;
+    uint8_t m_msgType;
+    uint8_t m_msgChannel;
     
-    std::vector<Distributor> _distributors;
+    std::vector<Distributor> m_distributors;
 
 public:
     //Msg Handler 
     MessageHandler();
-    void initalize(InstrumentController* instrumentController);
-    void processMessage(uint8_t _message[]);
+    void Initalize(InstrumentController* instrumentController);
+    void ProcessMessage(uint8_t message[]);
 
     //Distributors
-    void addDistributor();
-    void addDistributor(uint8_t data[]);
-    void addDistributor(Distributor distributor);
+    void AddDistributor();
+    void AddDistributor(uint8_t data[]);
+    void AddDistributor(Distributor distributor);
 
-    void removeDistributor(uint8_t id);
-    Distributor* getDistributor(uint8_t id);
+    void RemoveDistributor(uint8_t id);
+    Distributor* GetDistributor(uint8_t id);
 
 private:
     void DistributeMessage(uint8_t message[]);
-    void ProcessCC(uint8_t _message[]);
-    void ProcessSysEXE(uint8_t _message[]);
+    void ProcessCC(uint8_t message[]);
+    void ProcessSysEXE(uint8_t message[]);
  
 };

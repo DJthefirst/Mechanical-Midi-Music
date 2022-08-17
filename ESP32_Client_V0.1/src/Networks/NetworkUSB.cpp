@@ -1,58 +1,62 @@
+/*
+ * MoppyUSB.cpp
+ *
+ */
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
 
 NetworkUSB::NetworkUSB(){}
 
-void NetworkUSB::initalize(MessageHandler* ptrMessageHandler)
+void NetworkUSB::Initalize(MessageHandler* ptrMessageHandler)
 {
-    _ptrMessageHandler = ptrMessageHandler;
+    m_ptrMessageHandler = ptrMessageHandler;
 }
 
-void NetworkUSB::begin() {
+void NetworkUSB::Begin() {
     Serial.begin(115200);
-    startUSB();
+    StartUSB();
 }
 
 
 // connect to USB – returns true if successful or false if not
-bool NetworkUSB::startUSB() {
-    bool connected = true;
+bool NetworkUSB::StartUSB() {
+    bool connected = true; //Temporary
     return connected;
 }
 
 /*
     Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler
 */
-void NetworkUSB::readMessages() {
+void NetworkUSB::ReadMessages() {
     int messageLength = Serial.available();
 
     if (messageLength >= 3){
-        _messageBuffer[0] = Serial.read();
+        m_messageBuffer[0] = Serial.read();
         messageLength = 1;
 
         //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
         while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
-            _messageBuffer[messageLength] = Serial.read();
+            m_messageBuffer[messageLength] = Serial.read();
             messageLength++;
         }
 
         //Filter out incomplete or corrupt msg
         if (messageLength > 1 && messageLength <= 8){
-            (*_ptrMessageHandler).processMessage(_messageBuffer);
+            (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
         }
         else{
             Serial.println("PacketSize Out of Scope");
-            Serial.println(_messageBuffer[0]);
+            Serial.println(m_messageBuffer[0]);
             Serial.println(messageLength);
         }
     }
 }
 
-void NetworkUSB::sendData(uint8_t message[], int length) {
+void NetworkUSB::SendData(uint8_t message[], int length) {
     //Not Yet Implemented
 }
 
-void NetworkUSB::sendPong() {
+void NetworkUSB::SendPong() {
     //Not Yet Implemented
 }

@@ -9,24 +9,24 @@
 
 #include "MessageHandler.h"
 
-#define MOPPY_MAX_PACKET_LENGTH 259
+#define MAX_PACKET_LENGTH 259 //For Now
 
 class NetworkUSB{
 private:
-    MessageHandler* _ptrMessageHandler;
+    MessageHandler* m_ptrMessageHandler;
 
-    uint8_t _messagePos = 0;                         // Track current message read position
-    uint8_t _messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
+    uint8_t m_messagePos = 0;                         // Track current message read position
+    uint8_t m_messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length (ToDo add SysExe)
 
 public:
     NetworkUSB();
-    void initalize(MessageHandler* ptrMessageHandler);
-    void begin();
-    void readMessages();
+    void Initalize(MessageHandler* ptrMessageHandler);
+    void Begin();
+    void ReadMessages();
 
 private:
-    bool startUSB();
-    void parseMessage(uint8_t message[], int length);
-    void sendData(uint8_t message[], int length);
-    void sendPong();
+    bool StartUSB();
+    void ParseMessage(uint8_t message[], int length);
+    void SendData(uint8_t message[], int length);
+    void SendPong();
 };

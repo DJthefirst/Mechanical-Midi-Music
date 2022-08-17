@@ -1,3 +1,11 @@
+/*
+ *-------------------------------------Mechanical-Midi-Music------------------------------------------
+ *  Version: V0.1
+ *  Author: DJthefirst
+ *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
+ *----------------------------------------------------------------------------------------------------
+ */
+
 #include <Arduino.h>
 #include "MessageHandler.h"
 #include "Distributor.h"
@@ -7,10 +15,10 @@
 
 #include "Instruments/InstrumentController.h"
 #include "Instruments/ExampleInstrument.h"
-//#include "Instruments/FloppyDrives.h"
+#include "Instruments/FloppyDrives.h"
 //#include "Instruments/PWMDriver.h"
 //#include "Instruments/StepperMotors.h"
-//#include "Instruments/ShiftRegister.h"
+#include "Instruments/ShiftRegister.h"
 
 //Create a new message handler
 MessageHandler* messageHandler = new(MessageHandler);
@@ -34,22 +42,22 @@ NetworkUSB connection;
 
 
 void setup() {
-  messageHandler -> initalize(instrumentController);
-  connection.initalize(messageHandler);
-  connection.begin();
+  messageHandler -> Initalize(instrumentController);
+  connection.Initalize(messageHandler);
+  connection.Begin();
   delay(100);
 
   instrumentController->SetUp();
 
   //Testing Demo Setup Config
-  messageHandler -> addDistributor();
-  Distributor* distributor = messageHandler -> getDistributor(0);
-  distributor -> setChannels(0xFFFF); // 1-16
-  distributor -> setInstruments(0x0000000F); // 1-4
-  distributor -> setDistributionMethod(StrightThrough);
+  messageHandler -> AddDistributor();
+  Distributor* distributor = messageHandler -> GetDistributor(0);
+  distributor -> SetChannels(0xFFFF); // 1-16
+  distributor -> SetInstruments(0x0000000F); // 1-4
+  distributor -> SetDistributionMethod(StrightThrough);
 }
 
 void loop() {
   //Periodicaly Read Incomming Messages
-  connection.readMessages();
+  connection.ReadMessages();
 }
