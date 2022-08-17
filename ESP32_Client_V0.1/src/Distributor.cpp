@@ -124,11 +124,11 @@ uint8_t Distributor::NextInstrument()
 
     case(RoundRobin):
 
-        for(int i = 0; i < 32; i++){
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             _currentInstrument++;
 
             //Loop to first instrument if end is reached
-            _currentInstrument = (_currentInstrument >= 32) ? 0 : _currentInstrument;
+            _currentInstrument = (_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : _currentInstrument;
 
             //Check if valid instrument
             if(_instruments & (1 << _currentInstrument) != 0){
@@ -140,7 +140,7 @@ uint8_t Distributor::NextInstrument()
 
     case(Accending):
 
-        for(int i = 0; (i < 32); i++){
+        for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
             if(_instruments & (1 << i) != 0)
             {
                 uint8_t activeNotes = (*_ptrInstrumentController).getNumActiveNotes(i);
@@ -196,11 +196,11 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         return NONE;
 
     case(RoundRobin):
-        for(int i = 0; i < 32; i++){
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             nextInstrument--;
 
             //Only works bc 255 % 32 = 31
-            nextInstrument = nextInstrument % 32;
+            nextInstrument = nextInstrument % MAX_NUM_INSTRUMENTS;
 
             //Check if valid instrument
             if(_instruments & (1 << nextInstrument) != 0){
@@ -212,7 +212,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         return NONE;
 
     case(Accending):
-        for(int i = 0; i < 32; i++){
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument
             if(_instruments & (1 << i) != 0){
@@ -251,6 +251,10 @@ void Distributor::getDistributor(uint8_t* outputArray)
 
 uint16_t Distributor::getChannels(){
     return _channels;
+}
+
+void Distributor::setDistributionMethod(DistributionMethod distribution){
+    _distributionMethod = distribution;
 }
 
 void Distributor::setDamperPedal(bool damper){

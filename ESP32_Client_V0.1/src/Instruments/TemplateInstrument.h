@@ -4,12 +4,10 @@
 #include "Instruments/InstrumentController.h"
 #include <stdint.h>
 
-class ExampleInstrument : public InstrumentController{
+class TemplateInstrument : public InstrumentController{
 public:
 
 private:
-    static void togglePin(uint8_t instrument);
-
     //Local MIDI Device Atributes
     uint8_t _Program = 0;
     uint8_t _ChannelPressure = 0;

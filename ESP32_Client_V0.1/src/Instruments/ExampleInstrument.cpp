@@ -182,6 +182,12 @@ void ExampleInstrument::SetPitchBend(uint8_t instrument, uint16_t bend){
 
     }
 }
+void ExampleInstrument::SetProgramChange(uint8_t value){
+    //Not Yet Implemented    
+}
+void ExampleInstrument::SetChannelPressure(uint8_t value){
+    //Not Yet Implemented    
+}
 void ExampleInstrument::SetModulationWheel(uint8_t value){
     //Not Yet Implemented
 }

@@ -48,6 +48,7 @@ public:
     uint16_t getChannels();
 
     void setDistributor(uint8_t profile[]);
+    void setDistributionMethod(DistributionMethod);
     void setDamperPedal(bool);
     void setPolyphonic(bool);
     void setNoteOverwrite(bool noteOverwrite);
