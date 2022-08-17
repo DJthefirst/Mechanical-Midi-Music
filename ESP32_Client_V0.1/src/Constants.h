@@ -71,7 +71,7 @@ const uint8_t MIDI_CC_Monophonic = 126;
 const uint8_t MIDI_CC_Polyphonic = 127;
 
 //MIDI Constants
-const uint16_t MIDI_Control_Mid = 0x2000;
+const uint16_t MIDI_CTRL_CENTER = 0x2000;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Timer Constants

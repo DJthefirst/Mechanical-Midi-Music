@@ -23,7 +23,7 @@ const uint8_t LAST_NOTE = FIRST_NOTE + (NUM_NOTES-1);
 
 #define SHIFT_TIMER_RESOLUTION 1000 //Microsecond resolution for starting and ending notes
 
-// The velocity of the incomin4 notes will adjust the pulse length from MIN_PULSE_TICKS to MIN_PULSE_TICKS + PULSE_TICKS_RANGE
+// The velocity of the incoming notes will adjust the pulse length from MIN_PULSE_TICKS to MIN_PULSE_TICKS + PULSE_TICKS_RANGE
 #define MIN_PULSE_TICKS 10 // Minimum length of "on" pulse for each bit in ticks (e.g. RESOLUTION * PULSE_TICKS microseconds)
 #define PULSE_TICKS_RANGE 60 // Maximum number of ticks to add to MIN_PULSE_TICKS for maximum velocity
 
