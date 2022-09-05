@@ -119,7 +119,9 @@ void ExampleInstrument::tick()
         if (m_activePeriod[i][m_currentSlot[i]] > 0){
             if (m_currentTick[i] >= m_activePeriod[i][m_currentSlot[i]]) {
                 togglePin(i);
-                m_currentSlot[i]++;
+
+                //Move to next slot once a full cycle completes
+                if(m_currentState[i]){ m_currentSlot[i]++; }
                 m_currentTick[i] = 0;
                 continue;
             }

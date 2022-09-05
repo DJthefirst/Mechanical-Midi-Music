@@ -30,7 +30,7 @@ void MessageHandler::ProcessMessage(uint8_t message[])
     //Handle System Common Msg or Send to Distributors
     if(m_msgType == MIDI_SysCommon)
     {
-        //_msgChannel repeesents the message type for SysCommon
+        //_msgChannel represents the message type for SysCommon
         switch(m_msgChannel){
 
         case(MIDI_SysEXE):

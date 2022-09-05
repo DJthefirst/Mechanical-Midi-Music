@@ -11,11 +11,10 @@
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
 
-
 //Algorythmic Methods to Distribute Notes Amoungst Instruments.
 enum DistributionMethod
 { 
-    StrightThrough = 0, //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
+    StraightThrough = 0, //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
     RoundRobin,         //Distributes Notes in a circular manner.
     RoundRobinBalance,  //Distributes Notes in a circular manner (Balances Notes across Instruments).
     Accending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
@@ -23,6 +22,7 @@ enum DistributionMethod
     Stack               //Play Notes Polyphonicaly on lowest available Instrument until full.
 };
 
+//Distributes Midi Messages to Instruments.
 class Distributor{
 private:
 
@@ -41,7 +41,7 @@ private:
     bool m_noteOverwrite = false;
     uint8_t m_minNote, m_maxNote;
     uint8_t m_numPolyphonicNotes = 4;
-    DistributionMethod m_distributionMethod = StrightThrough;
+    DistributionMethod m_distributionMethod = StraightThrough;
 
 public:
 

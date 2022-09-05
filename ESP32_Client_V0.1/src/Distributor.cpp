@@ -45,7 +45,7 @@ void Distributor::ProcessMessage(uint8_t message[])
         ChannelPressureEvent(message[1]);
         break;
     case(MIDI_PitchBend):
-        PitchBendEvent((message[2] << 7) | message[1]);
+        PitchBendEvent((message[1] | message[2] << 7));
         break;
     case(MIDI_SysCommon):
         break;
@@ -121,7 +121,7 @@ uint8_t Distributor::NextInstrument()
 
     switch(m_distributionMethod){
 
-    case(StrightThrough):
+    case(StraightThrough):
         m_currentInstrument = m_currentChannel;
         return m_currentInstrument;
 
@@ -193,7 +193,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
     switch(m_distributionMethod){
 
-    case(StrightThrough):
+    case(StraightThrough):
         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
             return m_currentChannel;
         }

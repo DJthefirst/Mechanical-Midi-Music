@@ -54,7 +54,7 @@ void setup() {
   Distributor* distributor = messageHandler -> GetDistributor(0);
   distributor -> SetChannels(0xFFFF); // 1-16
   distributor -> SetInstruments(0x0000000F); // 1-4
-  distributor -> SetDistributionMethod(StrightThrough);
+  distributor -> SetDistributionMethod(StraightThrough);
 }
 
 void loop() {
