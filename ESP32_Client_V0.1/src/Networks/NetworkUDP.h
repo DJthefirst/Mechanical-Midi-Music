@@ -34,8 +34,7 @@ private:
     uint8_t m_messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length for Moppy messages is 259
 
 public:
-    NetworkUDP();
-    void Initalize(MessageHandler* ptrMessageHandler);
+    NetworkUDP(MessageHandler* ptrMessageHandler);
     void Begin();
     void ReadMessages();
 

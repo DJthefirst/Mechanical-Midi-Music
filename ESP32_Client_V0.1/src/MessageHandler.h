@@ -32,8 +32,7 @@ private:
 
 public:
     //Msg Handler 
-    MessageHandler();
-    void Initalize(InstrumentController* instrumentController);
+    MessageHandler(InstrumentController* ptrInstrumentController);
     void ProcessMessage(uint8_t message[]);
 
     //Distributors

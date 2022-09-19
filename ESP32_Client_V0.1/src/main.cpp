@@ -1,6 +1,6 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V0.1
+ *  Version: V0.2
  *  Author: DJthefirst
  *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
  *----------------------------------------------------------------------------------------------------
@@ -20,39 +20,37 @@
 //#include "Instruments/StepperMotors.h"
 //#include "Instruments/ShiftRegister.h"
 
-//Create a new message handler
-MessageHandler* messageHandler = new(MessageHandler);
-
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-InstrumentController* instrumentController = 
-  new(ExampleInstrument);
-//new(FloppyDrives);
-//new(PWMDriver);
-//new(StepperMotors);
-//new(ShiftRegister);
+ExampleInstrument instrumentController;
+//ExampleInstrument FloppyDrives;
+//ExampleInstrument PWMDriver;
+//ExampleInstrument StepperMotors;
+//ExampleInstrument ShiftRegister;
 
+
+//Create a new message handler
+MessageHandler messageHandler(&instrumentController);
 
 //---------- Uncomment Your Selected COM Type ----------
 
-NetworkUSB connection;
-//NetworkUDP connection;
-//NetworkDIN connection;
+
+NetworkUSB connection(&messageHandler);
+//NetworkUDP connection(messageHandler);
+//NetworkDIN connection(messageHandler);
 
 
 void setup() {
-  messageHandler -> Initalize(instrumentController);
-  connection.Initalize(messageHandler);
   connection.Begin();
   delay(100);
 
   //Testing Demo Setup Config
-  messageHandler -> AddDistributor();
-  Distributor* distributor = messageHandler -> GetDistributor(0);
-  distributor -> SetChannels(0xFFFF); // 1-16
-  distributor -> SetInstruments(0x0000000F); // 1-4
-  distributor -> SetDistributionMethod(StraightThrough);
+  Distributor distributor(&instrumentController);
+  distributor.SetChannels(0xFFFF); // 1-16
+  distributor.SetInstruments(0x0000000F); // 1-4
+  distributor.SetDistributionMethod(StraightThrough);
+  messageHandler.AddDistributor(distributor);
 }
 
 void loop() {

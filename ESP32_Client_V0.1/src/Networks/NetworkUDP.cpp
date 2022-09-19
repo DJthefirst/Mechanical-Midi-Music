@@ -15,9 +15,7 @@ WiFiUDP UnicastUDP;
  * Serial communications implementation for Arduino.  Instrument
  * has its handler functions called for device and system messages
  */
-NetworkUDP::NetworkUDP(){}
-
-void NetworkUDP::Initalize(MessageHandler* ptrMessageHandler)
+NetworkUDP::NetworkUDP(MessageHandler* ptrMessageHandler)
 {
     m_ptrMessageHandler = ptrMessageHandler;
 }

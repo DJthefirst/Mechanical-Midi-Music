@@ -12,9 +12,7 @@
 
 InstrumentController* m_ptrInstrumentController;
 
-MessageHandler::MessageHandler() {}
-
-void MessageHandler::Initalize(InstrumentController* ptrInstrumentController){
+MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
 }
 
@@ -156,7 +154,7 @@ void MessageHandler::AddDistributor(uint8_t data[])
 
 void MessageHandler::AddDistributor(Distributor distributor)
 {
-    //Not Yet Implemented
+    m_distributors.push_back(distributor);
 }
 
 void MessageHandler::RemoveDistributor(uint8_t id)
