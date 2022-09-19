@@ -99,7 +99,7 @@ void ExampleInstrument::tick()
 #endif
 {
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        //if(m_numActiveNotes == 0)continue;
+        if(m_numActiveNotes == 0)continue;
 
         if (m_activePeriod[i] > 0){
             if (m_currentTick[i] >= m_activePeriod[i]) {
@@ -133,14 +133,12 @@ void ExampleInstrument::togglePin(byte driveNum, byte pin) {
 
 uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
 {
-    //return (m_activeNotes[instrument] != 0) ? 1 : 0;
-    return 0;
+    return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
 bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    //return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
-    return 0;
+    return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
 void ExampleInstrument::SetPitchBend(uint8_t instrument, uint16_t bend){

@@ -20,15 +20,14 @@ public:
     ExampleInstrument();
     static void Tick();
 
-    void Reset(uint8_t instrument);
-    void ResetAll();
-    void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    void StopAll();
+    void Reset(uint8_t instrument) override;
+    void ResetAll() override;
+    void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void StopAll() override;
 
-    void SetPitchBend(uint8_t instrument, uint16_t value);
+    void SetPitchBend(uint8_t instrument, uint16_t value) override;
 
-
-    uint8_t getNumActiveNotes(uint8_t instrument);
-    bool isNoteActive(uint8_t instrument, uint8_t note);
+    uint8_t getNumActiveNotes(uint8_t instrument) override;
+    bool isNoteActive(uint8_t instrument, uint8_t note) override;
 };
