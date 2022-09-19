@@ -5,10 +5,7 @@
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
-
-NetworkUSB::NetworkUSB(){}
-
-void NetworkUSB::Initalize(MessageHandler* ptrMessageHandler)
+NetworkUSB::NetworkUSB(MessageHandler* ptrMessageHandler)
 {
     m_ptrMessageHandler = ptrMessageHandler;
 }

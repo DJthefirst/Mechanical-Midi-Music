@@ -19,8 +19,7 @@ private:
     uint8_t m_messageBuffer[MOPPY_MAX_PACKET_LENGTH]; // Max message length (ToDo add SysExe)
 
 public:
-    NetworkUSB();
-    void Initalize(MessageHandler* ptrMessageHandler);
+    NetworkUSB(MessageHandler* ptrMessageHandler);
     void Begin();
     void ReadMessages();
 
