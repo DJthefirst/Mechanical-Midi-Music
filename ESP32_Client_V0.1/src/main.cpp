@@ -24,10 +24,10 @@
 //---------- Uncomment Your Selected Instrument Type ----------
 
 ExampleInstrument instrumentController;
-//ExampleInstrument FloppyDrives;
-//ExampleInstrument PWMDriver;
-//ExampleInstrument StepperMotors;
-//ExampleInstrument ShiftRegister;
+//FloppyDrives  instrumentController;
+//PWMDriver     instrumentController;
+//StepperMotors instrumentController;
+//ShiftRegister instrumentController;
 
 
 //Create a new message handler
