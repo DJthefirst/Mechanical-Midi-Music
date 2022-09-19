@@ -1,4 +1,4 @@
-#include "Instruments/TemplateInstrument.h"
+#include "InstrumentController.h"
 #include "InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
@@ -9,46 +9,45 @@ static uint8_t _numActiveNotes[MAX_NUM_INSTRUMENTS];
 
 //Instrument Attributes
 
-void TemplateInstrument::SetUp()
+InstrumentController::InstrumentController()
 {
-    //Setup pins
-
     // With all pins setup, let's do a first run reset
-    ResetAll();
-    delay(500); // Wait a half second for safety
+    //ResetAll();
+    //delay(500); // Wait a half second for safetyl.
 
     // Setup timer to handle interrupts
-    InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
+    //InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
 }
 
-void TemplateInstrument::Reset(uint8_t instrument)
+
+void InstrumentController::Reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::ResetAll()
+void InstrumentController::ResetAll()
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void InstrumentController::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void InstrumentController::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::StopAll()
+void InstrumentController::StopAll()
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity)
+void InstrumentController::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     //Not Yet Implemented
 }
@@ -66,9 +65,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR TemplateInstrument::Tick()
+void ICACHE_RAM_ATTR InstrumentController::Tick()
 #else
-void TemplateInstrument::tick()
+void InstrumentController::tick()
 #endif
 {
     
@@ -80,40 +79,40 @@ void TemplateInstrument::tick()
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t TemplateInstrument::getNumActiveNotes(uint8_t instrument)
+uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument)
 {
     //Not Yet Implemented
 }
  
-bool TemplateInstrument::isNoteActive(uint8_t instrument, uint8_t note)
+bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note)
 {
     //Not Yet Implemented
 }
 
-void TemplateInstrument::SetPitchBend(uint8_t instrument, uint16_t bend){
+void InstrumentController::SetPitchBend(uint8_t instrument, uint16_t bend){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetProgramChange(uint8_t value){
+void InstrumentController::SetProgramChange(uint8_t value){
     //Not Yet Implemented    
 }
-void TemplateInstrument::SetChannelPressure(uint8_t value){
+void InstrumentController::SetChannelPressure(uint8_t value){
     //Not Yet Implemented    
 }
-void TemplateInstrument::SetModulationWheel(uint8_t value){
+void InstrumentController::SetModulationWheel(uint8_t value){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetFootPedal(uint8_t value){
+void InstrumentController::SetFootPedal(uint8_t value){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetVolume(uint8_t value){
+void InstrumentController::SetVolume(uint8_t value){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetExpression(uint8_t value){
+void InstrumentController::SetExpression(uint8_t value){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetEffectCrtl_1(uint8_t value){
+void InstrumentController::SetEffectCrtl_1(uint8_t value){
     //Not Yet Implemented
 }
-void TemplateInstrument::SetEffectCrtl_2(uint8_t value){
+void InstrumentController::SetEffectCrtl_2(uint8_t value){
     //Not Yet Implemented
 }

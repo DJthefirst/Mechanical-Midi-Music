@@ -15,10 +15,10 @@
 
 #include "Instruments/InstrumentController.h"
 #include "Instruments/ExampleInstrument.h"
-#include "Instruments/FloppyDrives.h"
+//#include "Instruments/FloppyDrives.h"
 //#include "Instruments/PWMDriver.h"
 //#include "Instruments/StepperMotors.h"
-#include "Instruments/ShiftRegister.h"
+//#include "Instruments/ShiftRegister.h"
 
 //Create a new message handler
 MessageHandler* messageHandler = new(MessageHandler);
@@ -26,7 +26,7 @@ MessageHandler* messageHandler = new(MessageHandler);
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-ExampleInstrument* instrumentController = 
+InstrumentController* instrumentController = 
   new(ExampleInstrument);
 //new(FloppyDrives);
 //new(PWMDriver);
@@ -46,8 +46,6 @@ void setup() {
   connection.Initalize(messageHandler);
   connection.Begin();
   delay(100);
-
-  instrumentController->SetUp();
 
   //Testing Demo Setup Config
   messageHandler -> AddDistributor();
