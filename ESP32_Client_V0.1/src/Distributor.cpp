@@ -6,7 +6,6 @@
  */
 
 #include "Distributor.h"
-#include "Arduino.h"
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {

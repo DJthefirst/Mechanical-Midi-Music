@@ -1,12 +1,4 @@
 #include "InstrumentController.h"
-#include "InterruptTimer.h"
-#include "Constants.h"
-#include "Arduino.h"
-
-//[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
-static uint8_t _activeNotes[MAX_NUM_INSTRUMENTS];
-static uint8_t _numActiveNotes[MAX_NUM_INSTRUMENTS];
-
 
 void InstrumentController::Reset(uint8_t instrument)
 {
@@ -33,10 +25,7 @@ void InstrumentController::StopAll()
     //Not Yet Implemented
 }
 
-void InstrumentController::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity)
-{
-    //Not Yet Implemented
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
@@ -46,6 +35,9 @@ uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
     //Not Yet Implemented
 }
 bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
+    //Not Yet Implemented
+}
+void InstrumentController::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
     //Not Yet Implemented
 }
 void InstrumentController::SetPitchBend(uint8_t instrument, uint16_t bend){

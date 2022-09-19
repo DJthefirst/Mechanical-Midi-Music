@@ -87,7 +87,7 @@ const uint16_t MIDI_CTRL_CENTER = 0x2000;
  * which might interfere with other processes but will result in more accurate frequency
  * reproduction.
  */
-#define TIMER_RESOLUTION 40 //40
+#define TIMER_RESOLUTION 40
 
 // In some cases a pulse will only happen every-other tick (e.g. if the tick is
 // toggling a pin on and off and pulses happen on rising signal) so to simplify

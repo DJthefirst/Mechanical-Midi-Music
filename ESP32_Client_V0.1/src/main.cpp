@@ -33,12 +33,12 @@ ExampleInstrument instrumentController;
 //Create a new message handler
 MessageHandler messageHandler(&instrumentController);
 
+
 //---------- Uncomment Your Selected COM Type ----------
 
-
 NetworkUSB connection(&messageHandler);
-//NetworkUDP connection(messageHandler);
-//NetworkDIN connection(messageHandler);
+//NetworkUDP connection(&messageHandler);
+//NetworkDIN connection(&messageHandler);
 
 
 void setup() {

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "Arduino.h"
 #include <stdint.h>
 #include <vector>
 #include "Instruments/InstrumentController.h"
