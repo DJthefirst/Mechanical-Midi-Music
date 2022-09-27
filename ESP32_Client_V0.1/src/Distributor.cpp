@@ -156,14 +156,11 @@ uint8_t Distributor::NextInstrument()
                 if(numInst < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
                     insturmentLeastActive = m_currentInstrument;
                 }
-                
-
-                
             }
         }
         return m_currentInstrument;
 
-//Ascending
+
     case(Ascending):
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
@@ -181,14 +178,13 @@ uint8_t Distributor::NextInstrument()
                 {
                     return insturmentLeastActive;
                 }
-
             }
         }
         return insturmentLeastActive;
 
     case(Descending):
 
-        for(int i = 31; (i >= 0); i--){
+        for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
             if(m_instruments & (1 << i) != 0)
             {
                 uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
@@ -206,6 +202,10 @@ uint8_t Distributor::NextInstrument()
             }
         }
         return insturmentLeastActive;
+
+    default:
+        //TODO Handle Error
+        return 0;
     }
 }
 
@@ -220,9 +220,9 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
             return m_currentChannel;
         }
-        return NONE;
+        break;
 
-    case(RoundRobin):
+    case(RoundRobin,RoundRobinBalance):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             nextInstrument--;
 
@@ -236,7 +236,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return NONE;
+        break;
 
     case(Ascending):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
@@ -248,10 +248,10 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return NONE;
+        break;
 
     case(Descending):
-        for(int i = 31; i >= 0; i--){
+        for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
             //Check if valid instrument
             if(m_instruments & (1 << i) != 0){
@@ -260,8 +260,13 @@ uint8_t Distributor::CheckForNote(uint8_t note)
                 }
             }
         }
-        return NONE;
+        break;
+
+    default:
+        //TODO Handle Error
+        break;
     }
+    return NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,11 +274,12 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //output Array = uint8_t[9]
-void Distributor::GetDistributor(uint8_t* outputArray)
+uint8_t* Distributor::GetDistributor()
 {
     uint8_t dstributorObj[] = {((m_noteOverwrite << 7) & (m_numPolyphonicNotes)), m_minNote, m_maxNote, m_channels >> 8, m_channels, 
         m_instruments >> 24, m_instruments >> 16, m_instruments >> 8, m_instruments};
-    outputArray = dstributorObj;
+
+    return dstributorObj;
 }
 
 uint16_t Distributor::GetChannels(){

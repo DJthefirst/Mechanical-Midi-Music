@@ -33,9 +33,11 @@ void InstrumentController::StopAll()
 
 uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
     //Not Yet Implemented
+    return 0;
 }
 bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
     //Not Yet Implemented
+    return false;
 }
 void InstrumentController::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
     //Not Yet Implemented
