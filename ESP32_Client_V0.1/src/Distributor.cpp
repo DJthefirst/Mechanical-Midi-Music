@@ -6,7 +6,6 @@
  */
 
 #include "Distributor.h"
-#include "Arduino.h"
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
@@ -140,25 +139,49 @@ uint8_t Distributor::NextInstrument()
             }
         }
         return m_currentInstrument;
+        
 
+    case(RoundRobinBalance):
+        insturmentLeastActive = m_currentInstrument + 1;
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+            m_currentInstrument++;
 
-    case(Accending):
+            //Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            //Check if valid instrument
+            if(m_instruments & (1 << m_currentInstrument) != 0){
+                uint8_t numInst = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+                if(numInst == 0) return m_currentInstrument;
+                if(numInst < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
+                    insturmentLeastActive = m_currentInstrument;
+                }
+                
+
+                
+            }
+        }
+        return m_currentInstrument;
+
+//Ascending
+    case(Ascending):
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
             if(m_instruments & (1 << i) != 0)
             {
                 uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
-                if(activeNotes == 0)
-                {
-                    return insturmentLeastActive;
-                }
-
                 if(activeNotes < leastActiveNotes)
                 {
                     leastActiveNotes = activeNotes;
                     insturmentLeastActive = i;
                 }
+
+                if(activeNotes == 0)
+                {
+                    return insturmentLeastActive;
+                }
+
             }
         }
         return insturmentLeastActive;
@@ -215,7 +238,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         }
         return NONE;
 
-    case(Accending):
+    case(Ascending):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument

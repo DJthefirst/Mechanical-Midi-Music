@@ -7,10 +7,6 @@ class InstrumentController{
 public:
 
 private:
-    //Local MIDI Device Atributes
-    uint8_t _Program = 0;
-    uint8_t _ChannelPressure = 0;
-    uint16_t _PitchBend[MAX_NUM_INSTRUMENTS];
 
     //Local CC Effect Atributes
     uint16_t _ModulationWheel = 0;
@@ -22,13 +18,15 @@ private:
 
 public:
 
+    //Basic Functions
     virtual void Reset(uint8_t instrument);
     virtual void ResetAll();
     virtual void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity);
     virtual void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity);
     virtual void StopAll();
-    virtual void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
 
+    //Setters
+    virtual void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
     virtual void SetPitchBend(uint8_t instrument, uint16_t value);
     virtual void SetProgramChange(uint8_t value);
     virtual void SetChannelPressure(uint8_t value);
@@ -39,6 +37,7 @@ public:
     virtual void SetEffectCrtl_1(uint8_t value);
     virtual void SetEffectCrtl_2(uint8_t value);
 
+    //Getters
     virtual uint8_t getNumActiveNotes(uint8_t instrument);
     virtual bool isNoteActive(uint8_t instrument, uint8_t note);
 };

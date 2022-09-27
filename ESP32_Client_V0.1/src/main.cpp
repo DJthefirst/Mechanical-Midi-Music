@@ -33,12 +33,12 @@ ExampleInstrument instrumentController;
 //Create a new message handler
 MessageHandler messageHandler(&instrumentController);
 
+
 //---------- Uncomment Your Selected COM Type ----------
 
-
 NetworkUSB connection(&messageHandler);
-//NetworkUDP connection(messageHandler);
-//NetworkDIN connection(messageHandler);
+//NetworkUDP connection(&messageHandler);
+//NetworkDIN connection(&messageHandler);
 
 
 void setup() {
@@ -48,8 +48,9 @@ void setup() {
   //Testing Demo Setup Config
   Distributor distributor(&instrumentController);
   distributor.SetChannels(0xFFFF); // 1-16
-  distributor.SetInstruments(0x0000000F); // 1-4
-  distributor.SetDistributionMethod(StraightThrough);
+  distributor.SetInstruments(0x00000003); // 1-4
+  distributor.SetDistributionMethod(RoundRobinBalance);
+  //distributor.SetDistributionMethod(Ascending);
   messageHandler.AddDistributor(distributor);
 }
 

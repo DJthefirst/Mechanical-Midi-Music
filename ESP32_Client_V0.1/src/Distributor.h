@@ -17,7 +17,7 @@ enum DistributionMethod
     StraightThrough = 0, //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
     RoundRobin,         //Distributes Notes in a circular manner.
     RoundRobinBalance,  //Distributes Notes in a circular manner (Balances Notes across Instruments).
-    Accending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
+    Ascending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
     Descending,         //Plays Note on highest available Instrument (Balances Notes across Instruments).
     Stack               //Play Notes Polyphonicaly on lowest available Instrument until full.
 };
@@ -40,7 +40,7 @@ private:
     bool m_polyphonic = true;
     bool m_noteOverwrite = false;
     uint8_t m_minNote, m_maxNote;
-    uint8_t m_numPolyphonicNotes = 4;
+    uint8_t m_numPolyphonicNotes = 1;
     DistributionMethod m_distributionMethod = StraightThrough;
 
 public:
