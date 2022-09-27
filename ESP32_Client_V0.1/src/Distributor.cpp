@@ -226,8 +226,8 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             nextInstrument--;
 
-            //Only works bc 255 % 32 = 31
-            nextInstrument = nextInstrument % MAX_NUM_INSTRUMENTS;
+             //Loop when undeflow
+             if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
 
             //Check if valid instrument
             if(m_instruments & (1 << nextInstrument) != 0){
