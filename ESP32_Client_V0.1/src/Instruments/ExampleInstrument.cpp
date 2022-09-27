@@ -61,6 +61,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
         m_activeNotes[instrument] = 0;
         m_notePeriod[instrument] = 0;
         m_activePeriod[instrument] = 0;
+        digitalWrite(pins[instrument], 0);
         m_numActiveNotes--;
         return;
     }
@@ -117,7 +118,7 @@ void ExampleInstrument::tick()
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR ExampleInstrument::togglePin(uint8_t instrument) {
 #else
-void ExampleInstrument::togglePin(byte driveNum, byte pin) {
+void ExampleInstrument::togglePin(uint8_t instrument) {
 #endif
 
     //Pulse the control pin
