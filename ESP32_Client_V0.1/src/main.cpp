@@ -48,16 +48,16 @@ void setup() {
   ////Testing Demo Setup Config////
 
   //Distributor 1
-  //Distributor distributor1(&instrumentController);
-  //distributor1.SetChannels(0x0001); // 1
-  //distributor1.SetInstruments(0x00000003); // 1,2
-  //distributor1.SetDistributionMethod(RoundRobinBalance);
-  //messageHandler.AddDistributor(distributor1);
+  Distributor distributor1(&instrumentController);
+  distributor1.SetChannels(0x0001); // 1
+  distributor1.SetInstruments(0x00000013); // 1,2,5
+  distributor1.SetDistributionMethod(RoundRobinBalance);
+  messageHandler.AddDistributor(distributor1);
 
   //Distributor 2
   Distributor distributor2(&instrumentController);
   distributor2.SetChannels(0x0006); // 2,3
-  distributor2.SetInstruments(0x0000FFFF); // 3,4,6,7
+  distributor2.SetInstruments(0x0000006C); // 3,4,6,7
   distributor2.SetDistributionMethod(Ascending);
   messageHandler.AddDistributor(distributor2);
 }
