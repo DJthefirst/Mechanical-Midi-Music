@@ -159,7 +159,12 @@ void MessageHandler::AddDistributor(Distributor distributor)
 
 void MessageHandler::RemoveDistributor(uint8_t id)
 {
-    //Not Yet Implemented
+    m_distributors.erase(m_distributors.begin() + id);
+}
+
+void MessageHandler::RemoveAllDistributors()
+{
+    m_distributors.clear();
 }
 
 Distributor* MessageHandler::GetDistributor(uint8_t index){

@@ -40,6 +40,7 @@ public:
     void AddDistributor(Distributor distributor);
 
     void RemoveDistributor(uint8_t id);
+    void RemoveAllDistributors();
     Distributor* GetDistributor(uint8_t id);
 
 private:

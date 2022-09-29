@@ -9,7 +9,7 @@
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16
 //Absolute max number of Instruments is 32
-#define MAX_NUM_INSTRUMENTS 3 //32
+#define MAX_NUM_INSTRUMENTS 7 //32
 //Absolute Lowest Note Min=0
 #define MIN_MIDI_NOTE 36 //C1
 //Absolute Highest Note Max=127
@@ -22,7 +22,7 @@ const uint8_t MSB_BITMASK = 0x80;
 const uint8_t NONE = -1;
 
 //Pinnouts  ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-const uint8_t pins[] = {2,4,18,19,21,22,13,12,23,25,26,27,32,33};
+const uint8_t pins[] = {2,4,18,19,21,22,23,13,12,25,26,27,32,33};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //MIDI Constants
