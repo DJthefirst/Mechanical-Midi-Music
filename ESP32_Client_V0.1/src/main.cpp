@@ -45,13 +45,35 @@ void setup() {
   connection.Begin();
   delay(100);
 
-  //Testing Demo Setup Config
-  Distributor distributor(&instrumentController);
-  distributor.SetChannels(0xFFFF); // 1-16
-  distributor.SetInstruments(0x00000003); // 1-4
-  distributor.SetDistributionMethod(RoundRobinBalance);
-  //distributor.SetDistributionMethod(Ascending);
-  messageHandler.AddDistributor(distributor);
+  ////Testing Demo Setup Config////
+
+  //Distributor 1
+  Distributor distributor1(&instrumentController);
+  distributor1.SetChannels(0x0001); // 1
+  distributor1.SetInstruments(0x00000003); // 1,2
+  distributor1.SetDistributionMethod(Ascending);
+  messageHandler.AddDistributor(distributor1);
+
+  //Distributor 2
+  Distributor distributor2(&instrumentController);
+  distributor2.SetChannels(0x0002); // 2
+  distributor2.SetInstruments(0x0000000C); // 3,4
+  distributor2.SetDistributionMethod(Ascending);
+  messageHandler.AddDistributor(distributor2);
+
+  //Distributor 3
+  Distributor distributor3(&instrumentController);
+  distributor3.SetChannels(0x0004); // 3
+  distributor3.SetInstruments(0x00000030); // 5,6
+  distributor3.SetDistributionMethod(Ascending);
+  messageHandler.AddDistributor(distributor3);
+
+  //Distributor 4
+  Distributor distributor4(&instrumentController);
+  distributor4.SetChannels(0x0008); // 4
+  distributor4.SetInstruments(0x00000040); // 7
+  distributor4.SetDistributionMethod(Ascending);
+  messageHandler.AddDistributor(distributor4);
 }
 
 void loop() {

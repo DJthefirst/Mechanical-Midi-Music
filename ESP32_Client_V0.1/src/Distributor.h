@@ -19,7 +19,7 @@ enum DistributionMethod
     RoundRobinBalance,  //Distributes Notes in a circular manner (Balances Notes across Instruments).
     Ascending,          //Plays Note on lowest available Instrument (Balances Notes across Instruments).
     Descending,         //Plays Note on highest available Instrument (Balances Notes across Instruments).
-    Stack               //Play Notes Polyphonicaly on lowest available Instrument until full.
+    Stack               //  TODO    Play Notes Polyphonicaly on lowest available Instrument until full.
 };
 
 //Distributes Midi Messages to Instruments.
@@ -48,7 +48,7 @@ public:
     Distributor(InstrumentController* ptrInstrumentController);
     void ProcessMessage(uint8_t message[]);
 
-    void GetDistributor(uint8_t profile[]);
+    uint8_t* GetDistributor();
     uint16_t GetChannels();
 
     void SetDistributor(uint8_t profile[]);
