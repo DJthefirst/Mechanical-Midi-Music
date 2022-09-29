@@ -231,17 +231,14 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 
     case(RoundRobin,RoundRobinBalance):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+            
+            //Decrement Instrument with Underflow Protection
             nextInstrument--;
-
-             //Loop when undeflow
-             if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
+            if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
 
             //Check if valid instrument
-            //if(!((m_instruments & (1 << m_currentInstrument)) != 0)){
-                if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)){
-                    return nextInstrument;
-                }
-            //}
+            if(!((m_instruments & (1 << nextInstrument)) != 0)) continue;
+            if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)) return nextInstrument;
         }
         break;
 
@@ -249,11 +246,8 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument
-            //if(!((m_instruments & (1 << i)) != 0)){
-                if((*m_ptrInstrumentController).isNoteActive(i, note)){
-                    return i;
-                }
-            //}
+            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
 
@@ -261,11 +255,8 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
             //Check if valid instrument
-            //if(!((m_instruments & (1 << i)) != 0)){
-                if((*m_ptrInstrumentController).isNoteActive(i, note)){
-                    return i;
-                }
-            //}
+            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
 
