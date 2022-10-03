@@ -44,8 +44,14 @@ public:
     Distributor* GetDistributor(uint8_t id);
 
 private:
+    //Main Midi Functions
     void DistributeMessage(uint8_t message[]);
     void ProcessCC(uint8_t message[]);
-    void ProcessSysEXE(uint8_t message[]);
+    void ProcessSysEX(uint8_t message[]);
+
+    //SysEx functions
+    void SysExDistributorAdd(uint8_t message[]);
+    void SysExDistributorRequest(uint8_t message[]);
+    void SysExDistributorRequestAll(uint8_t message[]);
  
 };

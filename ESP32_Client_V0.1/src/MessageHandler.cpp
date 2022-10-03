@@ -31,8 +31,8 @@ void MessageHandler::ProcessMessage(uint8_t message[])
         //_msgChannel represents the message type for SysCommon
         switch(m_msgChannel){
 
-        case(MIDI_SysEXE):
-            ProcessSysEXE(message);
+        case(MIDI_SysEX):
+            ProcessSysEX(message);
             break;
 
         case(MIDI_SysStop):
@@ -41,6 +41,9 @@ void MessageHandler::ProcessMessage(uint8_t message[])
 
         case(MIDI_SysReset):
             //Not Yet Implemented
+            break;
+
+        default:
             break;
         }
     }
@@ -53,12 +56,26 @@ void MessageHandler::ProcessMessage(uint8_t message[])
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Process SysEXE Messages
+//Process SysEX Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MessageHandler::ProcessSysEXE(uint8_t message[])
+void MessageHandler::ProcessSysEX(uint8_t message[])
 {
-    //Not Yet Implemented
+    //Check MIDI ID
+    if(message[1] != SYSEX_ID) return;
+    //Check Device ID
+    if(message[2] != SYSEX_DEV_ID0 || message[3] != SYSEX_DEV_ID1) return;
+
+    switch(message[4]){
+        case SYSEX_DistributorAdd:
+            break;
+        
+        case SYSEX_DistributorRequest:
+            break;
+
+        case SYSEX_DistributorRequestAll:
+            break;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +152,22 @@ void MessageHandler::DistributeMessage(uint8_t message[])
         if((m_distributors[i].GetChannels() & (1 << m_msgChannel)) != (0))
             m_distributors[i].ProcessMessage(message);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Handle SysEx MIDI Messages
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MessageHandler::SysExDistributorAdd(uint8_t message[]){
+
+}
+
+void MessageHandler::SysExDistributorRequest(uint8_t message[]){
+
+}
+
+void MessageHandler::SysExDistributorRequestAll(uint8_t message[]){
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

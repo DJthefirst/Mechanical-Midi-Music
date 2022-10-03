@@ -75,4 +75,7 @@ private:
     //Returns Instrument ID
     uint8_t NextInstrument();
     uint8_t CheckForNote(uint8_t note);
+
+    //Helper Functions
+    bool DistributorHasInstrument(int instrumentId);
 };
