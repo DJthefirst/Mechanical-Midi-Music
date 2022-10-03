@@ -25,7 +25,7 @@ bool NetworkUSB::StartUSB() {
 /*
     Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler
 */
-void NetworkUSB::ReadMessages() {
+void NetworkUSB::ReadMessage() {
     int messageLength = Serial.available();
 
     if (messageLength >= 3){
@@ -38,8 +38,13 @@ void NetworkUSB::ReadMessages() {
             messageLength++;
         }
 
+        // if (Serial.available() && (Serial.peek() == MIDI_SysEXEnd)){
+        //     m_messageBuffer[messageLength] = Serial.read();
+        //     messageLength++;
+        // }
+
         //Filter out incomplete or corrupt msg
-        if (messageLength > 1 && messageLength <= 8){
+        if (messageLength > 1 && messageLength <= 64){
             (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
         }
         else{
@@ -50,10 +55,6 @@ void NetworkUSB::ReadMessages() {
     }
 }
 
-void NetworkUSB::SendData(uint8_t message[], int length) {
-    //Not Yet Implemented
-}
-
-void NetworkUSB::SendPong() {
+void NetworkUSB::SendMessage(uint8_t message[], int length) {
     //Not Yet Implemented
 }

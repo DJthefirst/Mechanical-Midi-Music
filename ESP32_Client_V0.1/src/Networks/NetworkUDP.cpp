@@ -97,7 +97,7 @@ void NetworkUDP::StartOTA() {
 }
 
 
-void NetworkUDP::ReadMessages() {
+void NetworkUDP::ReadMessage() {
     // Handle OTA
     ArduinoOTA.handle();
 
@@ -160,21 +160,10 @@ void NetworkUDP::ReadMessages() {
     // }
     //Serial.println();
 
-void NetworkUDP::SendData(uint8_t message[], int length) {
+void NetworkUDP::SendMessage(uint8_t message[], int length) {
 
     UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);
     UnicastUDP.write(message, length);
-    UnicastUDP.endPacket();
-}
-
-void NetworkUDP::SendPong() {
-    static int i = 0;
-    i += 1;
-    UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);
-    byte pongBytes[10];
-    String( "Pong: " + (String)i ).getBytes(pongBytes,10);
-    Serial.println(pongBytes[0]);
-    UnicastUDP.write(pongBytes, sizeof(pongBytes));
     UnicastUDP.endPacket();
 }
 
