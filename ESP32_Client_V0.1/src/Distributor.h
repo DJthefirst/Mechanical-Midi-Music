@@ -22,6 +22,9 @@ enum DistributionMethod
     Stack               //  TODO    Play Notes Polyphonicaly on lowest available Instrument until full.
 };
 
+//Size of Distributor when convered to Byte array
+static const uint8_t DISTRIBUTOR_SERAIL_BYTES = 10;
+
 //Distributes Midi Messages to Instruments.
 class Distributor{
 private:
@@ -48,7 +51,7 @@ public:
     Distributor(InstrumentController* ptrInstrumentController);
     void ProcessMessage(uint8_t message[]);
 
-    uint8_t* GetDistributor();
+    uint8_t* ToSerial();
     uint16_t GetChannels();
 
     void SetDistributor(uint8_t profile[]);

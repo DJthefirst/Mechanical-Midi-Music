@@ -5,10 +5,7 @@
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
-NetworkUSB::NetworkUSB(MessageHandler* ptrMessageHandler)
-{
-    m_ptrMessageHandler = ptrMessageHandler;
-}
+NetworkUSB::NetworkUSB(){}
 
 void NetworkUSB::Begin() {
     Serial.begin(115200);
@@ -58,3 +55,8 @@ void NetworkUSB::ReadMessage() {
 void NetworkUSB::SendMessage(uint8_t message[], int length) {
     //Not Yet Implemented
 }
+
+ void NetworkUSB::SetMessageHandler(MessageHandler* ptrMessageHandler)
+    {
+        m_ptrMessageHandler = ptrMessageHandler;
+    }

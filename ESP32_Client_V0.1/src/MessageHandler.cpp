@@ -7,13 +7,14 @@
  */
 
 #include "MessageHandler.h"
-#include "Instruments/InstrumentController.h"
 #include "Constants.h"
-
-InstrumentController* m_ptrInstrumentController;
 
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
+}
+
+void MessageHandler::SetNetwork(Network* ptrNetwork){
+    m_ptrNetwork = ptrNetwork;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +164,7 @@ void MessageHandler::SysExDistributorAdd(uint8_t message[]){
 }
 
 void MessageHandler::SysExDistributorRequest(uint8_t message[]){
-
+    (*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),DISTRIBUTOR_SERAIL_BYTES);
 }
 
 void MessageHandler::SysExDistributorRequestAll(uint8_t message[]){

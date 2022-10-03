@@ -7,8 +7,9 @@
  */
 
 #include <Arduino.h>
-#include "MessageHandler.h"
 #include "Distributor.h"
+#include "MessageHandler.h"
+#include "Networks/Network.h"
 #include "Networks/NetworkUDP.h"
 #include "Networks/NetworkUSB.h"
 #include "Networks/NetworkDIN.h"
@@ -30,18 +31,20 @@ ExampleInstrument instrumentController;
 //ShiftRegister instrumentController;
 
 
+//---------- Uncomment Your Selected COM Type ----------
+
+ NetworkUSB connection;
+//NetworkUDP connection;
+//NetworkDIN connection;
+
+
 //Create a new message handler
 MessageHandler messageHandler(&instrumentController);
 
 
-//---------- Uncomment Your Selected COM Type ----------
-
-NetworkUSB connection(&messageHandler);
-//NetworkUDP connection(&messageHandler);
-//NetworkDIN connection(&messageHandler);
-
-
 void setup() {
+  messageHandler.SetNetwork(&connection);
+  connection.SetMessageHandler(&messageHandler);
   connection.Begin();
   delay(100);
 

@@ -281,9 +281,9 @@ bool Distributor::DistributorHasInstrument(int instrumentId){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //output Array = uint8_t[10]
-uint8_t* Distributor::GetDistributor()
+uint8_t* Distributor::ToSerial()
 {
-    uint8_t distributorObj[10];
+    uint8_t distributorObj[DISTRIBUTOR_SERAIL_BYTES];
 
     uint8_t distributorByte0 = 0;
     if(m_damperPedal)   distributorByte0 |= (1 << 0);

@@ -29,7 +29,8 @@
 class NetworkUDP : public Network{
 
 public:
-    NetworkUDP(MessageHandler* ptrMessageHandler);
+    NetworkUDP();
+    void SetMessageHandler(MessageHandler* messageHandler) override;
     void Begin() override;
     void ReadMessage() override;
     void SendMessage(uint8_t message[], int length) override;

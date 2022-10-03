@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <vector>
 #include "Instruments/InstrumentController.h"
+#include "Networks/Network.h"
 #include "Distributor.h"
 
 #define MOPPY_MAX_PACKET_LENGTH 259
@@ -18,6 +19,8 @@
 /* 
 A Class to convert incoming data into MIDI events
 */
+class Network;
+
 class MessageHandler{
 private:
     //Handler Config
@@ -29,6 +32,9 @@ private:
     
     std::vector<Distributor> m_distributors;
 
+    InstrumentController* m_ptrInstrumentController;
+    Network* m_ptrNetwork;
+
 public:
     //Msg Handler 
     MessageHandler(InstrumentController* ptrInstrumentController);
@@ -39,6 +45,7 @@ public:
     void AddDistributor(uint8_t data[]);
     void AddDistributor(Distributor distributor);
 
+    void SetNetwork(Network* ptrNetwork);
     void RemoveDistributor(uint8_t id);
     void RemoveAllDistributors();
     Distributor* GetDistributor(uint8_t id);
