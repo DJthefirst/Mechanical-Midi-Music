@@ -72,9 +72,14 @@ void MessageHandler::ProcessSysEX(uint8_t message[])
             break;
         
         case SYSEX_DistributorRequest:
+            SysExDistributorRequest(0);
             break;
 
         case SYSEX_DistributorRequestAll:
+            break;
+
+        case SYSEX_DistributorSetMode:
+            SysExDistributorSetMode(message);
             break;
     }
 }
@@ -164,11 +169,17 @@ void MessageHandler::SysExDistributorAdd(uint8_t message[]){
 }
 
 void MessageHandler::SysExDistributorRequest(uint8_t message[]){
-    (*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),DISTRIBUTOR_SERAIL_BYTES);
+    uint8_t demoArray[] = {0x00, 0x10, 0x00, 0x7D, 0x00, 0x10, 0x00, 0x7D};
+    (*m_ptrNetwork).SendMessage(demoArray,8);
+    //(*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),10);
 }
 
 void MessageHandler::SysExDistributorRequestAll(uint8_t message[]){
 
+}
+
+void MessageHandler::SysExDistributorSetMode(uint8_t message[]){
+    GetDistributor(0)->SetDistributionMethod(DistributionMethod(message[5]));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

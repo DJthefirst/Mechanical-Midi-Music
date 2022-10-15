@@ -48,21 +48,36 @@ void setup() {
   connection.Begin();
   delay(100);
 
+
+  /*Example Cmd Dumps
+
+  Note On
+   0x90 0x39 0x39
+  Note Off
+   0x90 0x39 0x39
+  Dump Data: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
+   0xF0 0x7D 0x00 0x00 0x01 0x00 0xF7
+  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
+   0xF0 0x7D 0x00 0x00 0x03 0x02 0xF7
+  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
+   0xF0 0x7D 0x00 0x00 0x03 0x03 0xF7
+  */
+
   ////Testing Demo Setup Config////
 
   //Distributor 1
   Distributor distributor1(&instrumentController);
   distributor1.SetChannels(0x0001); // 1
   distributor1.SetInstruments(0x0000007F); // 1,2
-  distributor1.SetDistributionMethod(RoundRobinBalance);
+  distributor1.SetDistributionMethod(Ascending);
   messageHandler.AddDistributor(distributor1);
 
   ////Distributor 2
-  //Distributor distributor2(&instrumentController);
-  //distributor2.SetChannels(0x0002); // 2
-  //distributor2.SetInstruments(0x0000000C); // 3,4
-  //distributor2.SetDistributionMethod(Ascending);
-  //messageHandler.AddDistributor(distributor2);
+  Distributor distributor2(&instrumentController);
+  distributor2.SetChannels(0x0001); // 2
+  distributor2.SetInstruments(0x0000000C); // 3,4
+  distributor2.SetDistributionMethod(Ascending);
+  messageHandler.AddDistributor(distributor2);
 
   ////Distributor 3
   //Distributor distributor3(&instrumentController);

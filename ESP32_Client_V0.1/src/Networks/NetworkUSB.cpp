@@ -45,15 +45,15 @@ void NetworkUSB::ReadMessage() {
             (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
         }
         else{
-            Serial.println("PacketSize Out of Scope");
-            Serial.println(m_messageBuffer[0]);
-            Serial.println(messageLength);
+            //Serial.println("PacketSize Out of Scope");
+            //Serial.println(m_messageBuffer[0]);
+            //Serial.println(messageLength);
         }
     }
 }
 
 void NetworkUSB::SendMessage(uint8_t message[], int length) {
-    //Not Yet Implemented
+    Serial.write(message,length);
 }
 
  void NetworkUSB::SetMessageHandler(MessageHandler* ptrMessageHandler)

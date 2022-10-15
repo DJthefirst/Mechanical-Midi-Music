@@ -39,10 +39,10 @@ const uint8_t MIDI_PitchBend          = 0xE0;
 const uint8_t MIDI_SysCommon          = 0xF0;
 
 //SysCommon Midi Msg Types
-const uint8_t MIDI_SysEX    = 0x00;
-const uint8_t MIDI_SysEXEnd = 0xF7;
-const uint8_t MIDI_SysStop  = 0x0A;
-const uint8_t MIDI_SysReset = 0x0F;
+const uint8_t MIDI_SysEX    = 0x0;
+const uint8_t MIDI_SysEXEnd = 0x7;
+const uint8_t MIDI_SysStop  = 0xA;
+const uint8_t MIDI_SysReset = 0xF;
 
 //CC Controller Types (Handled across all active channels)
 const uint8_t MIDI_CC_BankSelect = 0;
@@ -77,6 +77,9 @@ const uint8_t SYSEX_ID = 0x7D;
 const uint8_t SYSEX_DistributorAdd = 0x00;
 const uint8_t SYSEX_DistributorRequest =0x01;
 const uint8_t SYSEX_DistributorRequestAll =0x02;
+const uint8_t SYSEX_DistributorSetMode =0x03;    //Temp
+
+
 
 const uint8_t SYSEX_DEV_ID0= 0x00;
 const uint8_t SYSEX_DEV_ID1= 0x00;
