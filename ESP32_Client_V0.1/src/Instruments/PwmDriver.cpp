@@ -1,4 +1,4 @@
-#include "Instruments/ExampleInstrument.h"
+#include "Instruments/PwmDriver.h"
 #include "InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
@@ -13,7 +13,7 @@ static uint16_t m_activePeriod[MAX_NUM_INSTRUMENTS];//Note Played
 static uint8_t m_currentTick[MAX_NUM_INSTRUMENTS]; //Timeing
 static bool m_currentState[MAX_NUM_INSTRUMENTS]; //IO
 
-ExampleInstrument::ExampleInstrument()
+PwmDriver::PwmDriver()
 {
     //Setup pins
     for(uint8_t i=0; i < sizeof(pins); i++){
@@ -31,17 +31,17 @@ ExampleInstrument::ExampleInstrument()
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
 }
 
-void ExampleInstrument::Reset(uint8_t instrument)
+void PwmDriver::Reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ExampleInstrument::ResetAll()
+void PwmDriver::ResetAll()
 {
     StopAll();
 }
 
-void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -55,7 +55,7 @@ void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t veloc
     }
 }
 
-void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
         m_activeNotes[instrument] = 0;
@@ -67,7 +67,7 @@ void ExampleInstrument::StopNote(uint8_t instrument, uint8_t note, uint8_t veloc
     }
 }
 
-void ExampleInstrument::StopAll(){
+void PwmDriver::StopAll(){
     m_numActiveNotes = 0;
     std::fill(&m_activeNotes[0],&m_activeNotes[0]+sizeof(m_activeNotes),0);
     std::fill(&m_notePeriod[0],&m_notePeriod[0]+sizeof(m_notePeriod),0);
@@ -93,9 +93,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ExampleInstrument::Tick()
+void ICACHE_RAM_ATTR PwmDriver::Tick()
 #else
-void ExampleInstrument::tick()
+void PwmDriver::tick()
 #endif
 {
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
@@ -115,9 +115,9 @@ void ExampleInstrument::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ExampleInstrument::togglePin(uint8_t instrument) {
+void ICACHE_RAM_ATTR PwmDriver::togglePin(uint8_t instrument) {
 #else
-void ExampleInstrument::togglePin(uint8_t instrument) {
+void PwmDriver::togglePin(uint8_t instrument) {
 #endif
 
     //Pulse the control pin
@@ -131,17 +131,17 @@ void ExampleInstrument::togglePin(uint8_t instrument) {
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ExampleInstrument::getNumActiveNotes(uint8_t instrument)
+uint8_t PwmDriver::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool ExampleInstrument::isNoteActive(uint8_t instrument, uint8_t note)
+bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
 {
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void ExampleInstrument::SetPitchBend(uint8_t instrument, uint16_t bend){
+void PwmDriver::SetPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend[instrument] = bend;
     
     
