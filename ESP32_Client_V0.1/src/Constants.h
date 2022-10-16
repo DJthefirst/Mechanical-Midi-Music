@@ -9,7 +9,7 @@
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16
 //Absolute max number of Instruments is 32
-#define MAX_NUM_INSTRUMENTS 7 //32
+#define MAX_NUM_INSTRUMENTS 2 //32 //7
 //Absolute Lowest Note Min=0
 #define MIN_MIDI_NOTE 36 //C1
 //Absolute Highest Note Max=127
@@ -39,9 +39,10 @@ const uint8_t MIDI_PitchBend          = 0xE0;
 const uint8_t MIDI_SysCommon          = 0xF0;
 
 //SysCommon Midi Msg Types
-const uint8_t MIDI_SysEXE   = 0x00;
-const uint8_t MIDI_SysStop  = 0x0A;
-const uint8_t MIDI_SysReset = 0x0F;
+const uint8_t MIDI_SysEX    = 0x0;
+const uint8_t MIDI_SysEXEnd = 0x7;
+const uint8_t MIDI_SysStop  = 0xA;
+const uint8_t MIDI_SysReset = 0xF;
 
 //CC Controller Types (Handled across all active channels)
 const uint8_t MIDI_CC_BankSelect = 0;
@@ -69,6 +70,19 @@ const uint8_t MIDI_CC_OmniModeOff = 124;
 const uint8_t MIDI_CC_OmniModeOn = 125;
 const uint8_t MIDI_CC_Monophonic = 126;
 const uint8_t MIDI_CC_Polyphonic = 127;
+
+//SYSEX Custom Protocal
+const uint8_t SYSEX_ID = 0x7D;
+
+const uint8_t SYSEX_DistributorAdd = 0x00;
+const uint8_t SYSEX_DistributorRequest =0x01;
+const uint8_t SYSEX_DistributorRequestAll =0x02;
+const uint8_t SYSEX_DistributorSetMode =0x03;    //Temp
+
+
+
+const uint8_t SYSEX_DEV_ID0= 0x00;
+const uint8_t SYSEX_DEV_ID1= 0x00;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;

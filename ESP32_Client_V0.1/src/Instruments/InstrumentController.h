@@ -6,7 +6,7 @@
 class InstrumentController{
 public:
 
-private:
+protected:
 
     //Local CC Effect Atributes
     uint16_t _ModulationWheel = 0;

@@ -7,13 +7,14 @@
  */
 
 #include "MessageHandler.h"
-#include "Instruments/InstrumentController.h"
 #include "Constants.h"
-
-InstrumentController* m_ptrInstrumentController;
 
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
+}
+
+void MessageHandler::SetNetwork(Network* ptrNetwork){
+    m_ptrNetwork = ptrNetwork;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,8 +32,8 @@ void MessageHandler::ProcessMessage(uint8_t message[])
         //_msgChannel represents the message type for SysCommon
         switch(m_msgChannel){
 
-        case(MIDI_SysEXE):
-            ProcessSysEXE(message);
+        case(MIDI_SysEX):
+            ProcessSysEX(message);
             break;
 
         case(MIDI_SysStop):
@@ -41,6 +42,9 @@ void MessageHandler::ProcessMessage(uint8_t message[])
 
         case(MIDI_SysReset):
             //Not Yet Implemented
+            break;
+
+        default:
             break;
         }
     }
@@ -53,12 +57,31 @@ void MessageHandler::ProcessMessage(uint8_t message[])
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Process SysEXE Messages
+//Process SysEX Messages
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MessageHandler::ProcessSysEXE(uint8_t message[])
+void MessageHandler::ProcessSysEX(uint8_t message[])
 {
-    //Not Yet Implemented
+    //Check MIDI ID
+    if(message[1] != SYSEX_ID) return;
+    //Check Device ID
+    if(message[2] != SYSEX_DEV_ID0 || message[3] != SYSEX_DEV_ID1) return;
+
+    switch(message[4]){
+        case SYSEX_DistributorAdd:
+            break;
+        
+        case SYSEX_DistributorRequest:
+            SysExDistributorRequest(0);
+            break;
+
+        case SYSEX_DistributorRequestAll:
+            break;
+
+        case SYSEX_DistributorSetMode:
+            SysExDistributorSetMode(message);
+            break;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +158,28 @@ void MessageHandler::DistributeMessage(uint8_t message[])
         if((m_distributors[i].GetChannels() & (1 << m_msgChannel)) != (0))
             m_distributors[i].ProcessMessage(message);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Handle SysEx MIDI Messages
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MessageHandler::SysExDistributorAdd(uint8_t message[]){
+
+}
+
+void MessageHandler::SysExDistributorRequest(uint8_t message[]){
+    uint8_t demoArray[] = {0x00, 0x10, 0x00, 0x7D, 0x00, 0x10, 0x00, 0x7D};
+    (*m_ptrNetwork).SendMessage(demoArray,8);
+    //(*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),10);
+}
+
+void MessageHandler::SysExDistributorRequestAll(uint8_t message[]){
+
+}
+
+void MessageHandler::SysExDistributorSetMode(uint8_t message[]){
+    GetDistributor(0)->SetDistributionMethod(DistributionMethod(message[5]));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

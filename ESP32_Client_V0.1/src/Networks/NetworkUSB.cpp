@@ -5,10 +5,7 @@
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
-NetworkUSB::NetworkUSB(MessageHandler* ptrMessageHandler)
-{
-    m_ptrMessageHandler = ptrMessageHandler;
-}
+NetworkUSB::NetworkUSB(){}
 
 void NetworkUSB::Begin() {
     Serial.begin(115200);
@@ -25,7 +22,7 @@ bool NetworkUSB::StartUSB() {
 /*
     Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler
 */
-void NetworkUSB::ReadMessages() {
+void NetworkUSB::ReadMessage() {
     int messageLength = Serial.available();
 
     if (messageLength >= 3){
@@ -38,22 +35,28 @@ void NetworkUSB::ReadMessages() {
             messageLength++;
         }
 
+        // if (Serial.available() && (Serial.peek() == MIDI_SysEXEnd)){
+        //     m_messageBuffer[messageLength] = Serial.read();
+        //     messageLength++;
+        // }
+
         //Filter out incomplete or corrupt msg
-        if (messageLength > 1 && messageLength <= 8){
+        if (messageLength > 1 && messageLength <= 64){
             (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
         }
         else{
-            Serial.println("PacketSize Out of Scope");
-            Serial.println(m_messageBuffer[0]);
-            Serial.println(messageLength);
+            //Serial.println("PacketSize Out of Scope");
+            //Serial.println(m_messageBuffer[0]);
+            //Serial.println(messageLength);
         }
     }
 }
 
-void NetworkUSB::SendData(uint8_t message[], int length) {
-    //Not Yet Implemented
+void NetworkUSB::SendMessage(uint8_t message[], int length) {
+    Serial.write(message,length);
 }
 
-void NetworkUSB::SendPong() {
-    //Not Yet Implemented
-}
+ void NetworkUSB::SetMessageHandler(MessageHandler* ptrMessageHandler)
+    {
+        m_ptrMessageHandler = ptrMessageHandler;
+    }

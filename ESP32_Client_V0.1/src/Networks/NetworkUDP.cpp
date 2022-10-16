@@ -15,10 +15,7 @@ WiFiUDP UnicastUDP;
  * Serial communications implementation for Arduino.  Instrument
  * has its handler functions called for device and system messages
  */
-NetworkUDP::NetworkUDP(MessageHandler* ptrMessageHandler)
-{
-    m_ptrMessageHandler = ptrMessageHandler;
-}
+NetworkUDP::NetworkUDP(){}
 
 void NetworkUDP::Begin() {
     Serial.begin(115200); // For debugging
@@ -97,7 +94,7 @@ void NetworkUDP::StartOTA() {
 }
 
 
-void NetworkUDP::ReadMessages() {
+void NetworkUDP::ReadMessage() {
     // Handle OTA
     ArduinoOTA.handle();
 
@@ -160,22 +157,16 @@ void NetworkUDP::ReadMessages() {
     // }
     //Serial.println();
 
-void NetworkUDP::SendData(uint8_t message[], int length) {
+void NetworkUDP::SendMessage(uint8_t message[], int length) {
 
     UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);
     UnicastUDP.write(message, length);
     UnicastUDP.endPacket();
 }
 
-void NetworkUDP::SendPong() {
-    static int i = 0;
-    i += 1;
-    UnicastUDP.beginPacket(MulticastUDP.remoteIP(), 65535);
-    byte pongBytes[10];
-    String( "Pong: " + (String)i ).getBytes(pongBytes,10);
-    Serial.println(pongBytes[0]);
-    UnicastUDP.write(pongBytes, sizeof(pongBytes));
-    UnicastUDP.endPacket();
-}
+ void NetworkUDP::SetMessageHandler(MessageHandler* ptrMessageHandler)
+    {
+        m_ptrMessageHandler = ptrMessageHandler;
+    }
 
 #endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */

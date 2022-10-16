@@ -68,12 +68,11 @@ void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
     //Check if note has 0 velocity for note off
     if((Velocity == 0)){
         NoteOffEvent(Note, Velocity);
+        return;
     }
-    else if(Velocity != 0){
-        uint8_t instrument = NextInstrument();
-        if(instrument != NONE){ 
-            (*m_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
-        }
+    uint8_t instrument = NextInstrument();
+    if(instrument != NONE){ 
+        (*m_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
     }
 }
 
@@ -122,8 +121,9 @@ uint8_t Distributor::NextInstrument()
     switch(m_distributionMethod){
 
     case(StraightThrough):
+        
         m_currentInstrument = m_currentChannel;
-        if(!((m_instruments & (1 << m_currentInstrument)) != 0)) return m_currentInstrument;
+        if(!DistributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
 
     case(RoundRobin):
@@ -151,7 +151,7 @@ uint8_t Distributor::NextInstrument()
             m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << m_currentInstrument)) != 0)) continue;
+            if(!DistributorHasInstrument(m_currentInstrument)) continue;
             validInsturment = true;
 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
@@ -174,7 +174,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if(!DistributorHasInstrument(i)) continue;
             bool validInsturment = true;
 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
@@ -194,7 +194,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
         
             //Check if valid instrument
-            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if(!DistributorHasInstrument(i)) continue;
             bool validInsturment = true;
             
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
@@ -237,7 +237,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
             if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << nextInstrument)) != 0)) continue;
+            if(!DistributorHasInstrument(nextInstrument)) continue;
             if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)) return nextInstrument;
         }
         break;
@@ -246,7 +246,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if(!DistributorHasInstrument(i)) continue;
             if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
@@ -255,7 +255,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << i)) != 0)) continue;
+            if(!DistributorHasInstrument(i)) continue;
             if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
@@ -268,16 +268,41 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+//Helpers
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Distributor::DistributorHasInstrument(int instrumentId){
+    return ((m_instruments & (1 << instrumentId)) != 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//output Array = uint8_t[9]
-uint8_t* Distributor::GetDistributor()
+//output Array = uint8_t[10]
+uint8_t* Distributor::ToSerial()
 {
-    uint8_t dstributorObj[] = {((m_noteOverwrite << 7) & (m_numPolyphonicNotes)), m_minNote, m_maxNote, m_channels >> 8, m_channels, 
-        m_instruments >> 24, m_instruments >> 16, m_instruments >> 8, m_instruments};
+    uint8_t distributorObj[DISTRIBUTOR_SERAIL_BYTES];
 
-    return dstributorObj;
+    uint8_t distributorByte0 = 0;
+    if(m_damperPedal)   distributorByte0 |= (1 << 0);
+    if(m_polyphonic)    distributorByte0 |= (1 << 1);
+    if(m_noteOverwrite) distributorByte0 |= (1 << 2);
+
+    distributorObj[0] = distributorByte0;
+    distributorObj[1] = m_numPolyphonicNotes;
+    distributorObj[2] = m_minNote;
+    distributorObj[3] = m_maxNote;
+    distributorObj[4] = static_cast<uint8_t>( m_channels >> 0);
+    distributorObj[5] = static_cast<uint8_t>( m_channels >> 8);
+    distributorObj[6] = static_cast<uint8_t>( m_instruments >> 0);
+    distributorObj[7] = static_cast<uint8_t>( m_instruments >> 8);
+    distributorObj[8] = static_cast<uint8_t>( m_instruments >> 16);
+    distributorObj[9] = static_cast<uint8_t>( m_instruments >> 24);
+    //memcpy(&distributorObj[4], &m_channels, 2);
+    //memcpy(&distributorObj[6], &m_instruments, 4);
+
+    return distributorObj;
 }
 
 uint16_t Distributor::GetChannels(){
