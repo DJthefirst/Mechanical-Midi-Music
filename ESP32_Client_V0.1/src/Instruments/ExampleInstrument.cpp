@@ -24,7 +24,7 @@ ExampleInstrument::ExampleInstrument()
     ResetAll();
     delay(500); // Wait a half second for safety
 
-    // Setup timer to handle interrupts for floppy driving
+    // Setup timer to handle interrupts for driving the instrument
     InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
@@ -38,7 +38,7 @@ void ExampleInstrument::Reset(uint8_t instrument)
 
 void ExampleInstrument::ResetAll()
 {
-    //Not Yet Implemented
+    StopAll();
 }
 
 void ExampleInstrument::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
@@ -75,8 +75,7 @@ void ExampleInstrument::StopAll(){
     std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
     std::fill(&m_currentState[0],&m_currentState[0]+sizeof(m_currentState),0);
 
-    uint8_t i = 0;
-    for(i = 0; (i < sizeof(pins)); i++){
+    for(uint8_t i = 0; (i < sizeof(pins)); i++){
         digitalWrite(pins[i], LOW);
     }
 }

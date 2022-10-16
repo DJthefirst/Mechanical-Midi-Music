@@ -68,12 +68,11 @@ void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
     //Check if note has 0 velocity for note off
     if((Velocity == 0)){
         NoteOffEvent(Note, Velocity);
+        return;
     }
-    else if(Velocity != 0){
-        uint8_t instrument = NextInstrument();
-        if(instrument != NONE){ 
-            (*m_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
-        }
+    uint8_t instrument = NextInstrument();
+    if(instrument != NONE){ 
+        (*m_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
     }
 }
 
