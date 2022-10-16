@@ -26,8 +26,8 @@ Initially inspired by **Flanon _ FT Tech Labs** [Musical Orchestra ](https://you
   Instrument Types
   - PWM Modulation
   - Floppy Drives*
-  - Various Stepper Motor Drivers*
-  - Solenoid Instruments (Drum Kits)*
+  - Various Stepper Motor Drivers
+  - Solenoid Instruments (Drum Kits)
   
   MicroControllers
   - ESP32
