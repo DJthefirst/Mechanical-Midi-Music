@@ -1,4 +1,4 @@
-#include "Instruments/StepperMotors.h"
+#include "Instruments/StepperL298n.h"
 #include "InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
@@ -14,7 +14,7 @@ static uint8_t m_currentTick[MAX_NUM_INSTRUMENTS]; //Timeing
 
 static uint8_t m_currentStep[MAX_NUM_INSTRUMENTS]; //Timeing
 
-const SteppingMode steppingMode = WaveDrive;
+ const SteppingMode steppingMode = WaveDrive;
 
 //Stepper Motor Steps By Mode
 const uint8_t stepWave[4][4] = {
@@ -28,6 +28,7 @@ const uint8_t stepFull[4][4] = {
     {0,1,1,0},
     {0,1,0,1},
     {1,0,0,1}};
+
 const uint8_t stepHalf[8][4] = {
     {1,0,0,0},
     {1,0,1,0},
@@ -38,7 +39,7 @@ const uint8_t stepHalf[8][4] = {
     {0,0,0,1},
     {1,0,0,1}};
 
-StepperMotors::StepperMotors()
+StepperL298n::StepperL298n()
 {
     //Setup pins
     for(uint8_t i=0; i < MAX_NUM_INSTRUMENTS; i++){
@@ -59,7 +60,7 @@ StepperMotors::StepperMotors()
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
 }
 
-void StepperMotors::Reset(uint8_t instrument)
+void StepperL298n::Reset(uint8_t instrument)
 {
     m_activeNotes[instrument] = 0;
     m_notePeriod[instrument] = 0;
@@ -70,14 +71,14 @@ void StepperMotors::Reset(uint8_t instrument)
     digitalWrite(pins[4*instrument+3], LOW);
 }
 
-void StepperMotors::ResetAll()
+void StepperL298n::ResetAll()
 {
     for(uint8_t i = 0; (i < sizeof(pins)/4); i++){
         Reset(i);
     }
 }
 
-void StepperMotors::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void StepperL298n::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -91,7 +92,7 @@ void StepperMotors::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void StepperMotors::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void StepperL298n::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
         Reset(instrument);
@@ -100,7 +101,7 @@ void StepperMotors::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void StepperMotors::StopAll(){
+void StepperL298n::StopAll(){
     m_numActiveNotes = 0;
     ResetAll();
     std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
@@ -119,9 +120,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR StepperMotors::Tick()
+void ICACHE_RAM_ATTR StepperL298n::Tick()
 #else
-void StepperMotors::tick()
+void StepperL298n::tick()
 #endif
 {
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
@@ -141,38 +142,38 @@ void StepperMotors::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR StepperMotors::stepMotor(uint8_t instrument) {
+void ICACHE_RAM_ATTR StepperL298n::stepMotor(uint8_t instrument) {
 #else
-void StepperMotors::togglePin(uint8_t instrument) {
+void StepperL298n::togglePin(uint8_t instrument) {
 #endif
 
     switch (steppingMode)
     {
     case WaveDrive:
-        digitalWrite(pins[4*instrument+0], stepWave[0][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+1], stepWave[1][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+2], stepWave[2][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+3], stepWave[3][m_currentStep[instrument]]);
+        digitalWrite(pins[4*instrument+0], stepWave[m_currentStep[instrument]][0]);
+        digitalWrite(pins[4*instrument+1], stepWave[m_currentStep[instrument]][1]);
+        digitalWrite(pins[4*instrument+2], stepWave[m_currentStep[instrument]][2]);
+        digitalWrite(pins[4*instrument+3], stepWave[m_currentStep[instrument]][3]);
 
         //Increment Step 0-3
         m_currentStep[instrument] = m_currentStep[instrument] >= 3 ? 0 : m_currentStep[instrument]+1;
         break;
 
     case FullStep:
-        digitalWrite(pins[4*instrument+0], stepFull[0][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+1], stepFull[1][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+2], stepFull[2][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+3], stepFull[3][m_currentStep[instrument]]);
+        digitalWrite(pins[4*instrument+0], stepFull[m_currentStep[instrument]][0]);
+        digitalWrite(pins[4*instrument+1], stepFull[m_currentStep[instrument]][1]);
+        digitalWrite(pins[4*instrument+2], stepFull[m_currentStep[instrument]][2]);
+        digitalWrite(pins[4*instrument+3], stepFull[m_currentStep[instrument]][3]);
 
         //Increment Step 0-3
         m_currentStep[instrument] = m_currentStep[instrument] >= 3 ? 0 : m_currentStep[instrument]+1;
         break;
 
     case HalfStep:
-        digitalWrite(pins[4*instrument+0], stepHalf[0][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+1], stepHalf[1][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+2], stepHalf[2][m_currentStep[instrument]]);
-        digitalWrite(pins[4*instrument+3], stepHalf[3][m_currentStep[instrument]]);
+        digitalWrite(pins[4*instrument+0], stepHalf[m_currentStep[instrument]][0]);
+        digitalWrite(pins[4*instrument+1], stepHalf[m_currentStep[instrument]][1]);
+        digitalWrite(pins[4*instrument+2], stepHalf[m_currentStep[instrument]][2]);
+        digitalWrite(pins[4*instrument+3], stepHalf[m_currentStep[instrument]][3]);
 
         //Increment Step 0-7
         m_currentStep[instrument] = m_currentStep[instrument] >= 7 ? 0 : m_currentStep[instrument]+1;
@@ -186,17 +187,17 @@ void StepperMotors::togglePin(uint8_t instrument) {
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t StepperMotors::getNumActiveNotes(uint8_t instrument)
+uint8_t StepperL298n::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool StepperMotors::isNoteActive(uint8_t instrument, uint8_t note)
+bool StepperL298n::isNoteActive(uint8_t instrument, uint8_t note)
 {
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void StepperMotors::SetPitchBend(uint8_t instrument, uint16_t bend){
+void StepperL298n::SetPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend[instrument] = bend;
     
     

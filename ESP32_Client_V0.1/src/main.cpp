@@ -15,27 +15,27 @@
 #include "Networks/NetworkDIN.h"
 
 #include "Instruments/InstrumentController.h"
-#include "Instruments/ExampleInstrument.h"
+#include "Instruments/PwmDriver.h"
 //#include "Instruments/FloppyDrives.h"
-//#include "Instruments/PWMDriver.h"
-#include "Instruments/StepperMotors.h"
+#include "Instruments/StepperL298n.h"
+#include "Instruments/StepperMotor.h"
 #include "Instruments/ShiftRegister.h"
 
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-//ExampleInstrument instrumentController;
-//FloppyDrives  instrumentController;
-//PWMDriver     instrumentController;
-//StepperMotors instrumentController;
-ShiftRegister instrumentController;
+//FloppyDrives  instrumentController; //Not Yet Implemented
+//PwmDriver     instrumentController;
+StepperL298n  instrumentController;
+//StepperMotors instrumentController; //Not Yet Implemented
+//ShiftRegister instrumentController;
 
 
 //---------- Uncomment Your Selected COM Type ----------
 
  NetworkUSB connection;
-//NetworkUDP connection;
-//NetworkDIN connection;
+//NetworkUDP connection; //Not Yet Implemented
+//NetworkDIN connection; //Not Yet Implemented
 
 
 //Create a new message handler

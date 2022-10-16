@@ -4,25 +4,20 @@
 #include "Instruments/InstrumentController.h"
 #include <stdint.h>
 
-enum SteppingMode
-{ 
-    WaveDrive = 0,   //One Coil Engaged at a time (One Phase)
-    FullStep,        //Two Coils Engaged at a time (Two Phase)
-    HalfStep,        //Half Stepping
-};
-
-class StepperMotors : public InstrumentController{
+class PwmDriver : public InstrumentController{
 public:
 
 private:
-
-    static void stepMotor(uint8_t instrument);
+    static void togglePin(uint8_t instrument);
 
     //Local MIDI Device Atributes
+    uint8_t m_program = 0;
+    uint8_t m_channelPressure = 0;
     uint16_t m_pitchBend[MAX_NUM_INSTRUMENTS];
 
+
 public: 
-    StepperMotors();
+    PwmDriver();
     static void Tick();
 
     void Reset(uint8_t instrument) override;
