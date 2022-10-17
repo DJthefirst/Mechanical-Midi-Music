@@ -121,7 +121,7 @@ void ShiftRegister::tick()
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR ShiftRegister::updateShiftRegister() {
 #else
-void ShiftRegister::togglePin(uint8_t instrument) {
+void ShiftRegister::updateShiftRegister(uint8_t instrument) {
 #endif
 
     //Pulse the control pin
