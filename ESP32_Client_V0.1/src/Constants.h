@@ -9,7 +9,7 @@
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16
 //Absolute max number of Instruments is 32
-#define MAX_NUM_INSTRUMENTS 2 //32 //7
+#define MAX_NUM_INSTRUMENTS 2 //32
 //Absolute Lowest Note Min=0
 #define MIN_MIDI_NOTE 36 //C1
 //Absolute Highest Note Max=127
