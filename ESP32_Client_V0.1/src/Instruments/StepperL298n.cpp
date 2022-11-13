@@ -144,7 +144,7 @@ void StepperL298n::tick()
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR StepperL298n::stepMotor(uint8_t instrument) {
 #else
-void StepperL298n::togglePin(uint8_t instrument) {
+void StepperL298n::stepMotor(uint8_t instrument) {
 #endif
 
     switch (steppingMode)

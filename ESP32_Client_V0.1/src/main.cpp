@@ -53,10 +53,13 @@ void setup() {
 
   Note On
    0x90 0x39 0x39
+   903939
   Note Off
-   0x90 0x39 0x39
+   0x80 0x39 0x39
+   803939
   Dump Data: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x00 0x01 0x00 0xF7
+   0xF0 0x7D 0x00 0x00 0x01 0x00 0xF7     
+   F07D00000100F7
   (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
    0xF0 0x7D 0x00 0x00 0x03 0x02 0xF7
   (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
@@ -72,7 +75,7 @@ void setup() {
   distributor1.SetDistributionMethod(Ascending);
   messageHandler.AddDistributor(distributor1);
 
-  ////Distributor 2
+  //Distributor 2
   //Distributor distributor2(&instrumentController);
   //distributor2.SetChannels(0x0001); // 2
   //distributor2.SetInstruments(0x0000000C); // 3,4
