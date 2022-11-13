@@ -1,4 +1,6 @@
 div.windowMain {
+    display: fixed;
+    align-content: center;
     background-color: rgb(203, 184, 184);
     position: fixed;
     width: 50%;
@@ -36,4 +38,8 @@ div.deviceInfo {
 b.deviceInfo {
     margin: 5px;
     font-size: 20px;
+}
+
+input.control {
+    margin: 5;
 }

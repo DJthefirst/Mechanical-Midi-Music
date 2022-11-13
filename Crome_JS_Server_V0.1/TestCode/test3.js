@@ -5,6 +5,7 @@ if ("serial" in navigator) console.log("The Web Serial API is supported.");
 
 document.getElementById("btnStart").onclick = () => { main() };
 document.getElementById("btnAddDevice").onclick = () => { openPort() };
+document.getElementById("btnRemoveDevice").onclick = () => { removeDevice() };
 document.getElementById("btnSendHex").onclick = () => { SendHexText() };
 document.getElementById("btnNoteOn").onclick = () => { SendHex('903939') };
 document.getElementById("btnNoteOff").onclick = () => { SendHex('803939') };
@@ -38,9 +39,13 @@ class Device {
         return this.writer;
     }
 
+    getId () {
+        return this.id;
+    }
+
     selectDevice () {
         console.log('Selected Device: ' + this.id);
-        selectedDevice = this.id;
+        selectedDevice = this;
         Array.from(document.getElementsByClassName('deviceDiv'))
             .forEach(function(element) {element.style.backgroundColor = "#5086ad"});
         document.getElementById('deviceDiv' + this.id).style.backgroundColor = 'white';
@@ -79,6 +84,14 @@ class DevicePool{
         this.devices.push(device);
     }
 
+    remove () {
+        this.devices = this.devices.filter(function(device, index, arr){
+            return (device.getId() != selectedDevice.getId());
+        });
+        document.getElementById('deviceDiv' + selectedDevice.id).remove();
+        selectedDevice = null;
+    }
+
     get array () {
         return this.devices;
     }
@@ -90,6 +103,10 @@ function elementFromHTML (html) {
     const template = document.createElement("template");
     template.innerHTML = html.trim();
     return template.content.firstElementChild;
+}
+
+function removeDevice() {
+    devicePool.remove();
 }
 
 async function openPort() {
@@ -118,7 +135,7 @@ async function SendHex(hexString) {
     console.log(hexBytes);
     byteBuffer = hexBytes.buffer.slice(hexBytes.byteOffset, hexBytes.byteLength + hexBytes.byteOffset);
 
-    let writer = devicePool.array[selectedDevice].getWriter();
+    let writer = selectedDevice.getWriter();
     writer.ready
         .then(() => writer.write(byteBuffer))
         .then(() => console.log("Sent Byte."))
