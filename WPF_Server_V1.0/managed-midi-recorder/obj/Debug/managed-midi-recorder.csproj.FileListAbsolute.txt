@@ -1,1 +1,0 @@
-C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\managed-midi-recorder\obj\Debug\managed-midi-recorder.csproj.CoreCompileInputs.cache

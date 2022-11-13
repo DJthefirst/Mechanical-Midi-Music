@@ -1,2 +1,0 @@
-C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\managed-midi-player-console\obj\Release\managed-midi-player-console.csproj.AssemblyReference.cache
-C:\Users\djber\Downloads\managed-midi-master\managed-midi-master\tools\managed-midi-player-console\obj\Release\managed-midi-player-console.csproj.CoreCompileInputs.cache
