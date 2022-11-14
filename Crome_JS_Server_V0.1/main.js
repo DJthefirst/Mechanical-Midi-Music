@@ -1,5 +1,4 @@
-//const { disconnect } = require("process");
-//const { writer } = require("repl");
+import {DevicePool, Device} from "./classes.js"
 
 if ("serial" in navigator) console.log("The Web Serial API is supported.");
 
@@ -11,98 +10,11 @@ document.getElementById("btnNoteOn").onclick = () => { SendHex('903939') };
 document.getElementById("btnNoteOff").onclick = () => { SendHex('803939') };
 document.getElementById("btnGetConfig").onclick = () => { SendHex('F07D00000100F7') };
 
-var currentDevId = 0;
-var selectedDevice = null;
-
-class Device {
-
-    constructor(port, ComType) {
-      this.port = port;
-      this.comType = ComType;
-      this.instrumentType = 'Instrument';
-      this.id = currentDevId;
-      currentDevId++;
-
-      /*this.config = null; */
-      this.getConfig();
-
-      this.createDiv();
-
-    }
-
-    getPort () {
-        return this.port;
-    }
-
-
-    getId () {
-        return this.id;
-    }
-
-    selectDevice () {
-        console.log('Selected Device: ' + this.id);
-        selectedDevice = this;
-        Array.from(document.getElementsByClassName('deviceDiv'))
-            .forEach(function(element) {element.style.backgroundColor = "#5086ad"});
-        document.getElementById('deviceDiv' + this.id).style.backgroundColor = 'white';
-    }
-
-    createDiv () {
-        let div = document.createElement('div');
-        div.id = 'deviceDiv' + this.id;
-        
-        div.className = 'deviceDiv';
-        div.appendChild(elementFromHTML(' \
-            <div class="deviceInfo"> \
-                <b class="deviceInfo">Dev: '+ this.id +'</b>\
-                <b class="deviceInfo"> ' + this.instrumentType + '</b>\
-                <b class="deviceInfo">' + this.comType +'</b>\
-            </div> \
-            <div> \
-            </div> \
-        '));
-
-        div.onclick = () => {this.selectDevice()};
-        document.getElementById('windowRightBar').append(div);
-    }
-
-    getConfig () {
-
-    }
-}
-
-class DevicePool{
-    constructor (){
-        this.devices = new Array();
-    }
-
-    add (device) {
-        this.devices.push(device);
-    }
-
-    remove () {
-        this.devices = this.devices.filter(function(device, index, arr){
-            return (device.getId() != selectedDevice.getId());
-        });
-        document.getElementById('deviceDiv' + selectedDevice.id).remove();
-        selectedDevice = null;
-    }
-
-    get array () {
-        return this.devices;
-    }
-}
 
 var devicePool = new DevicePool;
 
-function elementFromHTML (html) {
-    const template = document.createElement("template");
-    template.innerHTML = html.trim();
-    return template.content.firstElementChild;
-}
-
 function removeDevice() {
-    selectedDevice.getPort().close();
+    devicePool.getSelectedDevice().getPort().close();
     devicePool.remove();
 }
 
@@ -124,15 +36,15 @@ async function SendHexText() {
 
 async function SendHex(hexString) {
     //Guard for no selected device
-    if(selectedDevice == null) return;
+    if(devicePool.getSelectedDevice() == null) return;
 
     // Convert String to Hex Array
     var hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
     for (var i = 0; i < hexBytes.length; i++) hexBytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
     console.log(hexBytes);
-    byteBuffer = hexBytes.buffer.slice(hexBytes.byteOffset, hexBytes.byteLength + hexBytes.byteOffset);
+    let byteBuffer = hexBytes.buffer.slice(hexBytes.byteOffset, hexBytes.byteLength + hexBytes.byteOffset);
 
-    let writer = selectedDevice.getPort().writable.getWriter();
+    let writer = devicePool.getSelectedDevice().getPort().writable.getWriter();
     writer.ready
         .then(() => writer.write(byteBuffer))
         .then(() => console.log("Sent Byte."))
