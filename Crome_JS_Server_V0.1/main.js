@@ -16,9 +16,8 @@ var selectedDevice = null;
 
 class Device {
 
-    constructor(reader, writer, ComType) {
-      this.reader = reader;
-      this.writer = writer;
+    constructor(port, ComType) {
+      this.port = port;
       this.comType = ComType;
       this.instrumentType = 'Instrument';
       this.id = currentDevId;
@@ -31,13 +30,10 @@ class Device {
 
     }
 
-    getReader () {
-        return this.reader;
+    getPort () {
+        return this.port;
     }
 
-    getWriter () {
-        return this.writer;
-    }
 
     getId () {
         return this.id;
@@ -106,6 +102,7 @@ function elementFromHTML (html) {
 }
 
 function removeDevice() {
+    selectedDevice.getPort().close();
     devicePool.remove();
 }
 
@@ -115,9 +112,9 @@ async function openPort() {
 
     await port.open({ baudRate: 115200 });
 
-    const reader = port.readable.getReader();
-    const writer = port.writable.getWriter();
-    devicePool.add( new Device(reader, writer, 'SerialCOM X'))
+    //const reader = port.readable.getReader();
+    //const writer = port.writable.getWriter();
+    devicePool.add( new Device(port, 'SerialCOM X'))
 }
 
 async function SendHexText() {
@@ -135,18 +132,16 @@ async function SendHex(hexString) {
     console.log(hexBytes);
     byteBuffer = hexBytes.buffer.slice(hexBytes.byteOffset, hexBytes.byteLength + hexBytes.byteOffset);
 
-    let writer = selectedDevice.getWriter();
+    let writer = selectedDevice.getPort().writable.getWriter();
     writer.ready
         .then(() => writer.write(byteBuffer))
         .then(() => console.log("Sent Byte."))
         .catch((err) => console.log("Send error:",err));
 
-
-
-    //writer.ready
-    //    .then(() => writer.close())
-    //    .then(() => console.log("Message Sent."))
-    //    .catch((err) => console.log("Send error:",err));
+    writer.ready
+        .then(() => writer.close())
+        .then(() => console.log("Writer Colsed."))
+        .catch((err) => console.log("Send error:",err));
 }
 
 async function main() {
@@ -154,7 +149,7 @@ async function main() {
     while (true) {
         let devices = devicePool.array
         for (var i = 0; i < devices.length; i++) {
-            let reader = devices[i].getReader();
+            let reader = devices[i].getPort().readable.getReader();
             const { value, done } = await reader.read();
             if (done) {
                 // Allow the serial port to be closed later.
@@ -162,7 +157,7 @@ async function main() {
                 break;
             }
             // value is a Uint8Array.
-            document.getElementById("my_label").innerHTML += value;
+            document.getElementById("my_label").innerHTML = value;
             console.log(value);
         }
     }
