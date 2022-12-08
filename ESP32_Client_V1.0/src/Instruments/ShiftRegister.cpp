@@ -3,8 +3,8 @@
 #include "Constants.h"
 #include "Arduino.h"
 
-const uint8_t startNote = 32; //Inclusive
-const uint8_t endNote = 80; //Exclusive
+const uint8_t startNote = 38; //Inclusive
+const uint8_t endNote = 77; //Exclusive
 
 const uint8_t MAX_NUM_NOTES = endNote - startNote;
 
@@ -18,11 +18,11 @@ static bool m_currentState[MAX_NUM_NOTES]; //IO
 ShiftRegister::ShiftRegister()
 {
     //Setup pins
-    for(uint8_t i=0; i < sizeof(pins); i++){
-        pinMode(pins[0], OUTPUT); //Serial Data
-        pinMode(pins[1], OUTPUT); //Serial Clock
-        pinMode(pins[2], OUTPUT); //Register Clock
-    }
+    pinMode(pins[0], OUTPUT); //Serial Data
+    pinMode(pins[1], OUTPUT); //Serial Clock
+    pinMode(pins[2], OUTPUT); //Load Registers
+    pinMode(pins[3], OUTPUT); //Reset Serial
+    pinMode(pins[4], OUTPUT); //Reset Registers
 
     // With all pins setup, let's do a first run reset
     ResetAll();
@@ -37,7 +37,7 @@ void ShiftRegister::Reset(uint8_t notePos)
 {
     m_activeDuration[notePos] = 0;
     m_currentTick[notePos] = 0;
-    m_currentState[notePos] = HIGH;
+    m_currentState[notePos] = LOW;
     updateShiftRegister();
 }
 
@@ -47,17 +47,21 @@ void ShiftRegister::ResetAll()
     std::fill(&m_activeDuration[0],&m_activeDuration[0]+sizeof(m_activeDuration),0);
     std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
     std::fill(&m_currentState[0],&m_currentState[0]+sizeof(m_currentState),LOW);
+    // Reset Shift Registers
+    // digitalWrite(pins[3], LOW); //Reset Serial
+    // digitalWrite(pins[4], LOW); //Reset Registers
+    // delayMicroseconds(1); //Stabilize 
+    // digitalWrite(pins[3],  HIGH); //Reset Serial
+    // digitalWrite(pins[4],  HIGH); //Reset Registers
     updateShiftRegister();
 }
 
 void ShiftRegister::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
-    uint8_t notePos = note - startNote;
+    uint8_t notePos = (note - startNote);
 
-    //Use MSB in note to indicate if a note is active.
-    double bendDeflection = ((double)m_pitchBend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-    m_activeDuration[notePos] = NOTE_ONTIME + (100 * bendDeflection);
+    m_activeDuration[notePos] = NOTE_ONTIME;
     m_currentTick[notePos] = 0;
     m_currentState[notePos] = HIGH;
     updateShiftRegister();
@@ -71,7 +75,6 @@ void ShiftRegister::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = note - startNote;
     if (!m_currentState[notePos]) return;
-
     Reset(notePos);
     m_numActiveNotes--;
     return;
@@ -99,16 +102,16 @@ void ICACHE_RAM_ATTR ShiftRegister::Tick()
 void ShiftRegister::tick()
 #endif
 {
-    //Turn of not if its Duration has expired
+    //Turn off note if its Duration has expired
     for (int i = 0; i < MAX_NUM_NOTES; i++) {
         if(m_numActiveNotes == 0)continue;
 
         if (m_activeDuration[i] > 0){
             if (m_currentTick[i] >= m_activeDuration[i]) {
 
+                m_currentState[i] = LOW;
                 m_activeDuration[i] = 0;
                 m_currentTick[i] = 0;
-                m_currentState[i] = LOW;
                 updateShiftRegister();
                 continue;
             }
@@ -124,17 +127,18 @@ void ICACHE_RAM_ATTR ShiftRegister::updateShiftRegister() {
 void ShiftRegister::updateShiftRegister(uint8_t instrument) {
 #endif
 
-    //Pulse the control pin
-    //m_currentState[instrument] = !m_currentState[instrument];
-    //digitalWrite(pins[instrument], m_currentState[instrument]);
-
+    // Write and Shift Data
     for(uint8_t i=0; i < MAX_NUM_NOTES; i++ ){
         digitalWrite(pins[0], m_currentState[i]); //Serial Data
         digitalWrite(pins[1], HIGH); //Serial Clock
+        delayMicroseconds(1); //Stabilize 
         digitalWrite(pins[1],  LOW); //Serial Clock
     }
-    digitalWrite(pins[2], HIGH); //Register Clock
-    digitalWrite(pins[2], LOW ); //Register Clock
+    // Toggle Load
+    digitalWrite(pins[2], HIGH); //Register Load
+    delayMicroseconds(1); //Stabilize 
+    digitalWrite(pins[2], LOW); //Register Load
+    digitalWrite(pins[0], LOW); //Serial Data
         
 }
 #pragma GCC pop_options

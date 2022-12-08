@@ -26,14 +26,14 @@
 
 //FloppyDrives  instrumentController; //Not Yet Implemented
 //PwmDriver     instrumentController;
-StepperL298n  instrumentController;
+//StepperL298n  instrumentController;
 //StepperMotors instrumentController; //Not Yet Implemented
-//ShiftRegister instrumentController;
+ShiftRegister instrumentController;
 
 
 //---------- Uncomment Your Selected COM Type ----------
 
- NetworkUSB connection;
+NetworkUSB connection;
 //NetworkUDP connection; //Not Yet Implemented
 //NetworkDIN connection; //Not Yet Implemented
 
@@ -47,7 +47,6 @@ void setup() {
   connection.SetMessageHandler(&messageHandler);
   connection.Begin();
   delay(100);
-
 
   /*Example Cmd Dumps
 
