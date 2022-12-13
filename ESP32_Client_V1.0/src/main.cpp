@@ -20,6 +20,7 @@
 #include "Instruments/StepperL298n.h"
 #include "Instruments/StepperMotor.h"
 #include "Instruments/ShiftRegister.h"
+#include "Instruments/Dulcimer.h"
 
 
 //---------- Uncomment Your Selected Instrument Type ----------
@@ -28,7 +29,8 @@
 //PwmDriver     instrumentController;
 //StepperL298n  instrumentController;
 //StepperMotors instrumentController; //Not Yet Implemented
-ShiftRegister instrumentController;
+//ShiftRegister instrumentController;
+Dulcimer      instrumentController;
 
 
 //---------- Uncomment Your Selected COM Type ----------
