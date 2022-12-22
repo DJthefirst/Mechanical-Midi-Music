@@ -26,11 +26,11 @@
 //---------- Uncomment Your Selected Instrument Type ----------
 
 //FloppyDrives  instrumentController; //Not Yet Implemented
-//PwmDriver     instrumentController;
+PwmDriver     instrumentController;
 //StepperL298n  instrumentController;
 //StepperMotors instrumentController; //Not Yet Implemented
 //ShiftRegister instrumentController;
-Dulcimer      instrumentController;
+//Dulcimer      instrumentController;
 
 
 //---------- Uncomment Your Selected COM Type ----------

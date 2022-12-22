@@ -12,7 +12,7 @@ export default class Network{
         await port.close();
     }
     
-    SendHexString(port,hexString) {
+    static SendHexString(port,hexString) {
     
         // Convert String to Hex Array
         var hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
@@ -20,10 +20,10 @@ export default class Network{
         console.log(hexBytes);
         
         //SendMsg
-        this.SendHexByteArray(hexBytes);
+        this.SendHexByteArray(port,hexBytes);
     }
 
-    async SendHexByteArray(port,hexByteArray) {
+    static async SendHexByteArray(port,hexByteArray) {
     
         // Convert Hex Array to Buffer
         let byteBuffer = hexByteArray.buffer.slice(hexByteArray.byteOffset, hexByteArray.byteLength + hexByteArray.byteOffset);
