@@ -1,5 +1,6 @@
 import Device from "./Device.js";
 import DeviceList from "./DeviceList.js";
+import Network from "./Network.js";
 
 let midiSourceDropDown = document.getElementById("midiSourcesDropDown");
 
@@ -12,7 +13,7 @@ export default class MidiControler {
         this.midiAccess = null;
 
         this.initMidiPorts();
-        midiSourceDropDown.onclick = () => this.updateSelectedMidiSource();
+        midiSourceDropDown.onchange = () => this.updateSelectedMidiSource();
     }
 
     async initMidiPorts(){
@@ -31,7 +32,7 @@ export default class MidiControler {
                 
                 let option = document.createElement("option");
                 option.setAttribute('value', port);
-                option.setAttribute('id', "midi" + port.id);
+                option.setAttribute('id', "midi-" + port.id);
 
                 let optionText = document.createTextNode(port.name);
                 option.appendChild(optionText);
@@ -43,9 +44,9 @@ export default class MidiControler {
     }
 
     portStateChange(port) {
-        console.log(port.state)
+        console.log('"' + port.name + '" has ' + port.state);
         if( port.state == "disconnected" ){
-            let option = document.getElementById("midi" + port.id);
+            let option = document.getElementById("midi-" + port.id);
             midiSourceDropDown.removeChild(option);
             port.close();
         }
@@ -53,15 +54,28 @@ export default class MidiControler {
     }
 
     updateSelectedMidiSource(){
+        //Remove Listeners Here
         this.midiSourcesSel = [];
         for(let option of midiSourceDropDown.options){
+            if (option.value == ""){ continue }
             if (option.selected) {
-                let port = option.value;
-                this.midiSourcesSel.push(port);
+                for (let port of this.midiAccess.inputs.values()){
+                    if (option.id == ("midi-" + port.id)){
+                        this.midiSourcesSel.push(port);
+                        port.onmidimessage = (event) => {this.onMidiMessage(event.data)}; 
+                        console.log(port);
+                        break;
+                    }
+                }
             }
         }
+        console.log("Selected Midi Source(s): " + this.midiSourcesSel);
     }
 
-    
+    onMidiMessage(message){
+        for(let device of DeviceList.getDeviceList()){
+            Network.SendHexByteArray(device.getPort(), message);
+        }
+    }
     
 }

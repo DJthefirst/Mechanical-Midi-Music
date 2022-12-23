@@ -17,26 +17,25 @@ export default class Network{
         // Convert String to Hex Array
         var hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
         for (var i = 0; i < hexBytes.length; i++) hexBytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
-        console.log(hexBytes);
         
         //SendMsg
         this.SendHexByteArray(port,hexBytes);
+
     }
 
     static async SendHexByteArray(port,hexByteArray) {
-    
+        console.log("Send: " + hexByteArray);
+        
         // Convert Hex Array to Buffer
         let byteBuffer = hexByteArray.buffer.slice(hexByteArray.byteOffset, hexByteArray.byteLength + hexByteArray.byteOffset);
     
         let writer = port.writable.getWriter();
         writer.ready
             .then(() => writer.write(byteBuffer))
-            .then(() => console.log("Sent Byte."))
             .catch((err) => console.log("Send error:",err));
     
         writer.ready
             .then(() => writer.close())
-            .then(() => console.log("Writer Colsed."))
             .catch((err) => console.log("Send error:",err));
     }
 }

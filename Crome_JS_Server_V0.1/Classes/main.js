@@ -8,7 +8,7 @@ let network = new Network();
 let midiController = new MidiController();
 
 
-function selectedPort() {deviceList.selectedDevice.getPort();}
+function selectedPort() {return DeviceList.getSelectedDevice().getPort();}
 
 document.getElementById("btnStart").onclick = () => { main() };
 document.getElementById("btnGetMidiPorts").onclick = () => {midiController.updateMidiSources()}
