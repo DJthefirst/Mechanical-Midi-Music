@@ -1,8 +1,10 @@
+import SerialCom from "./SerialCom.js";
+
 var currentDevId = 0;
 
 export default class Device {
-    constructor(port, ComType) {
-      this.port = port;
+    constructor(ComType) {
+      this.com = new SerialCom();
       this.comType = ComType;
       this.instrumentType = 'Instrument';
       this.id = currentDevId;
@@ -28,7 +30,7 @@ export default class Device {
     }
 
     getId() { return this.id; }
-    getPort() { return this.port; }
+    getCom() { return this.com; }
     getDiv() { return this.div; }
 }
 

@@ -1,6 +1,6 @@
 import Device from "./Device.js";
 import DeviceList from "./DeviceList.js";
-import Network from "./Network.js";
+import SerialCom from "./SerialCom.js";
 
 let midiSourceDropDown = document.getElementById("midiSourcesDropDown");
 
@@ -74,7 +74,7 @@ export default class MidiControler {
 
     onMidiMessage(message){
         for(let device of DeviceList.getDeviceList()){
-            Network.SendHexByteArray(device.getPort(), message);
+            device.com.SendHexByteArray(message);
         }
     }
     

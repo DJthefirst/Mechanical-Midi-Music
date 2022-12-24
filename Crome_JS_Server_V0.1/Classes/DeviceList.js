@@ -1,40 +1,42 @@
 import Device from "./Device.js";
-import Network from "./Network.js";
+import SerialCom from "./SerialCom.js";
 
-    var selectedDevice = null;
-    var deviceList = [];
+var deviceList = [];
 
 export default class DeviceList {
 
-    constructor () {}
+    constructor () {
+        this.selectedDevice = null;
+    }
 
-    addDevice(port, ComType) {
-        let device = new Device(port, ComType);
+    async addDevice(ComType) {
+        let device = new Device(ComType);
+        await device.com.open();
         deviceList.push(device);
-        port.ondisconnect = () => {this.removeDevice(device)};
+        device.com.port.ondisconnect = () => {this.removeDevice(device)};
         device.div.onclick = () => {this.selectDevice(device)};
         document.getElementById('deviceSelectList').append(device.getDiv());
-        selectedDevice = device;
+        this.selectedDevice = device;
     }
 
     removeDevice(device) {
-        if(device == null) device = selectedDevice;
+        if(device == null) device = this.selectedDevice;
         if(device == null) return;
         deviceList = deviceList.filter( dev => dev.getId() != device.getId());
-        document.getElementById('deviceDiv' + selectedDevice.getId()).remove();
-        Network.closePort(device.getPort());
-        selectedDevice = null;
+        document.getElementById('deviceDiv' + this.selectedDevice.getId()).remove();
+        device.com.close();
+        this.selectedDevice = null;
     }
 
     selectDevice(device) {
-        if (selectedDevice !== null) {
-            document.getElementById('deviceDiv' + selectedDevice.id).style.backgroundColor = "#5086ad";
+        if (this.selectedDevice !== null) {
+            document.getElementById('deviceDiv' + this.selectedDevice.id).style.backgroundColor = "#5086ad";
         }
         document.getElementById('deviceDiv' + device.id).style.backgroundColor = "#ffffff";
-        selectedDevice = device;
+        this.selectedDevice = device;
     }
 
-    static getSelectedDevice(){ return selectedDevice; }
+    getSelectedDevice(){ return this.selectedDevice; }
 
     static getDeviceList(){ return deviceList; }
 }
