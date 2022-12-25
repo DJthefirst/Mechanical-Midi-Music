@@ -2,7 +2,8 @@ import Device from "./Device.js";
 import DeviceList from "./DeviceList.js";
 import SerialCom from "./SerialCom.js";
 
-let midiSourceDropDown = document.getElementById("midiSourcesDropDown");
+let midiSourceDropDown = document.getElementById("midiSourceDropDown");
+let midiOutputDropDown = document.getElementById("midiOutputDropDown");
 
 export default class MidiControler {
     constructor(){
@@ -14,44 +15,91 @@ export default class MidiControler {
 
         this.initMidiPorts();
         midiSourceDropDown.onchange = () => this.updateSelectedMidiSource();
+        midiOutputDropDown.onchange = () => this.updateSelectedMidiOutput();
     }
 
     async initMidiPorts(){
         await navigator.requestMIDIAccess()
         .then((midiAccess) => {
             this.midiAccess = midiAccess;
-            this.updateMidiSources();
-            midiAccess.onstatechange = (event) => this.portStateChange(event.port);
+            this.updateMidiOptions();
+            midiAccess.onstatechange = (event) => this.updateMidiOptions();
         });
     }
 
-    updateMidiSources() {
-        for(let port of this.midiAccess.inputs.values()){
-            if (this.midiSourcesAvail.indexOf(port.id) == -1) {
-                this.midiSourcesAvail.push(port.id);
+    updateMidiOptions() {
+        //Convert Midi Access Iteratior into an Array
+        let midiSourcePorts = [];
+        let midiOutputPorts = [];
+        for(let port of this.midiAccess.inputs.values()){midiSourcePorts.push(port)}
+        for(let port of this.midiAccess.outputs.values()){midiOutputPorts.push(port)}
+
+        //Create Array of Added Ports
+        let addedSourcePorts = midiSourcePorts.filter(e => !this.midiSourcesAvail.includes(e.id));
+        let addedOutputPorts = midiOutputPorts.filter(e => !this.midiOutputsAvail.includes(e.id));
+
+        //Create Array of Removed Ports
+        let removedSourcePorts = this.midiSourcesAvail
+            .filter(e => !midiSourcePorts.map((e) => e.id).includes(e));
+        let removedOutputPorts = this.midiOutputsAvail
+            .filter(e => !midiOutputPorts.map((e) => e.id).includes(e));
+
+        //Remove Ports from Available Ports
+        this.midiSourcesAvail = this.midiSourcesAvail
+            .filter(e => midiSourcePorts.map((e) => e.id).includes(e));
+        this.midiOutputsAvail = this.midiOutputsAvail
+            .filter(e => midiOutputPorts.map((e) => e.id).includes(e));
+
+        for(let port of addedSourcePorts){
+            this.midiSourcesAvail.push(port.id);
                 
-                let option = document.createElement("option");
-                option.setAttribute('value', port);
-                option.setAttribute('id', "midi-" + port.id);
+            let option = document.createElement("option");
+            option.setAttribute('value', port);
+            option.setAttribute('id', "midiIn-" + port.id);
 
-                let optionText = document.createTextNode(port.name);
-                option.appendChild(optionText);
-                    
-                midiSourceDropDown.appendChild(option);
-                port.open();
-            }
-        } 
-    }
-
-    portStateChange(port) {
-        console.log('"' + port.name + '" has ' + port.state);
-        if( port.state == "disconnected" ){
-            let option = document.getElementById("midi-" + port.id);
-            midiSourceDropDown.removeChild(option);
-            port.close();
+            let optionText = document.createTextNode(port.name);
+            option.appendChild(optionText);
+            
+            midiSourceDropDown.appendChild(option);
+            port.open();
         }
-        this.updateMidiSources();
+
+        for(let port of addedOutputPorts){
+            this.midiOutputsAvail.push(port.id);
+                
+            let option = document.createElement("option");
+            option.setAttribute('value', port);
+            option.setAttribute('id', "midiOut-" + port.id);
+
+            let optionText = document.createTextNode(port.name);
+            option.appendChild(optionText);
+            
+            midiOutputDropDown.appendChild(option);
+            port.open();
+        }
+
+        for(let portId of removedSourcePorts){
+            let option = document.getElementById("midiIn-" + portId);
+            if(option == null) continue;
+            midiSourceDropDown.removeChild(option);
+        }
+
+        for(let portId of removedOutputPorts){
+            let option = document.getElementById("midiOut-" + portId);
+            if(option == null) continue;
+            midiOutputDropDown.removeChild(option);
+        }
     }
+
+    // portStateChange(port) {
+    //     console.log('"' + port.name + '" has ' + port.state);
+    //     if( port.state == "disconnected" ){
+    //         let option = document.getElementById("midi-" + port.id);
+    //         midiSourceDropDown.removeChild(option);
+    //         port.close();
+    //     }
+    //     this.updateMidiSources();
+    // }
 
     updateSelectedMidiSource(){
         //Remove Listeners Here
@@ -60,7 +108,7 @@ export default class MidiControler {
             if (option.value == ""){ continue }
             if (option.selected) {
                 for (let port of this.midiAccess.inputs.values()){
-                    if (option.id == ("midi-" + port.id)){
+                    if (option.id == ("midiIn-" + port.id)){
                         this.midiSourcesSel.push(port);
                         port.onmidimessage = (event) => {this.onMidiMessage(event.data)}; 
                         console.log(port);

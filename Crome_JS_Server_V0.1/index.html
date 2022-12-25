@@ -15,8 +15,11 @@
 				<input class="control" type="button" id="btnNoteOff" value="Note Off">
 				<input class="control" type="button" id="btnGetConfig" value="Get Config">
 				<br>
-				<select multiple id="midiSourcesDropDown">
-					<option value=""> None </option>
+				<select multiple id="midiSourceDropDown">
+					<option value="" selected="selected"> None </option>
+				</select>
+				<select multiple id="midiOutputDropDown">
+					<option value="" selected="selected"> None </option>
 				</select>
 				<br>
 				<label id="my_label" >-</label>
@@ -27,6 +30,17 @@
 		</div>
 		<div class="windowRightBar" id="windowRightBar">
 			<div class="deviceSelectMenu" id="deviceSelectMenu">
+				<select id="BaudRateDropDown">
+					<option value="1200">   1200 </option>
+					<option value="2400">   2400 </option>
+					<option value="4800">   4800 </option>
+					<option value="9600">   9600 </option>
+					<option value="19200">  19200 </option>
+					<option value="38400">  38400 </option>
+					<option value="57600">  57600 </option>
+					<option value="115200" selected="selected"> 115200 </option>
+					<option value="230400"> 230400 </option>
+				</select>
 				<input class="control" type="button" id="btnAddDevice" value="Add Device">
 				<input class="control" type="button" id="btnRemoveDevice" value="Remove Device">
 			</div>

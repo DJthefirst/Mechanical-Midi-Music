@@ -7,8 +7,9 @@ export default class SerialCom{
 
     async open() {
         // Prompt user to select any serial port.
+        let baudRate = document.getElementById("BaudRateDropDown").value;
         this.port = await navigator.serial.requestPort();
-        await this.port.open({ baudRate: 115200 })
+        await this.port.open({ baudRate: baudRate })
         this.reader = this.port.readable.getReader();
         this.writer = this.port.writable.getWriter();
         console.log(this.port.getInfo())
@@ -19,6 +20,19 @@ export default class SerialCom{
         this.writer.releaseLock();
         await this.port.close();
         }
+    
+    async readHexByteArray(){
+        let byteArray = [];
+
+        while(true){
+            const { value, done } = await this.reader.read();
+            console.log(value);
+            if (done) {
+                break;
+            }    
+        }
+        return;
+    }
     
     SendHexString(hexString) {
     
