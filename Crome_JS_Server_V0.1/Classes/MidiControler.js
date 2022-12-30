@@ -91,16 +91,6 @@ export default class MidiControler {
         }
     }
 
-    // portStateChange(port) {
-    //     console.log('"' + port.name + '" has ' + port.state);
-    //     if( port.state == "disconnected" ){
-    //         let option = document.getElementById("midi-" + port.id);
-    //         midiSourceDropDown.removeChild(option);
-    //         port.close();
-    //     }
-    //     this.updateMidiSources();
-    // }
-
     updateSelectedMidiSource(){
         //Remove Listeners Here
         this.midiSourcesSel = [];
@@ -111,6 +101,23 @@ export default class MidiControler {
                     if (option.id == ("midiIn-" + port.id)){
                         this.midiSourcesSel.push(port);
                         port.onmidimessage = (event) => {this.onMidiMessage(event.data)}; 
+                        break;
+                    }
+                }
+            }
+        }
+        console.log("Selected Midi Source(s): " + this.midiSourcesSel);
+    }
+
+    updateSelectedMidiOutput(){
+        //Remove Listeners Here
+        this.midiOutputsSel = [];
+        for(let option of midiOutputDropDown.options){
+            if (option.value == ""){ continue }
+            if (option.selected) {
+                for (let port of this.midiAccess.outputs.values()){
+                    if (option.id == ("midiOut-" + port.id)){
+                        this.midiOutputsSel.push(port);
                         console.log(port);
                         break;
                     }
@@ -121,9 +128,12 @@ export default class MidiControler {
     }
 
     onMidiMessage(message){
+        console.log("onMidiMsg: " + message);
         for(let device of DeviceList.getDeviceList()){
             device.com.SendHexByteArray(message);
         }
+        for(let port of this.midiOutputsSel){
+            port.send(message);
+        }
     }
-    
 }
