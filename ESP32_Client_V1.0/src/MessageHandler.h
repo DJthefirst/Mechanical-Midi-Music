@@ -49,6 +49,7 @@ public:
     void RemoveDistributor(uint8_t id);
     void RemoveAllDistributors();
     Distributor* GetDistributor(uint8_t id);
+    void SysExDistributorRequest(uint8_t message[]);
 
 private:
     //Main Midi Functions
@@ -58,7 +59,7 @@ private:
 
     //SysEx functions
     void SysExDistributorAdd(uint8_t message[]);
-    void SysExDistributorRequest(uint8_t message[]);
+    //void SysExDistributorRequest(uint8_t message[]);
     void SysExDistributorRequestAll(uint8_t message[]);
     void SysExDistributorSetMode(uint8_t message[]);
  
