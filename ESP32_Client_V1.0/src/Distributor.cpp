@@ -282,7 +282,7 @@ bool Distributor::DistributorHasInstrument(int instrumentId){
 //output Array = uint8_t[10]
 uint8_t* Distributor::ToSerial()
 {
-    uint8_t distributorObj[DISTRIBUTOR_SERAIL_BYTES];
+    static uint8_t distributorObj[DISTRIBUTOR_SERAIL_BYTES];
 
     uint8_t distributorByte0 = 0;
     if(m_damperPedal)   distributorByte0 |= (1 << 0);
@@ -299,6 +299,7 @@ uint8_t* Distributor::ToSerial()
     distributorObj[7] = static_cast<uint8_t>( m_instruments >> 8);
     distributorObj[8] = static_cast<uint8_t>( m_instruments >> 16);
     distributorObj[9] = static_cast<uint8_t>( m_instruments >> 24);
+
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);
 

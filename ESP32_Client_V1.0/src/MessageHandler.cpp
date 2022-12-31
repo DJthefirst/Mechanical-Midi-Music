@@ -8,6 +8,7 @@
 
 #include "MessageHandler.h"
 #include "Constants.h"
+#include <Arduino.h>
 
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
@@ -169,9 +170,7 @@ void MessageHandler::SysExDistributorAdd(uint8_t message[]){
 }
 
 void MessageHandler::SysExDistributorRequest(uint8_t message[]){
-    uint8_t demoArray[] = {0x00, 0x10, 0x00, 0x7D, 0x00, 0x10, 0x00, 0x7D};
-    (*m_ptrNetwork).SendMessage(demoArray,8);
-    //(*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),10);
+    (*m_ptrNetwork).SendMessage(GetDistributor(0)->ToSerial(),10);
 }
 
 void MessageHandler::SysExDistributorRequestAll(uint8_t message[]){

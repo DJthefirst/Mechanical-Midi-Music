@@ -6,6 +6,9 @@
 #pragma once
 #include <stdint.h>
 
+//DeviceType
+#define DEVICE_TYPE Esp32
+
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16
 //Absolute max number of Instruments is 32

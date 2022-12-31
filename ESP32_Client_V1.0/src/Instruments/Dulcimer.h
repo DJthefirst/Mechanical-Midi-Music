@@ -4,7 +4,7 @@
 #include "Instruments/InstrumentController.h"
 #include <stdint.h>
 
-class ShiftRegister : public InstrumentController{
+class Dulcimer : public InstrumentController{
 public:
 
 private:
@@ -13,11 +13,11 @@ private:
     //Local MIDI Device Atributes
     uint16_t m_pitchBend;
 
-    const static uint16_t NOTE_ONTIME = 300;
+    const static uint16_t NOTE_ONTIME = 275;
     const static bool SUSTAIN = false;
 
 public: 
-    ShiftRegister();
+    Dulcimer();
     static void Tick();
 
     void Reset(uint8_t instrument) override;

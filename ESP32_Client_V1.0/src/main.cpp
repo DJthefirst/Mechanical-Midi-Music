@@ -20,20 +20,22 @@
 #include "Instruments/StepperL298n.h"
 #include "Instruments/StepperMotor.h"
 #include "Instruments/ShiftRegister.h"
+#include "Instruments/Dulcimer.h"
 
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
 //FloppyDrives  instrumentController; //Not Yet Implemented
-//PwmDriver     instrumentController;
-StepperL298n  instrumentController;
+PwmDriver     instrumentController;
+//StepperL298n  instrumentController;
 //StepperMotors instrumentController; //Not Yet Implemented
 //ShiftRegister instrumentController;
+//Dulcimer      instrumentController;
 
 
 //---------- Uncomment Your Selected COM Type ----------
 
- NetworkUSB connection;
+NetworkUSB connection;
 //NetworkUDP connection; //Not Yet Implemented
 //NetworkDIN connection; //Not Yet Implemented
 
@@ -47,7 +49,6 @@ void setup() {
   connection.SetMessageHandler(&messageHandler);
   connection.Begin();
   delay(100);
-
 
   /*Example Cmd Dumps
 
@@ -75,6 +76,7 @@ void setup() {
   distributor1.SetDistributionMethod(Ascending);
   messageHandler.AddDistributor(distributor1);
 
+
   //Distributor 2
   //Distributor distributor2(&instrumentController);
   //distributor2.SetChannels(0x0001); // 2
@@ -95,6 +97,10 @@ void setup() {
   //distributor4.SetInstruments(0x00000040); // 7
   //distributor4.SetDistributionMethod(Ascending);
   //messageHandler.AddDistributor(distributor4);
+
+  //Testing
+  uint8_t testArray[] = {0x00, 0x10, 0x00, 0x7D, 0x00, 0x10, 0x00, 0x7D};
+  messageHandler.SysExDistributorRequest(testArray);
 }
 
 void loop() {
