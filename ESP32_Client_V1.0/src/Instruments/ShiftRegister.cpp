@@ -25,7 +25,7 @@ ShiftRegister::ShiftRegister()
     pinMode(pins[4], OUTPUT); //Reset Registers
 
     // With all pins setup, let's do a first run reset
-    ResetAll();
+    resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -33,7 +33,7 @@ ShiftRegister::ShiftRegister()
 
 }
 
-void ShiftRegister::Reset(uint8_t notePos)
+void ShiftRegister::reset(uint8_t notePos)
 {
     m_activeDuration[notePos] = 0;
     m_currentTick[notePos] = 0;
@@ -41,7 +41,7 @@ void ShiftRegister::Reset(uint8_t notePos)
     updateShiftRegister();
 }
 
-void ShiftRegister::ResetAll()
+void ShiftRegister::resetAll()
 {
     m_numActiveNotes = 0;
     std::fill(&m_activeDuration[0],&m_activeDuration[0]+sizeof(m_activeDuration),0);
@@ -56,7 +56,7 @@ void ShiftRegister::ResetAll()
     updateShiftRegister();
 }
 
-void ShiftRegister::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ShiftRegister::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = (note - startNote);
@@ -70,18 +70,18 @@ void ShiftRegister::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     
 }
 
-void ShiftRegister::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ShiftRegister::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = note - startNote;
     if (!m_currentState[notePos]) return;
-    Reset(notePos);
+    reset(notePos);
     m_numActiveNotes--;
     return;
 }
 
-void ShiftRegister::StopAll(){
-    ResetAll();
+void ShiftRegister::stopAll(){
+    resetAll();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,7 @@ bool ShiftRegister::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
 }
 
-void ShiftRegister::SetPitchBend(uint8_t instrument, uint16_t bend){
+void ShiftRegister::setPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend = bend;
     
     

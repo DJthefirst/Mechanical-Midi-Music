@@ -1,62 +1,57 @@
 /*
- * MoppyUSB.cpp
+ * NetworkUSB.cpp
  *
+ * Network that supports Serial Communication.
+ * 
  */
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
 NetworkUSB::NetworkUSB(){}
 
-void NetworkUSB::Begin() {
+void NetworkUSB::begin() {
     Serial.begin(115200);
-    StartUSB();
+    startUSB();
 }
 
 
 // connect to USB – returns true if successful or false if not
-bool NetworkUSB::StartUSB() {
+bool NetworkUSB::startUSB() {
     bool connected = true; //Temporary
     return connected;
 }
 
-/*
-    Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler
-*/
-void NetworkUSB::ReadMessage() {
+/* Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler */
+void NetworkUSB::readMessage() {
     int messageLength = Serial.available();
 
+    MidiMessage message;
+
+    //Wait until full message to begin reading the buffer
     if (messageLength >= 3){
-        m_messageBuffer[0] = Serial.read();
+        message.buffer[0] = Serial.read();
         messageLength = 1;
 
         //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
         while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
-            m_messageBuffer[messageLength] = Serial.read();
+            message.buffer[messageLength] = Serial.read();
             messageLength++;
         }
 
-        // if (Serial.available() && (Serial.peek() == MIDI_SysEXEnd)){
-        //     m_messageBuffer[messageLength] = Serial.read();
-        //     messageLength++;
-        // }
-
         //Filter out incomplete or corrupt msg
         if (messageLength > 1 && messageLength <= 64){
-            (*m_ptrMessageHandler).ProcessMessage(m_messageBuffer);
+            message.length = messageLength;
+            (*m_ptrMessageHandler).processMessage(message);
         }
-        else{
-            //Serial.println("PacketSize Out of Scope");
-            //Serial.println(m_messageBuffer[0]);
-            //Serial.println(messageLength);
-        }
+        else{}
     }
 }
 
-void NetworkUSB::SendMessage(uint8_t message[], int length) {
+void NetworkUSB::sendMessage(uint8_t message[], uint8_t length) {
     Serial.write(message,length);
 }
 
- void NetworkUSB::SetMessageHandler(MessageHandler* ptrMessageHandler)
+ void NetworkUSB::setMessageHandler(MessageHandler* ptrMessageHandler)
     {
         m_ptrMessageHandler = ptrMessageHandler;
     }

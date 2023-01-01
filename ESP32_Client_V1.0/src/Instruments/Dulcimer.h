@@ -20,13 +20,13 @@ public:
     Dulcimer();
     static void Tick();
 
-    void Reset(uint8_t instrument) override;
-    void ResetAll() override;
-    void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
-    void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
-    void StopAll() override;
+    void reset(uint8_t instrument) override;
+    void resetAll() override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void stopAll() override;
 
-    void SetPitchBend(uint8_t instrument, uint16_t value) override;
+    void setPitchBend(uint8_t instrument, uint16_t value) override;
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;

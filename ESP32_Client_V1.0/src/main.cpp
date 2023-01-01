@@ -1,6 +1,6 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V0.2
+ *  Version: V0.5
  *  Author: DJthefirst
  *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
  *----------------------------------------------------------------------------------------------------
@@ -45,65 +45,24 @@ MessageHandler messageHandler(&instrumentController);
 
 
 void setup() {
-  messageHandler.SetNetwork(&connection);
-  connection.SetMessageHandler(&messageHandler);
-  connection.Begin();
+
+  //Initialize MessageHandler and Begin Network Connection
+  messageHandler.setNetwork(&connection);
+  connection.setMessageHandler(&messageHandler);
+  connection.begin();
   delay(100);
 
-  /*Example Cmd Dumps
-
-  Note On
-   0x90 0x39 0x39
-   903939
-  Note Off
-   0x80 0x39 0x39
-   803939
-  Dump Data: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x00 0x01 0x00 0xF7     
-   F07D00000100F7
-  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x00 0x03 0x02 0xF7
-  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x00 0x03 0x03 0xF7
-  */
-
-  ////Testing Demo Setup Config////
+  //----Testing Demo Setup Config----//
 
   //Distributor 1
   Distributor distributor1(&instrumentController);
-  distributor1.SetChannels(0x0001); // 1
-  distributor1.SetInstruments(0x00000003); // 1,2
-  distributor1.SetDistributionMethod(Ascending);
-  messageHandler.AddDistributor(distributor1);
-
-
-  //Distributor 2
-  //Distributor distributor2(&instrumentController);
-  //distributor2.SetChannels(0x0001); // 2
-  //distributor2.SetInstruments(0x0000000C); // 3,4
-  //distributor2.SetDistributionMethod(Ascending);
-  //messageHandler.AddDistributor(distributor2);
-
-  ////Distributor 3
-  //Distributor distributor3(&instrumentController);
-  //distributor3.SetChannels(0x0004); // 3
-  //distributor3.SetInstruments(0x00000030); // 5,6
-  //distributor3.SetDistributionMethod(Ascending);
-  //messageHandler.AddDistributor(distributor3);
-
-  ////Distributor 4
-  //Distributor distributor4(&instrumentController);
-  //distributor4.SetChannels(0x0008); // 4
-  //distributor4.SetInstruments(0x00000040); // 7
-  //distributor4.SetDistributionMethod(Ascending);
-  //messageHandler.AddDistributor(distributor4);
-
-  //Testing
-  uint8_t testArray[] = {0x00, 0x10, 0x00, 0x7D, 0x00, 0x10, 0x00, 0x7D};
-  messageHandler.SysExDistributorRequest(testArray);
+  distributor1.setChannels(0x0001); // 1
+  distributor1.setInstruments(0x0000007F); // 1,2
+  distributor1.setDistributionMethod(Ascending);
+  messageHandler.addDistributor(distributor1);
 }
 
 void loop() {
-  //Periodicaly Read Incomming Messages
-  connection.ReadMessage();
+  //Periodicaly Read Incoming Messages
+  connection.readMessage();
 }

@@ -50,7 +50,7 @@ StepperL298n::StepperL298n()
     }
 
     // With all pins setup, let's do a first run reset
-    ResetAll();
+    resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -60,7 +60,7 @@ StepperL298n::StepperL298n()
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
 }
 
-void StepperL298n::Reset(uint8_t instrument)
+void StepperL298n::reset(uint8_t instrument)
 {
     m_activeNotes[instrument] = 0;
     m_notePeriod[instrument] = 0;
@@ -71,14 +71,14 @@ void StepperL298n::Reset(uint8_t instrument)
     digitalWrite(pins[4*instrument+3], LOW);
 }
 
-void StepperL298n::ResetAll()
+void StepperL298n::resetAll()
 {
     for(uint8_t i = 0; (i < sizeof(pins)/4); i++){
-        Reset(i);
+        reset(i);
     }
 }
 
-void StepperL298n::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void StepperL298n::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -92,18 +92,18 @@ void StepperL298n::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void StepperL298n::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void StepperL298n::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
-        Reset(instrument);
+        reset(instrument);
         m_numActiveNotes--;
         return;
     }
 }
 
-void StepperL298n::StopAll(){
+void StepperL298n::stopAll(){
     m_numActiveNotes = 0;
-    ResetAll();
+    resetAll();
     std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
 }
 
@@ -128,6 +128,7 @@ void StepperL298n::tick()
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
         if(m_numActiveNotes == 0)continue;
 
+        //Step StepperMotor Position at Note Frequency.
         if (m_activePeriod[i] > 0){
             if (m_currentTick[i] >= m_activePeriod[i]) {
                 stepMotor(i);
@@ -142,11 +143,11 @@ void StepperL298n::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR StepperL298n::stepMotor(uint8_t instrument) {
+void ICACHE_RAM_ATTR StepperL298n::stepMotor(uint8_t instrument)
 #else
-void StepperL298n::stepMotor(uint8_t instrument) {
+void StepperL298n::stepMotor(uint8_t instrument)
 #endif
-
+{
     switch (steppingMode)
     {
     case WaveDrive:
@@ -197,7 +198,7 @@ bool StepperL298n::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void StepperL298n::SetPitchBend(uint8_t instrument, uint16_t bend){
+void StepperL298n::setPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend[instrument] = bend;
     
     

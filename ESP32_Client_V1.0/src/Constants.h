@@ -12,7 +12,7 @@
 //Absolute max number of Polyphonic notes is 16
 #define MAX_POLYPHONIC_NOTES 16
 //Absolute max number of Instruments is 32
-#define MAX_NUM_INSTRUMENTS 2 //32
+#define MAX_NUM_INSTRUMENTS 8 //32
 //Absolute Lowest Note Min=0
 #define MIN_MIDI_NOTE 36 //C1
 //Absolute Highest Note Max=127
@@ -81,8 +81,6 @@ const uint8_t SYSEX_DistributorAdd = 0x00;
 const uint8_t SYSEX_DistributorRequest =0x01;
 const uint8_t SYSEX_DistributorRequestAll =0x02;
 const uint8_t SYSEX_DistributorSetMode =0x03;    //Temp
-
-
 
 const uint8_t SYSEX_DEV_ID0= 0x00;
 const uint8_t SYSEX_DEV_ID1= 0x00;

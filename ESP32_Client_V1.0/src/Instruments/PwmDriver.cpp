@@ -3,7 +3,7 @@
 #include "Constants.h"
 #include "Arduino.h"
 
-//[Instrument][ActiveNote] MSB of note is Active last 7 is Value 
+//[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static uint8_t m_activeNotes[MAX_NUM_INSTRUMENTS];
 static uint8_t m_numActiveNotes;
 
@@ -21,7 +21,7 @@ PwmDriver::PwmDriver()
     }
 
     // With all pins setup, let's do a first run reset
-    ResetAll();
+    resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -31,17 +31,17 @@ PwmDriver::PwmDriver()
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
 }
 
-void PwmDriver::Reset(uint8_t instrument)
+void PwmDriver::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void PwmDriver::ResetAll()
+void PwmDriver::resetAll()
 {
-    StopAll();
+    stopAll();
 }
 
-void PwmDriver::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -55,7 +55,7 @@ void PwmDriver::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void PwmDriver::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
         m_activeNotes[instrument] = 0;
@@ -67,7 +67,7 @@ void PwmDriver::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void PwmDriver::StopAll(){
+void PwmDriver::stopAll(){
     m_numActiveNotes = 0;
     std::fill(&m_activeNotes[0],&m_activeNotes[0]+sizeof(m_activeNotes),0);
     std::fill(&m_notePeriod[0],&m_notePeriod[0]+sizeof(m_notePeriod),0);
@@ -98,9 +98,11 @@ void ICACHE_RAM_ATTR PwmDriver::Tick()
 void PwmDriver::tick()
 #endif
 {
+    // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
         if(m_numActiveNotes == 0)continue;
 
+        //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
             if (m_currentTick[i] >= m_activePeriod[i]) {
                 togglePin(i);
@@ -115,11 +117,11 @@ void PwmDriver::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR PwmDriver::togglePin(uint8_t instrument) {
+void ICACHE_RAM_ATTR PwmDriver::togglePin(uint8_t instrument)
 #else
-void PwmDriver::togglePin(uint8_t instrument) {
+void PwmDriver::togglePin(uint8_t instrument)
 #endif
-
+{
     //Pulse the control pin
     m_currentState[instrument] = !m_currentState[instrument];
     digitalWrite(pins[instrument], m_currentState[instrument]);
@@ -141,7 +143,7 @@ bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void PwmDriver::SetPitchBend(uint8_t instrument, uint16_t bend){
+void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend[instrument] = bend;
     
     

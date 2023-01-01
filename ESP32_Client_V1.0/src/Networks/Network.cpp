@@ -1,21 +1,28 @@
+/* 
+ * Network.cpp
+ *
+ * An Default Class For Network Connections
+ * 
+ */
+
 #include "Network.h"
 
-    void Network::Begin()
+    void Network::begin()
     {
 
     }
     
-    void Network::ReadMessage()
+    void Network::readMessage()
     {
 
     }
 
-    void Network::SendMessage(uint8_t message[], int length)
+    void Network::sendMessage(uint8_t message[], uint8_t length)
     {
 
     }
 
-    void Network::SetMessageHandler(MessageHandler* ptrMessageHandler)
+    void Network::setMessageHandler(MessageHandler* ptrMessageHandler)
     {
 
     }

@@ -25,7 +25,7 @@ Dulcimer::Dulcimer()
     pinMode(pins[2], OUTPUT); //Load Registers
 
     // With all pins setup, let's do a first run reset
-    ResetAll();
+    resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -33,7 +33,7 @@ Dulcimer::Dulcimer()
 
 }
 
-void Dulcimer::Reset(uint8_t notePos)
+void Dulcimer::reset(uint8_t notePos)
 {
     m_activeDuration[notePos] = 0;
     m_currentTick[notePos] = 0;
@@ -41,7 +41,7 @@ void Dulcimer::Reset(uint8_t notePos)
     updateShiftRegister();
 }
 
-void Dulcimer::ResetAll()
+void Dulcimer::resetAll()
 {
     m_numActiveNotes = 0;
     std::fill(&m_activeDuration[0],&m_activeDuration[0]+sizeof(m_activeDuration),0);
@@ -50,16 +50,14 @@ void Dulcimer::ResetAll()
     updateShiftRegister();
 }
 
-void Dulcimer::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
-    //uint8_t notePos = note - startNote;
     uint8_t notePos = NoteMap[note - startNote];
 
     //Use MSB in note to indicate if a note is active.
     double bendDeflection = ((double)m_pitchBend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
     m_activeDuration[notePos] = NOTE_ONTIME + (100 * bendDeflection);
-    //m_activeDuration[notePos] = NOTE_ONTIME;
     m_currentTick[notePos] = 0;
     m_currentState[notePos] = HIGH;
     updateShiftRegister();
@@ -68,18 +66,18 @@ void Dulcimer::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     
 }
 
-void Dulcimer::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = note - startNote;
     if (!m_currentState[notePos]) return;
-    Reset(notePos);
+    reset(notePos);
     m_numActiveNotes--;
     return;
 }
 
-void Dulcimer::StopAll(){
-    ResetAll();
+void Dulcimer::stopAll(){
+    resetAll();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,10 +98,11 @@ void ICACHE_RAM_ATTR Dulcimer::Tick()
 void Dulcimer::tick()
 #endif
 {
-    //Turn of note if its Duration has expired
+    //Check Active Notes. 
     for (int i = 0; i < MAX_NUM_NOTES; i++) {
         if(m_numActiveNotes == 0)continue;
 
+        //Turn off note if its Duration has expired.
         if (m_activeDuration[i] > 0){
             if (m_currentTick[i] >= m_activeDuration[i]) {
 
@@ -121,11 +120,11 @@ void Dulcimer::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR Dulcimer::updateShiftRegister() {
+void ICACHE_RAM_ATTR Dulcimer::updateShiftRegister()
 #else
-void Dulcimer::updateShiftRegister(uint8_t instrument) {
+void Dulcimer::updateShiftRegister(uint8_t instrument)
 #endif
-
+{
     //Pulse the control pin
     //m_currentState[instrument] = !m_currentState[instrument];
     //digitalWrite(pins[instrument], m_currentState[instrument]);
@@ -161,7 +160,7 @@ bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
 }
 
-void Dulcimer::SetPitchBend(uint8_t instrument, uint16_t bend){
+void Dulcimer::setPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend = bend;
     
     
