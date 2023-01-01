@@ -1,26 +1,26 @@
 #include "InstrumentController.h"
 
-void InstrumentController::Reset(uint8_t instrument)
+void InstrumentController::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void InstrumentController::ResetAll()
+void InstrumentController::resetAll()
 {
     //Not Yet Implemented
 }
 
-void InstrumentController::PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void InstrumentController::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     //Not Yet Implemented
 }
 
-void InstrumentController::StopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void InstrumentController::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     //Not Yet Implemented
 }
 
-void InstrumentController::StopAll()
+void InstrumentController::stopAll()
 {
     //Not Yet Implemented
 }
@@ -37,33 +37,33 @@ uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
 bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
     return false;
 }
-void InstrumentController::SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
+void InstrumentController::setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
     //Not Yet Implemented
 }
-void InstrumentController::SetPitchBend(uint8_t instrument, uint16_t bend){
+void InstrumentController::setPitchBend(uint8_t instrument, uint16_t bend){
     //Not Yet Implemented
 }
-void InstrumentController::SetProgramChange(uint8_t value){
+void InstrumentController::setProgramChange(uint8_t value){
     //Not Yet Implemented    
 }
-void InstrumentController::SetChannelPressure(uint8_t value){
-    //Not Yet Implemented    
+void InstrumentController::setChannelPressure(uint8_t value){
+    //Not Yet Implemented   
 }
-void InstrumentController::SetModulationWheel(uint8_t value){
+void InstrumentController::setModulationWheel(uint8_t value){
     //Not Yet Implemented
 }
-void InstrumentController::SetFootPedal(uint8_t value){
+void InstrumentController::setFootPedal(uint8_t value){
     //Not Yet Implemented
 }
-void InstrumentController::SetVolume(uint8_t value){
+void InstrumentController::setVolume(uint8_t value){
     //Not Yet Implemented
 }
-void InstrumentController::SetExpression(uint8_t value){
+void InstrumentController::setExpression(uint8_t value){
     //Not Yet Implemented
 }
-void InstrumentController::SetEffectCrtl_1(uint8_t value){
+void InstrumentController::setEffectCrtl_1(uint8_t value){
     //Not Yet Implemented
 }
-void InstrumentController::SetEffectCrtl_2(uint8_t value){
+void InstrumentController::setEffectCrtl_2(uint8_t value){
     //Not Yet Implemented
 }

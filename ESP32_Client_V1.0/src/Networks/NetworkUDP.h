@@ -1,7 +1,10 @@
 /*
- * MoppyUDP.h
- *
+ * NetworkUDP.h
+ * 
+ * !! Work In Progress !!
+ * 
  */
+
 #pragma once
 
 #if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
@@ -30,14 +33,14 @@ class NetworkUDP : public Network{
 
 public:
     NetworkUDP();
-    void SetMessageHandler(MessageHandler* messageHandler) override;
-    void Begin() override;
-    void ReadMessage() override;
-    void SendMessage(uint8_t message[], int length) override;
+    void setMessageHandler(MessageHandler* messageHandler) override;
+    void begin() override;
+    void readMessage() override;
+    void sendMessage(uint8_t message[], uint8_t length) override;
 
 private:
-    void StartOTA();
-    bool StartUDP();
+    void startOTA();
+    bool startUDP();
 };
 
 #endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */

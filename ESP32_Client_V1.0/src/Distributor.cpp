@@ -1,8 +1,14 @@
 /* 
  * Distributor.cpp
  *
- * Distributors serve to route midi notes to varrious instrument groups. ex. Midi ch 2 & 3 -> instruments 4-8
- *
+ * Distributors serve to route midi notes to various instrument groups
+ * via configurable algorithms. Each Algorithm accounts for the number of 
+ * active notes playing on each instrument and the order of instruments 
+ * to be played.
+ *  
+ * ex. (Midi ch 2 & 3) -> (instruments 4-8) Mapped via RoundRobin.
+ * ex. (Midi ch 1,3,4) -> (instruments 1-4,7,8) Mapped via Ascending.
+ * 
  */
 
 #include "Distributor.h"
@@ -16,35 +22,33 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 //Message Processor
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Distributor::ProcessMessage(uint8_t message[])
+void Distributor::processMessage(MidiMessage message)
 {
-    m_currentChannel = (message[0] & 0b00001111);
+    m_currentInstrument = message.value();
 
     //Determine Type of MIDI Msg and Call Associated Event
-    uint8_t msg_type = (message[0] & 0b11110000);
-    
-    switch(msg_type){
+    switch(message.type()){
 
     case(MIDI_NoteOff):
-        NoteOffEvent(message[1],message[2]);
+        noteOffEvent(message.buffer[1],message.buffer[2]);
         break; 
     case(MIDI_NoteOn):
-        NoteOnEvent(message[1],message[2]);
+        noteOnEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_KeyPressure):
-        KeyPressureEvent(message[1],message[2]);
+        keyPressureEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_ControlChange):
-        ControlChangeEvent(message[1],message[2]);
+        controlChangeEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_ProgramChange):
-        ProgramChangeEvent(message[1]);
+        programChangeEvent(message.buffer[1]);
         break;
     case(MIDI_ChannelPressure):
-        ChannelPressureEvent(message[1]);
+        channelPressureEvent(message.buffer[1]);
         break;
     case(MIDI_PitchBend):
-        PitchBendEvent((message[1] | message[2] << 7));
+        pitchBendEvent((message.buffer[1] | message.buffer[2] << 7));
         break;
     case(MIDI_SysCommon):
         break;
@@ -55,55 +59,55 @@ void Distributor::ProcessMessage(uint8_t message[])
 //Event Handlers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Distributor::NoteOffEvent(uint8_t Note, uint8_t Velocity)
+void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = CheckForNote(Note); //returns -1 if no instrument found
+    uint8_t instrument = checkForNote(Note); //returns -1 if no instrument found
     if(instrument != NONE){ 
-        (*m_ptrInstrumentController).StopNote(instrument, Note, Velocity);
+        (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
     }
 }
 
-void Distributor::NoteOnEvent(uint8_t Note, uint8_t Velocity)
+void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity)
 {
     //Check if note has 0 velocity for note off
     if((Velocity == 0)){
-        NoteOffEvent(Note, Velocity);
+        noteOffEvent(Note, Velocity);
         return;
     }
-    uint8_t instrument = NextInstrument();
+    uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
-        (*m_ptrInstrumentController).PlayNote(instrument, Note, Velocity);
+        (*m_ptrInstrumentController).playNote(instrument, Note, Velocity);
     }
 }
 
-void Distributor::KeyPressureEvent(uint8_t Note, uint8_t Velocity)
+void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = CheckForNote(Note);
+    uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
-        (*m_ptrInstrumentController).SetKeyPressure(instrument, Note, Velocity);
+        (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
     }
 }
 
-void Distributor::ControlChangeEvent(uint8_t Controller, uint8_t Value)
+void Distributor::controlChangeEvent(uint8_t Controller, uint8_t Value)
 {
     //Implemented in MessageHandler
 }
 
-void Distributor::ProgramChangeEvent(uint8_t Program)
+void Distributor::programChangeEvent(uint8_t Program)
 {
     //Not Yet Implemented
 }
 
-void Distributor::ChannelPressureEvent(uint8_t Velocity)
+void Distributor::channelPressureEvent(uint8_t Velocity)
 {
     //Not Yet Implemented
 }
 
-void Distributor::PitchBendEvent(uint16_t pitchBend)
+void Distributor::pitchBendEvent(uint16_t pitchBend)
 {
     for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
         if((m_instruments & (1 << i)) != 0){
-            (*m_ptrInstrumentController).SetPitchBend(i, pitchBend);
+            (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
         }
     }
 }
@@ -112,7 +116,7 @@ void Distributor::PitchBendEvent(uint16_t pitchBend)
 //Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t Distributor::NextInstrument()
+uint8_t Distributor::nextInstrument()
 {
     bool validInsturment = false;
     uint8_t insturmentLeastActive = 0;
@@ -123,7 +127,7 @@ uint8_t Distributor::NextInstrument()
     case(StraightThrough):
         
         m_currentInstrument = m_currentChannel;
-        if(!DistributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
+        if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
 
     case(RoundRobin):
@@ -151,7 +155,7 @@ uint8_t Distributor::NextInstrument()
             m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
             //Check if valid instrument
-            if(!DistributorHasInstrument(m_currentInstrument)) continue;
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
             validInsturment = true;
 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
@@ -174,7 +178,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
 
             //Check if valid instrument
-            if(!DistributorHasInstrument(i)) continue;
+            if(!distributorHasInstrument(i)) continue;
             bool validInsturment = true;
 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
@@ -194,7 +198,7 @@ uint8_t Distributor::NextInstrument()
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
         
             //Check if valid instrument
-            if(!DistributorHasInstrument(i)) continue;
+            if(!distributorHasInstrument(i)) continue;
             bool validInsturment = true;
             
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
@@ -216,8 +220,7 @@ uint8_t Distributor::NextInstrument()
     }
 }
 
-//returns -1 if no instrument found
-uint8_t Distributor::CheckForNote(uint8_t note)
+uint8_t Distributor::checkForNote(uint8_t note)
 {
     uint8_t nextInstrument = m_currentInstrument;
 
@@ -237,7 +240,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
             if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
 
             //Check if valid instrument
-            if(!DistributorHasInstrument(nextInstrument)) continue;
+            if(!distributorHasInstrument(nextInstrument)) continue;
             if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)) return nextInstrument;
         }
         break;
@@ -246,7 +249,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument
-            if(!DistributorHasInstrument(i)) continue;
+            if(!distributorHasInstrument(i)) continue;
             if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
@@ -255,7 +258,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
             //Check if valid instrument
-            if(!DistributorHasInstrument(i)) continue;
+            if(!distributorHasInstrument(i)) continue;
             if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
         }
         break;
@@ -271,7 +274,7 @@ uint8_t Distributor::CheckForNote(uint8_t note)
 //Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Distributor::DistributorHasInstrument(int instrumentId){
+bool Distributor::distributorHasInstrument(int instrumentId){
     return ((m_instruments & (1 << instrumentId)) != 0);
 }
 
@@ -279,10 +282,9 @@ bool Distributor::DistributorHasInstrument(int instrumentId){
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//output Array = uint8_t[10]
-uint8_t* Distributor::ToSerial()
+uint8_t* Distributor::toSerial()
 {
-    static uint8_t distributorObj[DISTRIBUTOR_SERAIL_BYTES];
+    static uint8_t distributorObj[NUM_DISTRIBUTOR_CFG_BYTES];
 
     uint8_t distributorByte0 = 0;
     if(m_damperPedal)   distributorByte0 |= (1 << 0);
@@ -306,44 +308,39 @@ uint8_t* Distributor::ToSerial()
     return distributorObj;
 }
 
-uint16_t Distributor::GetChannels(){
+uint16_t Distributor::getChannels(){
     return m_channels;
 }
 
-void Distributor::SetDistributionMethod(DistributionMethod distribution){
+void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
 }
 
-void Distributor::SetDamperPedal(bool damper){
+void Distributor::setDamperPedal(bool damper){
     m_damperPedal = damper;
 }
 
-void Distributor::SetPolyphonic(bool polyphonic){
+void Distributor::setPolyphonic(bool polyphonic){
     m_polyphonic = polyphonic;
 }
 
-void Distributor::SetNoteOverwrite(bool noteOverwrite)
-{
+void Distributor::setNoteOverwrite(bool noteOverwrite){
     m_noteOverwrite = noteOverwrite;
 }
 
-void Distributor::SetMinMaxNote(uint8_t minNote, uint8_t maxNote)
-{
+void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
     m_minNote = minNote;
     m_maxNote = maxNote;
 }
 
-void Distributor::SetNumPolyphonicNotes(uint8_t numPolyphonicNotes)
-{
+void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
     m_numPolyphonicNotes = numPolyphonicNotes;
 }
     
-void Distributor::SetChannels(uint16_t channels)
-{
+void Distributor::setChannels(uint16_t channels){
     m_channels = channels;
 }
     
-void Distributor::SetInstruments(uint32_t instruments)
-{
+void Distributor::setInstruments(uint32_t instruments){
     m_instruments = instruments;
 }

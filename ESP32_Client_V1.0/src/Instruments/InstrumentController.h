@@ -19,23 +19,23 @@ protected:
 public:
 
     //Basic Functions
-    virtual void Reset(uint8_t instrument);
-    virtual void ResetAll();
-    virtual void PlayNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void StopNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void StopAll();
+    virtual void reset(uint8_t instrument);
+    virtual void resetAll();
+    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity);
+    virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity);
+    virtual void stopAll();
 
     //Setters
-    virtual void SetKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void SetPitchBend(uint8_t instrument, uint16_t value);
-    virtual void SetProgramChange(uint8_t value);
-    virtual void SetChannelPressure(uint8_t value);
-    virtual void SetModulationWheel(uint8_t value);
-    virtual void SetFootPedal(uint8_t value);
-    virtual void SetVolume(uint8_t value);
-    virtual void SetExpression(uint8_t value);
-    virtual void SetEffectCrtl_1(uint8_t value);
-    virtual void SetEffectCrtl_2(uint8_t value);
+    virtual void setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
+    virtual void setPitchBend(uint8_t instrument, uint16_t value);
+    virtual void setProgramChange(uint8_t value);
+    virtual void setChannelPressure(uint8_t value);
+    virtual void setModulationWheel(uint8_t value);
+    virtual void setFootPedal(uint8_t value);
+    virtual void setVolume(uint8_t value);
+    virtual void setExpression(uint8_t value);
+    virtual void setEffectCrtl_1(uint8_t value);
+    virtual void setEffectCrtl_2(uint8_t value);
 
     //Getters
     virtual uint8_t getNumActiveNotes(uint8_t instrument);

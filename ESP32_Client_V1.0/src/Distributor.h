@@ -1,8 +1,13 @@
 /* 
  * Distributor.h
  *
- * Distributors distribute Midi Messages to instruments.
- *
+ * Distributors serve to route midi notes to varrious instrument groups
+ * via configurable algorithms.Each Algorithm accounts for the number of 
+ * active notes playing on each instrument and the order of instruments 
+ * to be played.
+ *  
+ * ex. Midi ch 2 & 3 -> instruments 4-8 via RoundRobin.
+ * 
  */
 
 #pragma once
@@ -10,6 +15,7 @@
 #include <stdint.h>
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
+#include "MidiMessage.h"
 
 //Algorythmic Methods to Distribute Notes Amoungst Instruments.
 enum DistributionMethod
@@ -23,9 +29,9 @@ enum DistributionMethod
 };
 
 //Size of Distributor when convered to Byte array
-static const uint8_t DISTRIBUTOR_SERAIL_BYTES = 10;
+static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 10;
 
-//Distributes Midi Messages to Instruments.
+/* Routes Midi Notes to various instrument groups via configurable algorithms. */
 class Distributor{
 private:
 
@@ -49,36 +55,44 @@ private:
 public:
 
     Distributor(InstrumentController* ptrInstrumentController);
-    void ProcessMessage(uint8_t message[]);
 
-    uint8_t* ToSerial();
-    uint16_t GetChannels();
+    /* Determines which instruments the message is for */
+    void processMessage(MidiMessage message);
 
-    void SetDistributor(uint8_t profile[]);
-    void SetDistributionMethod(DistributionMethod);
-    void SetDamperPedal(bool);
-    void SetPolyphonic(bool);
-    void SetNoteOverwrite(bool noteOverwrite);
-    void SetMinMaxNote(uint8_t minNote, uint8_t maxNote);
-    void SetNumPolyphonicNotes(uint8_t numPolyphonicNotes);
-    void SetChannels(uint16_t channels);
-    void SetInstruments(uint32_t instruments);
+    /* Returns a Byte array representing this Distributor */
+    uint8_t* toSerial();
+
+    uint16_t getChannels();
+
+    void setDistributor(uint8_t profile[]);
+    void setDistributionMethod(DistributionMethod);
+    void setDamperPedal(bool);
+    void setPolyphonic(bool);
+    void setNoteOverwrite(bool noteOverwrite);
+    void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
+    void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
+    void setChannels(uint16_t channels);
+    void setInstruments(uint32_t instruments);
 
 private:
 
     //Midi Message Events
-    void NoteOnEvent(uint8_t key, uint8_t velocity);
-    void NoteOffEvent(uint8_t key, uint8_t velocity);
-    void KeyPressureEvent(uint8_t key, uint8_t velocity);
-    void ControlChangeEvent(uint8_t controller, uint8_t value);
-    void ProgramChangeEvent(uint8_t program);
-    void ChannelPressureEvent( uint8_t velocity);
-    void PitchBendEvent(uint16_t pitchBend);
+    void noteOnEvent(uint8_t key, uint8_t velocity);
+    void noteOffEvent(uint8_t key, uint8_t velocity);
+    void keyPressureEvent(uint8_t key, uint8_t velocity);
+    void controlChangeEvent(uint8_t controller, uint8_t value);
+    void programChangeEvent(uint8_t program);
+    void channelPressureEvent( uint8_t velocity);
+    void pitchBendEvent(uint16_t pitchBend);
 
-    //Returns Instrument ID
-    uint8_t NextInstrument();
-    uint8_t CheckForNote(uint8_t note);
+    // Returns the instument ID of the next instrument to be played.
+    uint8_t nextInstrument();
+    // Returns the instrument ID that is playing the given note else -1 if no instrument found.
+    uint8_t checkForNote(uint8_t note);
 
-    //Helper Functions
-    bool DistributorHasInstrument(int instrumentId);
+
+    //-------- Helper Functions --------//
+
+    /* Returns True if a Distributor Handles the given Instrument. */
+    bool distributorHasInstrument(int instrumentId);
 };
