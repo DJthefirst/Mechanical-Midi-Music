@@ -1,4 +1,6 @@
 # Mechanical Midi Music
+### [Open GUI](https://djthefirst.github.io/Mechanical-Midi-Music/)
+
 
 **M³** is a framework designed to allow easy development of new microcontroller-based MIDI instruments. 
 
