@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define MAX_PACKET_LENGTH 255
+#define MAX_PACKET_LENGTH 256
 
 struct MidiMessage
 {

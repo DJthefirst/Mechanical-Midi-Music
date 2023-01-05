@@ -286,22 +286,24 @@ uint8_t* Distributor::toSerial()
 {
     static uint8_t distributorObj[NUM_DISTRIBUTOR_CFG_BYTES];
 
-    uint8_t distributorByte0 = 0;
-    if(m_damperPedal)   distributorByte0 |= (1 << 0);
-    if(m_polyphonic)    distributorByte0 |= (1 << 1);
-    if(m_noteOverwrite) distributorByte0 |= (1 << 2);
+    uint8_t distributorBoolByte = 0;
+    if(this->m_damperPedal)   distributorBoolByte |= (1 << 0);
+    if(this->m_polyphonic)    distributorBoolByte |= (1 << 1);
+    if(this->m_noteOverwrite) distributorBoolByte |= (1 << 2);
 
-    distributorObj[0] = distributorByte0;
-    distributorObj[1] = m_numPolyphonicNotes;
-    distributorObj[2] = m_minNote;
-    distributorObj[3] = m_maxNote;
-    distributorObj[4] = static_cast<uint8_t>( m_channels >> 0);
-    distributorObj[5] = static_cast<uint8_t>( m_channels >> 8);
-    distributorObj[6] = static_cast<uint8_t>( m_instruments >> 0);
-    distributorObj[7] = static_cast<uint8_t>( m_instruments >> 8);
-    distributorObj[8] = static_cast<uint8_t>( m_instruments >> 16);
-    distributorObj[9] = static_cast<uint8_t>( m_instruments >> 24);
+    distributorObj[2] = static_cast<uint8_t>( m_channels >> 0);
+    distributorObj[3] = static_cast<uint8_t>( m_channels >> 8);
+    distributorObj[4] = static_cast<uint8_t>( m_instruments >> 0);
+    distributorObj[5] = static_cast<uint8_t>( m_instruments >> 8);
+    distributorObj[6] = static_cast<uint8_t>( m_instruments >> 16);
+    distributorObj[7] = static_cast<uint8_t>( m_instruments >> 24);
+    distributorObj[8] = this->m_distributionMethod;
+    distributorObj[9] = distributorBoolByte;
+    distributorObj[11] = this->m_minNote;
+    distributorObj[12] = this->m_maxNote;
+    distributorObj[13] = this->m_numPolyphonicNotes;
 
+    //Usefull Idea
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);
 
@@ -310,6 +312,10 @@ uint8_t* Distributor::toSerial()
 
 uint16_t Distributor::getChannels(){
     return m_channels;
+}
+
+uint32_t Distributor::getInstruments(){
+    return m_instruments;
 }
 
 void Distributor::setDistributionMethod(DistributionMethod distribution){
