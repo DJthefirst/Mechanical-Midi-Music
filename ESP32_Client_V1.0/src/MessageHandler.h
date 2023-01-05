@@ -19,8 +19,6 @@ class Network;
 /* A Class to decode incoming data into MIDI events */
 class MessageHandler{
 private:
-    //Handler Config
-    bool m_OmniMode = false;
     
     std::vector<Distributor> m_distributors;
 
@@ -49,9 +47,20 @@ private:
     void processSysEX(MidiMessage message);
 
     //SysEx functions
-    void sysExDistributorAdd(MidiMessage message);
-    void sysExDistributorRequest(uint8_t distributorNum);
-    void sysExDistributorRequestAll();
-    void sysExDistributorSetMode(MidiMessage message);
+    void sysExResetDeviceConfig(MidiMessage message);
+    void sysExGetDeviceConstruct(MidiMessage message);
+    void sysExGetDeviceName(MidiMessage message);
+    void sysExGetDeviceBoolean(MidiMessage message);
+    void sysExSetDeviceConstruct(MidiMessage message);
+    void sysExSetDeviceName(MidiMessage message);
+    void sysExSetDeviceBoolean(MidiMessage message);
+    void sysExGetNumOfDistributors(MidiMessage message);
+    void sysExGetDistributorConstruct(MidiMessage message);
+    void sysExSetDistributorChannels(MidiMessage message);
+    void sysExSetDistributorInstruments(MidiMessage message);
+    void sysExSetDistributorMethod(MidiMessage message);
+    void sysExSetDistributorBoolValues(MidiMessage message);
+    void sysExSetDistributorMinMaxNotes(MidiMessage message);
+    void sysExSetDistributorNumPolyphonicNotes(MidiMessage message);
  
 };

@@ -29,7 +29,7 @@ enum DistributionMethod
 };
 
 //Size of Distributor when convered to Byte array
-static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 10;
+static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 16;
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
 class Distributor{
@@ -63,6 +63,7 @@ public:
     uint8_t* toSerial();
 
     uint16_t getChannels();
+    uint32_t getInstruments();
 
     void setDistributor(uint8_t profile[]);
     void setDistributionMethod(DistributionMethod);

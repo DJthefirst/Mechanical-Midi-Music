@@ -12,8 +12,6 @@
 #include "MessageHandler.h"
 #include "MidiMessage.h"
 
-#define MAX_PACKET_LENGTH 256 //For Now
-
 class MessageHandler;
 
 class Network{

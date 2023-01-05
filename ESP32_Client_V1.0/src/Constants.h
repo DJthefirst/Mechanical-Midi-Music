@@ -6,26 +6,9 @@
 #pragma once
 #include <stdint.h>
 
-//DeviceType
-#define DEVICE_TYPE Esp32
-
-//Absolute max number of Polyphonic notes is 16
-#define MAX_POLYPHONIC_NOTES 16
-//Absolute max number of Instruments is 32
-#define MAX_NUM_INSTRUMENTS 8 //32
-//Absolute Lowest Note Min=0
-#define MIN_MIDI_NOTE 36 //C1
-//Absolute Highest Note Max=127
-#define MAX_MIDI_NOTE 83 //B4
-
-
 //Bit Masks
 const uint8_t MSB_BITMASK = 0x80;
-
 const uint8_t NONE = -1;
-
-//Pinnouts  ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-const uint8_t pins[] = {2,4,18,19,21,22,23,13,12,25,26,27,32,33};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //MIDI Constants
@@ -77,13 +60,24 @@ const uint8_t MIDI_CC_Polyphonic = 127;
 //SYSEX Custom Protocal
 const uint8_t SYSEX_ID = 0x7D;
 
-const uint8_t SYSEX_DistributorAdd = 0x00;
-const uint8_t SYSEX_DistributorRequest =0x01;
-const uint8_t SYSEX_DistributorRequestAll =0x02;
-const uint8_t SYSEX_DistributorSetMode =0x03;    //Temp
+const uint8_t SYSEX_ResetDeviceConfig = 0x00;
+const uint8_t SYSEX_GetDeviceConstruct = 0x02;
+const uint8_t SYSEX_GetDeviceName = 0x03;
+const uint8_t SYSEX_GetDeviceBoolean = 0x04;
+const uint8_t SYSEX_SetDeviceConstruct = 0x09;
+const uint8_t SYSEX_SetDeviceName = 0x0A;
+const uint8_t SYSEX_SetDeviceBoolean = 0x0B;
 
-const uint8_t SYSEX_DEV_ID0= 0x00;
-const uint8_t SYSEX_DEV_ID1= 0x00;
+const uint8_t SYSEX_AddDistributor = 0x10;
+const uint8_t SYSEX_RemoveDistributor = 0x11;
+const uint8_t SYSEX_GetNumOfDistributors = 0x12;
+const uint8_t SYSEX_GetDistributorConstruct = 0x14;
+const uint8_t SYSEX_SetDistributorChannels = 0x15;
+const uint8_t SYSEX_SetDistributorInstruments = 0x16;
+const uint8_t SYSEX_SetDistributorMethod = 0x17;
+const uint8_t SYSEX_SetDistributorBoolValues = 0x18;
+const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x19;
+const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1A;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;

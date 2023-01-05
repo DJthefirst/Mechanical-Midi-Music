@@ -23,6 +23,17 @@
 #include "Instruments/Dulcimer.h"
 
 
+//---------- Uncomment Your Selected Device Type ----------
+
+#define DEVICE_TYPE_ESP32
+//#define DEVICE_TYPE_ESP8266
+//#define DEVICE_TYPE_ARDUINO_UNO
+//#define DEVICE_TYPE_ARDUINO_MEGA
+//#define DEVICE_TYPE_ARDUINO_DUE
+//#define DEVICE_TYPE_ARDUINO_MICRO
+//#define DEVICE_TYPE_ARDUINO_NANO
+
+
 //---------- Uncomment Your Selected Instrument Type ----------
 
 //FloppyDrives  instrumentController; //Not Yet Implemented
