@@ -42,12 +42,15 @@ const uint8_t stepHalf[8][4] = {
 StepperL298n::StepperL298n()
 {
     //Setup pins
-    for(uint8_t i=0; i < MAX_NUM_INSTRUMENTS; i++){
-        pinMode(pins[4*i], OUTPUT);
-        pinMode(pins[4*i+1], OUTPUT);
-        pinMode(pins[4*i+2], OUTPUT);
-        pinMode(pins[4*i+3], OUTPUT);
-    }
+
+    //TODO Fix This
+
+    // for(uint8_t i=0; i < MAX_NUM_INSTRUMENTS; i++){
+    //     pinMode(pins[4*i], OUTPUT);
+    //     pinMode(pins[4*i+1], OUTPUT);
+    //     pinMode(pins[4*i+2], OUTPUT);
+    //     pinMode(pins[4*i+3], OUTPUT);
+    // }
 
     // With all pins setup, let's do a first run reset
     resetAll();

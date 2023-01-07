@@ -61,7 +61,8 @@ void Distributor::processMessage(MidiMessage message)
 
 void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = checkForNote(Note); //returns -1 if no instrument found
+    //Find the first Instrument playing the given Note and Stop it.
+    uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){ 
         (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
     }
@@ -69,11 +70,13 @@ void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 
 void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity)
 {
-    //Check if note has 0 velocity for note off
+    //Check if note has 0 velocity representing a note off event
     if((Velocity == 0)){
         noteOffEvent(Note, Velocity);
         return;
     }
+
+    //Get Next Instument Based on Distribution Method and Play Note
     uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
         (*m_ptrInstrumentController).playNote(instrument, Note, Velocity);
@@ -82,6 +85,7 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity)
 
 void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
+    //Find the First Active Instrument playing said Note and update its Velocity
     uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
         (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
@@ -105,6 +109,7 @@ void Distributor::channelPressureEvent(uint8_t Velocity)
 
 void Distributor::pitchBendEvent(uint16_t pitchBend)
 {
+    //Update Each Instruments Pitch Bend Value
     for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
         if((m_instruments & (1 << i)) != 0){
             (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
@@ -126,6 +131,7 @@ uint8_t Distributor::nextInstrument()
 
     case(StraightThrough):
         
+        // Return the Instument ID matching the current Messages Channel ID
         m_currentInstrument = m_currentChannel;
         if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
@@ -149,23 +155,27 @@ uint8_t Distributor::nextInstrument()
 
         insturmentLeastActive = NONE;
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+            //Increment current Instrument
             m_currentInstrument++;
 
-            //Loop to first instrument if end is reached
+            // Loop to first instrument if end is reached
             m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
-            //Check if valid instrument
+            // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
             validInsturment = true;
 
+            // If no active notes this must be the least active Instrument return
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
             if(activeNotes == 0) return m_currentInstrument;
 
+            // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
             if(insturmentLeastActive == NONE){
                 insturmentLeastActive = m_currentInstrument;
                 continue;
             }
 
+            // Update the Least Active Instrument if needed.
             if(activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
                 insturmentLeastActive = m_currentInstrument;
             }
