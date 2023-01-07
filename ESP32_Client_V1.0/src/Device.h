@@ -21,6 +21,6 @@ const uint8_t MAX_MIDI_NOTE = 83; //B4
 //A 14 bit number Representing this Devices ID
 const uint16_t SYSEX_DEV_ID = 0x01;
 
-
+//Golbal Device Attribues
 static uint8_t g_DeviceName[20] = {0};
 static bool g_OmniMode = false;

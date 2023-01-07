@@ -88,7 +88,7 @@ private:
 
     // Returns the instument ID of the next instrument to be played.
     uint8_t nextInstrument();
-    // Returns the instrument ID that is playing the given note else -1 if no instrument found.
+    // Returns the instrument ID that is playing the given note else NONE(-1) if no instrument found.
     uint8_t checkForNote(uint8_t note);
 
 

@@ -1,3 +1,9 @@
+/*
+ * Platform.h
+ * 
+ * Used to Setup Predefined Devices spcifying their pinnout and platform
+ */
+
 #pragma once
 
 #include <stdint.h>

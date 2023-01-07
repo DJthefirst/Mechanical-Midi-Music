@@ -170,5 +170,4 @@ void ShiftRegister::setPitchBend(uint8_t instrument, uint16_t bend){
         if (!m_currentState[i]) continue;
         m_activeDuration[i] = NOTE_ONTIME + (bendDeflection * 100);
     }
-
 }
