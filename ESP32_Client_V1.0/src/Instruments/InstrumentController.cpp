@@ -1,32 +1,5 @@
 #include "InstrumentController.h"
 
-void InstrumentController::reset(uint8_t instrument)
-{
-    //Not Yet Implemented
-}
-
-void InstrumentController::resetAll()
-{
-    //Not Yet Implemented
-}
-
-void InstrumentController::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
-{
-    //Not Yet Implemented
-}
-
-void InstrumentController::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
-{
-    //Not Yet Implemented
-}
-
-void InstrumentController::stopAll()
-{
-    //Not Yet Implemented
-}
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -69,7 +69,7 @@ void setup() {
   Distributor distributor1(&instrumentController);
   distributor1.setChannels(0x0001); // 1
   distributor1.setInstruments(0x0000007F); // 1,2
-  distributor1.setDistributionMethod(Ascending);
+  distributor1.setDistributionMethod(DistributionMethod::Ascending);
   messageHandler.addDistributor(distributor1);
 }
 

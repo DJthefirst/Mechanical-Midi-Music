@@ -7,8 +7,6 @@
 #include "NetworkUSB.h"
 #include "MessageHandler.h"
 
-NetworkUSB::NetworkUSB(){}
-
 void NetworkUSB::begin() {
     Serial.begin(115200);
     startUSB();
@@ -34,24 +32,15 @@ void NetworkUSB::readMessage() {
 
         //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
         while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
-            message.buffer[messageLength] = Serial.read();
             messageLength++;
-        }
-
-        //Filter out incomplete or corrupt msg
-        if (messageLength > 1 && messageLength <= 64){
-            message.length = messageLength;
-            (*m_ptrMessageHandler).processMessage(message);
-        }
-        else{}
+            if(messageLength == MAX_PACKET_LENGTH) return; //Error     
+            message.buffer[messageLength] = Serial.read();
+        }      
+        message.length = messageLength;
+        (*m_ptrMessageHandler).processMessage(message);
     }
 }
 
 void NetworkUSB::sendMessage(uint8_t message[], uint8_t length) {
     Serial.write(message,length);
 }
-
- void NetworkUSB::setMessageHandler(MessageHandler* ptrMessageHandler)
-    {
-        m_ptrMessageHandler = ptrMessageHandler;
-    }

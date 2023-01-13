@@ -129,15 +129,14 @@ uint8_t Distributor::nextInstrument()
 
     switch(m_distributionMethod){
 
-    case(StraightThrough):
+    case(DistributionMethod::StraightThrough):
         
         // Return the Instument ID matching the current Messages Channel ID
         m_currentInstrument = m_currentChannel;
         if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
 
-    case(RoundRobin):
-;
+    case(DistributionMethod::RoundRobin):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             m_currentInstrument++;
 
@@ -151,7 +150,7 @@ uint8_t Distributor::nextInstrument()
         return NONE;
         
 
-    case(RoundRobinBalance):
+    case(DistributionMethod::RoundRobinBalance):
 
         insturmentLeastActive = NONE;
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
@@ -183,13 +182,13 @@ uint8_t Distributor::nextInstrument()
         return insturmentLeastActive;
 
 
-    case(Ascending):
+    case(DistributionMethod::Ascending):
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
 
             //Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
-            bool validInsturment = true;
+            validInsturment = true;
 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
@@ -203,13 +202,13 @@ uint8_t Distributor::nextInstrument()
         }
         return validInsturment ? m_currentInstrument : NONE;
 
-    case(Descending):
+    case(DistributionMethod::Descending):
 
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
         
             //Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
-            bool validInsturment = true;
+            validInsturment = true;
             
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
@@ -236,13 +235,13 @@ uint8_t Distributor::checkForNote(uint8_t note)
 
     switch(m_distributionMethod){
 
-    case(StraightThrough):
+    case(DistributionMethod::StraightThrough):
         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
             return m_currentChannel;
         }
         break;
 
-    case(RoundRobin,RoundRobinBalance):
+    case(DistributionMethod::RoundRobin,DistributionMethod::RoundRobinBalance):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             
             //Decrement Instrument with Underflow Protection
@@ -255,7 +254,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
-    case(Ascending):
+    case(DistributionMethod::Ascending):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
             //Check if valid instrument
@@ -264,7 +263,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
-    case(Descending):
+    case(DistributionMethod::Descending):
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
             //Check if valid instrument
@@ -292,27 +291,30 @@ bool Distributor::distributorHasInstrument(int instrumentId){
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t* Distributor::toSerial()
+std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
 {
-    static uint8_t distributorObj[NUM_DISTRIBUTOR_CFG_BYTES];
+    std::array<std::uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> distributorObj;
 
     uint8_t distributorBoolByte = 0;
     if(this->m_damperPedal)   distributorBoolByte |= (1 << 0);
     if(this->m_polyphonic)    distributorBoolByte |= (1 << 1);
     if(this->m_noteOverwrite) distributorBoolByte |= (1 << 2);
 
+    distributorObj[0] = 0; //Device ID MSB
+    distributorObj[1] = 0; //Device ID LSB
     distributorObj[2] = static_cast<uint8_t>( m_channels >> 0);
     distributorObj[3] = static_cast<uint8_t>( m_channels >> 8);
     distributorObj[4] = static_cast<uint8_t>( m_instruments >> 0);
     distributorObj[5] = static_cast<uint8_t>( m_instruments >> 8);
     distributorObj[6] = static_cast<uint8_t>( m_instruments >> 16);
     distributorObj[7] = static_cast<uint8_t>( m_instruments >> 24);
-    distributorObj[8] = this->m_distributionMethod;
+    distributorObj[8] = static_cast<uint8_t>( m_distributionMethod);
     distributorObj[9] = distributorBoolByte;
-    distributorObj[11] = this->m_minNote;
-    distributorObj[12] = this->m_maxNote;
-    distributorObj[13] = this->m_numPolyphonicNotes;
+    distributorObj[11] = m_minNote;
+    distributorObj[12] = m_maxNote;
+    distributorObj[13] = m_numPolyphonicNotes;
 
+    return distributorObj;
     //Usefull Idea
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);

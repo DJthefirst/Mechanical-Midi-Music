@@ -12,13 +12,18 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <array>
+#include <cstdint>
+using std::int8_t;
+using std::int16_t;
+using std::int32_t;
+
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
 #include "MidiMessage.h"
 
 //Algorythmic Methods to Distribute Notes Amoungst Instruments.
-enum DistributionMethod
+enum class DistributionMethod
 { 
     StraightThrough = 0, //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
     RoundRobin,         //Distributes Notes in a circular manner.
@@ -29,38 +34,39 @@ enum DistributionMethod
 };
 
 //Size of Distributor when convered to Byte array
-static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 16;
+static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 14;
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
 class Distributor{
 private:
 
     //Local Atributes
-    uint8_t m_currentChannel;
-    uint8_t m_currentInstrument;
+    uint8_t m_currentChannel = 0;
+    uint8_t m_currentInstrument = 0;
     InstrumentController* m_ptrInstrumentController;
 
     //Each Bit Represents an Enabled Channel/Instrument (limits max number of instruments to 32)
-    uint16_t m_channels; //Represents Enabled MIDI Channels
-    uint32_t m_instruments; //Represents Enabled Instruments
+    uint16_t m_channels = 0; //Represents Enabled MIDI Channels
+    uint32_t m_instruments = 0; //Represents Enabled Instruments
 
     //Settings
     bool m_damperPedal = false;
     bool m_polyphonic = true;
     bool m_noteOverwrite = false;
-    uint8_t m_minNote, m_maxNote;
+    uint8_t m_minNote = 0;
+    uint8_t m_maxNote = 127;
     uint8_t m_numPolyphonicNotes = 1;
-    DistributionMethod m_distributionMethod = StraightThrough;
+    DistributionMethod m_distributionMethod = DistributionMethod::StraightThrough;
 
 public:
 
-    Distributor(InstrumentController* ptrInstrumentController);
+   explicit Distributor(InstrumentController* ptrInstrumentController);
 
     /* Determines which instruments the message is for */
     void processMessage(MidiMessage message);
 
     /* Returns a Byte array representing this Distributor */
-    uint8_t* toSerial();
+    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES>  toSerial();
 
     uint16_t getChannels();
     uint32_t getInstruments();

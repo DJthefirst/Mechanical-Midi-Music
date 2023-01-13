@@ -20,8 +20,9 @@ protected:
     MessageHandler* m_ptrMessageHandler;
     
 public:
-    virtual void setMessageHandler(MessageHandler* ptrMessageHandler);
-    virtual void begin();
-    virtual void readMessage();
-    virtual void sendMessage(uint8_t message[], uint8_t length);
+    void setMessageHandler(MessageHandler* ptrMessageHandler) { m_ptrMessageHandler = ptrMessageHandler; };
+    
+    virtual void begin() = 0;
+    virtual void readMessage() = 0;
+    virtual void sendMessage(uint8_t* message, uint8_t length) = 0;
 };

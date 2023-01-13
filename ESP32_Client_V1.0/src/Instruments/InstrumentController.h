@@ -3,7 +3,9 @@
 #include "Constants.h"
 #include "Device.h"
 #include "Platform.h"
-#include <stdint.h>
+#include <cstdint>
+using std::int8_t;
+
 
 class InstrumentController{
 public:
@@ -21,11 +23,11 @@ protected:
 public:
 
     //Basic Functions
-    virtual void reset(uint8_t instrument);
-    virtual void resetAll();
-    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void stopAll();
+    virtual void reset(uint8_t instrument) = 0;
+    virtual void resetAll() = 0;
+    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
+    virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
+    virtual void stopAll() = 0;
 
     //Setters
     virtual void setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);

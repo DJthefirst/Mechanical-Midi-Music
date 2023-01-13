@@ -14,11 +14,6 @@
 WiFiUDP MulticastUDP;
 WiFiUDP UnicastUDP;
 
-/*
- * Serial communications implementation for Arduino.  Instrument
- * has its handler functions called for device and system messages
- */
-NetworkUDP::NetworkUDP(){}
 
 void NetworkUDP::begin() {
     Serial.begin(115200); // For debugging
@@ -169,10 +164,5 @@ void NetworkUDP::sendMessage(uint8_t message[], uint8_t length) {
     UnicastUDP.write(message, length);
     UnicastUDP.endPacket();
 }
-
- void NetworkUDP::setMessageHandler(MessageHandler* ptrMessageHandler)
-    {
-        m_ptrMessageHandler = ptrMessageHandler;
-    }
 
 #endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */
