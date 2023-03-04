@@ -22,14 +22,14 @@ protected:
 
 public:
 
-    //Basic Functions
+    //Required Functions
     virtual void reset(uint8_t instrument) = 0;
     virtual void resetAll() = 0;
     virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
     virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
     virtual void stopAll() = 0;
 
-    //Setters
+    //Optional Setters
     virtual void setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
     virtual void setPitchBend(uint8_t instrument, uint16_t value);
     virtual void setProgramChange(uint8_t value);
@@ -41,7 +41,7 @@ public:
     virtual void setEffectCrtl_1(uint8_t value);
     virtual void setEffectCrtl_2(uint8_t value);
 
-    //Getters
+    //Optional Getters
     virtual uint8_t getNumActiveNotes(uint8_t instrument);
     virtual bool isNoteActive(uint8_t instrument, uint8_t note);
 };

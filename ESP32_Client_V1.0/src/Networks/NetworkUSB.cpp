@@ -28,12 +28,12 @@ void NetworkUSB::readMessage() {
     //Wait until full message to begin reading the buffer
     if (messageLength >= 3){
         message.buffer[0] = Serial.read();
-        messageLength = 1;
+        messageLength = 0;
 
         //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
         while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
             messageLength++;
-            if(messageLength == MAX_PACKET_LENGTH) return; //Error     
+            if(messageLength == MAX_PACKET_LENGTH) return; //ToDo: Error     
             message.buffer[messageLength] = Serial.read();
         }      
         message.length = messageLength;

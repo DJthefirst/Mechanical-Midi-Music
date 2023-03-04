@@ -3,14 +3,19 @@
 #include "Constants.h"
 #include "Arduino.h"
 
-const uint8_t startNote = 50; //Inclusive
-const uint8_t endNote = 89; //Exclusive
+const uint8_t startNote = 37; //Inclusive
+const uint8_t endNote = 62; //Exclusive
 
+const uint8_t MAX_NUM_REGISTERS = 32;
 const uint8_t MAX_NUM_NOTES = endNote - startNote;
 
 static uint8_t m_numActiveNotes;
-//                                      D3 D# E  F  F# G  G# A  A#  B
-const uint8_t NoteMap[MAX_NUM_NOTES] = {7,16,6,16,5,4,16,3,16,2,1,16,0,16,8,9,16,10,16,11,12,16,16,13,16,14};
+
+//Map Registers to Notes                                      
+const uint8_t RegisterMap[MAX_NUM_REGISTERS] = { 0, 0,11, 9, 6, 5, 3, 1,
+                                                14,16,19,21, 0, 0, 0, 0,
+                                                18,17,15,13,12,10, 8, 7,
+                                                20,23,22,24, 0, 0, 0, 0};
 
 //Instrument Attributes
 static uint16_t m_activeDuration[MAX_NUM_NOTES];//Note Played
@@ -53,7 +58,7 @@ void Dulcimer::resetAll()
 void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
-    uint8_t notePos = NoteMap[note - startNote];
+    uint8_t notePos = note - startNote;
 
     //Use MSB in note to indicate if a note is active.
     double bendDeflection = ((double)m_pitchBend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
@@ -129,8 +134,8 @@ void Dulcimer::updateShiftRegister(uint8_t instrument)
     //m_currentState[instrument] = !m_currentState[instrument];
     //digitalWrite(pins[instrument], m_currentState[instrument]);
 
-    for(uint8_t i=1; i <= MAX_NUM_NOTES; i++ ){
-        digitalWrite(pins[0], m_currentState[MAX_NUM_NOTES-i]); //Serial Data
+    for(uint8_t i=1; i <= MAX_NUM_REGISTERS; i++ ){
+        digitalWrite(pins[0], m_currentState[RegisterMap[MAX_NUM_REGISTERS-i]]); //Serial Data
         digitalWrite(pins[1], HIGH); //Serial Clock
         delayMicroseconds(1); //Stabilize 
         digitalWrite(pins[1],  LOW); //Serial Clock

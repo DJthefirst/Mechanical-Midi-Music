@@ -1,45 +1,45 @@
-/*
- * NetworkUDP.h
- * 
- * !! Work In Progress !!
- * 
- */
+// /*
+//  * NetworkUDP.h
+//  * 
+//  * !! Work In Progress !!
+//  * 
+//  */
 
-#pragma once
+// #pragma once
 
-#if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
-// For now, this will only work with ESP8266 or ESP32
-#else
+// #if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
+// // For now, this will only work with ESP8266 or ESP32
+// #else
 
-#include "Arduino.h"
-#include <ArduinoOTA.h>
-#ifdef ARDUINO_ARCH_ESP8266
-#include <ESP8266WiFi.h>
-#elif ARDUINO_ARCH_ESP32
-#include <WiFi.h>
-#endif
-#include <ESPAsyncWebServer.h>   //Local WebServer used to serve the configuration portal
-#include <ESPAsyncWiFiManager.h> // https://github.com/alanswx/ESPAsyncWiFiManager WiFi Configuration Magic
-#include <WiFiUdp.h>
-#include <stdint.h>
+// #include "Arduino.h"
+// #include <ArduinoOTA.h>
+// #ifdef ARDUINO_ARCH_ESP8266
+// #include <ESP8266WiFi.h>
+// #elif ARDUINO_ARCH_ESP32
+// #include <WiFi.h>
+// #endif
+// #include <ESPAsyncWebServer.h>   //Local WebServer used to serve the configuration portal
+// #include <ESPAsyncWiFiManager.h> // https://github.com/alanswx/ESPAsyncWiFiManager WiFi Configuration Magic
+// #include <WiFiUdp.h>
+// #include <stdint.h>
 
-#include "Networks/Network.h"
+// #include "Networks/Network.h"
 
-#define MULTICASTPORT 65534
-#define UNICASTPORT 65534
-#define MOPPY_MAX_PACKET_LENGTH 259
+// #define MULTICASTPORT 65534
+// #define UNICASTPORT 65534
+// #define MOPPY_MAX_PACKET_LENGTH 259
 
-class NetworkUDP : public Network{
+// class NetworkUDP : public Network{
 
-public:
-    NetworkUDP() = default;
-    void begin() override;
-    void readMessage() override;
-    void sendMessage(uint8_t message[], uint8_t length) override;
+// public:
+//     NetworkUDP() = default;
+//     void begin() override;
+//     void readMessage() override;
+//     void sendMessage(uint8_t message[], uint8_t length) override;
 
-private:
-    void startOTA();
-    bool startUDP();
-};
+// private:
+//     void startOTA();
+//     bool startUDP();
+// };
 
-#endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */
+// #endif /* ARDUINO_ARCH_ESP8266 or ARDUINO_ARCH_ESP32 */
