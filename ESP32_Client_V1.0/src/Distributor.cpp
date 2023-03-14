@@ -12,6 +12,8 @@
  */
 
 #include "Distributor.h"
+#include "Device.h"
+
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {
@@ -24,7 +26,7 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 
 void Distributor::processMessage(MidiMessage message)
 {
-    m_currentInstrument = message.value();
+    m_currentChannel = message.value();
 
     //Determine Type of MIDI Msg and Call Associated Event
     switch(message.type()){
@@ -63,7 +65,7 @@ void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
     //Find the first Instrument playing the given Note and Stop it.
     uint8_t instrument = checkForNote(Note);
-    if(instrument != NONE){ 
+    if(instrument != NONE){
         (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
     }
 }
@@ -121,6 +123,7 @@ void Distributor::pitchBendEvent(uint16_t pitchBend)
 //Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Returns the instument ID of the next instrument to be played.
 uint8_t Distributor::nextInstrument()
 {
     bool validInsturment = false;
@@ -144,8 +147,8 @@ uint8_t Distributor::nextInstrument()
             m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
             //Check if valid instrument
-            if(!((m_instruments & (1 << m_currentInstrument)) != 0)) continue;
-            return validInsturment;
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+            return m_currentInstrument;
         }
         return NONE;
         
@@ -162,7 +165,6 @@ uint8_t Distributor::nextInstrument()
 
             // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
-            validInsturment = true;
 
             // If no active notes this must be the least active Instrument return
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
@@ -241,12 +243,12 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
-    case(DistributionMethod::RoundRobin,DistributionMethod::RoundRobinBalance):
+    case(DistributionMethod::RoundRobin):
+    case(DistributionMethod::RoundRobinBalance):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
-            
             //Decrement Instrument with Underflow Protection
+            if(nextInstrument == 0) nextInstrument = MAX_NUM_INSTRUMENTS;
             nextInstrument--;
-            if(nextInstrument == (uint8_t)-1) nextInstrument = MAX_NUM_INSTRUMENTS - 1;
 
             //Check if valid instrument
             if(!distributorHasInstrument(nextInstrument)) continue;

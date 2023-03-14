@@ -18,6 +18,8 @@ struct MidiMessage
     uint8_t length;
     uint8_t buffer[MAX_PACKET_LENGTH];
 
+    //For Protocol https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing
+
     uint8_t type() {return buffer[0] & 0b11110000;}
     uint8_t value(){return buffer[0] & 0b00001111;}
     uint8_t sysExID(){return buffer[1];}

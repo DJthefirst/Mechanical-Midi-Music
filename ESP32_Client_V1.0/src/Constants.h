@@ -62,7 +62,7 @@ const uint8_t MIDI_CC_Monophonic = 126;
 const uint8_t MIDI_CC_Polyphonic = 127;
 
 //SYSEX Custom Protocal
-const uint8_t SYSEX_ID = 0x7D;
+const uint8_t SYSEX_ID = 0x7D; //Educational MIDI ID
 
 const uint8_t SYSEX_ResetDeviceConfig = 0x00;
 const uint8_t SYSEX_GetDeviceConstruct = 0x02;
