@@ -2,7 +2,8 @@
 
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
-#include <stdint.h>
+#include <cstdint>
+using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
 class PwmDriver : public InstrumentController{

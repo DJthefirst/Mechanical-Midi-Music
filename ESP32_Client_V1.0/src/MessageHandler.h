@@ -7,8 +7,10 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <vector>
+#include <cstdint>
+using std::int8_t;
+
 #include "Instruments/InstrumentController.h"
 #include "Networks/Network.h"
 #include "Distributor.h"
@@ -27,7 +29,7 @@ private:
 
 public:
     //Msg Handler 
-    MessageHandler(InstrumentController* ptrInstrumentController);
+    explicit MessageHandler(InstrumentController* ptrInstrumentController);
     void processMessage(MidiMessage message);
 
     //Distributors
@@ -38,7 +40,7 @@ public:
     void setNetwork(Network* ptrNetwork);
     void removeDistributor(uint8_t id);
     void removeAllDistributors();
-    Distributor* getDistributor(uint8_t id);
+    Distributor& getDistributor(uint8_t id);
     
 private:
     //Main Midi Functions

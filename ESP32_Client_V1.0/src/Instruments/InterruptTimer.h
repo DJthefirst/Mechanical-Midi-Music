@@ -4,9 +4,10 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+using std::int8_t;
 
-class InterruptTimer {
-public:
-    static void initialize(uint32_t microseconds, void (*isr)());
+
+namespace InterruptTimer {
+    void initialize(uint32_t microseconds, void (*isr)());
 };

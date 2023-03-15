@@ -4,19 +4,19 @@
 #include "Arduino.h"
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
-static uint8_t m_activeNotes[MAX_NUM_INSTRUMENTS];
+static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes
-static uint16_t m_notePeriod[MAX_NUM_INSTRUMENTS];  //Base Note
-static uint16_t m_activePeriod[MAX_NUM_INSTRUMENTS];//Note Played
-static uint8_t m_currentTick[MAX_NUM_INSTRUMENTS]; //Timeing
-static bool m_currentState[MAX_NUM_INSTRUMENTS]; //IO
+static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
+static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
+static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
+static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 PwmDriver::PwmDriver()
 {
     //Setup pins
-    for(uint8_t i=0; i < sizeof(pins); i++){
+    for(uint8_t i=0; i < pins.size(); i++){
         pinMode(pins[i], OUTPUT);
     }
 
@@ -45,14 +45,17 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
 
     //Use MSB in note to indicate if a note is active.
-    if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
+    //If Note inactive (MSB == 0) Update active notes, notePeriod and activePeriod
+    
+    //Remove this if statement condition for note overwrite
+    //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
         m_notePeriod[instrument] = noteDoubleTicks[note];
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         return;
-    }
+    //}
 }
 
 void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
@@ -69,13 +72,13 @@ void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 
 void PwmDriver::stopAll(){
     m_numActiveNotes = 0;
-    std::fill(&m_activeNotes[0],&m_activeNotes[0]+sizeof(m_activeNotes),0);
-    std::fill(&m_notePeriod[0],&m_notePeriod[0]+sizeof(m_notePeriod),0);
-    std::fill(&m_activePeriod[0],&m_activePeriod[0]+sizeof(m_activePeriod),0);
-    std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
-    std::fill(&m_currentState[0],&m_currentState[0]+sizeof(m_currentState),0);
+    m_activeNotes = {};
+    m_notePeriod = {};
+    m_activePeriod = {};
+    m_currentTick = {};
+    m_currentState = {};
 
-    for(uint8_t i = 0; (i < sizeof(pins)); i++){
+    for(uint8_t i = 0; i < pins.size(); i++){
         digitalWrite(pins[i], LOW);
     }
 }
