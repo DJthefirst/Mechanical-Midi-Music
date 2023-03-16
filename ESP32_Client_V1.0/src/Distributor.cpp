@@ -26,7 +26,7 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 
 void Distributor::processMessage(MidiMessage message)
 {
-    m_currentChannel = message.value();
+    m_currentChannel = message.channel();
 
     //Determine Type of MIDI Msg and Call Associated Event
     switch(message.type()){

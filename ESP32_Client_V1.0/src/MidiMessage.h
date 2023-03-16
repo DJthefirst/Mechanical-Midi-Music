@@ -21,8 +21,12 @@ struct MidiMessage
     //For Protocol https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing
 
     uint8_t type() {return buffer[0] & 0b11110000;}
-    uint8_t value(){return buffer[0] & 0b00001111;}
+    uint8_t sysCommonType(){return buffer[0] & 0b00001111;}
+    uint8_t channel(){return buffer[0] & 0b00001111;}
     uint8_t sysExID(){return buffer[1];}
     uint16_t deviceID(){return (buffer[2] << 7) | buffer[3];} //Combine message SysEx ID LSB and MSB
     uint8_t sysExCommand(){return buffer[4];}
+
+    uint8_t CC_Control(){return buffer[1];}
+    uint8_t CC_Value(){return buffer[2];}
 };

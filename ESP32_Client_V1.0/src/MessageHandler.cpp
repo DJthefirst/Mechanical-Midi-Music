@@ -28,7 +28,7 @@ void MessageHandler::processMessage(MidiMessage message)
     if(message.type() == MIDI_SysCommon)
     {
         //message.type() represents the message type for SysCommon msg
-        switch(message.value()){
+        switch(message.sysCommonType()){
 
         case(MIDI_SysEX):
             processSysEX(message);
@@ -129,29 +129,29 @@ void MessageHandler::processCC(MidiMessage message)
 {
     for(uint8_t i=0; i < m_distributors.size(); i++)
     {   
-        if((m_distributors[i].getChannels() & (1 << message.value())) != (0)){
-            switch(message.buffer[1]){
+        if((m_distributors[i].getChannels() & (1 << message.channel())) != (0)){
+            switch(message.CC_Control()){
 
             case(MIDI_CC_ModulationWheel):
-                (*m_ptrInstrumentController).setModulationWheel(message.buffer[2]);
+                (*m_ptrInstrumentController).setModulationWheel(message.CC_Value());
                 break;
             case(MIDI_CC_FootPedal):
-                (*m_ptrInstrumentController).setFootPedal(message.buffer[2]);
+                (*m_ptrInstrumentController).setFootPedal(message.CC_Value());
                 break;
             case(MIDI_CC_Volume):
-                (*m_ptrInstrumentController).setVolume(message.buffer[2]);
+                (*m_ptrInstrumentController).setVolume(message.CC_Value());
                 break;
             case(MIDI_CC_Expression):
-                (*m_ptrInstrumentController).setExpression(message.buffer[2]);
+                (*m_ptrInstrumentController).setExpression(message.CC_Value());
                 break;
             case(MIDI_CC_EffectCrtl_1):
-                (*m_ptrInstrumentController).setEffectCrtl_1(message.buffer[2]);
+                (*m_ptrInstrumentController).setEffectCrtl_1(message.CC_Value());
                 break;
             case(MIDI_CC_EffectCrtl_2):
-                (*m_ptrInstrumentController).setEffectCrtl_2(message.buffer[2]);
+                (*m_ptrInstrumentController).setEffectCrtl_2(message.CC_Value());
                 break;
             case(MIDI_CC_DamperPedal):
-                m_distributors[i].setDamperPedal(message.buffer[2] < 64);
+                m_distributors[i].setDamperPedal(message.CC_Value()< 64);
                 break;
             case(MIDI_CC_Mute):
                 (*m_ptrInstrumentController).stopAll();
@@ -192,7 +192,7 @@ void MessageHandler::distributeMessage(MidiMessage message)
 {  
     for(uint8_t i=0; i < m_distributors.size(); i++)
     {   
-        if((m_distributors[i].getChannels() & (1 << message.value())) != (0))
+        if((m_distributors[i].getChannels() & (1 << message.channel())) != (0))
             m_distributors[i].processMessage(message);
     }
 }
