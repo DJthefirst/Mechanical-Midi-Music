@@ -21,7 +21,8 @@ Initially inspired by **Flanon _ FT Tech Labs** [Musical Orchestra ](https://you
   - Stacked Notes*
   
   Supports
-  - 32 Different Instruments
+  - 100 Different Devices
+  - 32 Different Instruments per Device
   - 16 Polyphonic Notes per Instrument
   - Scalable Instrument Distribution Pools
   
