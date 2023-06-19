@@ -26,7 +26,7 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 
 void Distributor::processMessage(MidiMessage message)
 {
-    m_currentChannel = message.value();
+    m_currentChannel = message.channel();
 
     //Determine Type of MIDI Msg and Call Associated Event
     switch(message.type()){
@@ -157,7 +157,7 @@ uint8_t Distributor::nextInstrument()
 
         insturmentLeastActive = NONE;
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
-            //Increment current Instrument
+            // Increment current Instrument
             m_currentInstrument++;
 
             // Loop to first instrument if end is reached
@@ -188,7 +188,7 @@ uint8_t Distributor::nextInstrument()
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
 
-            //Check if valid instrument
+            // Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
 
@@ -208,7 +208,7 @@ uint8_t Distributor::nextInstrument()
 
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
         
-            //Check if valid instrument
+            // Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
             
@@ -302,26 +302,31 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
     if(this->m_polyphonic)    distributorBoolByte |= (1 << 1);
     if(this->m_noteOverwrite) distributorBoolByte |= (1 << 2);
 
-    distributorObj[0] = 0; //Device ID MSB
-    distributorObj[1] = 0; //Device ID LSB
-    distributorObj[2] = static_cast<uint8_t>( m_channels >> 0);
-    distributorObj[3] = static_cast<uint8_t>( m_channels >> 8);
-    distributorObj[4] = static_cast<uint8_t>( m_instruments >> 0);
-    distributorObj[5] = static_cast<uint8_t>( m_instruments >> 8);
-    distributorObj[6] = static_cast<uint8_t>( m_instruments >> 16);
-    distributorObj[7] = static_cast<uint8_t>( m_instruments >> 24);
-    distributorObj[8] = static_cast<uint8_t>( m_distributionMethod);
-    distributorObj[9] = distributorBoolByte;
-    distributorObj[11] = m_minNote;
-    distributorObj[12] = m_maxNote;
-    distributorObj[13] = m_numPolyphonicNotes;
+
+    //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
+    // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
+    distributorObj[0] = 0; //Device ID LSB
+    distributorObj[1] = 0; //Device ID MSB
+    distributorObj[2] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
+    distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
+    distributorObj[4] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
+    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 0) & 0x7F);
+    distributorObj[6] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
+    distributorObj[7] = static_cast<uint8_t>((m_instruments >> 14) & 0x7F);
+    distributorObj[8] = static_cast<uint8_t>((m_instruments >> 21) & 0x7F);
+    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 28) & 0x0F);
+    distributorObj[10] = static_cast<uint8_t>(m_distributionMethod);
+    distributorObj[11] = distributorBoolByte;
+    distributorObj[12] = m_minNote;
+    distributorObj[13] = m_maxNote;
+    distributorObj[14] = m_numPolyphonicNotes;
+    distributorObj[15] = 0; //Reserved
 
     return distributorObj;
+
     //Usefull Idea
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);
-
-    return distributorObj;
 }
 
 uint16_t Distributor::getChannels(){

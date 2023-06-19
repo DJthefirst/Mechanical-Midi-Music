@@ -63,13 +63,12 @@ void setup() {
   connection.begin();
   delay(100);
 
-  //----Testing Demo Setup Config----//
-
+  //----Example HardCoded Distributor----//
   //Distributor 1
   Distributor distributor1(&instrumentController);
-  distributor1.setChannels(0x0001); // 1
-  distributor1.setInstruments(0x0000007F); // 1,2
-  distributor1.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  distributor1.setChannels(0xFFFF); // Channels 1-16
+  distributor1.setInstruments(0x0000000F); // Instruments 1-4
+  distributor1.setDistributionMethod(DistributionMethod::StraightThrough);
   messageHandler.addDistributor(distributor1);
 }
 
