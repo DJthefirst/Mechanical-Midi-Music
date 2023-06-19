@@ -33,7 +33,7 @@ export default class SerialCom{
         }
         return;
     }
-    
+
     SendHexString(hexString) {
     
         // Convert String to Hex Array

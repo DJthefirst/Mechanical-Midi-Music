@@ -89,10 +89,13 @@ void MessageHandler::processSysEX(MidiMessage message)
             sysExSetDeviceBoolean(message);
             break;
         case (SYSEX_AddDistributor):
-            addDistributor();
+            addDistributor(message.buffer + 5);
             break;
         case (SYSEX_RemoveDistributor):
             removeDistributor(message.buffer[6]);
+            break;
+        case (SYSEX_RemoveAllDistributors):
+            removeAllDistributors();
             break;
         case (SYSEX_GetNumOfDistributors):
             sysExGetNumOfDistributors(message);
@@ -308,13 +311,45 @@ void MessageHandler::addDistributor(Distributor distributor)
     m_distributors.push_back(distributor);
 }
 
+void MessageHandler::addDistributor(uint8_t data[])
+{
+    (*m_ptrNetwork).sendMessage(data,16);
+    //Decode Distributor Construct
+    uint16_t distributorID = data[0] | (data[1] << 7);
+    uint16_t channels = data[2] 
+        | (data[3] << 7) 
+        | (data[4] << 14);
+    uint32_t instruments = data[5]
+        | (data[6] << 7) 
+        | (data[7] << 14)
+        | (data[8] << 21)
+        | (data[9] << 28);
+    DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
+
+    //Create Distributor
+    Distributor distributor(m_ptrInstrumentController);
+    distributor.setChannels(channels); // 1
+    distributor.setInstruments(instruments); // 1,2
+    distributor.setDistributionMethod(distribMethod);
+    distributor.setDamperPedal((data[11] & 0x01) != 0);
+    distributor.setPolyphonic((data[11] & 0x02) != 0);
+    distributor.setNoteOverwrite((data[11] & 0x04) != 0);
+    distributor.setMinMaxNote(data[12], data[13]);
+    distributor.setNumPolyphonicNotes(data[14]);
+
+    //Add Distributor to Distribution Pool
+    m_distributors.push_back(distributor);
+}
+
 void MessageHandler::removeDistributor(uint8_t id)
 {
+    (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
     m_distributors.erase(m_distributors.begin() + id);
 }
 
 void MessageHandler::removeAllDistributors()
 {
+    (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
     m_distributors.clear();
 }
 

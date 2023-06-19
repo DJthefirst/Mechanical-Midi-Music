@@ -22,6 +22,17 @@ div.player {
 
 div.deviceConfig {
     display: fixed;
+    align-content: center;
+    background-color: rgb(72, 101, 127);
+    position: relative;
+    width: 100%;
+    height: 150px;
+    top: 0px;
+    left: 0px;
+}
+
+div.distributors {
+    display: fixed;
     background-color: rgb(59, 91, 68);
     width: 100%; 
     height: 100%;

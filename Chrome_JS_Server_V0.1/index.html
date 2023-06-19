@@ -5,14 +5,18 @@
     <body>
 		<div class="windowMain">
 			<div class="player">
+				<!--
 				<input class="control" type="button" id="btnStart" value="Start">
 				<input class="control" type="button" id="btnGetMidiPorts" value="Get Midi Ports">
+				-->
+
 				<br>
 				<input class="control" type="text" id="textSendHex" placeholder="Hex Msg">
 				<input class="control" type="button" id="btnSendHex" value="Send Hex">
 				<br>
 				<input class="control" type="button" id="btnNoteOn" value="Note On">
 				<input class="control" type="button" id="btnNoteOff" value="Note Off">
+				<input class="control" type="button" id="btnStopAllNotes" value="Stop All Notes">
 				<input class="control" type="button" id="btnGetConfig" value="Get Config">
 				<input class="control" type="button" id="btnSetRobin" value="Robin">
 				<input class="control" type="button" id="btnSetStraight" value="Straight">
@@ -24,10 +28,45 @@
 					<option value="" selected="selected"> None </option>
 				</select>
 				<br>
-				<label id="my_label" >-</label>
 			</div>
 			<div class="deviceConfig">
 
+					<label for="fname">Channels:</label>
+					<input type="text" id="Channels" name="Channels" value="0x0001">
+					<label for="lname">Instruments:</label>
+					<input type="text" id="Instruments" name="Instruments" value="0x0000000F"><br>
+					<label for="lname">Distribution Method: </label>
+					<select id="DistributionMethod">
+						<option value="0"> StraightThrough </option>
+						<option value="1"> RoundRobin </option>
+						<option value="2" selected="selected"> RoundRobinBalance </option>
+						<option value="3"> Ascending </option>
+						<option value="4"> Descending </option>
+						<option value="5"> Stack </option>
+					</select><br>
+
+					<input type="checkbox" id="DamperEn" name="DamperEn">
+					<label for="DamperEn">Damper Enable</label>
+					<input type="checkbox" id="PolyphonicEn" name="PolyphonicEn">
+					<label for="PolyphonicEn">Polyphonic Enable</label>
+					<input type="checkbox" id="NoteOverwrite" name="NoteOverwrite">
+					<label for="NoteOverwrite">Note Overwrite</label><br>
+
+					<label for="lname">Note Min/Max:</label>
+					<input type="text" id="NoteMin" name="NoteMin" value="1">
+					<input type="text" id="NoteMax" name="NoteMax" value="0x7F"><br>
+					<label for="lname">Number of Polyphonic Notes:</label>
+					<input type="text" id="Polyphonic" name="Polyphonic" value="1"><br>
+					<input type="submit" id="btnAddDistributor" value="Add Distributor">
+					<input type="button" id="btnRemoveDistributor" value="Remove Distributor">
+					<input type="button" id="btnRemoveAllDistributors" value="Remove All Distributors">
+
+			</div>
+			<div class="distributors">
+				<div>
+					
+
+				</div>
 			</div>
 		</div>
 		<div class="windowRightBar" id="windowRightBar">
