@@ -1,24 +1,11 @@
 <script lang="ts">
 
-    import { LinkedList, Node } from "./LinkedList";
+    import { Playlist, Node, Song } from "./Playlist";
     // import { Song } from './Playlist';
     // import {playlist, curSong} from './Playlist';
     // import {setNode, addSong, addPlayList, removeSong, clearPlayList} from './Playlist';
 
-    class Song {
-    public path: string;
-    public title: string;
-    public time: number;
-    //--------- TODO ---------
-    constructor(path: string | null) {
-        if (path === null) path='';
-        this.path = path;
-        this.title = path;
-        this.time = 0;
-    }
-}
-
-    let playlist = new LinkedList();
+    let playlist = new Playlist();
     let curSong = new Song(null);
 
     let curNode: Node | null;
@@ -54,7 +41,6 @@
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //-------------------------------------------- DEV --------------------------------------------//
     /////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     function setNode(node: Node){
         curSec = 0;
@@ -108,7 +94,7 @@
 
     function clearPlayList(){
         // JS will free out of scope memory
-        playlist = new LinkedList();
+        playlist = new Playlist();
         curSong = new Song(null);
         curNode = null;
     }
@@ -128,9 +114,9 @@
         {#if curSong !== null}
         {#each playlist as node}
             {#if curSong == node.getElement()}
-            <div class= 'li-player-song bg-blue-800' on:click={() => setNode(node) }>
+            <div class= 'li-player-song bg-gray-select font-semibold' on:click={() => setNode(node) }>
                 <li class= 'pl-2'>{node.getElement().title}</li>
-                <span class='.self-end pl-4'>{secondsToTime(node.getElement().time)}</span>
+                <span class='.self-end pl-4 font-semibold'>{secondsToTime(node.getElement().time)}</span>
             </div>
             {:else}
             <div class= 'li-player-song hover:bg-gray-700' on:click={() => setNode(node)}>
@@ -148,15 +134,29 @@
     </div>
     <div class= 'flex flex-row justify-between px-2 pb-3 pt-1' >
         <span>-{curTime}</span>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none"
+        {#if doLoop}
+        <i class="material-icons bg-gray-select rounded-full cursor-pointer select-none p-1 my-1"
             on:click={() => doLoop= !doLoop}>loop</i>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none"
-            on:click={() => curSec = (curSec>10) ? curSec -= 10 : 0}>fast_rewind</i>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none">play_circle</i>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none">stop</i>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none"
-            on:click={() => curSec = (curSec<curSong.time-10) ? curSec += 10 : curSong.time}>fast_forward</i>
-        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none"
+        {:else}
+        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
+            on:click={() => doLoop= !doLoop}>loop</i>
+        {/if}
+
+        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
+            on:click={() => curSec = (curSec>5) ? curSec -= 5 : 0}>fast_rewind</i>
+        
+        {#if doPlay}
+            <i class="material-icons bg-gray-select rounded-full cursor-pointer select-none p-2" 
+            on:click={() => doPlay= !doPlay}>pause</i>
+        {:else}
+            <i class="material-icons bg-gray-select rounded-full cursor-pointer select-none p-2"
+            on:click={() => doPlay= !doPlay}>play_arrow</i>
+        {/if}
+
+        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1">stop</i>
+        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
+            on:click={() => curSec = (curSec<curSong.time-5) ? curSec += 5 : curSong.time}>fast_forward</i>
+        <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
             on:click={() => nextSong()}>shortcut</i>
         <span>{secondsToTime(curSong.time)}</span>
     </div>

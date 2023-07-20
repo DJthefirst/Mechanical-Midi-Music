@@ -11,6 +11,7 @@ const config = {
         gray: {
         'light': '#36393e',
         'dark': '#1e2124',
+        'select': '#205080',
         },
         btn: {
           'green': {

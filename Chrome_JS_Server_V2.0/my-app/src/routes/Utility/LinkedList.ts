@@ -26,7 +26,7 @@ export class LinkedList {
     * [Symbol.iterator]() { // define the default iterator for this class
         let node  = this.head; // get first node
         while (node) {  // while we have not reached the end of the list
-            yield node;  // ... yield the current node's data
+            yield node.elem;  // ... yield the current node's data
             node = node.next; // and move to the next node
         }
     }
