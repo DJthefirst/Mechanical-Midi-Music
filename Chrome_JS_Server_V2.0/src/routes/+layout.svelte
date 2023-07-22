@@ -4,8 +4,6 @@
 	import { inject } from '@vercel/analytics';
 
 	inject({ mode: dev ? 'development' : 'production' });
-
-	export const prerender = true;
 </script>
 
 <slot />
