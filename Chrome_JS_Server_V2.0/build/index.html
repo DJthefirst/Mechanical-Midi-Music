@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.png" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+		<meta name="viewport" content="width=device-width" />
+		
+		<link href="./_app/immutable/assets/0.05d09ead.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.da3b0518.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.63274e7e.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.33b8692f.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.2cc1a4fb.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.14a8fa7e.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.e19f2113.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/2.8a5999e5.js">
+	</head>
+	<body data-sveltekit-preload-data="hover" class="md:overflow-hidden">
+		<div style="display: contents">  <div class="grid grid-cols-1 md:grid-cols-5 xl:grid-cols-7 grid-rows-1 md:grid-rows-2 md:h-screen"><div class="div-grid md:row-span-2 md:h-screen md:col-span-3 xl:col-span-3 overflow-auto"><div><div class="div-outline"><p class="text-center font-bold" data-svelte-h="svelte-1eavsfb">MIDI Player</p> <div class="flex min-h-96 flex-row justify-end"><div class="p-2 w-full"><div class="w-full bg-gray-dark rounded-md"><ol class="w-full h-screen max-h-[calc(16rem)] p-2 list-decimal overflow-y-scroll"> <div class="li-player-song hover:bg-gray-700"><li class="pl-2">Montero (call me by your name) by Lil Nas X</li> <span class=".self-end pl-4 font-semibold">4:59</span> </div> <div class="li-player-song hover:bg-gray-700"><li class="pl-2">Head &amp; Heart by Joel Corry ft Mnek</li> <span class=".self-end pl-4 font-semibold">2:38</span> </div> <div class="li-player-song hover:bg-gray-700"><li class="pl-2">You broke me first by Tate Mcrae</li> <span class=".self-end pl-4 font-semibold">3:20</span> </div> <div class="li-player-song hover:bg-gray-700"><li class="pl-2">Lean On by Major Lazer &amp; Dj shake ft. Mo</li> <span class=".self-end pl-4 font-semibold">2:54</span> </div></ol> <div class="w-full p-0 m-0"><input class="slider-player w-full cursor-pointer" type="range" min="0" max="0" value="0"></div> <div class="flex flex-row justify-between px-2 pb-3 pt-1"><span>-0:00</span>  <i class="material-icons bg-gray-dark hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1">loop</i>  <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1" data-svelte-h="svelte-4moosf">fast_rewind</i>  <i class="material-icons bg-gray-select rounded-full cursor-pointer select-none p-2">play_arrow</i>  <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1" data-svelte-h="svelte-3oj2b9">stop</i>  <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1" data-svelte-h="svelte-jovg2l">fast_forward</i>  <i class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1" data-svelte-h="svelte-l15i7z">shortcut</i> <span>0:00</span></div></div></div> <div class="flex flex-col justify-between mr-2 mb-3 w-56 min-w-56"><div class="flex flex-col justify-center m-0" data-svelte-h="svelte-lq2hmw"><button class="button-player-green w-full"><i class="material-icons">add</i> Add Song</button> <button class="button-player-green w-full"><i class="material-icons">playlist_add</i> Add Playlist</button> <button class="button-player-red w-full"><i class="material-icons">remove</i> Remove Song</button> <button class="button-player-red w-full"><i class="material-icons">playlist_remove</i> Clear Playlist</button></div> <div data-svelte-h="svelte-1mz0khr"><h1 class="text-center font-bold italic">MIDI IN</h1> <ul class="outline outline-dark-50 overflow-y-scroll h-16 rounded-sm"><li class="li-player-io">Loop Midi</li> <li class="li-player-io">Loop Midi 1</li> <li class="li-player-io">Loop Midi 2</li> <li class="li-player-io">Loop Midi 3</li> <li class="li-player-io">Akai MPK MkII</li></ul></div> <div data-svelte-h="svelte-1q2p9"><h1 class="text-center font-bold italic">MIDI OUT</h1> <ul class="outline outline-dark-50 overflow-y-scroll h-16 rounded-tl-sm"><li class="li-player-io">Loop Midi</li> <li class="li-player-io">Loop Midi 1</li> <li class="li-player-io">Loop Midi 2</li> <li class="li-player-io">Loop Midi 3</li> <li class="li-player-io">Akai MPK MkII</li></ul></div></div></div></div></div> <div><div class="div-outline" data-svelte-h="svelte-15x0i3t"><p class="text-center font-bold">Device Manager</p> <div class="flex justify-start flex-wrap"><div><label for="deviceId" class="font-semibold pl-4">Device ID</label> <input type="text" id="devId" placeholder="0x0001" class="bg-gray-dark rounded-md px-3 py-1 m-3 w-20 font-semibold"></div> <div><label for="deviceName" class="font-semibold pl-4">Device Name</label> <input type="text" id="deviceName" placeholder="" class="bg-gray-dark rounded-md px-3 py-1 m-3 w-48 font-semibold"></div></div> <div class="flex justify-start"><label for="deviceName" class="font-semibold m-2 ml-4">Omni Mode Enable</label> <input type="checkbox" id="deviceName" class="bg-gray-dark"></div> <div class="flex justify-center m-2"><button class="button-player-green mx-2">Update Device</button> <button class="button-player-green mx-2">Add Device</button> <button class="button-player-red mx-2">Remove Device</button> <button class="button-player-red mx-2">Clear Device</button></div></div></div> <div><div class="div-outline" data-svelte-h="svelte-1xu9wnb"><p class="text-center font-bold">Distributor Manager</p> <div class="flex justify-start flex-wrap"><div><label for="channels" class="font-semibold pl-4">Channels</label> <input type="text" id="channels" placeholder="0x000F" class="bg-gray-dark rounded-md px-3 py-1 m-3 w-32 font-semibold"></div> <div><label for="instruments" class="font-semibold pl-4">Instruments</label> <input type="text" id="instruments" placeholder="0x0000000F" class="bg-gray-dark rounded-md px-3 py-1 m-3 w-48 font-semibold"></div></div> <div class="flex justify-start flex-wrap"><div><label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label> <input type="checkbox" id="deviceName" class="bg-gray-dark"></div> <div><label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label> <input type="checkbox" id="deviceName" class="bg-gray-dark"></div> <div><label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label> <input type="checkbox" id="deviceName" class="bg-gray-dark"></div></div> <div><label for="noteMinMax" class="font-semibold pl-4">Note Min/Max</label> <input type="text" id="noteMinMax" placeholder="0" class="bg-gray-dark rounded-md px-3 py-1 my-3 w-24 font-semibold"> <span class="font-extrabold">-</span> <input type="text" id="noteMinMax" placeholder="127" class="bg-gray-dark rounded-md px-3 py-1 my-3 w-24 font-semibold"></div> <div><label for="numPolyphonicNotes" class="font-semibold pl-4">Number of Polyphonic Notes</label> <input type="text" id="numPolyphonicNotes" placeholder="1" class="bg-gray-dark rounded-md px-3 py-1 m-3 w-24 font-semibold"></div> <div class="flex justify-center m-2"><button class="button-player-green mx-2">Update Device</button> <button class="button-player-green mx-2">Add Device</button> <button class="button-player-red mx-2">Remove Device</button> <button class="button-player-red mx-2">Clear Device</button></div></div></div></div> <div class="div-grid md:col-start-4 xl:col-start-4 md:col-span-2 md:row-start-1 row-span-1 xl:row-auto xl:h-screen overflow-auto"><div class="div-outline"><p class="text-center font-bold" data-svelte-h="svelte-1235cg7">Device List</p> <div class="h-full"><div class="flex flex-wrap justify-between bg-gray-dark m-2 rounded-xl"><select class="w-28 rounded-lg m-2 px-4 bg-gray-light"><option value="1200" data-svelte-h="svelte-176arlo">1200 </option><option value="2400" data-svelte-h="svelte-ytmivi">2400 </option><option value="4800" data-svelte-h="svelte-195unny">4800 </option><option value="9600" data-svelte-h="svelte-1llmuzo">9600 </option><option value="19200" data-svelte-h="svelte-181drxa">19200 </option><option value="38400" data-svelte-h="svelte-jlbeiy">38400 </option><option value="57600" data-svelte-h="svelte-u04yaa">57600 </option><option value="115200" selected data-svelte-h="svelte-1it88lr">115200 </option><option value="230400" data-svelte-h="svelte-m3ekx0">230400</option></select> <div class="flex flex-row" data-svelte-h="svelte-1sb9rdw"><button class="button-player-green m-2 p-2"><i class="material-icons">add</i> Add Device</button> <button class="button-player-red my-2 mr-2 p-2"><i class="material-icons">remove</i> Remove Device</button></div></div>  <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="font-bold flex flex-row flex-wrap justify-between w-full my-2 mx-4"><label>ID:
+						<span>1</span></label> <span class="px-2">Dulcimer</span> <span>COM 3</span></div> <div class="flex flex-col py-2"><label class="px-2 text-sm italic text-gray-400 font-extralight">Version:
+						<span class="">001.1</span></label> <label class="px-2">Platform:
+						<span class="font-semibold">ESP32</span></label> <label class="px-2">Device Type:
+						<span class="font-semibold">Shift Register</span></label> <label class="px-2">Number of Instruments:
+						<span class="font-semibold">1</span></label> <label class="px-2">Notes:
+						<span class="font-semibold">0-127</span> </label></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="font-bold flex flex-row flex-wrap justify-between w-full my-2 mx-4"><label>ID:
+						<span>2</span></label> <span class="px-2">Air Compressor</span> <span>COM 4</span></div> <div class="flex flex-col py-2"><label class="px-2 text-sm italic text-gray-400 font-extralight">Version:
+						<span class="">001.1</span></label> <label class="px-2">Platform:
+						<span class="font-semibold">Arduino Nano</span></label> <label class="px-2">Device Type:
+						<span class="font-semibold">PWM Driver</span></label> <label class="px-2">Number of Instruments:
+						<span class="font-semibold">8</span></label> <label class="px-2">Notes:
+						<span class="font-semibold">0-127</span> </label></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="font-bold flex flex-row flex-wrap justify-between w-full my-2 mx-4"><label>ID:
+						<span>4</span></label> <span class="px-2">Floppy Drives</span> <span>COM 6</span></div> <div class="flex flex-col py-2"><label class="px-2 text-sm italic text-gray-400 font-extralight">Version:
+						<span class="">001.1</span></label> <label class="px-2">Platform:
+						<span class="font-semibold">Ardunio Uno</span></label> <label class="px-2">Device Type:
+						<span class="font-semibold">Floppy Drive</span></label> <label class="px-2">Number of Instruments:
+						<span class="font-semibold">4</span></label> <label class="px-2">Notes:
+						<span class="font-semibold">0-127</span> </label></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="font-bold flex flex-row flex-wrap justify-between w-full my-2 mx-4"><label>ID:
+						<span>10</span></label> <span class="px-2">Stepper Motor</span> <span>COM 7</span></div> <div class="flex flex-col py-2"><label class="px-2 text-sm italic text-gray-400 font-extralight">Version:
+						<span class="">001.1</span></label> <label class="px-2">Platform:
+						<span class="font-semibold">Arduino Mega</span></label> <label class="px-2">Device Type:
+						<span class="font-semibold">Stepper Motor</span></label> <label class="px-2">Number of Instruments:
+						<span class="font-semibold">6</span></label> <label class="px-2">Notes:
+						<span class="font-semibold">0-127</span> </label></div> </div></div></div></div> <div class="div-grid md:col-start-4 xl:col-start-6 md:col-span-2 md:row-start-2 row-span-1 xl:row-auto xl:h-screen overflow-auto"><div class="div-outline overflow-y-auto"><p class="text-center font-bold" data-svelte-h="svelte-hutpf8">Distributor List</p> <div class="h-full"> <div class="bg-gray-select m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="flex flex-col p-2 w-60"><label>Distributor ID:
+						<span class="font-semibold">0</span></label> <label>Channels:
+						<span class="font-semibold">1</span></label> <label>Instruments:
+						<span class="font-semibold">15</span></label> <label>Distribution Method:
+						<span class="font-semibold">1</span></label> <label>Note Min/Max:
+						<span class="font-semibold">0-127</span> </label></div> <div class="flex flex-col p-2"><div class="flex flex-row"><label class="text-gray-500">Damper</label> </div> <div class="flex flex-row"><label class="text-gray-500">Polyphonic</label> </div> <div class="flex flex-row"><label class="text-gray-500">Note Overwrite</label>  </div></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="flex flex-col p-2 w-60"><label>Distributor ID:
+						<span class="font-semibold">1</span></label> <label>Channels:
+						<span class="font-semibold">2</span></label> <label>Instruments:
+						<span class="font-semibold">240</span></label> <label>Distribution Method:
+						<span class="font-semibold">10</span></label> <label>Note Min/Max:
+						<span class="font-semibold">0-127</span> </label></div> <div class="flex flex-col p-2"><div class="flex flex-row"><label class="text-gray-500">Damper</label> </div> <div class="flex flex-row"><label class="mr-2">Polyphonic</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"></div> <div class="flex flex-row"><label class="mr-2">Note Overwrite</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"> </div></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="flex flex-col p-2 w-60"><label>Distributor ID:
+						<span class="font-semibold">2</span></label> <label>Channels:
+						<span class="font-semibold">4</span></label> <label>Instruments:
+						<span class="font-semibold">3840</span></label> <label>Distribution Method:
+						<span class="font-semibold">100</span></label> <label>Note Min/Max:
+						<span class="font-semibold">0-127</span> </label></div> <div class="flex flex-col p-2"><div class="flex flex-row"><label class="mr-2">Damper</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"></div> <div class="flex flex-row"><label class="mr-2">Polyphonic</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"></div> <div class="flex flex-row"><label class="mr-2">Note Overwrite</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"> </div></div> </div> <div class="bg-gray-dark hover:bg-gray-700 m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"><div class="flex flex-col p-2 w-60"><label>Distributor ID:
+						<span class="font-semibold">3</span></label> <label>Channels:
+						<span class="font-semibold">8</span></label> <label>Instruments:
+						<span class="font-semibold">61440</span></label> <label>Distribution Method:
+						<span class="font-semibold">1000</span></label> <label>Note Min/Max:
+						<span class="font-semibold">0-127</span> </label></div> <div class="flex flex-col p-2"><div class="flex flex-row"><label class="mr-2">Damper</label> <img src="/_app/immutable/assets/checkmark.b220394a.svg" alt="Checked" class="w-4"></div> <div class="flex flex-row"><label class="text-gray-500">Polyphonic</label> </div> <div class="flex flex-row"><label class="text-gray-500">Note Overwrite</label>  </div></div> </div></div></div></div></div> 
+			
+			<script>
+				{
+					__sveltekit_7rlpo7 = {
+						base: new URL(".", location).pathname.slice(0, -1),
+						env: {}
+					};
+
+					const element = document.currentScript.parentElement;
+
+					const data = [null,null];
+
+					Promise.all([
+						import("./_app/immutable/entry/start.da3b0518.js"),
+						import("./_app/immutable/entry/app.2cc1a4fb.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 2],
+							data,
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>

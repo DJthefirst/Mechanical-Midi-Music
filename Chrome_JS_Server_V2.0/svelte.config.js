@@ -15,15 +15,17 @@ const config = {
 		handler(warning);
 	},
 
+	paths: {
+		base: '/Mechanical-Midi-Music-App',
+	},
 	kit: {
         adapter: adapter({
-            //paths: { base: "/PERSONAL_PATH" },
 			pages: 'build',
             assets: 'build',
-            fallback: 'index.html',
+            fallback: 'none',
             precompress: false,
 			strict: true,
-        })
+        }),
 	}
 };
 
