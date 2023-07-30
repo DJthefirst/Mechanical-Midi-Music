@@ -6,9 +6,12 @@
 	import DistributorList from './Distributors/DistributorList.svelte';
 </script>
 
+<svelte:head>
+    <title> MIDI MUSIC </title> 
+</svelte:head>
 <div
 	class="grid grid-cols-1 md:grid-cols-5 xl:grid-cols-7
-grid-rows-1 md:grid-rows-2 md:h-screen"
+	grid-rows-1 md:grid-rows-2 md:h-screen"
 >
 	<div class="div-grid md:row-span-2 md:h-screen md:col-span-3 xl:col-span-3 overflow-auto">
 		<div>

@@ -38,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@vercel/analytics": "^1.0.1"
+		"@vercel/analytics": "^1.0.1",
+		"svelte-toasts": "^1.1.2"
 	}
 }

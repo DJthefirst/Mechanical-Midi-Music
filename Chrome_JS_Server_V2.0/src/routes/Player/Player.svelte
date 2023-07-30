@@ -2,6 +2,8 @@
 	import MidiIn from './MidiIn.svelte';
 	import MidiOut from './MidiOut.svelte';
 	import MidiPlayer from './MidiPlayer.svelte';
+	import { goto } from '$app/navigation';
+
 </script>
 
 <div class="div-outline">
@@ -13,6 +15,7 @@
 		<div class="flex flex-col justify-between mr-2 mb-3 w-56 min-w-56">
 			<div class="flex flex-col justify-center m-0">
 				<button class="button-player-green w-full"
+					on:click={()=> goto("/upload")}	
 					><i class="material-icons">add</i> Add Song</button
 				>
 				<button class="button-player-green w-full"

@@ -8,6 +8,10 @@ const config = {
 	theme: {
 		extend: {
 			colors: {
+				primary: '#1e2124',
+				secondary: '#205080',
+				success: '#06c258',
+				failure: '#ee5555',
 				gray: {
 					light: '#36393e',
 					dark: '#1e2124',
