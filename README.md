@@ -1,5 +1,5 @@
 # Mechanical Midi Music
-### [Open GUI](https://mechanical-midi-music.vercel.app/)
+### [Open GUI](https://mechanical-midi-music.vercel.app/) *Note Work in Progress
 
 
 **M³** is a framework designed to allow easy development of new microcontroller-based MIDI instruments. 
