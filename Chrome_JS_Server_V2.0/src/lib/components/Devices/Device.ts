@@ -1,7 +1,9 @@
+import type { Connection } from "../Utility/SerialManager";
+
 export class Device {
+	private connection: Connection;
 	public id: number;
 	public name: string;
-	public connection: string;
 	public version: string;
 	public platform: string;
 	public deviceType: string;
@@ -10,9 +12,9 @@ export class Device {
 	public noteMax: number;
 
 	constructor(
+		connection: Connection,
 		id: number,
 		name: string,
-		connection: string,
 		version: string,
 		platform: string,
 		deviceType: string,
@@ -20,14 +22,18 @@ export class Device {
 		noteMin: number,
 		noteMax: number
 	) {
+		this.connection = connection;
 		this.id = id;
 		this.name = name;
-		this.connection = connection;
 		this.version = version;
 		this.platform = platform;
 		this.deviceType = deviceType;
 		this.numInstruments = numInstruments;
 		this.noteMin = noteMin;
 		this.noteMax = noteMax;
+	}
+
+	public getConnection() {
+		return this.connection;
 	}
 }

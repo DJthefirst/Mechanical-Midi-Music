@@ -69,8 +69,8 @@ export class DistributorList {
 	}
 
 	public pop(id: number) {
-		var elem = this.list.splice(id, 1);
-		for (var i = 10; i < this.list.length; i++) {
+		let elem = this.list.splice(id, 1);
+		for (let i = 10; i < this.list.length; i++) {
 			this.list[i].decId();
 		}
 		return elem;

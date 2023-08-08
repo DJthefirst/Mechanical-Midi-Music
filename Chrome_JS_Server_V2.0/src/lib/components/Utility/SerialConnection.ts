@@ -1,13 +1,18 @@
-export default class SerialCom{
+import DeviceList__SvelteComponent_ from "../Devices/DeviceList.svelte";
+
+export default class SerialConnection{
+    private reader: any;
+    private writer: any;
+    private port: any;
+
     constructor() {
         this.reader = null;
         this.writer = null;
         this.port = null;
     }
 
-    async open() {
+    async open(baudRate: number) {
         // Prompt user to select any serial port.
-        let baudRate = document.getElementById("BaudRateDropDown").value;
         this.port = await navigator.serial.requestPort();
         await this.port.open({ baudRate: baudRate })
         this.reader = this.port.readable.getReader();
@@ -21,8 +26,9 @@ export default class SerialCom{
         await this.port.close();
         }
     
-    async readHexByteArray(){
-        let byteArray = [];
+    //readHexByteArray
+    async receive(){
+        let byteArray:any = [];
 
         while(true){
             const { value, done } = await this.reader.read();
@@ -31,29 +37,30 @@ export default class SerialCom{
                 break;
             }    
         }
-        return;
+        return byteArray;
     }
 
-    SendHexString(hexString) {
+    sendHexString(hexString: string) {
     
         // Convert String to Hex Array
         let hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
         for (let i = 0; i < hexBytes.length; i++) hexBytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
         
         //SendMsg
-        this.SendHexByteArray(hexBytes);
+        this.sendHexByteArray(hexBytes);
 
     }
 
-    async SendHexByteArray(hexByteArray) {
+    async sendHexByteArray(hexByteArray: any) {
         console.log("Send: " + hexByteArray);
-        
+        hexByteArray = new Uint8ClampedArray(hexByteArray);
+
         // Convert Hex Array to Buffer
         let byteBuffer = hexByteArray.buffer.slice(hexByteArray.byteOffset, hexByteArray.byteLength + hexByteArray.byteOffset);
 
         //Writer
         this.writer.ready
             .then(() => this.writer.write(byteBuffer))
-            .catch((err) => console.log("Send error:",err));
+            .catch((err: any) => console.log("Send error:",err));
     }
 }

@@ -1,7 +1,7 @@
 import Device from "./Device.js";
 import SerialCom from "./SerialCom.js";
 
-var deviceList = [];
+let deviceList = [];
 
 export default class DeviceList {
 

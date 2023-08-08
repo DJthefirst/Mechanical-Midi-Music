@@ -5,7 +5,9 @@
 	import DistributorManager from "$lib/components/Distributors/DistributorManager.svelte";
 	import Player from "$lib/components/Player/Player.svelte";
 
+	import { startMidi } from "$lib/components/Utility/Initilizations";
 
+	startMidi();
 </script>
 
 <div

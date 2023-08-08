@@ -107,8 +107,8 @@ export class Playlist {
 	}
 
 	public toString() {
-		var current = this.head;
-		var str = '';
+		let current = this.head;
+		let str = '';
 		while (current) {
 			str += current.elem; //output is undefinedundefinedundefined
 			// str += JSON.stringify(current);

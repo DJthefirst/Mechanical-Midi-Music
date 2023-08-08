@@ -1,6 +1,6 @@
 import SerialCom from "./SerialCom.js";
 
-var currentDevId = 0;
+let currentDevId = 0;
 
 export default class Device {
     constructor(ComType) {
