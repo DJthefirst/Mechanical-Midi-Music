@@ -1,9 +1,11 @@
 <script>
-	import Player from './Player/Player.svelte';
-	import DeviceManager from './Devices/DeviceManager.svelte';
-	import DeviceList from './Devices/DeviceList.svelte';
-	import DistributorManager from './Distributors/DistributorManager.svelte';
-	import DistributorList from './Distributors/DistributorList.svelte';
+	import DeviceList from "$lib/components/Devices/DeviceList.svelte";
+	import DeviceManager from "$lib/components/Devices/DeviceManager.svelte";
+	import DistributorList  from "$lib/components/Distributors/DistributorList.svelte";
+	import DistributorManager from "$lib/components/Distributors/DistributorManager.svelte";
+	import Player from "$lib/components/Player/Player.svelte";
+
+
 </script>
 
 <div
