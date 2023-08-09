@@ -40,14 +40,14 @@ export default class SerialConnection{
         return byteArray;
     }
 
-    sendHexString(hexString: string) {
+    async sendHexString(hexString: string) {
     
         // Convert String to Hex Array
         let hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
         for (let i = 0; i < hexBytes.length; i++) hexBytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
         
         //SendMsg
-        this.sendHexByteArray(hexBytes);
+        await this.sendHexByteArray(hexBytes);
 
     }
 

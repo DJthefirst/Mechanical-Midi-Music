@@ -76,7 +76,7 @@ const uint8_t SYSEX_AddDistributor = 0x10;
 const uint8_t SYSEX_RemoveDistributor = 0x11;
 const uint8_t SYSEX_RemoveAllDistributors = 0x12;
 const uint8_t SYSEX_GetNumOfDistributors = 0x13;
-const uint8_t SYSEX_GetDistributorConstruct = 0x15;
+const uint8_t SYSEX_GetDistributorConstruct = 0x15; //(Dump Distributor)
 
 const uint8_t SYSEX_SetDistributorChannels = 0x16;
 const uint8_t SYSEX_SetDistributorInstruments = 0x17;

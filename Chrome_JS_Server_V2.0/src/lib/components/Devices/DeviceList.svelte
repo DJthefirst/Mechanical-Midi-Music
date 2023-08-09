@@ -1,7 +1,7 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
 	import type { Device } from './Device';
-	import { serialManagerStore } from '$lib/store/stores';
+	import { comManagerStore } from '$lib/store/stores';
 	import { deviceListStore } from '$lib/store/stores';
 
 	let selectedBaudRate: number;
@@ -20,7 +20,7 @@
 	//$: console.log(curDevice.id);
 
 	function addDevice() {
-		$serialManagerStore.addDevice(selectedBaudRate);
+		$comManagerStore.addDevice(selectedBaudRate);
 	}
 
 </script>

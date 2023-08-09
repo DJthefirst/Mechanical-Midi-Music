@@ -1,7 +1,14 @@
-import type { Connection } from "../Utility/SerialManager";
+import type { Connection } from "../Utility/ComManager";
+import type { Distributor } from "../Distributors/Distributor";
+import type ComManager from "../Utility/ComManager";
+import { comManagerStore } from "$lib/store/stores";
+
+let comManager: ComManager;
+comManagerStore.subscribe((prev_value) => comManager = prev_value);
 
 export class Device {
 	private connection: Connection;
+	private distributors: Distributor[]; 
 	public id: number;
 	public name: string;
 	public version: string;
@@ -31,9 +38,18 @@ export class Device {
 		this.numInstruments = numInstruments;
 		this.noteMin = noteMin;
 		this.noteMax = noteMax;
+		this.distributors = [];
 	}
 
-	public getConnection() {
+	public getConnection(){
 		return this.connection;
+	}
+
+	public syncDevice(){
+		comManager.syncDevice(this);
+	}
+
+	public syncDistributors(){
+		comManager.syncDistributors(this);
 	}
 }
