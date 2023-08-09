@@ -1,12 +1,11 @@
 <script lang="ts">
-
+	import { midiNodeStore } from '$lib/store/stores';
     import JZZ from 'jzz'; // @ts-ignore
-    import { midiNodeStore } from '$lib/store/midiStore';
 
-    export let port;
+    export let port: any;
 
     let selected = false;
-    let midiNode;
+    let midiNode: any;
 
     // Generate Common Node
     midiNodeStore.subscribe((prev_val) => midiNode = prev_val)

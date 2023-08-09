@@ -12,8 +12,8 @@ export default class SerialConnection{
     }
 
     async open(baudRate: number) {
-        // Prompt user to select any serial port.
-        this.port = await navigator.serial.requestPort();
+        // @ts-ignore 
+        this.port = await navigator.serial.requestPort(); // Prompt user to select any serial port.
         await this.port.open({ baudRate: baudRate })
         this.reader = this.port.readable.getReader();
         this.writer = this.port.writable.getWriter();

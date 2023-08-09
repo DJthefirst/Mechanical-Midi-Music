@@ -1,7 +1,10 @@
 import { writable } from 'svelte/store';
-import { midiNodeStore } from "./midiStore";
 import type { Device } from '../components/Devices/Device';
-import SerialManager from '$lib/components/Utility/SerialManager';
+import type SerialManager from '$lib/components/Utility/SerialManager';
 
-export const deviceListStore = writable<Device[]>([]);
-export const serialManagerStore = writable(new SerialManager);
+import JZZ from 'jzz';
+let midiNode = JZZ.Widget(); // @ts-ignore 
+
+export const midiNodeStore = writable(midiNode);
+export const deviceListStore = writable([]);
+export const serialManagerStore = writable<SerialManager>();

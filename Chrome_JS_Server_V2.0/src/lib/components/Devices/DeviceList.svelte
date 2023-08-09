@@ -4,8 +4,6 @@
 	import { serialManagerStore } from '$lib/store/stores';
 	import { deviceListStore } from '$lib/store/stores';
 
-	let deviceList:any[] = [];
-
 	let selectedBaudRate: number;
 	let baudRates = [
 		{value: 1200},

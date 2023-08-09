@@ -1,8 +1,11 @@
-import { midiNodeStore } from "$lib/store/midiStore";
+import { midiNodeStore } from "$lib/store/stores";
+import SerialManager from "./SerialManager";
 import { serialManagerStore } from "$lib/store/stores";
 
 let midiNode: any;
-let serialManager: any;
+let serialManager = new SerialManager;
+
+serialManagerStore.set(serialManager);
 
 midiNodeStore.subscribe((prev_value) => midiNode = prev_value);
 serialManagerStore.subscribe((prev_value) => serialManager = prev_value);

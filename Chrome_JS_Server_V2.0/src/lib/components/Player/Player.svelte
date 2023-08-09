@@ -6,7 +6,7 @@
 
 <div class="div-outline">
 	<p class="text-center font-bold">MIDI Player</p>
-	<div class="flex min-h-96 flex-row justify-end">
+	<div class="flex min-h-96 flex-row justify-end select-none">
 		<div class="p-2 w-full">
 			<MidiPlayer />
 		</div>
