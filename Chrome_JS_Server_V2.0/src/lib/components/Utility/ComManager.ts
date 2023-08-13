@@ -55,7 +55,7 @@ export default class SerialManager{
         sysExCmd(device,SYSEX_CMD_GetNumDistributors,'');
         let numDistributors = await device.getConnection().receive();
         for(let i = 0; i<numDistributors[0]; i++){
-            sysExCmd(device,SYSEX_CMD_GetDistributorID,i.toHexString());
+            sysExCmd(device,SYSEX_CMD_GetDistributorID,to14BitStr(i));
             let distributorConstruct = await device.getConnection().receive();
             device.updateDistributor(distributorConstruct);
         }

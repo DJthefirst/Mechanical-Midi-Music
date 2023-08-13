@@ -62,8 +62,8 @@ void MessageHandler::processSysEX(MidiMessage message)
 {
     //Check MIDI ID
     if(message.sysExID() != SYSEX_ID) return;
-    //Check Device ID
-    if(message.deviceID() != SYSEX_DEV_ID) return;
+    //Check Device ID or Global ID 0x00;
+    if(message.deviceID() != SYSEX_DEV_ID && message.deviceID() != 0x00) return;
 
     switch(message.sysExCommand()){
         
@@ -89,7 +89,7 @@ void MessageHandler::processSysEX(MidiMessage message)
             sysExSetDeviceBoolean(message);
             break;
         case (SYSEX_AddDistributor):
-            addDistributor(message.buffer + 5);
+            addDistributor(message.sysExCmdOffset());
             break;
         case (SYSEX_RemoveDistributor):
             removeDistributor(message.buffer[6]);
@@ -209,12 +209,28 @@ void MessageHandler::sysExResetDeviceConfig(MidiMessage message){
 }
 
 void MessageHandler::sysExGetDeviceConstruct(MidiMessage message){
-    auto distributorBytes = getDistributor(message.buffer[6]).toSerial();
-    (*m_ptrNetwork).sendMessage(distributorBytes.data(),distributorBytes.size());
+    std::array<std::uint8_t,NUM_DEVICE_CFG_BYTES> deviceObj;
+
+    uint8_t deviceBoolByte = 0;
+    if(Device::OmniMode) deviceBoolByte |= (1 << 0);
+
+    deviceObj[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
+    deviceObj[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
+    deviceObj[2] = deviceBoolByte;
+    deviceObj[3] = FIRMWARE_TYPE;
+    deviceObj[4] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
+    deviceObj[5] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
+    
+
+    for(uint8_t i = 0; i < 20; i++){
+        deviceObj[6+i] = Device::Name[i];
+    }
+
+    (*m_ptrNetwork).sendMessage(deviceObj.data(),deviceObj.size());
 }
 
 void MessageHandler::sysExGetDeviceName(MidiMessage message){
-    (*m_ptrNetwork).sendMessage(Device::Name,20);
+    //(*m_ptrNetwork).sendMessage(Device::Name,20);
 }
 
 void MessageHandler::sysExGetDeviceBoolean(MidiMessage message){
@@ -242,7 +258,9 @@ void MessageHandler::sysExGetNumOfDistributors(MidiMessage message){
 }
 
 void MessageHandler::sysExGetDistributorConstruct(MidiMessage message){
-    auto distributorBytes = getDistributor(message.buffer[6]).toSerial();
+    auto distributorBytes = getDistributor(message.sysExDistributorID()).toSerial();
+    distributorBytes[0] = message.buffer[5];
+    distributorBytes[1] = message.buffer[6];
     (*m_ptrNetwork).sendMessage(distributorBytes.data(),distributorBytes.size());
 }
 
@@ -266,7 +284,7 @@ void MessageHandler::sysExSetDistributorChannels(MidiMessage message){
     uint16_t channels = ((message.buffer[7] << 14) 
                        & (message.buffer[8] << 7) 
                        & (message.buffer[9] << 0));
-    getDistributor(message.buffer[6]).setChannels(channels);
+    getDistributor(message.sysExDistributorID()).setChannels(channels);
 }
 
 void MessageHandler::sysExSetDistributorInstruments(MidiMessage message){
@@ -275,25 +293,25 @@ void MessageHandler::sysExSetDistributorInstruments(MidiMessage message){
                           & (message.buffer[9] << 14) 
                           & (message.buffer[10] << 7) 
                           & (message.buffer[11] << 0));
-    getDistributor(message.buffer[6]).setInstruments(instruments);
+    getDistributor(message.sysExDistributorID()).setInstruments(instruments);
 }
 
 void MessageHandler::sysExSetDistributorMethod(MidiMessage message){
-    getDistributor(message.buffer[6]).setDistributionMethod(DistributionMethod(message.buffer[7]));
+    getDistributor(message.sysExDistributorID()).setDistributionMethod(DistributionMethod(message.buffer[7]));
 }
 
 void MessageHandler::sysExSetDistributorBoolValues(MidiMessage message){
-    getDistributor(message.buffer[6]).setDamperPedal((message.buffer[7] & 0x01) != 0);
-    getDistributor(message.buffer[6]).setPolyphonic((message.buffer[7] & 0x02) != 0);
-    getDistributor(message.buffer[6]).setNoteOverwrite((message.buffer[7] & 0x04) != 0);
+    getDistributor(message.sysExDistributorID()).setDamperPedal((message.buffer[7] & 0x01) != 0);
+    getDistributor(message.sysExDistributorID()).setPolyphonic((message.buffer[7] & 0x02) != 0);
+    getDistributor(message.sysExDistributorID()).setNoteOverwrite((message.buffer[7] & 0x04) != 0);
 }
 
 void MessageHandler::sysExSetDistributorMinMaxNotes(MidiMessage message){
-    getDistributor(message.buffer[6]).setMinMaxNote(message.buffer[7],message.buffer[8]);
+    getDistributor(message.sysExDistributorID()).setMinMaxNote(message.buffer[7],message.buffer[8]);
 }
 
 void MessageHandler::sysExSetDistributorNumPolyphonicNotes(MidiMessage message){
-    getDistributor(message.buffer[6]).setNumPolyphonicNotes(message.buffer[7]);
+    getDistributor(message.sysExDistributorID()).setNumPolyphonicNotes(message.buffer[7]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,16 +332,18 @@ void MessageHandler::addDistributor(Distributor distributor)
 void MessageHandler::addDistributor(uint8_t data[])
 {
     (*m_ptrNetwork).sendMessage(data,16);
-    //Decode Distributor Construct
-    uint16_t distributorID = data[0] | (data[1] << 7);
-    uint16_t channels = data[2] 
+    // Decode Distributor Construct
+    uint16_t distributorID = data[0] << 7| (data[1]);
+    uint16_t channels = 
+          (data[2] << 14)
         | (data[3] << 7) 
-        | (data[4] << 14);
-    uint32_t instruments = data[5]
-        | (data[6] << 7) 
+        | (data[4] << 0);
+    uint32_t instruments = 
+          (data[5] << 28)
+        | (data[6] << 21) 
         | (data[7] << 14)
-        | (data[8] << 21)
-        | (data[9] << 28);
+        | (data[8] << 7)
+        | (data[9] << 0);
     DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
 
     //Create Distributor

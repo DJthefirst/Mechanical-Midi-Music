@@ -84,7 +84,7 @@ public:
 private:
 
     //Midi Message Events
-    void noteOnEvent(uint8_t key, uint8_t velocity);
+    void noteOnEvent(uint8_t key, uint8_t velocity, uint8_t channel);
     void noteOffEvent(uint8_t key, uint8_t velocity);
     void keyPressureEvent(uint8_t key, uint8_t velocity);
     void controlChangeEvent(uint8_t controller, uint8_t value);

@@ -16,12 +16,6 @@
 
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
-//#include "Instruments/FloppyDrives.h"
-#include "Instruments/StepperL298n.h"
-#include "Instruments/StepperMotor.h"
-#include "Instruments/ShiftRegister.h"
-#include "Instruments/Dulcimer.h"
-
 
 //---------- Uncomment Your Selected Device Type ----------
 
@@ -63,13 +57,35 @@ void setup() {
   connection.begin();
   delay(100);
 
-  //----Example HardCoded Distributor----//
+  //----Testing Demo Setup Config----//
+
   //Distributor 1
   Distributor distributor1(&instrumentController);
-  distributor1.setChannels(0xFFFF); // Channels 1-16
-  distributor1.setInstruments(0x0000000F); // Instruments 1-4
-  distributor1.setDistributionMethod(DistributionMethod::StraightThrough);
+  distributor1.setChannels(0x0001); // 1
+  distributor1.setInstruments(0x000000FF); // 1-8
+  distributor1.setDistributionMethod(DistributionMethod::RoundRobinBalance);
   messageHandler.addDistributor(distributor1);
+
+  //Distributor 2
+  Distributor distributor2(&instrumentController);
+  distributor2.setChannels(0x0002); // 2
+  distributor2.setInstruments(0x000000FF); // 1-8
+  distributor2.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  messageHandler.addDistributor(distributor2);
+
+  //Distributor 3
+  Distributor distributor3(&instrumentController);
+  distributor3.setChannels(0x0004); // 3
+  distributor3.setInstruments(0x000000FF); // 1-8
+  distributor3.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  messageHandler.addDistributor(distributor3);
+
+  //Distributor 4
+  Distributor distributor4(&instrumentController);
+  distributor4.setChannels(0x0008); // 4
+  distributor4.setInstruments(0x000000FF); // 1-8
+  distributor4.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  messageHandler.addDistributor(distributor4);
 }
 
 void loop() {

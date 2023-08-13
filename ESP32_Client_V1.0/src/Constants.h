@@ -76,14 +76,15 @@ const uint8_t SYSEX_AddDistributor = 0x10;
 const uint8_t SYSEX_RemoveDistributor = 0x11;
 const uint8_t SYSEX_RemoveAllDistributors = 0x12;
 const uint8_t SYSEX_GetNumOfDistributors = 0x13;
-const uint8_t SYSEX_GetDistributorConstruct = 0x15; //(Dump Distributor)
+const uint8_t SYSEX_GetDistributorConstruct = 0x15;
 
-const uint8_t SYSEX_SetDistributorChannels = 0x16;
-const uint8_t SYSEX_SetDistributorInstruments = 0x17;
-const uint8_t SYSEX_SetDistributorMethod = 0x18;
-const uint8_t SYSEX_SetDistributorBoolValues = 0x19;
-const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x1A;
-const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1B;
+const uint8_t SYSEX_SetDistributorConstruct = 0x16;
+const uint8_t SYSEX_SetDistributorChannels = 0x17;
+const uint8_t SYSEX_SetDistributorInstruments = 0x18;
+const uint8_t SYSEX_SetDistributorMethod = 0x19;
+const uint8_t SYSEX_SetDistributorBoolValues = 0x1A;
+const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x1B;
+const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1C;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;

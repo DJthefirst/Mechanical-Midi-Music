@@ -3,6 +3,20 @@
 #include "Constants.h"
 #include "Arduino.h"
 
+#include <FastLED.h>
+
+//FAST LED Variables
+#define LED_PIN     33
+#define NUM_LEDS    8
+#define BRIGHTNESS  255
+#define LED_TYPE    WS2811
+#define COLOR_ORDER GRB
+CRGB leds[NUM_LEDS];
+
+#define UPDATES_PER_SECOND 100
+
+
+
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
@@ -19,6 +33,10 @@ PwmDriver::PwmDriver()
     for(uint8_t i=0; i < pins.size(); i++){
         pinMode(pins[i], OUTPUT);
     }
+
+    //Setup FAST LED
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+    FastLED.setBrightness(  BRIGHTNESS );
 
     // With all pins setup, let's do a first run reset
     resetAll();
@@ -41,7 +59,7 @@ void PwmDriver::resetAll()
     stopAll();
 }
 
-void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -54,6 +72,7 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
+        setInstumentLedOn(instrument, channel, note, velocity);
         return;
     //}
 }
@@ -66,6 +85,7 @@ void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         m_activePeriod[instrument] = 0;
         digitalWrite(pins[instrument], 0);
         m_numActiveNotes--;
+        setInstumentLedOff(instrument);
         return;
     }
 }
@@ -81,6 +101,7 @@ void PwmDriver::stopAll(){
     for(uint8_t i = 0; i < pins.size(); i++){
         digitalWrite(pins[i], LOW);
     }
+    resetLEDs();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,4 +176,34 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
     m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);
 
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//FAST LED Helper Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Set an Instrument Led to on
+void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
+    static uint8_t offset = 0;
+    offset++;
+    //uint8_t hue = (note%25)*10; //Hue by Note
+    //uint8_t hue = (note%128)*2; //Hue by Pitch
+    //uint8_t hue = (instrument%2)*125; //Hue by Instrument Position
+    uint8_t hue = (channel%4)*64+offset; //Hue by Instrument Position
+    leds[instrument] = CHSV(hue,255,velocity*2); //Brightness by velocity
+    //leds[instrument] = CHSV(hue,255,255); 
+    FastLED.show();
+}
+
+//Set an Instrument Led to off
+void PwmDriver::setInstumentLedOff(uint8_t instrument){
+    leds[instrument] = CRGB::Black; 
+    FastLED.show();
+}
+
+//Reset Leds
+void PwmDriver::resetLEDs(){
+    for( int i = 0; i < NUM_LEDS; ++i) {
+        leds[i] = CRGB::Black;
+    }
 }

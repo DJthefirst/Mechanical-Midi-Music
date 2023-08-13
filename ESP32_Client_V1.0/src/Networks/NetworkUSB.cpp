@@ -42,5 +42,13 @@ void NetworkUSB::readMessage() {
 }
 
 void NetworkUSB::sendMessage(uint8_t message[], uint8_t length) {
+    uint8_t header[] = {0xF0, 0x7D, 0x7F, 0x7F};
+    uint8_t tail[] = {0xF7};
+    Serial.write(header,4);
     Serial.write(message,length);
+    Serial.write(tail,1);
+}
+
+void NetworkUSB::sendMessage(String msg) {
+    Serial.println(msg);
 }

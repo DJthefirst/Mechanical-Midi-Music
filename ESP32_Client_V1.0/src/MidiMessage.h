@@ -23,10 +23,15 @@ struct MidiMessage
     uint8_t type() {return buffer[0] & 0b11110000;}
     uint8_t sysCommonType(){return buffer[0] & 0b00001111;}
     uint8_t channel(){return buffer[0] & 0b00001111;}
-    uint8_t sysExID(){return buffer[1];}
-    uint16_t deviceID(){return (buffer[2] << 7) | buffer[3];} //Combine message SysEx ID LSB and MSB
-    uint8_t sysExCommand(){return buffer[4];}
 
     uint8_t CC_Control(){return buffer[1];}
     uint8_t CC_Value(){return buffer[2];}
+
+    //SYSEX MSG Helpers
+    uint8_t sysExID(){return buffer[1];}
+    uint16_t deviceID(){return (buffer[2] << 7) | buffer[3];} //Combine message SysEx ID LSB and MSB
+    uint8_t sysExCommand(){return buffer[4];}
+    uint8_t* sysExCmdOffset(){return buffer + 5;} 
+
+    uint16_t sysExDistributorID(){return (buffer[5] << 7) | buffer[6];}
 };

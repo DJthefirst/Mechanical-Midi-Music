@@ -35,7 +35,7 @@ void Distributor::processMessage(MidiMessage message)
         noteOffEvent(message.buffer[1],message.buffer[2]);
         break; 
     case(MIDI_NoteOn):
-        noteOnEvent(message.buffer[1],message.buffer[2]);
+        noteOnEvent(message.buffer[1],message.buffer[2],message.channel());
         break;
     case(MIDI_KeyPressure):
         keyPressureEvent(message.buffer[1],message.buffer[2]);
@@ -50,7 +50,7 @@ void Distributor::processMessage(MidiMessage message)
         channelPressureEvent(message.buffer[1]);
         break;
     case(MIDI_PitchBend):
-        pitchBendEvent((message.buffer[1] | message.buffer[2] << 7));
+        pitchBendEvent((message.buffer[1] << 7 | message.buffer[2]));
         break;
     case(MIDI_SysCommon):
         break;
@@ -70,7 +70,7 @@ void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
     }
 }
 
-void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity)
+void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
 {
     //Check if note has 0 velocity representing a note off event
     if((Velocity == 0)){
@@ -81,7 +81,7 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity)
     //Get Next Instument Based on Distribution Method and Play Note
     uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
-        (*m_ptrInstrumentController).playNote(instrument, Note, Velocity);
+        (*m_ptrInstrumentController).playNote(instrument, Note, Velocity, channel);
     }
 }
 
@@ -305,16 +305,16 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
 
     //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
     // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
-    distributorObj[0] = 0; //Device ID LSB
-    distributorObj[1] = 0; //Device ID MSB
-    distributorObj[2] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
+    distributorObj[0] = 0; //Distributor ID MSB
+    distributorObj[1] = 0; //Distributor ID LSB
+    distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
     distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
-    distributorObj[4] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
-    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 0) & 0x7F);
-    distributorObj[6] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
+    distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
+    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 28) & 0x7F);
+    distributorObj[6] = static_cast<uint8_t>((m_instruments >> 21) & 0x7F);
     distributorObj[7] = static_cast<uint8_t>((m_instruments >> 14) & 0x7F);
-    distributorObj[8] = static_cast<uint8_t>((m_instruments >> 21) & 0x7F);
-    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 28) & 0x0F);
+    distributorObj[8] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
+    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 0) & 0x0F);
     distributorObj[10] = static_cast<uint8_t>(m_distributionMethod);
     distributorObj[11] = distributorBoolByte;
     distributorObj[12] = m_minNote;

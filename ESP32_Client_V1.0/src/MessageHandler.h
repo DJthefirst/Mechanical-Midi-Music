@@ -28,6 +28,9 @@ private:
     Network* m_ptrNetwork;
 
 public:
+    //Set Network Connection
+    void setNetwork(Network* ptrNetwork);
+
     //Msg Handler 
     explicit MessageHandler(InstrumentController* ptrInstrumentController);
     void processMessage(MidiMessage message);
@@ -36,8 +39,6 @@ public:
     void addDistributor();
     void addDistributor(uint8_t data[]);
     void addDistributor(Distributor distributor);
-
-    void setNetwork(Network* ptrNetwork);
     void removeDistributor(uint8_t id);
     void removeAllDistributors();
     Distributor& getDistributor(uint8_t id);
