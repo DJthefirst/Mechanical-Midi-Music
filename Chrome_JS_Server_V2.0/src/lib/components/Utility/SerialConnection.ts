@@ -1,4 +1,5 @@
 import DeviceList__SvelteComponent_ from "../Devices/DeviceList.svelte";
+import { SYSEX_RegExpEnd, SYSEX_RegExpMsg } from "./Constants";
 
 export default class SerialConnection{
     private reader: any;
@@ -27,34 +28,36 @@ export default class SerialConnection{
         }
     
     //readHexByteArray
-    async receive(){
-        let byteArray:any = [];
-
+    async receive(): Promise<Uint8Array>{
+        let hexString: string = "";
+        let result;
         while(true){
+            if ((result = SYSEX_RegExpMsg.exec(hexString)) !== null){ //@ts-ignore
+                hexString = hexString.slice(result.indices[0][1]);
+                return result[1].toHex();
+            }
+            if ((result = SYSEX_RegExpEnd.exec(hexString)) !== null){ //@ts-ignore
+                hexString = hexString.slice(result.indices[0][1]);
+                console.log('Bad Msg' + String(result[0]));
+                continue;
+            }
+
             const { value, done } = await this.reader.read();
-            console.log(value);
-            if (done) {
-                break;
-            }    
+            for(let num of value){ 
+                hexString += num.toHexString();
+            }
         }
-        return byteArray;
     }
 
     async sendHexString(hexString: string) {
-    
-        // Convert String to Hex Array
-        let hexBytes = new Uint8Array(Math.ceil(hexString.length / 2));
-        for (let i = 0; i < hexBytes.length; i++) hexBytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
-        
         //SendMsg
-        await this.sendHexByteArray(hexBytes);
+        await this.sendHexByteArray(hexString.toHex());
 
     }
 
     async sendHexByteArray(hexByteArray: any) {
-        console.log("Send: " + hexByteArray);
+        // console.log("Send: " + hexByteArray);
         hexByteArray = new Uint8ClampedArray(hexByteArray);
-
         // Convert Hex Array to Buffer
         let byteBuffer = hexByteArray.buffer.slice(hexByteArray.byteOffset, hexByteArray.byteLength + hexByteArray.byteOffset);
 

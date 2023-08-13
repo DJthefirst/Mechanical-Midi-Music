@@ -6,5 +6,5 @@ import JZZ from 'jzz';
 let midiNode = JZZ.Widget(); // @ts-ignore 
 
 export const midiNodeStore = writable(midiNode);
-export const deviceListStore = writable([]);
+export const deviceListStore = writable<Device[]>([]);
 export const comManagerStore = writable<ComManager>();

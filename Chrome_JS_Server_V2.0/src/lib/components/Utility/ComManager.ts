@@ -1,15 +1,18 @@
 import { Device } from "../Devices/Device";
 import SerialConnection from "./SerialConnection";
 import { deviceListStore } from "$lib/store/stores";
+import {} from "constants";
+import { SYSEX_CMD_GetDeviceConstructOnly, SYSEX_CMD_GetDistributorID, SYSEX_CMD_GetNumDistributors, SYSEX_END, SYSEX_START } from "./Constants";
+import {} from "./helpers"
 
 let i = 1;
-let name = ['Dulcimer', 'AirCompressor', 'FloppyDrive','StepperMotor'];
-let platform = ['ESP32','Ardino Nano', 'Arduino Uno', 'Arduino Mega'];
-let deviceType = ['Shift Register', 'PWM Driver', 'FloppyDrive','StepperMotor'];
+//let name = ['Dulcimer', 'AirCompressor', 'FloppyDrive','StepperMotor'];
+//let platform = ['ESP32','Ardino Nano', 'Arduino Uno', 'Arduino Mega'];
+//let deviceType = ['Shift Register', 'PWM Driver', 'FloppyDrive','StepperMotor'];
 
 let deviceList: any;
 
-deviceListStore.subscribe((prev_value) => deviceList = prev_value);
+deviceListStore.subscribe((prev_value: any) => deviceList = prev_value);
 
 
 export interface Connection {
@@ -25,8 +28,9 @@ export default class SerialManager{
     public async addDevice(baudRate: number){
         let connection = new SerialConnection();
         await connection.open(baudRate);
-        let device = new Device(connection, i, name[i], '001.1', platform[i], deviceType[i], i*4, 0, 127);
-        this.syncDistributors(device);
+        // Fix this to not require Dev ID on init
+        let device = new Device(connection, 1, "temp", '000.0', "Platfourm", "device", 0, 0, 127);
+        this.syncDevice(device);
         deviceList.push(device);
         deviceListStore.set(deviceList);
     }
@@ -37,41 +41,42 @@ export default class SerialManager{
         }
     }
 
+    ////////////////////////////////////////////////
+    // SYSEX Commands
+    ////////////////////////////////////////////////
 
     public async syncDevice(device: Device) {
-        sysExCmd(device,SYSEX_CMD_GetDistributorConstructID,'0000');
+        sysExCmd(device,SYSEX_CMD_GetDeviceConstructOnly,'');
+        let deviceConstruct = await device.getConnection().receive();
+        device.update(deviceConstruct);
+        this.syncDistributors(device);
     }
 
     public async syncDistributors(device: Device) {
         sysExCmd(device,SYSEX_CMD_GetNumDistributors,'');
-        //sysExCmd(device,SYSEX_CMD_GetDistributorConstructID,'0000');
-        //sysExCmd(device,SYSEX_CMD_SetDistributionMethod,'000003');
-        console.log("waiting for result");
-        let result = await device.getConnection().receive();
-        console.log("result: " + String(result))
+        let numDistributors = await device.getConnection().receive();
+        for(let i = 0; i<numDistributors[0]; i++){
+            sysExCmd(device,SYSEX_CMD_GetDistributorID,i.toHexString());
+            let distributorConstruct = await device.getConnection().receive();
+            device.updateDistributor(distributorConstruct);
+        }
     }
 }
+
+    ////////////////////////////////////////////////
+    // Helper Functions
+    ////////////////////////////////////////////////
 
 function sysExCmd(device: Device, cmd:string, payload?:any){
     if (payload == 'undefined') payload = '';
     device.getConnection().sendHexString(
-    SYSEX_START + to14Bit(device.id) + cmd + payload + SYSEX_END
+    SYSEX_START + to14BitStr(device.id) + cmd + payload + SYSEX_END
     );
-    console.log(SYSEX_START + to14Bit(device.id) + cmd + payload + SYSEX_END)
+    console.log(SYSEX_START + to14BitStr(device.id) + cmd + payload + SYSEX_END)
 }
 
-function to14Bit(num: number){
-    let result = (num & 0b01111111).toString(16);
-    result = (result.length < 2) ? '0' + result : result;
-    let result2 = ((num >> 8) & 0b01111111).toString(16);
-    result2 = (result2.length < 2) ? '0' + result2 : result2;
+function to14BitStr(num: number){
+    let result = (num & 0b01111111).toHexString();
+    let result2 = ((num >> 8) & 0b01111111).toHexString();
     return(result2 + result);
 }
-
-const SYSEX_START = 'F07D';
-const SYSEX_END = 'F7';
-
-const SYSEX_CMD_GetDeviceConstruct = '02';
-const SYSEX_CMD_GetNumDistributors = '13';
-const SYSEX_CMD_GetDistributorConstructID = '15';
-const SYSEX_CMD_SetDistributionMethod = '17';
