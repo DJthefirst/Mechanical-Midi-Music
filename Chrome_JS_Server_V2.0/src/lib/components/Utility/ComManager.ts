@@ -1,7 +1,7 @@
 import { Device } from "../Devices/Device";
 import SerialConnection from "./SerialConnection";
 import { deviceListStore } from "$lib/store/stores";
-import {} from "constants";
+import {} from "./Constants";
 import { SYSEX_CMD_GetDeviceConstructOnly, SYSEX_CMD_GetDistributorID, SYSEX_CMD_GetNumDistributors, SYSEX_END, SYSEX_START } from "./Constants";
 import {} from "./helpers"
 
@@ -13,7 +13,6 @@ let i = 1;
 let deviceList: any;
 
 deviceListStore.subscribe((prev_value: any) => deviceList = prev_value);
-
 
 export interface Connection {
     open: (baudRate:number) => void;
@@ -29,7 +28,7 @@ export default class SerialManager{
         let connection = new SerialConnection();
         await connection.open(baudRate);
         // Fix this to not require Dev ID on init
-        let device = new Device(connection, 1, "temp", '000.0', "Platfourm", "device", 0, 0, 127);
+        let device = new Device(connection, 0, "temp", '000.0', "Platfourm", "device", 0, 0, 127);
         this.syncDevice(device);
         deviceList.push(device);
         deviceListStore.set(deviceList);

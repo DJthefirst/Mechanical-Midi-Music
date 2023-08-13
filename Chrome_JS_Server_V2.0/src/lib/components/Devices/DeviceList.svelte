@@ -1,8 +1,11 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
 	import type { Device } from './Device';
-	import { comManagerStore } from '$lib/store/stores';
+	import { comManagerStore, distributorListStore } from '$lib/store/stores';
 	import { deviceListStore } from '$lib/store/stores';
+	import { DistributorList } from '../Distributors/Distributor';
+	
+	//distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
 
 	let selectedBaudRate: number;
 	let baudRates = [
@@ -21,6 +24,14 @@
 
 	function addDevice() {
 		$comManagerStore.addDevice(selectedBaudRate);
+	}
+
+	function selectDevice(device: Device) {
+		curDevice = device;
+
+		let distributorList = new DistributorList();
+		for( let distributor of device.getDistributors()) distributorList.append(distributor);
+		$distributorListStore = distributorList;
 	}
 
 </script>
@@ -50,7 +61,7 @@
 			<div
 				class="{device === curDevice ? 'bg-gray-select' : 'bg-gray-dark hover:bg-gray-700'} 
                     m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"
-				on:click={() => (curDevice = device)}
+				on:click={() => selectDevice(device)}
 			>
 				<div class="font-bold flex flex-row flex-wrap justify-between w-full my-2 mx-4">
 					<label

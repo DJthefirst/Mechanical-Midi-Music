@@ -1,4 +1,3 @@
-import DeviceList__SvelteComponent_ from "../Devices/DeviceList.svelte";
 import { SYSEX_RegExpEnd, SYSEX_RegExpMsg } from "./Constants";
 
 export default class SerialConnection{

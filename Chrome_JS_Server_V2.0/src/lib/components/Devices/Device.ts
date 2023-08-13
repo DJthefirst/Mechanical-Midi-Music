@@ -48,6 +48,10 @@ export class Device {
 		return this.connection;
 	}
 
+	public getDistributors(){
+		return this.distributors;
+	}
+
 	public syncDevice(){
 		comManager.syncDevice(this);
 	}

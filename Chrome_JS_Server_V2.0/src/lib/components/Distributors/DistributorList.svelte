@@ -1,22 +1,18 @@
-<script>
+<script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
-
-	import { Distributor, DistributorList } from './Distributor';
+	import { distributorListStore } from '$lib/store/stores';
+	import type { DistributorList } from './Distributor';
 
 	$: curDistributorId = 0;
 	$: console.log(curDistributorId);
 
-	let distributorList = new DistributorList();
+	let distributorList : DistributorList;
+	distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
 
-	let distributor1 = new Distributor(0x0001, 0x0000000f, 1, 0, 127, 1, false, false, false);
-	let distributor2 = new Distributor(0x0002, 0x000000f0, 10, 0, 127, 1, false, true, true);
-	let distributor3 = new Distributor(0x0004, 0x00000f00, 100, 0, 127, 1, true, true, true);
-	let distributor4 = new Distributor(0x0008, 0x0000f000, 1000, 0, 127, 1, true, false, false);
-
-	distributorList.append(distributor1);
-	distributorList.append(distributor2);
-	distributorList.append(distributor3);
-	distributorList.append(distributor4);
+	// let distributor1 = new Distributor(0x0001, 0x0000000f, 1, 0, 127, 1, false, false, false);
+	// let distributor2 = new Distributor(0x0002, 0x000000f0, 10, 0, 127, 1, false, true, true);
+	// let distributor3 = new Distributor(0x0004, 0x00000f00, 100, 0, 127, 1, true, true, true);
+	// let distributor4 = new Distributor(0x0008, 0x0000f000, 1000, 0, 127, 1, true, false, false);
 </script>
 
 <div class="div-outline overflow-y-auto">
