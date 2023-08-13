@@ -56,7 +56,7 @@ export class Device {
 		this.id = (array[0] + array[1]);
 		this.deviceType = String(array[3]);
 		this.version = String(array[4] << 7 + array[5]); //@ts-ignore
-		this.name = String.fromCharCode(array.slice(6,26)); //@ts-ignore
+		this.name = String.fromCharCode(...array.slice(6,25)); //@ts-ignore
 		deviceListStore.set(deviceList);
 	}
 
