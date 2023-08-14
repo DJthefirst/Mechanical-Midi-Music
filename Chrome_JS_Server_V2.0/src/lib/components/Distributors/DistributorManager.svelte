@@ -22,15 +22,15 @@
 	</div>
 	<div class="flex justify-start flex-wrap">
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label>
+			<label for="deviceName" class="font-semibold my-2 ml-4">Damper Enable</label>
 			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label>
+			<label for="deviceName" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
 			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Omni Mode Enable</label>
+			<label for="deviceName" class="font-semibold my-2 ml-4">Note Overwrite</label>
 			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 	</div>

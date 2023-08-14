@@ -217,13 +217,16 @@ void MessageHandler::sysExGetDeviceConstruct(MidiMessage message){
     deviceObj[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
     deviceObj[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
     deviceObj[2] = deviceBoolByte;
-    deviceObj[3] = FIRMWARE_TYPE;
-    deviceObj[4] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
-    deviceObj[5] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
+    deviceObj[3] = MAX_NUM_INSTRUMENTS;
+    deviceObj[4] = INSTRUMENT_TYPE;
+    deviceObj[5] = PLATFORM_TYPE;
+    deviceObj[6] = MIN_MIDI_NOTE;
+    deviceObj[7] = MAX_MIDI_NOTE;
+    deviceObj[8] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
+    deviceObj[9] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
     
-
     for(uint8_t i = 0; i < 20; i++){
-        deviceObj[6+i] = Device::Name[i];
+        deviceObj[10+i] = Device::Name[i];
     }
 
     (*m_ptrNetwork).sendMessage(deviceObj.data(),deviceObj.size());

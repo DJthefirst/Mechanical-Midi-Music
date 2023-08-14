@@ -6,6 +6,15 @@
 	$: curDistributorId = 0;
 	$: console.log(curDistributorId);
 
+	let DistributionMethodType = [
+		"StriaghtThrough",
+		"RoundRobin",
+		"RoundRobinBalance",
+		"Ascending",
+		"Descending",
+		"Stack"
+	]
+
 	let distributorList : DistributorList;
 	distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
 
@@ -34,15 +43,15 @@
 					</label>
 					<label>
 						Channels:
-						<span class="font-semibold">{distributor.channels}</span>
+						<span class="font-semibold">0x{distributor.channels.toString(16).padZero(4).toUpperCase()}</span>
 					</label>
 					<label>
 						Instruments:
-						<span class="font-semibold">{distributor.instruments}</span>
+						<span class="font-semibold">0x{distributor.instruments.toString(16).padZero(8).toUpperCase()}</span>
 					</label>
 					<label>
 						Distribution Method:
-						<span class="font-semibold">{distributor.distributionMethod}</span>
+						<span class="font-semibold">{DistributionMethodType[distributor.distributionMethod]}</span>
 					</label>
 					<label>
 						Note Min/Max:

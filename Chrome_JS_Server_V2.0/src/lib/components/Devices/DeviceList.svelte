@@ -2,10 +2,28 @@
 	import checkmark from '$lib/images/checkmark.svg';
 	import type { Device } from './Device';
 	import { comManagerStore, distributorListStore } from '$lib/store/stores';
-	import { deviceListStore } from '$lib/store/stores';
+	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
 	import { DistributorList } from '../Distributors/Distributor';
 	
 	//distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
+	let InstrumentType = [
+		"N/A",
+		"PWM",
+		"Shift Register",
+		"Stepper Motor",
+		"Floppy Drive"
+	]
+
+	let PlatformType = [
+		"N/A",
+		"ESP32",
+		"ESP8266",
+		"Arduino Uno",
+		"Arduino Mega",
+		"Arduino Due",
+		"Arduino Micro",
+		"Arduino Nano"
+	]
 
 	let selectedBaudRate: number;
 	let baudRates = [
@@ -19,15 +37,13 @@
 		{value: 115200},
 		{value: 230400}
 	];
-	let curDevice: Device;
-	//$: console.log(curDevice.id);
 
 	function addDevice() {
 		$comManagerStore.addDevice(selectedBaudRate);
 	}
 
 	function selectDevice(device: Device) {
-		curDevice = device;
+		selectedDeviceStore.set(device);
 
 		let distributorList = new DistributorList();
 		for( let distributor of device.getDistributors()) distributorList.append(distributor);
@@ -59,7 +75,7 @@
 		{#each $deviceListStore as device}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
-				class="{device === curDevice ? 'bg-gray-select' : 'bg-gray-dark hover:bg-gray-700'} 
+				class="{device === $selectedDeviceStore ? 'bg-gray-select' : 'bg-gray-dark hover:bg-gray-700'} 
                     m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"
 				on:click={() => selectDevice(device)}
 			>
@@ -69,7 +85,7 @@
 						<span>{device.id}</span>
 					</label>
 					<span class="px-2">{device.name}</span>
-					<span>{"Connection"}</span>
+					<span>{"Serial"}</span>
 				</div>
 				<div class="flex flex-col py-2">
 					<label class="px-2 text-sm italic text-gray-400 font-extralight"
@@ -78,11 +94,11 @@
 					</label>
 					<label class="px-2"
 						>Platform:
-						<span class="font-semibold">{device.platform}</span>
+						<span class="font-semibold">{PlatformType[device.platform]}</span>
 					</label>
 					<label class="px-2"
-						>Device Type:
-						<span class="font-semibold">{device.deviceType}</span>
+						>Instrument:
+						<span class="font-semibold">{InstrumentType[device.instrumentType]}</span>
 					</label>
 					<label class="px-2"
 						>Number of Instruments:
@@ -90,7 +106,7 @@
 					</label>
 					<label class="px-2"
 						>Notes:
-						<span class="font-semibold">{device.noteMin}-{device.noteMax}</span>
+						<span class="font-semibold">{device.noteMin.toMidiNote()}  <b>-</b> {device.noteMax.toMidiNote()}</span>
 					</label>
 				</div>
 			</div>

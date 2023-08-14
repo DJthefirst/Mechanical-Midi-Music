@@ -1,15 +1,11 @@
 import { Device } from "../Devices/Device";
 import SerialConnection from "./SerialConnection";
 import { deviceListStore } from "$lib/store/stores";
-import {} from "./Constants";
+import { SYSEX_CMD_SetDeviceBoolean, SYSEX_CMD_SetDeviceName, SYSEX_CMD_SetDistributorID } from "./Constants";
 import { SYSEX_CMD_GetDeviceConstructOnly, SYSEX_CMD_GetDistributorID, SYSEX_CMD_GetNumDistributors, SYSEX_END, SYSEX_START } from "./Constants";
 import {} from "./helpers"
 
 let i = 1;
-//let name = ['Dulcimer', 'AirCompressor', 'FloppyDrive','StepperMotor'];
-//let platform = ['ESP32','Ardino Nano', 'Arduino Uno', 'Arduino Mega'];
-//let deviceType = ['Shift Register', 'PWM Driver', 'FloppyDrive','StepperMotor'];
-
 let deviceList: any;
 
 deviceListStore.subscribe((prev_value: any) => deviceList = prev_value);
@@ -27,8 +23,7 @@ export default class SerialManager{
     public async addDevice(baudRate: number){
         let connection = new SerialConnection();
         await connection.open(baudRate);
-        // Fix this to not require Dev ID on init
-        let device = new Device(connection, 0, "temp", '000.0', "Platfourm", "device", 0, 0, 127);
+        let device = new Device(connection, 0, 0, 0, 0, 0, 127, 0, "Not Connected");
         this.syncDevice(device);
         deviceList.push(device);
         deviceListStore.set(deviceList);
@@ -49,6 +44,16 @@ export default class SerialManager{
         let deviceConstruct = await device.getConnection().receive();
         device.update(deviceConstruct);
         this.syncDistributors(device);
+    }
+
+    public async setDevice(device: Device){
+        let asciiName = device.name.toAsciiString();
+        while (asciiName.length < 40 ) asciiName += "00";
+        let deviceBoolean = device.isOnmiMode ? 0x01 : 0x00;
+
+        sysExCmd(device,SYSEX_CMD_SetDeviceName,asciiName);
+        sysExCmd(device,SYSEX_CMD_SetDeviceBoolean,deviceBoolean);
+        this.syncDevice(device);
     }
 
     public async syncDistributors(device: Device) {

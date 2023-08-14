@@ -13,34 +13,36 @@ export class Device {
 	private connection: Connection;
 	private distributors: Distributor[]; 
 	public id: number;
-	public name: string;
-	public version: string;
-	public platform: string;
-	public deviceType: string;
+	public isOnmiMode: boolean;
 	public numInstruments: number;
+	public instrumentType: number;
+	public platform: number;
 	public noteMin: number;
 	public noteMax: number;
+	public version: number;
+	public name: string;
 
 	constructor(
 		connection: Connection,
 		id: number,
-		name: string,
-		version: string,
-		platform: string,
-		deviceType: string,
 		numInstruments: number,
+		instrumentType: number,
+		platform: number,
 		noteMin: number,
-		noteMax: number
+		noteMax: number,
+		version: number,
+		name: string,
 	) {
 		this.connection = connection;
 		this.id = id;
-		this.name = name;
+		this.isOnmiMode = false,
+		this.numInstruments = numInstruments;
+		this.instrumentType = instrumentType;
+		this.platform = platform;
+		this.noteMin = noteMin;
+		this.noteMax = noteMax;
 		this.version = version;
-		this.platform = 'platform';
-		this.deviceType = deviceType;
-		this.numInstruments = 0;
-		this.noteMin = 0;
-		this.noteMax = 127;
+		this.name = name,
 		this.distributors = [];
 	}
 
@@ -56,11 +58,21 @@ export class Device {
 		comManager.syncDevice(this);
 	}
 
+	public setDevice(name : string, isOmniMode: boolean){
+		this.name = name;
+		this.isOnmiMode = isOmniMode;
+		comManager.setDevice(this);
+	}
+
 	public update(array: Uint8Array){
 		this.id = (array[0] + array[1]);
-		this.deviceType = String(array[3]);
-		this.version = String(array[4] << 7 + array[5]); //@ts-ignore
-		this.name = String.fromCharCode(...array.slice(6,25)); //@ts-ignore
+		this.numInstruments = array[3];
+		this.instrumentType = array[4];
+		this.platform = array[5];
+		this.noteMin = array[6];
+		this.noteMax = array[7];
+		this.version = array[8] << 7 + array[9];
+		this.name = String.fromCharCode(...array.slice(10,30).filter((val) => (val !== 0))); //@ts-ignore
 		deviceListStore.set(deviceList);
 	}
 

@@ -19,13 +19,13 @@
 
 //---------- Uncomment Your Selected Device Type ----------
 
-#define DEVICE_TYPE_ESP32
-//#define DEVICE_TYPE_ESP8266
-//#define DEVICE_TYPE_ARDUINO_UNO
-//#define DEVICE_TYPE_ARDUINO_MEGA
-//#define DEVICE_TYPE_ARDUINO_DUE
-//#define DEVICE_TYPE_ARDUINO_MICRO
-//#define DEVICE_TYPE_ARDUINO_NANO
+#define PLATFORM_ESP32
+//#define PLATFORM_ESP8266
+//#define PLATFORM_ARDUINO_UNO
+//#define PLATFORM_ARDUINO_MEGA
+//#define PLATFORM_ARDUINO_DUE
+//#define PLATFORM_ARDUINO_MICRO
+//#define PLATFORM_ARDUINO_NANO
 
 
 //---------- Uncomment Your Selected Instrument Type ----------

@@ -310,11 +310,11 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
     distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
     distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
     distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
-    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 28) & 0x7F);
+    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 28) & 0x0F);
     distributorObj[6] = static_cast<uint8_t>((m_instruments >> 21) & 0x7F);
     distributorObj[7] = static_cast<uint8_t>((m_instruments >> 14) & 0x7F);
     distributorObj[8] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
-    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 0) & 0x0F);
+    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 0) & 0x7F);
     distributorObj[10] = static_cast<uint8_t>(m_distributionMethod);
     distributorObj[11] = distributorBoolByte;
     distributorObj[12] = m_minNote;
