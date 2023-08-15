@@ -1,9 +1,9 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
 	import type { Device } from './Device';
-	import { comManagerStore, distributorListStore } from '$lib/store/stores';
+	import { comManagerStore, distributorListStore, selectedDistributorStore } from '$lib/store/stores';
 	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
-	import { DistributorList } from '../Distributors/Distributor';
+	import { DistributorList } from '../Distributors/DistributorList';
 	
 	//distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
 	let InstrumentType = [
@@ -43,7 +43,7 @@
 	}
 
 	function removeDevice() {
-		$comManagerStore.removeDevice($selectedDeviceStore);
+		$selectedDeviceStore.remove();
 	}
 
 	function selectDevice(device: Device) {
@@ -53,6 +53,7 @@
 		let distributorList = new DistributorList();
 		for( let distributor of device.getDistributors()) distributorList.append(distributor);
 		$distributorListStore = distributorList;
+		if (device.getDistributors().length > 0) $selectedDistributorStore = device.getDistributors()[0];
 	}
 
 </script>

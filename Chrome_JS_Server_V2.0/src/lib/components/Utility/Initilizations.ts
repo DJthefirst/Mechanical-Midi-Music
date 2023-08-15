@@ -1,10 +1,12 @@
-import { midiNodeStore } from "$lib/store/stores";
+import { distributorListStore, midiNodeStore } from "$lib/store/stores";
 import ComManager from "./ComManager";
 import { comManagerStore } from "$lib/store/stores";
+import { DistributorList } from "../Distributors/DistributorList";
 
 let midiNode: any;
 let comManager = new ComManager;
 
+distributorListStore.set(new DistributorList);
 comManagerStore.set(comManager);
 
 midiNodeStore.subscribe((prev_value) => midiNode = prev_value);

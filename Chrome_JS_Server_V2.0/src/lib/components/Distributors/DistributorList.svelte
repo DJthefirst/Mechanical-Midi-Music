@@ -1,10 +1,7 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
-	import { distributorListStore } from '$lib/store/stores';
-	import type { DistributorList } from './Distributor';
-
-	$: curDistributorId = 0;
-	$: console.log(curDistributorId);
+	import { distributorListStore, selectedDistributorStore } from '$lib/store/stores';
+	import type { DistributorList } from './DistributorList';
 
 	let DistributionMethodType = [
 		"StriaghtThrough",
@@ -15,26 +12,19 @@
 		"Stack"
 	]
 
-	let distributorList : DistributorList;
-	distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
-
-	// let distributor1 = new Distributor(0x0001, 0x0000000f, 1, 0, 127, 1, false, false, false);
-	// let distributor2 = new Distributor(0x0002, 0x000000f0, 10, 0, 127, 1, false, true, true);
-	// let distributor3 = new Distributor(0x0004, 0x00000f00, 100, 0, 127, 1, true, true, true);
-	// let distributor4 = new Distributor(0x0008, 0x0000f000, 1000, 0, 127, 1, true, false, false);
 </script>
 
 <div class="div-outline overflow-y-auto">
 	<p class="text-center font-bold">Distributor List</p>
 	<div class="h-full">
-		{#each distributorList as distributor}
+		{#each $distributorListStore as distributor}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
-				class="{distributor.getId() == curDistributorId
+				class="{distributor.getId() == $selectedDistributorStore.getId()
 					? 'bg-gray-select'
 					: 'bg-gray-dark hover:bg-gray-700'} 
                     m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"
-				on:click={() => (curDistributorId = distributor.getId())}
+				on:click={() => ($selectedDistributorStore = distributor)}
 			>
 				<div class="flex flex-col p-2 w-60">
 					<label>

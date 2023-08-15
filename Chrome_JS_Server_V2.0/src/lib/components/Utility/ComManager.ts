@@ -1,17 +1,15 @@
 import { Device } from "../Devices/Device";
 import SerialConnection from "./SerialConnection";
-import { deviceListStore, distributorListStore, selectedDeviceStore} from "$lib/store/stores";
+import { deviceListStore, distributorListStore} from "$lib/store/stores";
 import { SYSEX_CMD_SetDeviceBoolean, SYSEX_CMD_SetDeviceName, SYSEX_CMD_SetDistributorID } from "./Constants";
 import { SYSEX_CMD_GetDeviceConstructOnly, SYSEX_CMD_GetDistributorID, SYSEX_CMD_GetNumDistributors, SYSEX_END, SYSEX_START } from "./Constants";
-import { DistributorList } from "../Distributors/Distributor";
+import { DistributorList } from "../Distributors/DistributorList";
 import {} from "./helpers"
 
 let i = 1;
 let deviceList: Device[];
-let selectedDevice: Device;
 
 deviceListStore.subscribe((prev_value: any) => deviceList = prev_value);
-selectedDeviceStore.subscribe((prev_value: any) => selectedDevice = prev_value);
 
 export interface Connection {
     open: (baudRate:number) => void;
@@ -27,7 +25,7 @@ export default class SerialManager{
         let connection = new SerialConnection();
         let device = new Device(connection, 0, 0, 0, 0, 0, 127, 0, "Not Connected");
         await connection.open(baudRate);
-        connection.getPort().ondisconnect = () => {this.removeDevice(device)};
+        connection.getPort().ondisconnect = () => {device.remove()};
         await this.syncDevice(device).then(()=>{
             deviceList.push(device);
             deviceListStore.set(deviceList);
@@ -35,13 +33,11 @@ export default class SerialManager{
     }
 
     public async removeDevice(device: Device){
-        device.getConnection().close();
+        await device.getConnection().close();
         let index = deviceList.indexOf(device);
         if (index < 0) return; // if item is found
         deviceList.splice(index, 1); 
         deviceListStore.set(deviceList);
-        if (device === selectedDevice) distributorListStore.set(new DistributorList); //@ts-ignore
-        selectedDeviceStore.set(undefined);
     }
 
     public sendMidiToDevices(msg: any) {
@@ -54,15 +50,7 @@ export default class SerialManager{
     // SYSEX Commands
     ////////////////////////////////////////////////
 
-    public async syncDevice(device: Device) {
-        sysExCmd(device,SYSEX_CMD_GetDeviceConstructOnly,'');
-        let deviceConstruct = await device.getConnection().receive();
-        if(deviceConstruct === null) return;
-        device.update(deviceConstruct);
-        this.syncDistributors(device);
-    }
-
-    public async setDevice(device: Device){
+    public async saveDevice(device: Device){
         let asciiName = device.name.toAsciiString();
         while (asciiName.length < 40 ) asciiName += "00";
         let deviceBoolean = device.isOnmiMode ? 0x01 : 0x00;
@@ -70,6 +58,24 @@ export default class SerialManager{
         sysExCmd(device,SYSEX_CMD_SetDeviceName,asciiName);
         sysExCmd(device,SYSEX_CMD_SetDeviceBoolean,deviceBoolean);
         this.syncDevice(device);
+    }
+
+    public async saveDistributor(device: Device){
+        let asciiName = device.name.toAsciiString();
+        while (asciiName.length < 40 ) asciiName += "00";
+        let deviceBoolean = device.isOnmiMode ? 0x01 : 0x00;
+
+        sysExCmd(device,SYSEX_CMD_SetDeviceName,asciiName);
+        sysExCmd(device,SYSEX_CMD_SetDeviceBoolean,deviceBoolean);
+        this.syncDevice(device);
+    }
+
+    public async syncDevice(device: Device) {
+        sysExCmd(device,SYSEX_CMD_GetDeviceConstructOnly,'');
+        let deviceConstruct = await device.getConnection().receive();
+        if(deviceConstruct === null) return;
+        device.update(deviceConstruct);
+        this.syncDistributors(device);
     }
 
     public async syncDistributors(device: Device) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { selectedDeviceStore } from "$lib/store/stores";
+	import { deviceListStore, selectedDeviceStore } from "$lib/store/stores";
 	import { Distributor } from "../Distributors/Distributor";
 	
 	
@@ -7,12 +7,30 @@
 	$: formDeviceName = "";
 	$: formOmniModeEnable = false;
 
-	function updateDevice(){
+	function saveDevice(){
 		if($selectedDeviceStore.id === 0) return;
-		$selectedDeviceStore.setDevice(
+		$selectedDeviceStore.save(
 			formDeviceName.slice(0,20),
 			formOmniModeEnable
 		);
+	}
+
+	function addDevice(){
+		// ToDo add Device
+	}
+
+	async function removeDevice(){
+		await $selectedDeviceStore.remove();
+	}
+
+	async function clearDevices(){
+		//@ts-ignore
+		$selectedDeviceStore = undefined;
+
+		// Disconect all connected Devices
+		for await (let device of $deviceListStore){
+			device.remove();
+		}
 	}
 
 	$: if (($selectedDeviceStore !== undefined) && $selectedDeviceStore.id !== 0)updateForm();
@@ -54,9 +72,9 @@
 		<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
 	</div>
 	<div class="flex justify-center m-2">
-		<button on:click={ () => updateDevice()} class="button-player-green mx-2">Update Device</button>
-		<button class="button-player-green mx-2">Add Device</button>
-		<button class="button-player-red mx-2">Remove Device</button>
-		<button class="button-player-red mx-2">Clear Devices</button>
+		<button on:click={ () => saveDevice()} class="button-player-green mx-2">Update Device</button>
+		<button on:click={ () => addDevice()} class="button-player-green mx-2">Add Device</button>
+		<button on:click={ () => removeDevice()} class="button-player-red mx-2">Remove Device</button>
+		<button on:click={ () => clearDevices()} class="button-player-red mx-2">Clear Devices</button>
 	</div>
 </div>

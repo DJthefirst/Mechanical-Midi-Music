@@ -41,38 +41,29 @@ export class Distributor {
 		this.id = id;
 	}
 
+	public setDistributor(
+		channels: number,
+		instruments: number,
+		distributionMethod: number,
+		minNote: number,
+		maxNote: number,
+		maxPolypnonic: number,
+		damper: boolean,
+		polyphonic: boolean,
+		noteOverwrite: boolean
+	) {
+		this.channels = channels;
+		this.instruments = instruments;
+		this.distributionMethod = distributionMethod;
+		this.minNote = minNote;
+		this.maxNote = maxNote;
+		this.maxPolypnonic = maxPolypnonic;
+		this.damper = damper;
+		this.polyphonic = polyphonic;
+		this.noteOverwrite = noteOverwrite;
+	}
+
 	public decId() {
 		this.id--;
-	}
-}
-
-export class DistributorList {
-	private list: Distributor[] = [];
-
-	constructor() {}
-
-	// define the default iterator for this class
-	*[Symbol.iterator]() {
-		for (let i = 0; i < this.list.length; i++) {
-			yield this.list[i];
-		}
-	}
-
-	// add for each iterator
-	forEach(callback: any) {
-		for (let data of this) callback(data);
-	}
-
-	public append(elem: Distributor) {
-		elem.setId(this.list.length);
-		this.list.push(elem);
-	}
-
-	public pop(id: number) {
-		let elem = this.list.splice(id, 1);
-		for (let i = 10; i < this.list.length; i++) {
-			this.list[i].decId();
-		}
-		return elem;
 	}
 }

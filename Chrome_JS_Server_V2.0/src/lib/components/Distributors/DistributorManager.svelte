@@ -1,9 +1,46 @@
+<script lang="ts">
+	import { selectedDistributorStore } from "$lib/store/stores";
+	
+	$: formChannels = 0x000F;
+	$: formInstruments = 0x0000000F;
+	$: formDistributionMethod = 1;
+	$: formDamperEnable = false;
+	$: formPolyphonicEnable = false;
+	$: formNoteOverwrite = false;
+	$: formNoteMin = 0;
+	$: formNoteMax = 127;
+	$: formNumPolyphonicNotes = 1;
+
+	function updateDistributor(){
+		if($selectedDistributorStore === undefined) return;
+		$selectedDistributorStore.setDistributor(
+			formChannels,
+			formInstruments,
+			formDistributionMethod,
+			formNoteMin,
+			formNoteMax,
+			formNumPolyphonicNotes,
+			formDamperEnable,
+			formPolyphonicEnable,
+			formNoteOverwrite
+		);
+	}
+
+	$: if (($selectedDistributorStore !== undefined))updateForm();
+	function updateForm(){
+		formChannels = $selectedDistributorStore.channels;
+	}
+
+
+</script>
+
 <div class="div-outline">
 	<p class="text-center font-bold">Distributor Manager</p>
 	<div class="flex justify-start flex-wrap">
 		<div>
 			<label for="channels" class="font-semibold pl-4">Channels</label>
 			<input
+				bind:value={formChannels}
 				type="text"
 				id="channels"
 				placeholder="0x000F"
@@ -13,6 +50,7 @@
 		<div>
 			<label for="instruments" class="font-semibold pl-4">Instruments</label>
 			<input
+				bind:value={formInstruments}
 				type="text"
 				id="instruments"
 				placeholder="0x0000000F"
@@ -23,20 +61,21 @@
 	<div class="flex justify-start flex-wrap">
 		<div>
 			<label for="deviceName" class="font-semibold my-2 ml-4">Damper Enable</label>
-			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<input bind:checked={formDamperEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 		<div>
 			<label for="deviceName" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
-			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<input bind:checked={formPolyphonicEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 		<div>
 			<label for="deviceName" class="font-semibold my-2 ml-4">Note Overwrite</label>
-			<input type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<input bind:checked={formNoteOverwrite} type="checkbox" id="deviceName" class="bg-gray-dark" />
 		</div>
 	</div>
 	<div>
 		<label for="noteMinMax" class="font-semibold pl-4">Note Min/Max</label>
 		<input
+			bind:value={formNoteMin}
 			type="text"
 			id="noteMinMax"
 			placeholder="0"
@@ -44,6 +83,7 @@
 		/>
 		<span class="font-extrabold">-</span>
 		<input
+			bind:value={formNoteMax}
 			type="text"
 			id="noteMinMax"
 			placeholder="127"
@@ -53,6 +93,7 @@
 	<div>
 		<label for="numPolyphonicNotes" class="font-semibold pl-4">Number of Polyphonic Notes</label>
 		<input
+			bind:value={formNumPolyphonicNotes}
 			type="text"
 			id="numPolyphonicNotes"
 			placeholder="1"
@@ -60,9 +101,9 @@
 		/>
 	</div>
 	<div class="flex justify-center m-2">
-		<button class="button-player-green mx-2">Update Device</button>
-		<button class="button-player-green mx-2">Add Device</button>
-		<button class="button-player-red mx-2">Remove Device</button>
-		<button class="button-player-red mx-2">Clear Device</button>
+		<button on:click = {() => updateDistributor()} class="button-player-green mx-2">Update Distributor</button>
+		<button class="button-player-green mx-2">Add Distributor</button>
+		<button class="button-player-red mx-2">Remove Distributor</button>
+		<button class="button-player-red mx-2">Clear Distributors</button>
 	</div>
 </div>

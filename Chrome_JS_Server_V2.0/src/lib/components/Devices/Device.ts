@@ -1,11 +1,17 @@
 import type { Connection } from "../Utility/ComManager";
 import { Distributor } from "../Distributors/Distributor";
 import type ComManager from "../Utility/ComManager";
-import { comManagerStore, deviceListStore } from "$lib/store/stores";
+import { comManagerStore, deviceListStore, distributorListStore, selectedDeviceStore, selectedDistributorStore } from "$lib/store/stores";
 import type DeviceList from "./DeviceList.svelte";
+import { DistributorList } from "../Distributors/DistributorList";
 
 let comManager: ComManager;
 let deviceList: DeviceList | never[];
+let selectedDevice: Device;
+let selectedDistributor: Distributor;
+
+selectedDeviceStore.subscribe((prev_value: any) => selectedDevice = prev_value);
+selectedDistributorStore.subscribe((prev_value: any) => selectedDistributor = prev_value);
 comManagerStore.subscribe((prev_value) => comManager = prev_value); // @ts-ignore 
 deviceListStore.subscribe((prev_value) => deviceList = prev_value);
 
@@ -54,16 +60,30 @@ export class Device {
 		return this.distributors;
 	}
 
-	public syncDevice(){
+	// Removes This Device
+	public remove(){
+		comManager.removeDevice(this);
+		if (this === selectedDevice) distributorListStore.set(new DistributorList); //@ts-ignore
+        selectedDeviceStore.set(undefined);
+	}
+
+	// Syncs GUI Device Construct From Device
+	public sync(){
 		comManager.syncDevice(this);
 	}
 
-	public setDevice(name : string, isOmniMode: boolean){
+	// Saves Config to Device
+	public save(name : string, isOmniMode: boolean){
 		this.name = name;
 		this.isOnmiMode = isOmniMode;
-		comManager.setDevice(this);
+		comManager.saveDevice(this);
 	}
 
+	public saveDistributor(){
+
+	}
+
+	// Update 
 	public update(array: Uint8Array){
 		this.id = (array[0] + array[1]);
 		this.numInstruments = array[3];
