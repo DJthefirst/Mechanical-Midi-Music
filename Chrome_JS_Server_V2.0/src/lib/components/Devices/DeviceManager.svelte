@@ -8,6 +8,7 @@
 	$: formOmniModeEnable = false;
 
 	function updateDevice(){
+		if($selectedDeviceStore.id === 0) return;
 		$selectedDeviceStore.setDevice(
 			formDeviceName.slice(0,20),
 			formOmniModeEnable
@@ -56,6 +57,6 @@
 		<button on:click={ () => updateDevice()} class="button-player-green mx-2">Update Device</button>
 		<button class="button-player-green mx-2">Add Device</button>
 		<button class="button-player-red mx-2">Remove Device</button>
-		<button class="button-player-red mx-2">Clear Device</button>
+		<button class="button-player-red mx-2">Clear Devices</button>
 	</div>
 </div>

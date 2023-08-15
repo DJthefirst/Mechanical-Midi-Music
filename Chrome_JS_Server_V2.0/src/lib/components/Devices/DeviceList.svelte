@@ -42,7 +42,12 @@
 		$comManagerStore.addDevice(selectedBaudRate);
 	}
 
+	function removeDevice() {
+		$comManagerStore.removeDevice($selectedDeviceStore);
+	}
+
 	function selectDevice(device: Device) {
+		// TODO: If not connected reconnect 
 		selectedDeviceStore.set(device);
 
 		let distributorList = new DistributorList();
@@ -67,6 +72,7 @@
 					><i class="material-icons">add</i> Add Device</button
 				>
 				<button class="button-player-red my-2 mr-2 p-2"
+					on:click={() => removeDevice()}
 					><i class="material-icons">remove</i> Remove Device</button
 				>
 			</div>

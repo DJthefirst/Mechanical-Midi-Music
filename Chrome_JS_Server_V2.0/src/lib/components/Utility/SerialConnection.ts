@@ -11,13 +11,17 @@ export default class SerialConnection{
         this.port = null;
     }
 
+    getPort(){
+        return this.port;
+    }
+
     async open(baudRate: number) {
         // @ts-ignore 
         this.port = await navigator.serial.requestPort(); // Prompt user to select any serial port.
-        await this.port.open({ baudRate: baudRate })
+        await this.port.open({ baudRate: baudRate });
+        await sleep(200); // ESP32 D15->GND to Suppress Boot Messages, Delay for Boot
         this.reader = this.port.readable.getReader();
         this.writer = this.port.writable.getWriter();
-        console.log(this.port.getInfo())
     }
 
     async close() {
@@ -27,18 +31,16 @@ export default class SerialConnection{
         }
     
     //readHexByteArray
-    async receive(): Promise<Uint8Array>{
+    async receive(): Promise<Uint8Array | null>{
         let hexString: string = "";
         let result;
         while(true){
-            if ((result = SYSEX_RegExpMsg.exec(hexString)) !== null){ //@ts-ignore
-                hexString = hexString.slice(result.indices[0][1]);
+            if ((result = SYSEX_RegExpMsg.exec(hexString)) !== null){ 
                 return result[1].toHex();
             }
-            if ((result = SYSEX_RegExpEnd.exec(hexString)) !== null){ //@ts-ignore
-                hexString = hexString.slice(result.indices[0][1]);
+            if ((result = SYSEX_RegExpEnd.exec(hexString)) !== null){
                 console.log('Bad Msg' + String(result[0]));
-                continue;
+                return null;
             }
 
             const { value, done } = await this.reader.read();
@@ -66,3 +68,7 @@ export default class SerialConnection{
             .catch((err: any) => console.log("Send error:",err));
     }
 }
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms || 1000));
+  }
