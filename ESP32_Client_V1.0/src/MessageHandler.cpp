@@ -35,11 +35,11 @@ void MessageHandler::processMessage(MidiMessage message)
             break;
 
         case(MIDI_SysStop):
-            //Not Yet Implemented
+            (*m_ptrInstrumentController).stopAll();
             break;
 
         case(MIDI_SysReset):
-            //Not Yet Implemented
+            (*m_ptrInstrumentController).resetAll();
             break;
 
         default:
@@ -88,8 +88,8 @@ void MessageHandler::processSysEX(MidiMessage message)
         case (SYSEX_SetDeviceBoolean):
             sysExSetDeviceBoolean(message);
             break;
-        case (SYSEX_AddDistributor):
-            addDistributor(message.sysExCmdOffset());
+        case (SYSEX_SetDistributor):
+            setDistributor(message.sysExCmdOffset());
             break;
         case (SYSEX_RemoveDistributor):
             removeDistributor(message.buffer[6]);
@@ -332,35 +332,18 @@ void MessageHandler::addDistributor(Distributor distributor)
     m_distributors.push_back(distributor);
 }
 
-void MessageHandler::addDistributor(uint8_t data[])
+void MessageHandler::setDistributor(uint8_t data[])
 {
-    (*m_ptrNetwork).sendMessage(data,16);
-    // Decode Distributor Construct
+    // If Distributor exists update it.
     uint16_t distributorID = data[0] << 7| (data[1]);
-    uint16_t channels = 
-          (data[2] << 14)
-        | (data[3] << 7) 
-        | (data[4] << 0);
-    uint32_t instruments = 
-          (data[5] << 28)
-        | (data[6] << 21) 
-        | (data[7] << 14)
-        | (data[8] << 7)
-        | (data[9] << 0);
-    DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
+    if (distributorID < m_distributors.size()){
+        m_distributors[distributorID].setDistributor(data);
+        return;
+    }
 
-    //Create Distributor
+    // Else create Distributor and add it to vector
     Distributor distributor(m_ptrInstrumentController);
-    distributor.setChannels(channels); // 1
-    distributor.setInstruments(instruments); // 1,2
-    distributor.setDistributionMethod(distribMethod);
-    distributor.setDamperPedal((data[11] & 0x01) != 0);
-    distributor.setPolyphonic((data[11] & 0x02) != 0);
-    distributor.setNoteOverwrite((data[11] & 0x04) != 0);
-    distributor.setMinMaxNote(data[12], data[13]);
-    distributor.setNumPolyphonicNotes(data[14]);
-
-    //Add Distributor to Distribution Pool
+    distributor.setDistributor(data);
     m_distributors.push_back(distributor);
 }
 

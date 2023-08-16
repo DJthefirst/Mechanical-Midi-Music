@@ -1,7 +1,8 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
-	import { distributorListStore, selectedDistributorStore } from '$lib/store/stores';
-	import type { DistributorList } from './DistributorList';
+	import { distributorListStore, selectedDeviceStore, selectedDistributorStore } from '$lib/store/stores';
+	import type { Device } from '../Devices/Device';
+	import { DistributorList } from './DistributorList';
 
 	let DistributionMethodType = [
 		"StriaghtThrough",
@@ -11,6 +12,27 @@
 		"Descending",
 		"Stack"
 	]
+
+	let prev_selectedDeviceStore: Device;
+
+	//Update Distributor List
+	$: { $selectedDeviceStore; updateDistributorList()}
+	console.log($selectedDeviceStore)
+	export function updateDistributorList(){
+		let distributorList = new DistributorList();
+		if ($selectedDeviceStore !== undefined) {
+			for( let distributor of $selectedDeviceStore.getDistributors()) distributorList.append(distributor);
+		}
+		distributorListStore.set(distributorList);
+
+		// On Device change update selected Disributor
+		if ($selectedDeviceStore == prev_selectedDeviceStore) return;
+		if ($selectedDeviceStore === undefined) { //@ts-ignore
+			$selectedDistributorStore = undefined; return;
+		}
+		$selectedDistributorStore = $selectedDeviceStore.getDistributors()[0];
+		prev_selectedDeviceStore = $selectedDeviceStore;
+	}
 
 </script>
 

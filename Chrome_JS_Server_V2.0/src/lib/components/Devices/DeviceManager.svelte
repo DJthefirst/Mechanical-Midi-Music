@@ -9,6 +9,7 @@
 
 	function saveDevice(){
 		if($selectedDeviceStore.id === 0) return;
+		
 		$selectedDeviceStore.save(
 			formDeviceName.slice(0,20),
 			formOmniModeEnable
@@ -33,14 +34,14 @@
 		}
 	}
 
+	// Update Form on Selected Device Change
 	$: if (($selectedDeviceStore !== undefined) && $selectedDeviceStore.id !== 0)updateForm();
 	function updateForm(){
 		formDeviceID = $selectedDeviceStore.id;
 		formDeviceName = $selectedDeviceStore.name;
 		formOmniModeEnable = $selectedDeviceStore.isOnmiMode;
 	}
-
-
+	
 </script>
 
 <div class="div-outline">

@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { selectedDistributorStore } from "$lib/store/stores";
+	import { selectedDeviceStore, selectedDistributorStore } from "$lib/store/stores";
+	import { Distributor } from "./Distributor";
+	import updateDistributorList from "./DistributorList.svelte"
 	
 	$: formChannels = 0x000F;
 	$: formInstruments = 0x0000000F;
@@ -11,9 +13,11 @@
 	$: formNoteMax = 127;
 	$: formNumPolyphonicNotes = 1;
 
-	function updateDistributor(){
-		if($selectedDistributorStore === undefined) return;
-		$selectedDistributorStore.setDistributor(
+	// Save Distributor to Device
+	async function saveDistributor(addDistributor: boolean){
+		if($selectedDistributorStore === undefined) addDistributor = true;
+
+		let distributor = new Distributor(
 			formChannels,
 			formInstruments,
 			formDistributionMethod,
@@ -24,11 +28,31 @@
 			formPolyphonicEnable,
 			formNoteOverwrite
 		);
+
+		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors.length);
+		else distributor.setId($selectedDistributorStore.getId());
+		$selectedDistributorStore = distributor;
+		await $selectedDeviceStore.saveDistributor(distributor).then(() => {
+			$selectedDeviceStore = $selectedDeviceStore;
+		});
 	}
 
+	function removeDistributor(){}
+
+	function clearDistributor(){}
+
+	// Update Form on Selected Distributir Change
 	$: if (($selectedDistributorStore !== undefined))updateForm();
 	function updateForm(){
 		formChannels = $selectedDistributorStore.channels;
+		formInstruments = $selectedDistributorStore.instruments;
+		formDistributionMethod = $selectedDistributorStore.distributionMethod;
+		formNoteMin = $selectedDistributorStore.minNote;
+		formNoteMax = $selectedDistributorStore.maxNote;
+		formNumPolyphonicNotes = $selectedDistributorStore.maxPolypnonic;
+		formDamperEnable = $selectedDistributorStore.damper;
+		formPolyphonicEnable = $selectedDistributorStore.polyphonic;
+		formNoteOverwrite = $selectedDistributorStore.noteOverwrite;
 	}
 
 
@@ -101,9 +125,9 @@
 		/>
 	</div>
 	<div class="flex justify-center m-2">
-		<button on:click = {() => updateDistributor()} class="button-player-green mx-2">Update Distributor</button>
-		<button class="button-player-green mx-2">Add Distributor</button>
-		<button class="button-player-red mx-2">Remove Distributor</button>
-		<button class="button-player-red mx-2">Clear Distributors</button>
+		<button on:click = {() => saveDistributor(false)} class="button-player-green mx-2">Update Distributor</button>
+		<button on:click = {() => saveDistributor(true)} class="button-player-green mx-2">Add Distributor</button>
+		<button on:click = {() => removeDistributor()} class="button-player-red mx-2">Remove Distributor</button>
+		<button on:click = {() => clearDistributor()} class="button-player-red mx-2">Clear Distributors</button>
 	</div>
 </div>

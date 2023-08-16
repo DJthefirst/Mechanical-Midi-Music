@@ -1,7 +1,6 @@
 import { selectedDistributorStore} from "$lib/store/stores";
 import type { Distributor } from "./Distributor";
 
-
 let selectedDistributor: Distributor;
 selectedDistributorStore.subscribe((prev_val) => selectedDistributor = prev_val);
 
@@ -25,7 +24,7 @@ export class DistributorList {
 	public append(elem: Distributor) {
 		elem.setId(this.list.length);
 		this.list.push(elem);
-		if(elem.getId() === 0) selectedDistributorStore.set(elem); 
+		if(selectedDistributor === undefined) selectedDistributorStore.set(elem); 
 	}
 
 	public pop(id: number) {

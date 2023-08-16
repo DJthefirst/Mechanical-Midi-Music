@@ -1,19 +1,14 @@
+import type ComManager from "../Utility/ComManager";
 import type { Connection } from "../Utility/ComManager";
 import { Distributor } from "../Distributors/Distributor";
-import type ComManager from "../Utility/ComManager";
-import { comManagerStore, deviceListStore, distributorListStore, selectedDeviceStore, selectedDistributorStore } from "$lib/store/stores";
-import type DeviceList from "./DeviceList.svelte";
-import { DistributorList } from "../Distributors/DistributorList";
+import { comManagerStore, deviceListStore, selectedDeviceStore} from "$lib/store/stores";
+import SerialConnection from "../Utility/SerialConnection";
 
 let comManager: ComManager;
-let deviceList: DeviceList | never[];
-let selectedDevice: Device;
-let selectedDistributor: Distributor;
+let deviceList: Device[];
 
-selectedDeviceStore.subscribe((prev_value: any) => selectedDevice = prev_value);
-selectedDistributorStore.subscribe((prev_value: any) => selectedDistributor = prev_value);
-comManagerStore.subscribe((prev_value) => comManager = prev_value); // @ts-ignore 
-deviceListStore.subscribe((prev_value) => deviceList = prev_value);
+deviceListStore.subscribe((prev_value: any) => deviceList= prev_value);
+comManagerStore.subscribe((prev_value) => comManager = prev_value);
 
 export class Device {
 	private connection: Connection;
@@ -51,25 +46,30 @@ export class Device {
 		this.name = name,
 		this.distributors = [];
 	}
-
+	
+	// Get Device Connection 
 	public getConnection(){
 		return this.connection;
 	}
 
+	// Get List of Device Distributors
 	public getDistributors(){
 		return this.distributors;
 	}
 
-	// Removes This Device
+	// Removes This Device from GUI
 	public remove(){
-		comManager.removeDevice(this);
-		if (this === selectedDevice) distributorListStore.set(new DistributorList); //@ts-ignore
-        selectedDeviceStore.set(undefined);
+		disconnectDevice(this);
 	}
 
 	// Syncs GUI Device Construct From Device
 	public sync(){
 		comManager.syncDevice(this);
+	}
+
+	// Syncs GUI Distributor Construct From Device
+	public syncDistributors(){
+		comManager.syncDistributors(this);
 	}
 
 	// Saves Config to Device
@@ -79,11 +79,12 @@ export class Device {
 		comManager.saveDevice(this);
 	}
 
-	public saveDistributor(){
-
+	// Save Distributor Config to device or adds a new Distributor by ID
+	public async saveDistributor(distributor: Distributor){
+		await comManager.saveDistributor(this,distributor);
 	}
 
-	// Update 
+	// Updates DeviceStore from Message
 	public update(array: Uint8Array){
 		this.id = (array[0] + array[1]);
 		this.numInstruments = array[3];
@@ -96,6 +97,7 @@ export class Device {
 		deviceListStore.set(deviceList);
 	}
 
+	// Updates Device Distributors from Message
 	public updateDistributor(array: Uint8Array){
 		let id = (array[0] << 7) + (array[1]);
 		let channels = ((array[2] << 14) + (array[3] << 7) + array[4]);
@@ -111,12 +113,31 @@ export class Device {
 		let distributor = new Distributor(channels, instruments, distributionMethod, 
 			minNote, maxNote, maxPolypnonic, damper, polyphonic, noteOverwrite)
 
-		if (this.distributors.length < id) // Add Protection
+		if (id >= this.distributors.length) // Add Protection
 			this.distributors.push(distributor);
 		else this.distributors[id] = distributor;
 	}
+}
 
-	public syncDistributors(){
-		comManager.syncDistributors(this);
-	}
+// Connects Device from GUI
+export async function connectDevice(baudRate: number){
+	let connection = new SerialConnection();
+	let device = new Device(connection, 0, 0, 0, 0, 0, 127, 0, "Not Connected");
+	await connection.open(baudRate);
+	connection.getPort().ondisconnect = () => {device.remove()};
+	await comManager.syncDevice(device).then(()=>{
+		deviceList.push(device);
+		deviceListStore.set(deviceList);
+	});
+}
+
+// Disconnects Device from GUI
+export async function disconnectDevice(device: Device){
+	await device.getConnection().sendHexByteArray(new Uint8Array([0xFF]));
+	await device.getConnection().close();
+	let index = deviceList.indexOf(device);
+	if (index < 0) return; // if item is found
+	deviceList.splice(index, 1); 
+	deviceListStore.set(deviceList); //@ts-ignore
+	selectedDeviceStore.set(undefined);
 }

@@ -72,13 +72,13 @@ const uint8_t SYSEX_SetDeviceConstruct = 0x09;
 const uint8_t SYSEX_SetDeviceName = 0x0A;
 const uint8_t SYSEX_SetDeviceBoolean = 0x0B;
 
-const uint8_t SYSEX_AddDistributor = 0x10;
+const uint8_t SYSEX_SetDistributor = 0x10;
 const uint8_t SYSEX_RemoveDistributor = 0x11;
 const uint8_t SYSEX_RemoveAllDistributors = 0x12;
 const uint8_t SYSEX_GetNumOfDistributors = 0x13;
 const uint8_t SYSEX_GetDistributorConstruct = 0x15;
 
-const uint8_t SYSEX_SetDistributorConstruct = 0x16;
+// const uint8_t SYSEX_SetDistributorConstruct = 0x16;
 const uint8_t SYSEX_SetDistributorChannels = 0x17;
 const uint8_t SYSEX_SetDistributorInstruments = 0x18;
 const uint8_t SYSEX_SetDistributorMethod = 0x19;

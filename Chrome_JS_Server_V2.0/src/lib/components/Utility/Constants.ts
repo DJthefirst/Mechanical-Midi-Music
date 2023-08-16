@@ -14,13 +14,13 @@ export const SYSEX_CMD_SetDeviceConstructOnly = '09'; // Without Distributors
 export const SYSEX_CMD_SetDeviceName = '0A';
 export const SYSEX_CMD_SetDeviceBoolean = '0B';
 
-export const SYSEX_CMD_AddDistributor = '10';
+export const SYSEX_CMD_SetDistributor = '10';
 export const SYSEX_CMD_RemoveDistributorID = '11';
 export const SYSEX_CMD_RemoveAllDistributors = '12';
 export const SYSEX_CMD_GetNumDistributors = '13';
 export const SYSEX_CMD_GetAllDistributors = '14';
 export const SYSEX_CMD_GetDistributorID = '15';
-export const SYSEX_CMD_SetDistributorID = '16';
+// export const SYSEX_CMD_SetDistributorID = '16';
 export const SYSEX_CMD_SetDistributorID_Channels = '17';
 export const SYSEX_CMD_SetDistributorID_Instruments = '18';
 export const SYSEX_CMD_SetDistributorID_DistributionMethod = '19';

@@ -1,11 +1,8 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
-	import type { Device } from './Device';
-	import { comManagerStore, distributorListStore, selectedDistributorStore } from '$lib/store/stores';
+	import { Device, connectDevice, disconnectDevice } from './Device';
 	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
-	import { DistributorList } from '../Distributors/DistributorList';
 	
-	//distributorListStore.subscribe((prev_value: any) => distributorList = prev_value);
 	let InstrumentType = [
 		"N/A",
 		"PWM",
@@ -39,21 +36,17 @@
 	];
 
 	function addDevice() {
-		$comManagerStore.addDevice(selectedBaudRate);
+		connectDevice(selectedBaudRate);
 	}
 
 	function removeDevice() {
-		$selectedDeviceStore.remove();
+		disconnectDevice($selectedDeviceStore);
 	}
 
 	function selectDevice(device: Device) {
 		// TODO: If not connected reconnect 
+		if ($selectedDeviceStore === device) return;
 		selectedDeviceStore.set(device);
-
-		let distributorList = new DistributorList();
-		for( let distributor of device.getDistributors()) distributorList.append(distributor);
-		$distributorListStore = distributorList;
-		if (device.getDistributors().length > 0) $selectedDistributorStore = device.getDistributors()[0];
 	}
 
 </script>

@@ -70,23 +70,23 @@ void setup() {
   Distributor distributor2(&instrumentController);
   distributor2.setChannels(0x0002); // 2
   distributor2.setInstruments(0x000000FF); // 1-8
-  distributor2.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
   messageHandler.addDistributor(distributor2);
 
   //Distributor 3
   Distributor distributor3(&instrumentController);
   distributor3.setChannels(0x0004); // 3
   distributor3.setInstruments(0x000000FF); // 1-8
-  distributor3.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
   messageHandler.addDistributor(distributor3);
 
   //Distributor 4
   Distributor distributor4(&instrumentController);
   distributor4.setChannels(0x0008); // 4
   distributor4.setInstruments(0x000000FF); // 1-8
-  distributor4.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  distributor4.setDistributionMethod(DistributionMethod::Ascending);
   messageHandler.addDistributor(distributor4);
-}
+ }
 
 void loop() {
   //Periodicaly Read Incoming Messages

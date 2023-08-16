@@ -1,3 +1,5 @@
+import {} from "../Utility/helpers"
+
 export class Distributor {
 	private id: number;
 	public channels: number;
@@ -37,6 +39,26 @@ export class Distributor {
 		return this.id;
 	}
 
+	public getConstruct() {
+		let booleanValues = (
+			(this.damper ? 0x01 : 0) |
+			(this.polyphonic ? 0x02 : 0) |
+			(this.noteOverwrite ? 0x04 : 0)
+		);
+
+		let construct = "";
+		construct += to7BitStr(this.id, 2);
+		construct += to8BitStr(this.channels, 3);
+		construct += to8BitStr(this.instruments, 5);
+		construct += this.distributionMethod.toHexString();
+		construct += booleanValues.toHexString();
+		construct += Number(this.minNote).toHexString();
+		construct += Number(this.maxNote).toHexString();
+		construct += Number(this.maxPolypnonic).toHexString();
+		construct += "00";
+		return construct;
+	}
+
 	public setId(id: number) {
 		this.id = id;
 	}
@@ -66,4 +88,20 @@ export class Distributor {
 	public decId() {
 		this.id--;
 	}
+}
+
+function to7BitStr(num: number, len: number){
+	let result = ""
+	for (let i = 0; i < len; i++){
+    	result = ((num >> 8*i) & 0b01111111).toHexString() + result;
+	}
+    return(result);
+}
+
+function to8BitStr(num: number, len: number){
+	let result = ""
+	for (let i = 0; i < len; i++){
+    	result = ((num >> 7*i)& 0b01111111).toHexString() + result;
+	}
+    return(result);
 }

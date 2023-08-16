@@ -36,9 +36,9 @@ public:
     void processMessage(MidiMessage message);
 
     //Distributors
-    void addDistributor();
-    void addDistributor(uint8_t data[]);
-    void addDistributor(Distributor distributor);
+    void addDistributor(); // Internal Function
+    void addDistributor(Distributor distributor); // Internal Function
+    void setDistributor(uint8_t data[]); // Set/Add Distributor
     void removeDistributor(uint8_t id);
     void removeAllDistributors();
     Distributor& getDistributor(uint8_t id);

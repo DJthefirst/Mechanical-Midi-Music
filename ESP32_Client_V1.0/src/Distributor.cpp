@@ -337,6 +337,31 @@ uint32_t Distributor::getInstruments(){
     return m_instruments;
 }
 
+void Distributor::setDistributor(uint8_t data[]){
+    // Decode Distributor Construct
+    uint16_t channels = 
+          (data[2] << 14)
+        | (data[3] << 7) 
+        | (data[4] << 0);
+    uint32_t instruments = 
+          (data[5] << 28)
+        | (data[6] << 21) 
+        | (data[7] << 14)
+        | (data[8] << 7)
+        | (data[9] << 0);
+    DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
+
+    m_channels = channels; // 1
+    m_instruments = instruments; // 1,2
+    m_distributionMethod = distribMethod;
+    m_damperPedal = (data[11] & 0x01) != 0;
+    m_polyphonic = (data[11] & 0x02) != 0;
+    m_noteOverwrite = (data[11] & 0x04) != 0;
+    m_minNote = data[12];
+    m_maxNote = data[13];
+    m_numPolyphonicNotes = (data[14]);
+}
+
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
 }
