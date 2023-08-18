@@ -117,6 +117,17 @@ export class Device {
 			this.distributors.push(distributor);
 		else this.distributors[id] = distributor;
 	}
+
+	public async removeDistributor(distributor: Distributor){
+		console.log(distributor);
+		this.distributors = [];
+		await comManager.removeDistributor(this,distributor);		
+	}
+
+	public async clearDistributors(){
+		await comManager.clearDistributors(this);
+		this.distributors = [];
+	}
 }
 
 // Connects Device from GUI

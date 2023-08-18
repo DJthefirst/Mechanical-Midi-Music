@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { selectedDeviceStore, selectedDistributorStore } from "$lib/store/stores";
 	import { Distributor } from "./Distributor";
-	import updateDistributorList from "./DistributorList.svelte"
 	
-	$: formChannels = 0x000F;
-	$: formInstruments = 0x0000000F;
+	$: formChannels = "1-4";
+	$: formInstruments = "1-4";
 	$: formDistributionMethod = 1;
 	$: formDamperEnable = false;
 	$: formPolyphonicEnable = false;
@@ -18,8 +17,8 @@
 		if($selectedDistributorStore === undefined) addDistributor = true;
 
 		let distributor = new Distributor(
-			formChannels,
-			formInstruments,
+			listedItemsToNumber(formChannels),
+			listedItemsToNumber(formInstruments),
 			formDistributionMethod,
 			formNoteMin,
 			formNoteMax,
@@ -29,7 +28,7 @@
 			formNoteOverwrite
 		);
 
-		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors.length);
+		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
 		else distributor.setId($selectedDistributorStore.getId());
 		$selectedDistributorStore = distributor;
 		await $selectedDeviceStore.saveDistributor(distributor).then(() => {
@@ -37,15 +36,81 @@
 		});
 	}
 
-	function removeDistributor(){}
+function listedItemsToNumber(input: any) {
+    const RegExp_NumRanges = /(\d+)\s?-\s?(\d+)/g;
+    const RegExp_Num = /(?<=^|[^-\s\d]|\d\s)\s*(\d+)\s*(?=[^-\s\d]|\s\d|$)/g;
 
-	function clearDistributor(){}
+	let result = 0x00;
+    if (typeof input === "number") return(input);
+	if (typeof input !== "string") return(result);
+
+    //If hex binary or epression return computation
+    if(/0x|0b|[|&]/gi.test(input)){
+      return eval(input);
+    }
+
+    //Else convet item list to Number
+    let num;
+    let numRange;
+
+    //Match all Indivudal itmes "1,2,4"
+    while ((num = RegExp_Num.exec(input)) !== null){ 
+      result += (0x01<<(Number(num[1])-1))
+    }
+
+    //Match all Item Ranges "1-3"
+    while ((numRange = RegExp_NumRanges.exec(input)) !== null){ 
+      for (let i= Number(numRange[1]); i <= Number(numRange[2]); i++){
+        result += (0x01<<(i-1))
+      }
+    } 
+
+    return result;
+  };
+
+	function NumberToListedItems(num: number){
+		let result = "";
+		let i = 0;
+  
+  		let prev = false;
+		let cur = ((num >> i) & 0x01) != 0;
+		while (num > 0){
+  			let next = ((num >> i+1) & 0x01) != 0;
+  	
+			let curValue = String(i+1);
+
+			if (cur){
+				if (!prev) result += curValue;
+				if (!prev && ! next) result += ",";
+				if (prev && ! next) result += (curValue + ",");
+				if (!prev && next) result += "-";
+				num = num ^ (0x01 << i);
+			}
+		
+			prev = cur;
+			cur = next;
+			i++;
+		} 
+		return result.slice(0, -1);
+	}
+
+	async function removeDistributor(){
+		$selectedDeviceStore.removeDistributor($selectedDistributorStore).then(() => {
+			$selectedDeviceStore = $selectedDeviceStore;
+		});
+	}
+
+	async function clearDistributor(){
+		$selectedDeviceStore.clearDistributors().then(() => {
+			$selectedDeviceStore = $selectedDeviceStore;
+		});
+	}
 
 	// Update Form on Selected Distributir Change
 	$: if (($selectedDistributorStore !== undefined))updateForm();
 	function updateForm(){
-		formChannels = $selectedDistributorStore.channels;
-		formInstruments = $selectedDistributorStore.instruments;
+		formChannels = NumberToListedItems($selectedDistributorStore.channels);
+		formInstruments = NumberToListedItems($selectedDistributorStore.instruments);
 		formDistributionMethod = $selectedDistributorStore.distributionMethod;
 		formNoteMin = $selectedDistributorStore.minNote;
 		formNoteMax = $selectedDistributorStore.maxNote;
@@ -54,7 +119,6 @@
 		formPolyphonicEnable = $selectedDistributorStore.polyphonic;
 		formNoteOverwrite = $selectedDistributorStore.noteOverwrite;
 	}
-
 
 </script>
 

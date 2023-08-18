@@ -1,8 +1,6 @@
 import type { Device } from "../Devices/Device";
 import { deviceListStore} from "$lib/store/stores";
-import { SYSEX_CMD_SetDeviceBoolean, SYSEX_CMD_SetDeviceName, SYSEX_CMD_SetDistributor} from "./Constants";
-import { SYSEX_CMD_GetDeviceConstructOnly, SYSEX_CMD_GetDistributorID, SYSEX_CMD_GetNumDistributors, SYSEX_END, SYSEX_START } from "./Constants";
-
+import * as CONST from "./Constants";
 import {} from "./helpers"
 import type { Distributor } from "../Distributors/Distributor";
 import SerialConnection from "./SerialConnection";
@@ -39,18 +37,18 @@ export default class SerialManager{
         while (asciiName.length < 40 ) asciiName += "00";
         let deviceBoolean = device.isOnmiMode ? 0x01 : 0x00;
 
-        sysExCmd(device,SYSEX_CMD_SetDeviceName,asciiName);
-        sysExCmd(device,SYSEX_CMD_SetDeviceBoolean,deviceBoolean);
+        sysExCmd(device,CONST.SYSEX_SetDeviceName,asciiName);
+        sysExCmd(device,CONST.SYSEX_SetDeviceBoolean,deviceBoolean);
         this.syncDevice(device);
     }
 
     public async saveDistributor(device: Device, distributor: Distributor){
-        sysExCmd(device,SYSEX_CMD_SetDistributor,distributor.getConstruct());
+        sysExCmd(device,CONST.SYSEX_SetDistributor,distributor.getConstruct());
         await this.syncDevice(device);
     }
 
     public async syncDevice(device: Device) {
-        sysExCmd(device,SYSEX_CMD_GetDeviceConstructOnly,'');
+        sysExCmd(device,CONST.SYSEX_GetDeviceConstructOnly,'');
         let deviceConstruct = await device.getConnection().receive();
         if(deviceConstruct === null) return;
         device.update(deviceConstruct);
@@ -58,14 +56,25 @@ export default class SerialManager{
     }
 
     public async syncDistributors(device: Device) {
-        sysExCmd(device,SYSEX_CMD_GetNumDistributors,'');
+        sysExCmd(device,CONST.SYSEX_GetNumDistributors,'');
         let numDistributors = await device.getConnection().receive();
         for(let i = 0; i<numDistributors[0]; i++){
-            sysExCmd(device,SYSEX_CMD_GetDistributorID,to14BitStr(i));
+            sysExCmd(device,CONST.SYSEX_GetDistributorID,to14BitStr(i));
             let distributorConstruct = await device.getConnection().receive();
             device.updateDistributor(distributorConstruct);
         }
     }
+
+    public async removeDistributor(device: Device, distributor: Distributor) {
+        sysExCmd(device,CONST.SYSEX_RemoveDistributorID,distributor.getId().toHexString());
+        await this.syncDevice(device);
+    }
+
+    public async clearDistributors(device: Device) {
+        sysExCmd(device,CONST.SYSEX_RemoveAllDistributors,"");
+        await this.syncDevice(device);
+    }
+
 }
 
     ////////////////////////////////////////////////
@@ -75,9 +84,9 @@ export default class SerialManager{
 function sysExCmd(device: Device, cmd:string, payload?:any){
     if (payload == 'undefined') payload = '';
     device.getConnection().sendHexString(
-    SYSEX_START + to14BitStr(device.id) + cmd + payload + SYSEX_END
+        CONST.SYSEX_START + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END
     );
-    console.log(SYSEX_START + to14BitStr(device.id) + cmd + payload + SYSEX_END)
+    console.log(CONST.SYSEX_START + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END)
 }
 
 function to14BitStr(num: number){

@@ -17,7 +17,6 @@
 
 	//Update Distributor List
 	$: { $selectedDeviceStore; updateDistributorList()}
-	console.log($selectedDeviceStore)
 	export function updateDistributorList(){
 		let distributorList = new DistributorList();
 		if ($selectedDeviceStore !== undefined) {

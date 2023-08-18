@@ -31,15 +31,15 @@ declare global {
     return hexBytes;
   };
 
-    // Converts a String to ASCII String
-    String.prototype.toAsciiString = function () {
-      let str = String(this);
-      let result = "";
-      for (let i=0; i < str.length; i++){
-         result += str.charCodeAt(i).toHexString(); 
-      }
-      return result;
-    };
+  // Converts a String to ASCII String
+  String.prototype.toAsciiString = function () {
+    let str = String(this);
+    let result = "";
+    for (let i=0; i < str.length; i++){
+        result += str.charCodeAt(i).toHexString(); 
+    }
+    return result;
+  };
 
   //Converts Number to Paded Hex String
   Number.prototype.toHexString = function () {

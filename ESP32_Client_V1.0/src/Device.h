@@ -49,7 +49,7 @@ const uint8_t MIN_MIDI_NOTE = 36; //C1 //36-83 dulcimer
 //Absolute Highest Note Max=127
 const uint8_t MAX_MIDI_NOTE = 83; //B4
 //A 14 bit number Representing this Devices ID
-const uint16_t SYSEX_DEV_ID = 0x01;
+const uint16_t SYSEX_DEV_ID = 0x02;
 //Firmware Version 14bit
 const uint16_t FIRMWARE_VERSION = 03;
 
@@ -57,7 +57,7 @@ namespace Device
 {
     //Golbal Device Attribues
     //inline static char* Name = new char[20]();
-    inline static String Name = "Air Compressor";
+    inline static String Name = "Test Instrument";
     inline static bool OmniMode = false;
 
 

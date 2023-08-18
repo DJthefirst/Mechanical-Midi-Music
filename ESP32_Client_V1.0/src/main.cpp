@@ -86,7 +86,7 @@ void setup() {
   distributor4.setInstruments(0x000000FF); // 1-8
   distributor4.setDistributionMethod(DistributionMethod::Ascending);
   messageHandler.addDistributor(distributor4);
- }
+}
 
 void loop() {
   //Periodicaly Read Incoming Messages
