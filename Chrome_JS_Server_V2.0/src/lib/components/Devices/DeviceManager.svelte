@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { deviceListStore, selectedDeviceStore } from "$lib/store/stores";
-	import { Distributor } from "../Distributors/Distributor";
+	import { connectDevice } from "./Device";
 	
 	
 	$: formDeviceID = 0x0001;
@@ -17,7 +17,7 @@
 	}
 
 	function addDevice(){
-		// ToDo add Device
+		connectDevice(115200);
 	}
 
 	async function removeDevice(){

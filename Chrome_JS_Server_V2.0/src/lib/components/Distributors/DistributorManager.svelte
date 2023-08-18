@@ -55,14 +55,16 @@ function listedItemsToNumber(input: any) {
 
     //Match all Indivudal itmes "1,2,4"
     while ((num = RegExp_Num.exec(input)) !== null){ 
-      result += (0x01<<(Number(num[1])-1))
+		if ((result & (0x01<<(Number(num[1])-1))) === 0) // If number not added.
+    		result += (0x01<<(Number(num[1])-1));
     }
 
     //Match all Item Ranges "1-3"
     while ((numRange = RegExp_NumRanges.exec(input)) !== null){ 
-      for (let i= Number(numRange[1]); i <= Number(numRange[2]); i++){
-        result += (0x01<<(i-1))
-      }
+    	for (let i= Number(numRange[1]); i <= Number(numRange[2]); i++){
+			if ((result & (0x01<<(i-1))) === 0) // If number not added.
+        		result += (0x01<<(i-1))
+    	}
     } 
 
     return result;
@@ -97,12 +99,14 @@ function listedItemsToNumber(input: any) {
 	async function removeDistributor(){
 		$selectedDeviceStore.removeDistributor($selectedDistributorStore).then(() => {
 			$selectedDeviceStore = $selectedDeviceStore;
+			$selectedDistributorStore = $selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
 		});
 	}
 
 	async function clearDistributor(){
 		$selectedDeviceStore.clearDistributors().then(() => {
 			$selectedDeviceStore = $selectedDeviceStore;
+			$selectedDistributorStore = $selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
 		});
 	}
 

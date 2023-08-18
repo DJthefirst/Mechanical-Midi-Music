@@ -66,7 +66,7 @@ export default class SerialManager{
     }
 
     public async removeDistributor(device: Device, distributor: Distributor) {
-        sysExCmd(device,CONST.SYSEX_RemoveDistributorID,distributor.getId().toHexString());
+        sysExCmd(device,CONST.SYSEX_RemoveDistributorID,to14BitStr(distributor.getId()));
         await this.syncDevice(device);
     }
 

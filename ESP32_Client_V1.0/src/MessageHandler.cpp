@@ -92,7 +92,7 @@ void MessageHandler::processSysEX(MidiMessage message)
             setDistributor(message.sysExCmdOffset());
             break;
         case (SYSEX_RemoveDistributor):
-            removeDistributor(message.buffer[6]);
+            removeDistributor(message.sysExDistributorID());
             break;
         case (SYSEX_RemoveAllDistributors):
             removeAllDistributors();
@@ -350,6 +350,7 @@ void MessageHandler::setDistributor(uint8_t data[])
 void MessageHandler::removeDistributor(uint8_t id)
 {
     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
+    if(id >= m_distributors.size()) id = m_distributors.size();
     m_distributors.erase(m_distributors.begin() + id);
 }
 
