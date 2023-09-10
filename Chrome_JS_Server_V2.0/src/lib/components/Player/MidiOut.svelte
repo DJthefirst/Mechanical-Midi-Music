@@ -1,18 +1,31 @@
 <script lang="ts">
-
+	import { onMount } from 'svelte';
 	import JZZ from 'jzz'; // @ts-ignore
 	import MidiOutElem from './MidiOutElem.svelte';
 
-	async function loadOutputs(){
-		let outputs = JZZ().info().outputs;
-		for(let output of outputs)console.log('MidiOut: '+output['name']);
+	// Detect Midi Changes
+	$: midiPorts = [];
+
+	//Set event trigger
+	onMount(async function initMidiPorts(){
+		await navigator.requestMIDIAccess()
+		.then((midiAccess) => {
+			midiAccess.onstatechange = () => updateOutputs();
+			updateOutputs();
+		});
+	});
+
+	async function updateOutputs(){
+		await JZZ()
 
 		let ports = [];
-		for (let i=0; i<4; i++){
-			let port = await JZZ().openMidiOut(i);
+		let outputs = JZZ().info().outputs;
+		for(let output of outputs){
+			let port = JZZ().openMidiOut(output['name']);
 			ports.push(port);
 		}
-		return(ports);
+		//@ts-ignore
+		midiPorts = ports;
 	}
 
 </script>
@@ -22,14 +35,8 @@
 	<ul class="outline outline-dark-50 overflow-y-scroll
     h-16 rounded-sm"
 	>
-		{#await loadOutputs()}
-			<li class = ''>-Loaing outputs-</li>	
-		{:then midiOutputs}
-			{#each midiOutputs as port}
-				<MidiOutElem port={port}/>
-			{/each} 
-		{:catch error}
-			<p style="color: red">{error.message}</p>
-		{/await}
+		{#each midiPorts as port}
+			<MidiOutElem port={port}/>
+		{/each} 
 	</ul>
 </div>
