@@ -2,9 +2,11 @@
 
 export class Node {
 	private elem;
+	private pos: any;
 	private next: any;
 
 	constructor(elem: any) {
+		this.pos = null;
 		this.elem = elem;
 		this.next = null;
 	}
@@ -132,10 +134,10 @@ export class Song {
 	public title: string;
 	public time: number;
 	//--------- TODO ---------
-	constructor(path: string | null) {
-		if (path === null) path = '';
-		this.path = path;
-		this.title = path;
+	constructor(title: string | null) {
+		if (title === null) title = '';
+		this.path = "/" + title + ".mid";
+		this.title = title;
 		this.time = 0;
 	}
 }

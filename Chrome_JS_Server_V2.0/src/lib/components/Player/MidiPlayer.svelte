@@ -1,48 +1,103 @@
 <script lang="ts">
 	import { Playlist, Node, Song } from './Playlist';
-	// import { Song } from './Playlist';
+	import {onMount} from 'svelte';
+	import JZZ from 'jzz'; // @ts-ignore
+	import SMF from 'jzz-midi-smf'; // @ts-ignore
+	import { midiNodeStore } from '$lib/store/stores';
+	import Player from './Player.svelte';
+	SMF(JZZ);
+
 	// import {playlist, curSong} from './Playlist';
 	// import {setNode, addSong, addPlayList, removeSong, clearPlayList} from './Playlist';
 
-	let playlist = new Playlist();
-	let curSong = new Song(null);
+	$: playlist = new Playlist();
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	//-------------------------------------------- DEV --------------------------------------------//
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	let testSong1: any = null;
+	let testSong2: any = null;
+	let testSong3: any = null;
+
+	onMount(async function loadFile(){
+		await JZZ()
+		testSong1 = await fetch('/short.mid').then(async(response) => {return response.arrayBuffer()});
+		testSong2 = await fetch('/jerk.mid').then(async(response) => {return response.arrayBuffer()});
+		testSong3 = await fetch('/smash.mid').then(async(response) => {return response.arrayBuffer()});
+
+		initSongs();
+
+	})
+
+	//Temp Dev Function
+	async function getSongFile(songName: string) {
+		if(songName == '/short.mid') return(JZZ.MIDI.SMF(testSong1))
+		if(songName == '/jerk.mid') return(JZZ.MIDI.SMF(testSong2))
+		if(songName == '/smash.mid') return(JZZ.MIDI.SMF(testSong3))
+		return(null)
+	}
+
+	function initSongs(){
+		let song1 = new Song('short');
+		song1.time = Math.floor(JZZ.MIDI.SMF(testSong1).player().durationMS()/1000);
+		let song2 = new Song('jerk');
+		song2.time = Math.floor(JZZ.MIDI.SMF(testSong2).player().durationMS()/1000);
+		let song3 = new Song('smash');
+		song3.time = Math.floor(JZZ.MIDI.SMF(testSong3).player().durationMS()/1000);
+
+		playlist.append(song1);
+		playlist.append(song2);
+		playlist.append(song3);
+
+		playlist = playlist;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	//-------------------------------------------- DEV --------------------------------------------//
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$: curSong = new Song(null);
 	let curNode: Node | null;
+	let player: any = null;
 
 	//State Variables
 	let doLoop = false;
 	let doPlay = false;
 
-	let curSec = 0;
-	$: curTime = secondsToTime(curSec); //seconds
+	let curMS = 0;
+	$: curTime = secondsToTime(curMS/1000); //seconds
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
+	function updateCurTime(){
+		if(!doPlay)return;
+			curMS = player.positionMS();
+		setTimeout(updateCurTime,200);
+	}
 
-	let song1 = new Song('C:DesktopsongsMontero (call me by your name) by Lil Nas X');
-	song1.title = 'Montero (call me by your name) by Lil Nas X';
-	song1.time = 299;
-	let song2 = new Song('C:DesktopsongsHead & Heart by Joel Corry ft Mnek');
-	song2.title = 'Head & Heart by Joel Corry ft Mnek';
-	song2.time = 158;
-	let song3 = new Song('C:DesktopsongsYou broke me first by Tate Mcrae');
-	song3.title = 'You broke me first by Tate Mcrae';
-	song3.time = 200;
-	let song4 = new Song('C:DesktopsongsLean On by Major Lazer & Dj shake ft. Mo');
-	song4.title = 'Lean On by Major Lazer & Dj shake ft. Mo';
-	song4.time = 174;
-	playlist.append(song1);
-	playlist.append(song2);
-	playlist.append(song3);
-	playlist.append(song4);
+	function togglePlay() {
+		doPlay = !doPlay
+		// curSong = curSong;
+		if(player == null) return;
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
+		if(doPlay) player.resume();
+		else player.pause();
+		updateCurTime();
+	}
+  
+	$: curSong, updateSong();
+	async function updateSong(){
+		if (curSong.title == "")return;
+		let songfile = await getSongFile(curSong.path)
+	
+		if(player != null)player.stop();
+		player = songfile.player();
+		player.connect($midiNodeStore);
+		player.onEnd = function() {setTimeout(nextSong,500);}
+		if (doPlay)player.play();
+	}
 
 	function setNode(node: Node) {
-		curSec = 0;
+		curMS = 0;
 		curNode = node;
 		curSong = node.getElement();
 		console.log(curSong);
@@ -50,20 +105,21 @@
 
 	function setSong(song: Song) {
 		if (curSong !== song) {
-			curSec = 0;
+			curMS = 0;
 		}
 		curSong = song;
 	}
 
 	function nextSong() {
 		if (curNode === null) return;
+		if (doLoop){ curSong = curSong; return; }
 		let node = curNode.getNext();
 		if (node === null) node = playlist.getHead();
 		setNode(node);
 	}
 
 	// Add Song
-	function addSong(filePath: string) {
+	export function addSong(filePath: string) {
 		let song = new Song(filePath);
 		if (curSong === null) {
 			curSong = song;
@@ -73,8 +129,15 @@
 	}
 
 	// Remove Song
-	function removeSong(pos: number) {
-		let oldNode = playlist.removeAt(pos);
+	export function removeSong() {
+		let i = 0;
+		for (let node of playlist){
+			if (node == curNode) break;
+			i++
+		}
+		console.log(i)
+
+		let oldNode = playlist.removeAt(i);
 		if (curNode === oldNode) {
 			if (oldNode.getNext() !== null) {
 				curNode = oldNode.getNext();
@@ -83,14 +146,15 @@
 			}
 			if (curNode !== null) setSong(curNode.getElement());
 		}
+		curSong = curSong;
 	}
 
-	function addPlayList(filePath: string) {
+	export function addPlayList(filePath: string) {
 		//For song
 		addSong(filePath);
 	}
 
-	function clearPlayList() {
+	export function clearPlayList() {
 		// JS will free out of scope memory
 		playlist = new Playlist();
 		curSong = new Song(null);
@@ -99,12 +163,14 @@
 
 	function stop() {
 		doPlay = false;
-		curSec = 0;
+		curMS = 0;
+		if(player == null) return;
+		player.stop();
 	}
 
 	function secondsToTime(len: number) {
 		let min = String(Math.floor(len / 60));
-		let sec = String(len % 60);
+		let sec = String(Math.floor(len % 60));
 		if (sec.length < 2) sec = '0' + sec;
 		return min + ':' + sec;
 	}
@@ -132,8 +198,9 @@
 			class="slider-player w-full cursor-pointer"
 			type="range"
 			min="0"
-			max={curSong.time}
-			bind:value={curSec}
+			max={curSong.time*1000}
+			on:click={player.jumpMS(this.value)}
+			bind:value={curMS}
 		/>
 	</div>
 	<div class="flex flex-row justify-between px-2 pb-3 pt-1">
@@ -149,13 +216,13 @@
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<i
 			class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
-			on:click={() => (curSec = curSec > 5 ? (curSec -= 5) : 0)}>fast_rewind</i
+			on:click={() => (curMS > 5000 ? player.jumpMS(curMS -= 5000) : null)}>fast_rewind</i
 		>
 
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<i
 			class="material-icons bg-gray-select rounded-full cursor-pointer select-none p-2"
-			on:click={() => (doPlay = !doPlay)}>{doPlay ? 'pause' : 'play_arrow'}</i
+			on:click={() => togglePlay()}>{doPlay ? 'pause' : 'play_arrow'}</i
 		>
 
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -167,7 +234,7 @@
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<i
 			class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
-			on:click={() => (curSec = curSec < curSong.time - 5 ? (curSec += 5) : curSong.time)}
+			on:click={() => (curMS < curSong.time*1000 - 5000 ? player.jumpMS(curMS += 5000) : null)}
 			>fast_forward</i
 		>
 
