@@ -105,8 +105,8 @@ export class LinkedList {
 	}
 
 	public toString() {
-		var current = this.head;
-		var str = '';
+		let current = this.head;
+		let str = '';
 		while (current) {
 			str += current.elem; //output is undefinedundefinedundefined
 			// str += JSON.stringify(current);
@@ -125,6 +125,7 @@ export class LinkedList {
 	}
 }
 
+// Test Code
 // let t = new LinkedList();
 // t.append('asd'); // Works fine
 // t.append(1);

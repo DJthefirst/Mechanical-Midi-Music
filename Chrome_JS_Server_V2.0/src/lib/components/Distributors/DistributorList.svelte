@@ -1,35 +1,60 @@
-<script>
+<script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
+	import {
+		distributorListStore,
+		selectedDeviceStore,
+		selectedDistributorStore
+	} from '$lib/store/stores';
+	import type { Device } from '../Devices/Device';
+	import { DistributorList } from './DistributorList';
 
-	import { Distributor, DistributorList } from './Distributor';
+	let DistributionMethodType = [
+		'StriaghtThrough',
+		'RoundRobin',
+		'RoundRobinBalance',
+		'Ascending',
+		'Descending',
+		'Stack'
+	];
 
-	$: curDistributorId = 0;
-	$: console.log(curDistributorId);
+	let prev_selectedDeviceStore: Device;
 
-	let distributorList = new DistributorList();
+	//Update Distributor List
+	$: {
+		$selectedDeviceStore;
+		updateDistributorList();
+	}
+	export function updateDistributorList() {
+		let distributorList = new DistributorList();
+		if ($selectedDeviceStore !== undefined) {
+			for (let distributor of $selectedDeviceStore.getDistributors())
+				distributorList.append(distributor);
+		}
+		distributorListStore.set(distributorList);
 
-	let distributor1 = new Distributor(0x0001, 0x0000000f, 1, 0, 127, 1, false, false, false);
-	let distributor2 = new Distributor(0x0002, 0x000000f0, 10, 0, 127, 1, false, true, true);
-	let distributor3 = new Distributor(0x0004, 0x00000f00, 100, 0, 127, 1, true, true, true);
-	let distributor4 = new Distributor(0x0008, 0x0000f000, 1000, 0, 127, 1, true, false, false);
-
-	distributorList.append(distributor1);
-	distributorList.append(distributor2);
-	distributorList.append(distributor3);
-	distributorList.append(distributor4);
+		// On Device change update selected Disributor
+		if ($selectedDeviceStore == prev_selectedDeviceStore) return;
+		if ($selectedDeviceStore === undefined) {
+			//@ts-ignore
+			$selectedDistributorStore = undefined;
+			return;
+		}
+		$selectedDistributorStore = $selectedDeviceStore.getDistributors()[0];
+		prev_selectedDeviceStore = $selectedDeviceStore;
+	}
 </script>
 
 <div class="div-outline overflow-y-auto">
 	<p class="text-center font-bold">Distributor List</p>
 	<div class="h-full">
-		{#each distributorList as distributor}
+		{#each $distributorListStore as distributor}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
-				class="{distributor.getId() == curDistributorId
+				class="{distributor.getId() == $selectedDistributorStore.getId()
 					? 'bg-gray-select'
 					: 'bg-gray-dark hover:bg-gray-700'} 
                     m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"
-				on:click={() => (curDistributorId = distributor.getId())}
+				on:click={() => ($selectedDistributorStore = distributor)}
 			>
 				<div class="flex flex-col p-2 w-60">
 					<label>
@@ -38,15 +63,21 @@
 					</label>
 					<label>
 						Channels:
-						<span class="font-semibold">{distributor.channels}</span>
+						<span class="font-semibold"
+							>0x{distributor.channels.toString(16).padZero(4).toUpperCase()}</span
+						>
 					</label>
 					<label>
 						Instruments:
-						<span class="font-semibold">{distributor.instruments}</span>
+						<span class="font-semibold"
+							>0x{distributor.instruments.toString(16).padZero(8).toUpperCase()}</span
+						>
 					</label>
 					<label>
 						Distribution Method:
-						<span class="font-semibold">{distributor.distributionMethod}</span>
+						<span class="font-semibold"
+							>{DistributionMethodType[distributor.distributionMethod]}</span
+						>
 					</label>
 					<label>
 						Note Min/Max:

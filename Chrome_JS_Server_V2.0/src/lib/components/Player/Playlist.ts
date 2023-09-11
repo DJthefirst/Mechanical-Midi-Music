@@ -2,9 +2,11 @@
 
 export class Node {
 	private elem;
+	private pos: any;
 	private next: any;
 
 	constructor(elem: any) {
+		this.pos = null;
 		this.elem = elem;
 		this.next = null;
 	}
@@ -38,7 +40,7 @@ export class Playlist {
 	forEach(cb: any) {
 		// Takes a callback argument.
 		// As this object has a default iterator (see above) we
-		//    can use the following syntax to consume that iterator.
+		// can use the following syntax to consume that iterator.
 		// Call the callback for each yielded value.
 		for (let data of this) cb(data);
 	}
@@ -107,8 +109,8 @@ export class Playlist {
 	}
 
 	public toString() {
-		var current = this.head;
-		var str = '';
+		let current = this.head;
+		let str = '';
 		while (current) {
 			str += current.elem; //output is undefinedundefinedundefined
 			// str += JSON.stringify(current);
@@ -132,10 +134,10 @@ export class Song {
 	public title: string;
 	public time: number;
 	//--------- TODO ---------
-	constructor(path: string | null) {
-		if (path === null) path = '';
-		this.path = path;
-		this.title = path;
+	constructor(title: string | null) {
+		if (title === null) title = '';
+		this.path = '/' + title + '.mid';
+		this.title = title;
 		this.time = 0;
 	}
 }
