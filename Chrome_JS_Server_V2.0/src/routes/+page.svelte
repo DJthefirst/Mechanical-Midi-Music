@@ -1,11 +1,11 @@
 <script>
-	import DeviceList from "$lib/components/Devices/DeviceList.svelte";
-	import DeviceManager from "$lib/components/Devices/DeviceManager.svelte";
-	import DistributorList  from "$lib/components/Distributors/DistributorList.svelte";
-	import DistributorManager from "$lib/components/Distributors/DistributorManager.svelte";
-	import Player from "$lib/components/Player/Player.svelte";
+	import DeviceList from '$lib/components/Devices/DeviceList.svelte';
+	import DeviceManager from '$lib/components/Devices/DeviceManager.svelte';
+	import DistributorList from '$lib/components/Distributors/DistributorList.svelte';
+	import DistributorManager from '$lib/components/Distributors/DistributorManager.svelte';
+	import Player from '$lib/components/Player/Player.svelte';
 
-	import { startMidi } from "$lib/components/Utility/Initilizations";
+	import { startMidi } from '$lib/components/Utility/Initilizations';
 
 	startMidi();
 </script>

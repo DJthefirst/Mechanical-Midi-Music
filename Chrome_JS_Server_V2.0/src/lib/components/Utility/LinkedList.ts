@@ -125,6 +125,7 @@ export class LinkedList {
 	}
 }
 
+// Test Code
 // let t = new LinkedList();
 // t.append('asd'); // Works fine
 // t.append(1);

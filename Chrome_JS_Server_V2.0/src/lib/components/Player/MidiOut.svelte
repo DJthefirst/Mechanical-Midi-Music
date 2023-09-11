@@ -7,27 +7,25 @@
 	$: midiPorts = [];
 
 	//Set event trigger
-	onMount(async function initMidiPorts(){
-		await navigator.requestMIDIAccess()
-		.then((midiAccess) => {
+	onMount(async function initMidiPorts() {
+		await navigator.requestMIDIAccess().then((midiAccess) => {
 			midiAccess.onstatechange = () => updateOutputs();
 			updateOutputs();
 		});
 	});
 
-	async function updateOutputs(){
-		await JZZ()
+	async function updateOutputs() {
+		await JZZ();
 
 		let ports = [];
 		let outputs = JZZ().info().outputs;
-		for(let output of outputs){
+		for (let output of outputs) {
 			let port = JZZ().openMidiOut(output['name']);
 			ports.push(port);
 		}
 		//@ts-ignore
 		midiPorts = ports;
 	}
-
 </script>
 
 <div>
@@ -36,7 +34,7 @@
     h-16 rounded-sm"
 	>
 		{#each midiPorts as port}
-			<MidiOutElem port={port}/>
-		{/each} 
+			<MidiOutElem {port} />
+		{/each}
 	</ul>
 </div>

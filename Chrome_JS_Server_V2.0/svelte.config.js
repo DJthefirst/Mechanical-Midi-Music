@@ -16,16 +16,16 @@ const config = {
 	},
 
 	paths: {
-		base: '/Mechanical-Midi-Music-App',
+		base: '/Mechanical-Midi-Music-App'
 	},
 	kit: {
-        adapter: adapter({
+		adapter: adapter({
 			pages: 'build',
-            assets: 'build',
-            fallback: 'none',
-            precompress: false,
-			strict: true,
-        }),
+			assets: 'build',
+			fallback: 'none',
+			precompress: false,
+			strict: true
+		})
 	}
 };
 

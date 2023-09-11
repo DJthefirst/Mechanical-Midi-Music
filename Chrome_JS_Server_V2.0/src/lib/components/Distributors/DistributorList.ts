@@ -1,8 +1,8 @@
-import { selectedDistributorStore} from "$lib/store/stores";
-import type { Distributor } from "./Distributor";
+import { selectedDistributorStore } from '$lib/store/stores';
+import type { Distributor } from './Distributor';
 
 let selectedDistributor: Distributor;
-selectedDistributorStore.subscribe((prev_val) => selectedDistributor = prev_val);
+selectedDistributorStore.subscribe((prev_val) => (selectedDistributor = prev_val));
 
 export class DistributorList {
 	private list: Distributor[] = [];
@@ -24,7 +24,7 @@ export class DistributorList {
 	public append(elem: Distributor) {
 		elem.setId(this.list.length);
 		this.list.push(elem);
-		if(selectedDistributor === undefined) selectedDistributorStore.set(elem); 
+		if (selectedDistributor === undefined) selectedDistributorStore.set(elem);
 	}
 
 	public pop(id: number) {
@@ -33,7 +33,7 @@ export class DistributorList {
 			this.list[i].decId();
 		}
 		//@ts-ignore
-		if(selectedDistributor.getId() == id) selectedDistributorStore.set(undefined);
+		if (selectedDistributor.getId() == id) selectedDistributorStore.set(undefined);
 		return elem;
 	}
 }

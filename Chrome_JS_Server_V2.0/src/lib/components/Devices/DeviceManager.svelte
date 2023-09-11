@@ -1,47 +1,42 @@
 <script lang="ts">
-	import { deviceListStore, selectedDeviceStore } from "$lib/store/stores";
-	import { connectDevice } from "./Device";
-	
-	
+	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
+	import { connectDevice } from './Device';
+
 	$: formDeviceID = 0x0001;
-	$: formDeviceName = "";
+	$: formDeviceName = '';
 	$: formOmniModeEnable = false;
 
-	function saveDevice(){
-		if($selectedDeviceStore.id === 0) return;
-		
-		$selectedDeviceStore.save(
-			formDeviceName.slice(0,20),
-			formOmniModeEnable
-		);
+	function saveDevice() {
+		if ($selectedDeviceStore.id === 0) return;
+
+		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formOmniModeEnable);
 	}
 
-	function addDevice(){
+	function addDevice() {
 		connectDevice(115200);
 	}
 
-	async function removeDevice(){
+	async function removeDevice() {
 		await $selectedDeviceStore.remove();
 	}
 
-	async function clearDevices(){
+	async function clearDevices() {
 		//@ts-ignore
 		$selectedDeviceStore = undefined;
 
 		// Disconect all connected Devices
-		for await (let device of $deviceListStore){
+		for await (let device of $deviceListStore) {
 			device.remove();
 		}
 	}
 
 	// Update Form on Selected Device Change
-	$: if (($selectedDeviceStore !== undefined) && $selectedDeviceStore.id !== 0)updateForm();
-	function updateForm(){
+	$: if ($selectedDeviceStore !== undefined && $selectedDeviceStore.id !== 0) updateForm();
+	function updateForm() {
 		formDeviceID = $selectedDeviceStore.id;
 		formDeviceName = $selectedDeviceStore.name;
 		formOmniModeEnable = $selectedDeviceStore.isOnmiMode;
 	}
-	
 </script>
 
 <div class="div-outline">
@@ -73,9 +68,9 @@
 		<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
 	</div>
 	<div class="flex justify-center m-2">
-		<button on:click={ () => saveDevice()} class="button-player-green mx-2">Update Device</button>
-		<button on:click={ () => addDevice()} class="button-player-green mx-2">Add Device</button>
-		<button on:click={ () => removeDevice()} class="button-player-red mx-2">Remove Device</button>
-		<button on:click={ () => clearDevices()} class="button-player-red mx-2">Clear Devices</button>
+		<button on:click={() => saveDevice()} class="button-player-green mx-2">Update Device</button>
+		<button on:click={() => addDevice()} class="button-player-green mx-2">Add Device</button>
+		<button on:click={() => removeDevice()} class="button-player-red mx-2">Remove Device</button>
+		<button on:click={() => clearDevices()} class="button-player-red mx-2">Clear Devices</button>
 	</div>
 </div>

@@ -40,7 +40,7 @@ export class Playlist {
 	forEach(cb: any) {
 		// Takes a callback argument.
 		// As this object has a default iterator (see above) we
-		//    can use the following syntax to consume that iterator.
+		// can use the following syntax to consume that iterator.
 		// Call the callback for each yielded value.
 		for (let data of this) cb(data);
 	}
@@ -136,7 +136,7 @@ export class Song {
 	//--------- TODO ---------
 	constructor(title: string | null) {
 		if (title === null) title = '';
-		this.path = "/" + title + ".mid";
+		this.path = '/' + title + '.mid';
 		this.title = title;
 		this.time = 0;
 	}

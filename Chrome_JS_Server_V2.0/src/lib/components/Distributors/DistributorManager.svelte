@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { selectedDeviceStore, selectedDistributorStore } from "$lib/store/stores";
-	import { Distributor } from "./Distributor";
-	
-	$: formChannels = "1-4";
-	$: formInstruments = "1-4";
+	import { selectedDeviceStore, selectedDistributorStore } from '$lib/store/stores';
+	import { Distributor } from './Distributor';
+
+	$: formChannels = '1-4';
+	$: formInstruments = '1-4';
 	$: formDistributionMethod = 1;
 	$: formDamperEnable = false;
 	$: formPolyphonicEnable = false;
@@ -13,8 +13,8 @@
 	$: formNumPolyphonicNotes = 1;
 
 	// Save Distributor to Device
-	async function saveDistributor(addDistributor: boolean){
-		if($selectedDistributorStore === undefined) addDistributor = true;
+	async function saveDistributor(addDistributor: boolean) {
+		if ($selectedDistributorStore === undefined) addDistributor = true;
 
 		let distributor = new Distributor(
 			listedItemsToNumber(formChannels),
@@ -36,83 +36,87 @@
 		});
 	}
 
-function listedItemsToNumber(input: any) {
-    const RegExp_NumRanges = /(\d+)\s?-\s?(\d+)/g;
-    const RegExp_Num = /(?<=^|[^-\s\d]|\d\s)\s*(\d+)\s*(?=[^-\s\d]|\s\d|$)/g;
+	function listedItemsToNumber(input: any) {
+		const RegExp_NumRanges = /(\d+)\s?-\s?(\d+)/g;
+		const RegExp_Num = /(?<=^|[^-\s\d]|\d\s)\s*(\d+)\s*(?=[^-\s\d]|\s\d|$)/g;
 
-	let result = 0x00;
-    if (typeof input === "number") return(input);
-	if (typeof input !== "string") return(result);
+		let result = 0x00;
+		if (typeof input === 'number') return input;
+		if (typeof input !== 'string') return result;
 
-    //If hex binary or epression return computation
-    if(/0x|0b|[|&]/gi.test(input)){
-      return eval(input);
-    }
+		//If hex binary or epression return computation
+		if (/0x|0b|[|&]/gi.test(input)) {
+			return eval(input);
+		}
 
-    //Else convet item list to Number
-    let num;
-    let numRange;
+		//Else convet item list to Number
+		let num;
+		let numRange;
 
-    //Match all Indivudal itmes "1,2,4"
-    while ((num = RegExp_Num.exec(input)) !== null){ 
-		if ((result & (0x01<<(Number(num[1])-1))) === 0) // If number not added.
-    		result += (0x01<<(Number(num[1])-1));
-    }
+		//Match all Indivudal itmes "1,2,4"
+		while ((num = RegExp_Num.exec(input)) !== null) {
+			if ((result & (0x01 << (Number(num[1]) - 1))) === 0)
+				// If number not added.
+				result += 0x01 << (Number(num[1]) - 1);
+		}
 
-    //Match all Item Ranges "1-3"
-    while ((numRange = RegExp_NumRanges.exec(input)) !== null){ 
-    	for (let i= Number(numRange[1]); i <= Number(numRange[2]); i++){
-			if ((result & (0x01<<(i-1))) === 0) // If number not added.
-        		result += (0x01<<(i-1))
-    	}
-    } 
+		//Match all Item Ranges "1-3"
+		while ((numRange = RegExp_NumRanges.exec(input)) !== null) {
+			for (let i = Number(numRange[1]); i <= Number(numRange[2]); i++) {
+				if ((result & (0x01 << (i - 1))) === 0)
+					// If number not added.
+					result += 0x01 << (i - 1);
+			}
+		}
 
-    return result;
-  };
+		return result;
+	}
 
-	function NumberToListedItems(num: number){
-		let result = "";
+	function NumberToListedItems(num: number) {
+		let result = '';
 		let i = 0;
-  
-  		let prev = false;
-		let cur = ((num >> i) & 0x01) != 0;
-		while (num > 0){
-  			let next = ((num >> i+1) & 0x01) != 0;
-  	
-			let curValue = String(i+1);
 
-			if (cur){
+		let prev = false;
+		let cur = ((num >> i) & 0x01) != 0;
+		while (num > 0) {
+			let next = ((num >> (i + 1)) & 0x01) != 0;
+
+			let curValue = String(i + 1);
+
+			if (cur) {
 				if (!prev) result += curValue;
-				if (!prev && ! next) result += ",";
-				if (prev && ! next) result += (curValue + ",");
-				if (!prev && next) result += "-";
+				if (!prev && !next) result += ',';
+				if (prev && !next) result += curValue + ',';
+				if (!prev && next) result += '-';
 				num = num ^ (0x01 << i);
 			}
-		
+
 			prev = cur;
 			cur = next;
 			i++;
-		} 
+		}
 		return result.slice(0, -1);
 	}
 
-	async function removeDistributor(){
+	async function removeDistributor() {
 		$selectedDeviceStore.removeDistributor($selectedDistributorStore).then(() => {
 			$selectedDeviceStore = $selectedDeviceStore;
-			$selectedDistributorStore = $selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
+			$selectedDistributorStore =
+				$selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
 		});
 	}
 
-	async function clearDistributor(){
+	async function clearDistributor() {
 		$selectedDeviceStore.clearDistributors().then(() => {
 			$selectedDeviceStore = $selectedDeviceStore;
-			$selectedDistributorStore = $selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
+			$selectedDistributorStore =
+				$selectedDeviceStore.getDistributors()[$selectedDistributorStore.getId()];
 		});
 	}
 
 	// Update Form on Selected Distributir Change
-	$: if (($selectedDistributorStore !== undefined))updateForm();
-	function updateForm(){
+	$: if ($selectedDistributorStore !== undefined) updateForm();
+	function updateForm() {
 		formChannels = NumberToListedItems($selectedDistributorStore.channels);
 		formInstruments = NumberToListedItems($selectedDistributorStore.instruments);
 		formDistributionMethod = $selectedDistributorStore.distributionMethod;
@@ -123,7 +127,6 @@ function listedItemsToNumber(input: any) {
 		formPolyphonicEnable = $selectedDistributorStore.polyphonic;
 		formNoteOverwrite = $selectedDistributorStore.noteOverwrite;
 	}
-
 </script>
 
 <div class="div-outline">
@@ -157,11 +160,21 @@ function listedItemsToNumber(input: any) {
 		</div>
 		<div>
 			<label for="deviceName" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
-			<input bind:checked={formPolyphonicEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<input
+				bind:checked={formPolyphonicEnable}
+				type="checkbox"
+				id="deviceName"
+				class="bg-gray-dark"
+			/>
 		</div>
 		<div>
 			<label for="deviceName" class="font-semibold my-2 ml-4">Note Overwrite</label>
-			<input bind:checked={formNoteOverwrite} type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<input
+				bind:checked={formNoteOverwrite}
+				type="checkbox"
+				id="deviceName"
+				class="bg-gray-dark"
+			/>
 		</div>
 	</div>
 	<div>
@@ -193,9 +206,17 @@ function listedItemsToNumber(input: any) {
 		/>
 	</div>
 	<div class="flex justify-center m-2">
-		<button on:click = {() => saveDistributor(false)} class="button-player-green mx-2">Update Distributor</button>
-		<button on:click = {() => saveDistributor(true)} class="button-player-green mx-2">Add Distributor</button>
-		<button on:click = {() => removeDistributor()} class="button-player-red mx-2">Remove Distributor</button>
-		<button on:click = {() => clearDistributor()} class="button-player-red mx-2">Clear Distributors</button>
+		<button on:click={() => saveDistributor(false)} class="button-player-green mx-2"
+			>Update Distributor</button
+		>
+		<button on:click={() => saveDistributor(true)} class="button-player-green mx-2"
+			>Add Distributor</button
+		>
+		<button on:click={() => removeDistributor()} class="button-player-red mx-2"
+			>Remove Distributor</button
+		>
+		<button on:click={() => clearDistributor()} class="button-player-red mx-2"
+			>Clear Distributors</button
+		>
 	</div>
 </div>

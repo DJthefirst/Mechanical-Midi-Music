@@ -1,38 +1,47 @@
 <script lang="ts">
 	import checkmark from '$lib/images/checkmark.svg';
-	import { distributorListStore, selectedDeviceStore, selectedDistributorStore } from '$lib/store/stores';
+	import {
+		distributorListStore,
+		selectedDeviceStore,
+		selectedDistributorStore
+	} from '$lib/store/stores';
 	import type { Device } from '../Devices/Device';
 	import { DistributorList } from './DistributorList';
 
 	let DistributionMethodType = [
-		"StriaghtThrough",
-		"RoundRobin",
-		"RoundRobinBalance",
-		"Ascending",
-		"Descending",
-		"Stack"
-	]
+		'StriaghtThrough',
+		'RoundRobin',
+		'RoundRobinBalance',
+		'Ascending',
+		'Descending',
+		'Stack'
+	];
 
 	let prev_selectedDeviceStore: Device;
 
 	//Update Distributor List
-	$: { $selectedDeviceStore; updateDistributorList()}
-	export function updateDistributorList(){
+	$: {
+		$selectedDeviceStore;
+		updateDistributorList();
+	}
+	export function updateDistributorList() {
 		let distributorList = new DistributorList();
 		if ($selectedDeviceStore !== undefined) {
-			for( let distributor of $selectedDeviceStore.getDistributors()) distributorList.append(distributor);
+			for (let distributor of $selectedDeviceStore.getDistributors())
+				distributorList.append(distributor);
 		}
 		distributorListStore.set(distributorList);
 
 		// On Device change update selected Disributor
 		if ($selectedDeviceStore == prev_selectedDeviceStore) return;
-		if ($selectedDeviceStore === undefined) { //@ts-ignore
-			$selectedDistributorStore = undefined; return;
+		if ($selectedDeviceStore === undefined) {
+			//@ts-ignore
+			$selectedDistributorStore = undefined;
+			return;
 		}
 		$selectedDistributorStore = $selectedDeviceStore.getDistributors()[0];
 		prev_selectedDeviceStore = $selectedDeviceStore;
 	}
-
 </script>
 
 <div class="div-outline overflow-y-auto">
@@ -54,15 +63,21 @@
 					</label>
 					<label>
 						Channels:
-						<span class="font-semibold">0x{distributor.channels.toString(16).padZero(4).toUpperCase()}</span>
+						<span class="font-semibold"
+							>0x{distributor.channels.toString(16).padZero(4).toUpperCase()}</span
+						>
 					</label>
 					<label>
 						Instruments:
-						<span class="font-semibold">0x{distributor.instruments.toString(16).padZero(8).toUpperCase()}</span>
+						<span class="font-semibold"
+							>0x{distributor.instruments.toString(16).padZero(8).toUpperCase()}</span
+						>
 					</label>
 					<label>
 						Distribution Method:
-						<span class="font-semibold">{DistributionMethodType[distributor.distributionMethod]}</span>
+						<span class="font-semibold"
+							>{DistributionMethodType[distributor.distributionMethod]}</span
+						>
 					</label>
 					<label>
 						Note Min/Max:
