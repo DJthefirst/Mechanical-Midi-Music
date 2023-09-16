@@ -130,15 +130,18 @@ export class Playlist {
 }
 
 export class Song {
-	public path: string;
+	public file: File | null;
 	public title: string;
 	public time: number;
 	//--------- TODO ---------
-	constructor(title: string | null) {
-		if (title === null) title = '';
-		this.path = '/' + title + '.mid';
-		this.title = title;
+	constructor(file: File | null) {
+		this.file = file;
+		this.title = (file === null) ? '' : file.name.split(".")[0];
 		this.time = 0;
+	}
+
+	public getData(){
+		return this.file?.arrayBuffer();
 	}
 }
 

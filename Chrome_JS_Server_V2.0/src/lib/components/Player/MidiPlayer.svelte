@@ -2,66 +2,13 @@
 	import { Playlist, Node, Song } from './Playlist';
 	import { onMount } from 'svelte';
 	import JZZ from 'jzz'; // @ts-ignore
-	import SMF from 'jzz-midi-smf'; // @ts-ignore
+	import SMF from 'jzz-midi-smf';
 	import { midiNodeStore } from '$lib/store/stores';
-	import Player from './Player.svelte';
 	SMF(JZZ);
-
-	// import {playlist, curSong} from './Playlist';
-	// import {setNode, addSong, addPlayList, removeSong, clearPlayList} from './Playlist';
 
 	$: playlist = new Playlist();
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-	let testSong1: any = null;
-	let testSong2: any = null;
-	let testSong3: any = null;
-
-	onMount(async function loadFile() {
-		await JZZ();
-		testSong1 = await fetch('/short.mid').then(async (response) => {
-			return response.arrayBuffer();
-		});
-		testSong2 = await fetch('/jerk.mid').then(async (response) => {
-			return response.arrayBuffer();
-		});
-		testSong3 = await fetch('/smash.mid').then(async (response) => {
-			return response.arrayBuffer();
-		});
-
-		initSongs();
-	});
-
-	//Temp Dev Function
-	async function getSongFile(songName: string) {
-		//@ts-ignore
-		if (songName == '/short.mid') return JZZ.MIDI.SMF(testSong1); //@ts-ignore
-		if (songName == '/jerk.mid') return JZZ.MIDI.SMF(testSong2); //@ts-ignore
-		if (songName == '/smash.mid') return JZZ.MIDI.SMF(testSong3);
-		return null;
-	}
-
-	function initSongs() {
-		let song1 = new Song('short'); //@ts-ignore
-		song1.time = Math.floor(JZZ.MIDI.SMF(testSong1).player().durationMS() / 1000);
-		let song2 = new Song('jerk'); //@ts-ignore
-		song2.time = Math.floor(JZZ.MIDI.SMF(testSong2).player().durationMS() / 1000);
-		let song3 = new Song('smash'); //@ts-ignore
-		song3.time = Math.floor(JZZ.MIDI.SMF(testSong3).player().durationMS() / 1000);
-
-		playlist.append(song1);
-		playlist.append(song2);
-		playlist.append(song3);
-
-		playlist = playlist;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
+	// let testSong1: any = '/short.mid';
 
 	$: curSong = new Song(null);
 	let curNode: Node | null;
@@ -82,7 +29,6 @@
 
 	function togglePlay() {
 		doPlay = !doPlay;
-		// curSong = curSong;
 		if (player == null) return;
 
 		if (doPlay) player.resume();
@@ -92,11 +38,11 @@
 
 	$: curSong, updateSong();
 	async function updateSong() {
-		if (curSong.title == '') return;
-		let songfile = await getSongFile(curSong.path);
+		if (curSong.title == '') return; // @ts-ignore
+		let songFile = JZZ.MIDI.SMF(await curSong.getData())
 
 		if (player != null) player.stop();
-		player = songfile.player();
+		player = songFile.player();
 		player.connect($midiNodeStore);
 		player.onEnd = function () {
 			setTimeout(nextSong, 500);
@@ -130,13 +76,15 @@
 	}
 
 	// Add Song
-	export function addSong(filePath: string) {
-		let song = new Song(filePath);
+	export async function addSong(file: File) {
+		let song = new Song(file); // @ts-ignore
+		song.time = Math.floor(JZZ.MIDI.SMF(await song.getData()).player().durationMS() / 1000);
 		if (curSong === null) {
 			curSong = song;
 			curNode = playlist.getHead();
 		}
 		playlist.append(song);
+		playlist = playlist;
 	}
 
 	// Remove Song
@@ -160,15 +108,13 @@
 		curSong = curSong;
 	}
 
-	export function addPlayList(filePath: string) {
-		//For song
-		addSong(filePath);
-	}
-
 	export function clearPlayList() {
 		// JS will free out of scope memory
 		playlist = new Playlist();
 		curSong = new Song(null);
+		curMS = 0;
+		player.stop();
+		player = null;
 		curNode = null;
 	}
 
@@ -198,7 +144,7 @@
 						: 'hover:bg-gray-700'}"
 					on:click={() => setNode(node)}
 				>
-					<li class="pl-2">{node.getElement().title}</li>
+					<li class="pl-2">{node.getElement().title.slice(0,25)}</li>
 					<span class=".self-end pl-4 font-semibold">{secondsToTime(node.getElement().time)}</span>
 				</div>
 			{/each}
@@ -210,7 +156,7 @@
 			type="range"
 			min="0"
 			max={curSong.time * 1000}
-			on:click={player.jumpMS(this.value)}
+			on:click={player != null && player.jumpMS(this.value)}
 			bind:value={curMS}
 		/>
 	</div>
