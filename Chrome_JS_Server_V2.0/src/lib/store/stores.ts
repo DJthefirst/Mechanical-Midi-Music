@@ -7,6 +7,7 @@ import type ComManager from '$lib/components/Utility/ComManager';
 import JZZ from 'jzz';
 let midiNode = JZZ.Widget(); // @ts-ignore
 
+// export const playlistStore = writable<Playlist>(new Playlist());
 export const midiNodeStore = writable(midiNode);
 export const selectedDeviceStore = writable<Device>(undefined);
 export const selectedDistributorStore = writable<Distributor>(undefined);

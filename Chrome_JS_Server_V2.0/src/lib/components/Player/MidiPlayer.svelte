@@ -1,16 +1,40 @@
 <script lang="ts">
 	import { Playlist, Node, Song } from './Playlist';
-	import { onMount } from 'svelte';
 	import JZZ from 'jzz'; // @ts-ignore
 	import SMF from 'jzz-midi-smf';
 	import { midiNodeStore } from '$lib/store/stores';
+	import {FileDB} from '../Utility/FileDB';
+	import { onMount } from 'svelte';
 	SMF(JZZ);
 
 	$: playlist = new Playlist();
 
-	// let testSong1: any = '/short.mid';
+	let fileDB = new FileDB();
+	let demoSongs: string[] =["KirbysTheme.mid", "NyanCat.mid", "Tetris.mid", 
+		"Pirates of the Caribbean - He's a Pirate.mid", "Smash Mouth - All Star.mid"];
 
-	$: curSong = new Song(null);
+	onMount(async() => {
+		fileDB.init().then( async() =>{
+			let files = await fileDB.loadAll();
+
+			//Load demo songs if FileDB is empty
+			if (files.length == 0){
+				for (let fileName of demoSongs){
+					let blob = await (await fetch("/DemoSongs/"+fileName)).blob();
+  					let file = new File([blob], fileName, {type: (blob).type});
+					addSong(file);
+				};
+				return;
+			}
+			for (let file of await files){
+				addSong(file);
+			}
+		});
+	});
+
+	let _cursong: null|Song= null;
+	$: curSong = _cursong;
+	$: curSongTime = (curSong == null ? 0 : curSong.time);
 	let curNode: Node | null;
 	let player: any = null;
 
@@ -22,7 +46,7 @@
 	$: curTime = secondsToTime(curMS / 1000); //seconds
 
 	function updateCurTime() {
-		if (!doPlay) return;
+		if (!doPlay || player == null) return;
 		curMS = player.positionMS();
 		setTimeout(updateCurTime, 200);
 	}
@@ -38,6 +62,11 @@
 
 	$: curSong, updateSong();
 	async function updateSong() {
+		if(curSong == null){
+			clearPlayList();
+			return;
+		}
+		console.log(curSong);
 		if (curSong.title == '') return; // @ts-ignore
 		let songFile = JZZ.MIDI.SMF(await curSong.getData())
 
@@ -48,6 +77,7 @@
 			setTimeout(nextSong, 500);
 		};
 		if (doPlay) player.play();
+		updateCurTime();
 	}
 
 	function setNode(node: Node) {
@@ -57,7 +87,7 @@
 		console.log(curSong);
 	}
 
-	function setSong(song: Song) {
+	function setSong(song: Song|null) {
 		if (curSong !== song) {
 			curMS = 0;
 		}
@@ -70,13 +100,12 @@
 			curSong = curSong;
 			return;
 		}
-		let node = curNode.getNext();
-		if (node === null) node = playlist.getHead();
-		setNode(node);
+		setNode(curNode.getNext());
 	}
 
 	// Add Song
 	export async function addSong(file: File) {
+		fileDB.add(file);
 		let song = new Song(file); // @ts-ignore
 		song.time = Math.floor(JZZ.MIDI.SMF(await song.getData()).player().durationMS() / 1000);
 		if (curSong === null) {
@@ -89,31 +118,21 @@
 
 	// Remove Song
 	export function removeSong() {
-		let i = 0;
-		for (let node of playlist) {
-			if (node == curNode) break;
-			i++;
-		}
-		console.log(i);
-
-		let oldNode = playlist.removeAt(i);
-		if (curNode === oldNode) {
-			if (oldNode.getNext() !== null) {
-				curNode = oldNode.getNext();
-			} else {
-				curNode = playlist.getHead();
-			}
-			if (curNode !== null) setSong(curNode.getElement());
-		}
-		curSong = curSong;
+		if(curSong == null) return;
+		if(curSong.file != null) fileDB.remove(curSong.file);
+		curNode = playlist.remove(curSong);
+		setSong(curNode == null ? null : curNode.getElement());
+		playlist = playlist;
 	}
 
 	export function clearPlayList() {
-		// JS will free out of scope memory
+		if(player != null){
+			player.stop();
+			fileDB.clear();
+		}
 		playlist = new Playlist();
 		curSong = new Song(null);
 		curMS = 0;
-		player.stop();
 		player = null;
 		curNode = null;
 	}
@@ -155,7 +174,7 @@
 			class="slider-player w-full cursor-pointer"
 			type="range"
 			min="0"
-			max={curSong.time * 1000}
+			max={curSongTime * 1000}
 			on:click={player != null && player.jumpMS(this.value)}
 			bind:value={curMS}
 		/>
@@ -191,7 +210,7 @@
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<i
 			class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
-			on:click={() => (curMS < curSong.time * 1000 - 5000 ? player.jumpMS((curMS += 5000)) : null)}
+			on:click={() => (curMS < curSongTime * 1000 - 5000 ? player.jumpMS((curMS += 5000)) : null)}
 			>fast_forward</i
 		>
 
@@ -201,6 +220,6 @@
 			on:click={() => nextSong()}>shortcut</i
 		>
 
-		<span>{secondsToTime(curSong.time)}</span>
+		<span>{secondsToTime(curSongTime)}</span>
 	</div>
 </div>
