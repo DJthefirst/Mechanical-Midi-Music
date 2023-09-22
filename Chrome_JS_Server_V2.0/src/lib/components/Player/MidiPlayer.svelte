@@ -1,69 +1,40 @@
 <script lang="ts">
 	import { Playlist, Node, Song } from './Playlist';
-	import { onMount } from 'svelte';
 	import JZZ from 'jzz'; // @ts-ignore
-	import SMF from 'jzz-midi-smf'; // @ts-ignore
+	import SMF from 'jzz-midi-smf';
 	import { midiNodeStore } from '$lib/store/stores';
-	import Player from './Player.svelte';
+	import {FileDB} from '../Utility/FileDB';
+	import { onMount } from 'svelte';
 	SMF(JZZ);
-
-	// import {playlist, curSong} from './Playlist';
-	// import {setNode, addSong, addPlayList, removeSong, clearPlayList} from './Playlist';
 
 	$: playlist = new Playlist();
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
+	let fileDB = new FileDB();
+	let demoSongs: string[] =["KirbysTheme.mid", "NyanCat.mid", "Tetris.mid", 
+		"Pirates of the Caribbean - He's a Pirate.mid", "Smash Mouth - All Star.mid"];
 
-	let testSong1: any = null;
-	let testSong2: any = null;
-	let testSong3: any = null;
+	onMount(async() => {
+		fileDB.init().then( async() =>{
+			let files = await fileDB.loadAll();
 
-	onMount(async function loadFile() {
-		await JZZ();
-		testSong1 = await fetch('/short.mid').then(async (response) => {
-			return response.arrayBuffer();
+			//Load demo songs if FileDB is empty
+			if (files.length == 0){
+				for (let fileName of demoSongs){
+					let blob = await (await fetch("/DemoSongs/"+fileName)).blob();
+  					let file = new File([blob], fileName, {type: (blob).type});
+					addSong(file);
+				};
+				return;
+			}
+			for (let file of await files){
+				addSong(file);
+			}
 		});
-		testSong2 = await fetch('/jerk.mid').then(async (response) => {
-			return response.arrayBuffer();
-		});
-		testSong3 = await fetch('/smash.mid').then(async (response) => {
-			return response.arrayBuffer();
-		});
-
-		initSongs();
 	});
 
-	//Temp Dev Function
-	async function getSongFile(songName: string) {
-		//@ts-ignore
-		if (songName == '/short.mid') return JZZ.MIDI.SMF(testSong1); //@ts-ignore
-		if (songName == '/jerk.mid') return JZZ.MIDI.SMF(testSong2); //@ts-ignore
-		if (songName == '/smash.mid') return JZZ.MIDI.SMF(testSong3);
-		return null;
-	}
-
-	function initSongs() {
-		let song1 = new Song('short'); //@ts-ignore
-		song1.time = Math.floor(JZZ.MIDI.SMF(testSong1).player().durationMS() / 1000);
-		let song2 = new Song('jerk'); //@ts-ignore
-		song2.time = Math.floor(JZZ.MIDI.SMF(testSong2).player().durationMS() / 1000);
-		let song3 = new Song('smash'); //@ts-ignore
-		song3.time = Math.floor(JZZ.MIDI.SMF(testSong3).player().durationMS() / 1000);
-
-		playlist.append(song1);
-		playlist.append(song2);
-		playlist.append(song3);
-
-		playlist = playlist;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-	//-------------------------------------------- DEV --------------------------------------------//
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-	$: curSong = new Song(null);
+	let _cursong: null|Song= null;
+	$: curSong = _cursong;
+	$: curSongTime = (curSong == null ? 0 : curSong.time);
 	let curNode: Node | null;
 	let player: any = null;
 
@@ -75,14 +46,13 @@
 	$: curTime = secondsToTime(curMS / 1000); //seconds
 
 	function updateCurTime() {
-		if (!doPlay) return;
+		if (!doPlay || player == null) return;
 		curMS = player.positionMS();
 		setTimeout(updateCurTime, 200);
 	}
 
 	function togglePlay() {
 		doPlay = !doPlay;
-		// curSong = curSong;
 		if (player == null) return;
 
 		if (doPlay) player.resume();
@@ -92,16 +62,22 @@
 
 	$: curSong, updateSong();
 	async function updateSong() {
-		if (curSong.title == '') return;
-		let songfile = await getSongFile(curSong.path);
+		if(curSong == null){
+			clearPlayList();
+			return;
+		}
+		console.log(curSong);
+		if (curSong.title == '') return; // @ts-ignore
+		let songFile = JZZ.MIDI.SMF(await curSong.getData())
 
 		if (player != null) player.stop();
-		player = songfile.player();
+		player = songFile.player();
 		player.connect($midiNodeStore);
 		player.onEnd = function () {
 			setTimeout(nextSong, 500);
 		};
 		if (doPlay) player.play();
+		updateCurTime();
 	}
 
 	function setNode(node: Node) {
@@ -111,7 +87,7 @@
 		console.log(curSong);
 	}
 
-	function setSong(song: Song) {
+	function setSong(song: Song|null) {
 		if (curSong !== song) {
 			curMS = 0;
 		}
@@ -124,51 +100,40 @@
 			curSong = curSong;
 			return;
 		}
-		let node = curNode.getNext();
-		if (node === null) node = playlist.getHead();
-		setNode(node);
+		setNode(curNode.getNext());
 	}
 
 	// Add Song
-	export function addSong(filePath: string) {
-		let song = new Song(filePath);
+	export async function addSong(file: File) {
+		fileDB.add(file);
+		let song = new Song(file); // @ts-ignore
+		song.time = Math.floor(JZZ.MIDI.SMF(await song.getData()).player().durationMS() / 1000);
 		if (curSong === null) {
 			curSong = song;
 			curNode = playlist.getHead();
 		}
 		playlist.append(song);
+		playlist = playlist;
 	}
 
 	// Remove Song
 	export function removeSong() {
-		let i = 0;
-		for (let node of playlist) {
-			if (node == curNode) break;
-			i++;
-		}
-		console.log(i);
-
-		let oldNode = playlist.removeAt(i);
-		if (curNode === oldNode) {
-			if (oldNode.getNext() !== null) {
-				curNode = oldNode.getNext();
-			} else {
-				curNode = playlist.getHead();
-			}
-			if (curNode !== null) setSong(curNode.getElement());
-		}
-		curSong = curSong;
-	}
-
-	export function addPlayList(filePath: string) {
-		//For song
-		addSong(filePath);
+		if(curSong == null) return;
+		if(curSong.file != null) fileDB.remove(curSong.file);
+		curNode = playlist.remove(curSong);
+		setSong(curNode == null ? null : curNode.getElement());
+		playlist = playlist;
 	}
 
 	export function clearPlayList() {
-		// JS will free out of scope memory
+		if(player != null){
+			player.stop();
+			fileDB.clear();
+		}
 		playlist = new Playlist();
 		curSong = new Song(null);
+		curMS = 0;
+		player = null;
 		curNode = null;
 	}
 
@@ -198,7 +163,7 @@
 						: 'hover:bg-gray-700'}"
 					on:click={() => setNode(node)}
 				>
-					<li class="pl-2">{node.getElement().title}</li>
+					<li class="pl-2">{node.getElement().title.slice(0,25)}</li>
 					<span class=".self-end pl-4 font-semibold">{secondsToTime(node.getElement().time)}</span>
 				</div>
 			{/each}
@@ -209,8 +174,8 @@
 			class="slider-player w-full cursor-pointer"
 			type="range"
 			min="0"
-			max={curSong.time * 1000}
-			on:click={player.jumpMS(this.value)}
+			max={curSongTime * 1000}
+			on:click={player != null && player.jumpMS(this.value)}
 			bind:value={curMS}
 		/>
 	</div>
@@ -245,7 +210,7 @@
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<i
 			class="material-icons hover:bg-gray-700 rounded-full cursor-pointer select-none p-1 my-1"
-			on:click={() => (curMS < curSong.time * 1000 - 5000 ? player.jumpMS((curMS += 5000)) : null)}
+			on:click={() => (curMS < curSongTime * 1000 - 5000 ? player.jumpMS((curMS += 5000)) : null)}
 			>fast_forward</i
 		>
 
@@ -255,6 +220,6 @@
 			on:click={() => nextSong()}>shortcut</i
 		>
 
-		<span>{secondsToTime(curSong.time)}</span>
+		<span>{secondsToTime(curSongTime)}</span>
 	</div>
 </div>

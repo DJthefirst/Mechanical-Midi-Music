@@ -3,7 +3,16 @@
 	import MidiOut from './MidiOut.svelte';
 	import MidiPlayer from './MidiPlayer.svelte';
 
+	$: files = null;
 	let player: any;
+	let fileInput: any;
+
+	$: files, updateDB();
+	function updateDB(){
+		if (files == null) return;
+		for (const file of files) player.addSong(file);
+	}
+
 </script>
 
 <div class="div-outline">
@@ -14,11 +23,10 @@
 		</div>
 		<div class="flex flex-col justify-between mr-2 mb-3 w-56 min-w-56">
 			<div class="flex flex-col justify-center m-0">
-				<button class="button-player-green w-full" on:click={player.addSong}
-					><i class="material-icons">add</i> Add Song</button
-				>
-				<button class="button-player-green w-full" on:click={player.addPlaylist}
-					><i class="material-icons">playlist_add</i> Add Playlist</button
+				
+				<input bind:this={fileInput} accept="audio/midi, audio/x-midi" bind:files multiple type="file" class="invisible w-0 h-0">
+				<button class="button-player-green w-full" on:click={()=>fileInput.click()}
+					><i class="material-icons">add</i> Add Songs</button
 				>
 				<button class="button-player-red w-full" on:click={player.removeSong}
 					><i class="material-icons">remove</i> Remove Song</button
