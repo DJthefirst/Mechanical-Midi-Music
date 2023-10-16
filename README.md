@@ -7,6 +7,12 @@
 Initially inspired by **Flanon _ FT Tech Labs** [Musical Orchestra ](https://youtu.be/2UesaCcfI_8?t=24) and roughly based on the [Moppy Drive Project](https://github.com/Sammy1Am/Moppy2) by **[Sammy1Am](https://github.com/Sammy1Am)** the **M³** project hopes to help tinkerers discover the magic of true electronic music.
 
 ## Features
+  Cross Platform Web Based GUI
+  - Windows
+  - Linux
+  - Mac
+  - ChromeOS (UnTested)
+
   Multiple Communication Protocols
   - WIFI UDP*
   - MIDI DIN*
