@@ -66,7 +66,7 @@ public:
     void processMessage(MidiMessage message);
 
     /* Returns a Byte array representing this Distributor */
-    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES>  toSerial();
+    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> toSerial();
 
     uint16_t getChannels();
     uint32_t getInstruments();

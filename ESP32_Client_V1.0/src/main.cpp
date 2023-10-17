@@ -17,6 +17,9 @@
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
 
+#include "Device.h"
+#include "Extras/LocalStorage.h"
+
 //---------- Uncomment Your Selected Device Type ----------
 
 #define PLATFORM_ESP32
@@ -50,12 +53,35 @@ MessageHandler messageHandler(&instrumentController);
 
 
 void setup() {
+  connection = NetworkUSB();
 
   //Initialize MessageHandler and Begin Network Connection
   messageHandler.setNetwork(&connection);
   connection.setMessageHandler(&messageHandler);
-  connection.begin();
+  connection.begin();  
   delay(100);
+
+  //Load Previous Config from memory
+  uint8_t data[20];
+  LocalStorage localStorage = LocalStorage();
+
+  //Device Config
+  Device::Name = localStorage.GetDeviceName(data);
+  //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
+
+  //Distributor Config
+  uint8_t numDistributors = localStorage.GetNumOfDistributors();
+  for(uint8_t i = 0; i < numDistributors; i++){
+    uint8_t data[20];
+    localStorage.GetDistributorConstruct(i,data);
+    messageHandler.addDistributor(data);
+  }
+
+  //Reset previous config if needed.
+  //localStorage.ResetDeviceConfig();
+
+
+
 
   //----Testing Demo Setup Config----//
 
@@ -86,6 +112,7 @@ void setup() {
   // distributor4.setInstruments(0x000000FF); // 1-8
   // distributor4.setDistributionMethod(DistributionMethod::Ascending);
   // messageHandler.addDistributor(distributor4);
+
 }
 
 void loop() {

@@ -16,6 +16,8 @@ using std::int8_t;
 #include "Distributor.h"
 #include "MidiMessage.h"
 
+#include "Extras/LocalStorage.h"
+
 class Network;
 
 /* A Class to decode incoming data into MIDI events */
@@ -27,6 +29,8 @@ private:
     InstrumentController* m_ptrInstrumentController;
     Network* m_ptrNetwork;
 
+    LocalStorage localStorage;
+ 
 public:
     //Set Network Connection
     void setNetwork(Network* ptrNetwork);
@@ -38,10 +42,12 @@ public:
     //Distributors
     void addDistributor(); // Internal Function
     void addDistributor(Distributor distributor); // Internal Function
+    void addDistributor(uint8_t data[]); // Internal Function
     void setDistributor(uint8_t data[]); // Set/Add Distributor
     void removeDistributor(uint8_t id);
     void removeAllDistributors();
     Distributor& getDistributor(uint8_t id);
+    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> getDistributorSerial(uint8_t id);
     
 private:
     //Main Midi Functions

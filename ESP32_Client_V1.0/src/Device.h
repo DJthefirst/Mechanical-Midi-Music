@@ -56,9 +56,9 @@ const uint16_t FIRMWARE_VERSION = 03;
 namespace Device
 {
     //Golbal Device Attribues
-    //inline static char* Name = new char[20]();
-    inline static String Name = "Air Compressor";
-    inline static bool OmniMode = false;
+    //inline char[20] Name = "New Device";
+    inline std::string Name = "New Device";
+    inline bool OmniMode = false;
 
 
     //C++ v11

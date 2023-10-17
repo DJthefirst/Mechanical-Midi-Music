@@ -1,5 +1,4 @@
 <script lang="ts">
-	import checkmark from '$lib/images/checkmark.svg';
 	import { Device, connectDevice, disconnectDevice } from './Device';
 	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
 
