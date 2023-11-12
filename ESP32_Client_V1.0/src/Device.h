@@ -1,6 +1,5 @@
 /*
  * Device.h
- * 
  * A Struct Representing this devices configuration
  */
 
@@ -9,49 +8,12 @@
 #include "Arduino.h"
 #include <stdint.h>
 #include <cstdint>
+#include "Constants.h"
+#include "Configs/AirCompressor.h"
 using std::int8_t;
 
-
-enum InstrumentType
-{ 
-    INSTRUMENT_PWM = 1,
-    INSTRUMENT_ShiftRegister,
-    INSTRUMENT_StepperMotor,
-    INSTRUMENT_FloppyDrive
-};
-
-enum PlatformType
-{ 
-    PLATFORM_ESP32 = 1,
-    PLATFORM_ESP8266,
-    PLATFORM_ArduinoUno,
-    PLATFORM_ArduinoMega,
-    PLATFORM_ArduinoDue,
-    PLATFORM_ArduinoMicro,
-    PLATFORM_ArduinoNano
-};
-
-//---------- Edit These Values Per Device ----------
-
+//Number 
 const uint8_t NUM_DEVICE_CFG_BYTES = 30;
-
-//Instrument type
-const uint8_t INSTRUMENT_TYPE = INSTRUMENT_PWM;
-//Platform type
-const uint8_t PLATFORM_TYPE = PLATFORM_ESP32;
-
-//Absolute max number of Polyphonic notes is 16
-const uint8_t MAX_POLYPHONIC_NOTES = 16;
-//Absolute max number of Instruments is 32
-const uint8_t MAX_NUM_INSTRUMENTS = 8;
-//Absolute Lowest Note Min=0
-const uint8_t MIN_MIDI_NOTE = 36; //C1 //36-83 dulcimer
-//Absolute Highest Note Max=127
-const uint8_t MAX_MIDI_NOTE = 83; //B4
-//A 14 bit number Representing this Devices ID
-const uint16_t SYSEX_DEV_ID = 0x01;
-//Firmware Version 14bit
-const uint16_t FIRMWARE_VERSION = 03;
 
 namespace Device
 {
@@ -65,3 +27,58 @@ namespace Device
     // extern bool g_OmniMode; //in the header file
     // bool g_OmniMode = false; // in exaclty *one* cpp file in the project
 }
+
+// ---------- Device Platform ----------
+
+#ifndef PLATFORM_ESP32
+    //#define ARDUINO_ARCH_ESP32
+
+    //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
+    const std::array<uint8_t,8> pins = {2,4,18,19,21,22,23,32};
+    
+    const char platformName[] = "ESP32";
+    const PlatformType platform = PLATFORM_ESP32;
+
+#elif PLATFORM_ESP8266
+    //#define ARDUINO_ARCH_ESP32
+    const uint8_t pins[] = {};
+
+    const char platform[] = "ESP8266";
+    const PlatformType platform = PLATFORM_ESP8266;
+
+#elif PLATFORM_ARDUINO_UNO
+    //#define ARDUINO_ARCH_AVR
+    const uint8_t pins[] = {};
+
+    const char platform[] = "Arduino Uno";
+    const PlatformType platform = PLATFORM_ArduinoUno;
+
+#elif PLATFORM_ARDUINO_MEGA
+    //#define ARDUINO_ARCH_AVR
+    const uint8_t pins[] = {};
+
+    const char platform[] = "Arduino Mega";
+    const PlatformType platform = PLATFORM_ArduinoMega;
+
+#elif PLATFORM_ARDUINO_DUE
+    //#define ARDUINO_ARCH_
+    const uint8_t pins[] = {};
+
+    const char platform[] = "Arduino Due";
+    const PlatformType platform = PLATFORM_ArduinoDue;
+
+#elif PLATFORM_ARDUINO_MICRO
+    //#define ARDUINO_ARCH_AVR
+    const uint8_t pins[] = {};
+
+    const char platform[] = "Arduino Micro";
+    const PlatformType platform = PLATFORM_ArduinoMicro;
+
+#elif PLATFORM_ARDUINO_NANO
+    //#define ARDUINO_ARCH_AVR
+    const uint8_t pins[] = {};
+
+    const char platform[] = "Arduino Nano";
+    const PlatformType platform = PLATFORM_ArduinoNano;
+
+#endif

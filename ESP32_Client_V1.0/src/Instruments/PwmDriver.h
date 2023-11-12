@@ -2,6 +2,8 @@
 
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
+#include "Device.h"
+
 #include <cstdint>
 using std::int8_t;
 

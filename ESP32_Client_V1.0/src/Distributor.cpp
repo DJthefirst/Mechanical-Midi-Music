@@ -12,8 +12,6 @@
  */
 
 #include "Distributor.h"
-#include "Device.h"
-
 
 Distributor::Distributor(InstrumentController* ptrInstrumentController)
 {

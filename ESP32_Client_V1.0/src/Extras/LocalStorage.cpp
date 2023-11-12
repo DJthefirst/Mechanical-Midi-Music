@@ -4,6 +4,7 @@
 #include <string>
 #include "LocalStorage.h"
 #include "Distributor.h"
+#include "Device.h"
 
 esp_err_t err;
 nvs_handle_t handle;
@@ -145,7 +146,6 @@ void LocalStorage::GetDistributorConstruct(uint16_t distributorNum, uint8_t* con
 void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, uint8_t * construct){
     const char *key = Uint16ToKey(distributorNum).c_str();
     WriteNvsBlob(key, construct , NUM_DISTRIBUTOR_CFG_BYTES);
-    Serial.println(distributorNum);
 }
 
 // Get key from valueHelper
@@ -159,13 +159,3 @@ std::string LocalStorage::Uint16ToKey(uint16_t value){
 
     return(key);
 }
-
-// // Get key from valueHelper
-// const char* LocalStorage::Uint16ToKey(uint16_t value){
-//     const char* key = "Distributor____";
-//     std::string key = "Distributor____";
-
-
-//     return(key);
-// }
-

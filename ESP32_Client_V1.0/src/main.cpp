@@ -1,6 +1,6 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V0.5
+ *  Version: V1.0
  *  Author: DJthefirst
  *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
  *----------------------------------------------------------------------------------------------------
@@ -17,29 +17,23 @@
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
 
-#include "Device.h"
 #include "Extras/LocalStorage.h"
 
-//---------- Uncomment Your Selected Device Type ----------
+//---------- Uncomment Your Selected Device Config ----------
 
-#define PLATFORM_ESP32
-//#define PLATFORM_ESP8266
-//#define PLATFORM_ARDUINO_UNO
-//#define PLATFORM_ARDUINO_MEGA
-//#define PLATFORM_ARDUINO_DUE
-//#define PLATFORM_ARDUINO_MICRO
-//#define PLATFORM_ARDUINO_NANO
-
+  //#include "Configs/AirCompressor.h"
+  //#include "Configs/TestInstrument.h"
+  //#include "Configs/FloppyDrives.h"
+  //#include "Configs/StepperMotor.h"
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
 //FloppyDrives  instrumentController; //Not Yet Implemented
-PwmDriver     instrumentController;
+PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //StepperMotors instrumentController; //Not Yet Implemented
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
-
 
 //---------- Uncomment Your Selected COM Type ----------
 
@@ -61,6 +55,9 @@ void setup() {
   connection.begin();  
   delay(100);
 
+
+ 
+  #ifdef LOCAL_STORAGE
   //Load Previous Config from memory
   uint8_t data[20];
   LocalStorage localStorage = LocalStorage();
@@ -79,9 +76,7 @@ void setup() {
 
   //Reset previous config if needed.
   //localStorage.ResetDeviceConfig();
-
-
-
+  #endif
 
   //----Testing Demo Setup Config----//
 
@@ -119,3 +114,4 @@ void loop() {
   //Periodicaly Read Incoming Messages
   connection.readMessage();
 }
+

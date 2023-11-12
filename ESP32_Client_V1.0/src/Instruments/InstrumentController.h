@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Constants.h"
-#include "Device.h"
-#include "Platform.h"
 #include <cstdint>
 using std::int8_t;
 

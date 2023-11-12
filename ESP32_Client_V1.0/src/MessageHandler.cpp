@@ -7,12 +7,11 @@
  */
 
 #include "MessageHandler.h"
-#include "Constants.h"
 #include <Arduino.h>
 
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
-    localStorage = LocalStorage();
+    localStorageInit();
 }
 
 void MessageHandler::setNetwork(Network* ptrNetwork){
@@ -252,8 +251,7 @@ void MessageHandler::sysExSetDeviceConstruct(MidiMessage message){
 void MessageHandler::sysExSetDeviceName(MidiMessage message){
     char name[20];
     for(uint8_t i=0; i<20; i++) name[i] = message.buffer[i+5];
-    localStorage.SetDeviceName(name);
-    Device::Name = localStorage.GetDeviceName((uint8_t*)name);
+    localStorageSetDeviceName(name);
 }
 
 void MessageHandler::sysExSetDeviceBoolean(MidiMessage message){
@@ -322,75 +320,6 @@ void MessageHandler::sysExSetDistributorNumPolyphonicNotes(MidiMessage message){
     getDistributor(message.sysExDistributorID()).setNumPolyphonicNotes(message.buffer[7]);
 }
 
-
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-// //Manage Distributors
-// ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// void MessageHandler::addDistributor()
-// {
-//     Distributor newDistributor = Distributor(m_ptrInstrumentController);
-//     m_distributors.push_back(newDistributor);
-//     localStorage.SetDistributorConstruct(m_distributors.size()-1,newDistributor.toSerial().data());
-//     localStorage.SetNumOfDistributors(m_distributors.size());
-// }
-
-// void MessageHandler::addDistributor(Distributor distributor)
-// {
-//     m_distributors.push_back(distributor);
-//     localStorage.SetDistributorConstruct(m_distributors.size()-1,distributor.toSerial().data());
-//     localStorage.SetNumOfDistributors(m_distributors.size());
-// }
-
-// void MessageHandler::addDistributor(uint8_t data[])
-// {
-//     Distributor distributor(m_ptrInstrumentController);
-//     distributor.setDistributor(data);
-//     m_distributors.push_back(distributor);
-//     localStorage.SetDistributorConstruct(m_distributors.size()-1,distributor.toSerial().data());
-//     localStorage.SetNumOfDistributors(m_distributors.size());
-// }
-
-// void MessageHandler::setDistributor(uint8_t data[])
-// {
-//     // If Distributor exists update it.
-//     uint16_t distributorID = data[0] << 7| (data[1]);
-//     if (distributorID < m_distributors.size()){
-//         localStorage.SetDistributorConstruct(distributorID,data);
-//         m_distributors[distributorID].setDistributor(data);
-//         return;
-//     }
-
-//     // Else create Distributor and add it to vector
-//     addDistributor(data);
-// }
-
-// void MessageHandler::removeDistributor(uint8_t id)
-// {
-//     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
-//     if(id >= m_distributors.size()) id = m_distributors.size();
-//     m_distributors.erase(m_distributors.begin() + id);
-//     localStorage.SetNumOfDistributors(m_distributors.size());
-
-//     for(int i = id; i < m_distributors.size(); i++){
-//         localStorage.SetDistributorConstruct(i,getDistributor(i).toSerial().data());
-//     }
-// }
-
-// void MessageHandler::removeAllDistributors()
-// {
-//     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
-//     m_distributors.clear();
-//     localStorage.SetNumOfDistributors(m_distributors.size());
-// }
-
-// Distributor& MessageHandler::getDistributor(uint8_t index){
-//     return (m_distributors[index]);
-// }
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Manage Distributors
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -399,19 +328,13 @@ void MessageHandler::addDistributor()
 {
     Distributor newDistributor = Distributor(m_ptrInstrumentController);
     m_distributors.push_back(newDistributor);
-
-    uint8_t index = m_distributors.size()-1;
-    localStorage.SetDistributorConstruct(index,getDistributorSerial(index).data());
-    localStorage.SetNumOfDistributors(m_distributors.size());
+    localStorageAddDistributor();
 }
 
 void MessageHandler::addDistributor(Distributor distributor)
 {
     m_distributors.push_back(distributor);
-
-    uint8_t index = m_distributors.size()-1;
-    localStorage.SetDistributorConstruct(index,getDistributorSerial(index).data());
-    localStorage.SetNumOfDistributors(m_distributors.size());
+    localStorageAddDistributor();
 }
 
 void MessageHandler::addDistributor(uint8_t data[])
@@ -419,10 +342,7 @@ void MessageHandler::addDistributor(uint8_t data[])
     Distributor distributor(m_ptrInstrumentController);
     distributor.setDistributor(data);
     m_distributors.push_back(distributor);
-
-    uint8_t index = m_distributors.size()-1;
-    localStorage.SetDistributorConstruct(index,getDistributorSerial(index).data());
-    localStorage.SetNumOfDistributors(m_distributors.size());
+    localStorageAddDistributor();
 }
 
 void MessageHandler::setDistributor(uint8_t data[])
@@ -430,7 +350,7 @@ void MessageHandler::setDistributor(uint8_t data[])
     // If Distributor exists update it.
     uint16_t distributorID = data[0] << 7| (data[1]);
     if (distributorID < m_distributors.size()){
-        localStorage.SetDistributorConstruct(distributorID,data);
+        localStorageUpdateDistributor(distributorID,data);
         m_distributors[distributorID].setDistributor(data);
         return;
     }
@@ -444,18 +364,14 @@ void MessageHandler::removeDistributor(uint8_t id)
     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
     if(id >= m_distributors.size()) id = m_distributors.size();
     m_distributors.erase(m_distributors.begin() + id);
-    localStorage.SetNumOfDistributors(m_distributors.size());
-
-    for(int i = id; i < m_distributors.size(); i++){
-        localStorage.SetDistributorConstruct(i,getDistributorSerial(i).data());
-    }
+    localStorageRemoveDistributor(id);
 }
 
 void MessageHandler::removeAllDistributors()
 {
     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
     m_distributors.clear();
-    localStorage.SetNumOfDistributors(m_distributors.size());
+    localStorageClaerDistributors();
 }
 
 Distributor& MessageHandler::getDistributor(uint8_t index){
@@ -469,3 +385,47 @@ std::array<uint8_t, NUM_DISTRIBUTOR_CFG_BYTES> MessageHandler::getDistributorSer
     distributorObj[1] = static_cast<uint8_t>((index >> 0) & 0x7F);
     return distributorObj;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Local Storage
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef LOCAL_STORAGE
+
+void MessageHandler::localStorageInit(){
+    localStorage = LocalStorage();
+}
+
+void MessageHandler::localStorageSetDeviceName(char* name){
+    localStorage.SetDeviceName(name);
+    Device::Name = localStorage.GetDeviceName((uint8_t*)name);
+}
+
+void MessageHandler::localStorageAddDistributor(){
+    uint8_t index = m_distributors.size()-1;
+    localStorage.SetDistributorConstruct(index,getDistributorSerial(index).data());
+    localStorage.SetNumOfDistributors(m_distributors.size());
+}
+
+void MessageHandler::localStorageRemoveDistributor(uint8_t id){
+    localStorage.SetNumOfDistributors(m_distributors.size());
+
+    for(int i = id; i < m_distributors.size(); i++){
+        localStorage.SetDistributorConstruct(i,getDistributorSerial(i).data());
+    }
+}
+
+void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data){
+    localStorage.SetDistributorConstruct(distributorID,data);
+}
+
+void MessageHandler::localStorageClaerDistributors(){
+    localStorage.SetNumOfDistributors(m_distributors.size());
+}
+#else
+void MessageHandler::localStorageInit(){}
+void MessageHandler::localStorageSetDeviceName(char* name){}
+void MessageHandler::localStorageAddDistributor(){}
+void MessageHandler::localStorageRemoveDistributor(uint8_t id){}
+void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data){}
+void MessageHandler::localStorageClaerDistributors(){}
+#endif

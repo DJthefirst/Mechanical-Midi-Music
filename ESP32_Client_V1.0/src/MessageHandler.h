@@ -15,6 +15,7 @@ using std::int8_t;
 #include "Networks/Network.h"
 #include "Distributor.h"
 #include "MidiMessage.h"
+#include "Device.h"
 
 #include "Extras/LocalStorage.h"
 
@@ -29,7 +30,9 @@ private:
     InstrumentController* m_ptrInstrumentController;
     Network* m_ptrNetwork;
 
-    LocalStorage localStorage;
+    #ifdef LOCAL_STORAGE 
+        LocalStorage localStorage; 
+    #endif
  
 public:
     //Set Network Connection
@@ -71,5 +74,13 @@ private:
     void sysExSetDistributorBoolValues(MidiMessage message);
     void sysExSetDistributorMinMaxNotes(MidiMessage message);
     void sysExSetDistributorNumPolyphonicNotes(MidiMessage message);
+
+    //Local Storage
+    void localStorageInit();
+    void localStorageSetDeviceName(char* name);
+    void localStorageAddDistributor();
+    void localStorageRemoveDistributor(uint8_t id);
+    void localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data);
+    void localStorageClaerDistributors();
  
 };

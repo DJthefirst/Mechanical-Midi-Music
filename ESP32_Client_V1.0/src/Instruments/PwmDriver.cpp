@@ -1,6 +1,5 @@
 #include "Instruments/PwmDriver.h"
 #include "InterruptTimer.h"
-#include "Constants.h"
 #include "Arduino.h"
 
 #include <FastLED.h>
@@ -24,7 +23,7 @@ static uint8_t m_numActiveNotes;
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
-static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
+static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
 static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 PwmDriver::PwmDriver()
