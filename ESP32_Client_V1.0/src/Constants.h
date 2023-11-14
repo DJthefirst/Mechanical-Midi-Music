@@ -72,66 +72,56 @@ const uint8_t SYSEX_SetDeviceConstruct = 0x09;
 const uint8_t SYSEX_SetDeviceName = 0x0A;
 const uint8_t SYSEX_SetDeviceBoolean = 0x0B;
 
-const uint8_t SYSEX_AddDistributor = 0x10;
+const uint8_t SYSEX_SetDistributor = 0x10;
 const uint8_t SYSEX_RemoveDistributor = 0x11;
 const uint8_t SYSEX_RemoveAllDistributors = 0x12;
 const uint8_t SYSEX_GetNumOfDistributors = 0x13;
 const uint8_t SYSEX_GetDistributorConstruct = 0x15;
 
-const uint8_t SYSEX_SetDistributorChannels = 0x16;
-const uint8_t SYSEX_SetDistributorInstruments = 0x17;
-const uint8_t SYSEX_SetDistributorMethod = 0x18;
-const uint8_t SYSEX_SetDistributorBoolValues = 0x19;
-const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x1A;
-const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1B;
+// const uint8_t SYSEX_SetDistributorConstruct = 0x16;
+const uint8_t SYSEX_SetDistributorChannels = 0x17;
+const uint8_t SYSEX_SetDistributorInstruments = 0x18;
+const uint8_t SYSEX_SetDistributorMethod = 0x19;
+const uint8_t SYSEX_SetDistributorBoolValues = 0x1A;
+const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x1B;
+const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1C;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;
 
+//Device Constructs
+const uint8_t BOOL_OMNIMODE = 0x01;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Timer Constants
+//Enums
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Number of octaves to bend notes by at full-deflection.
-// Described as cents/cents-in-an-octave
-constexpr float BEND_OCTAVES = 200/(float)1200;
-
-/*
- * Number of microseconds in a timer-tick for setting timer resolution
- * and calculating noteTicks.  Smaller values here will trigger interrupts more often,
- * which might interfere with other processes but will result in more accurate frequency
- * reproduction.
- */
-constexpr int TIMER_RESOLUTION = 40;
-
-// The period of notes in microseconds
-constexpr uint16_t notePeriods[128] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    30578, 28861, 27242, 25713, 24270, 22909, 21622, 20409, 19263, 18182, 17161, 16198, //C1 - B1
-    15289, 14436, 13621, 12856, 12135, 11454, 10811, 10205, 9632, 9091, 8581, 8099, //C2 - B2
-    7645, 7218, 6811, 6428, 6068, 5727, 5406, 5103, 4816, 4546, 4291, 4050, //C3 - B3
-    3823, 3609, 3406, 3214, 3034, 2864, 2703, 2552, 2408, 2273, 2146, 2025, //C4 - B4
-	1911, 1804, 1703, 1607, 1517, 1432, 1351, 1276, 1204, 1136, 1073, 1012, //C5 - B5
-	956, 902, 851, 804, 758, 716, 676, 638, 602, 568, 536, 506, //C6 - B6
-	478, 451, 426, 402, 379, 358, 338, 319, 301, 284, 268, 253, //C7 - B7
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0
+enum InstrumentType
+{ 
+    INSTRUMENT_PWM = 1,
+    INSTRUMENT_ShiftRegister,
+    INSTRUMENT_StepperMotor,
+    INSTRUMENT_FloppyDrive
 };
 
-// Create Note Arrays in terms of Ticks(Interupt Intervals)
-constexpr std::array<std::uint16_t,128> compute_divided_ticks(const int divisor)
-{
-    std::array<std::uint16_t,128> noteDoubleTicks{};
-    for(int i=0;i<128;++i)
-        noteDoubleTicks[i] = notePeriods[i]/divisor;
-    
-    return noteDoubleTicks;
-}
+enum PlatformType
+{ 
+    PLATFORM_ESP32 = 1,
+    PLATFORM_ESP8266,
+    PLATFORM_ArduinoUno,
+    PLATFORM_ArduinoMega,
+    PLATFORM_ArduinoDue,
+    PLATFORM_ArduinoMicro,
+    PLATFORM_ArduinoNano
+};
 
-constexpr auto noteTicks = compute_divided_ticks(TIMER_RESOLUTION);
-
-// In some cases a pulse will only happen every-other tick (e.g. if the tick is
-// toggling a pin on and off and pulses happen on rising signal) so to simplify
-// the math multiply the RESOLUTION by 2 here.
-constexpr auto noteDoubleTicks = compute_divided_ticks(TIMER_RESOLUTION*2);
+//Algorythmic Methods to Distribute Notes Amoungst Instruments.
+enum class DistributionMethod
+{ 
+    StraightThrough = 0,    //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
+    RoundRobin,             //Distributes Notes in a circular manner.
+    RoundRobinBalance,      //Distributes Notes in a circular manner (Balances Notes across Instruments).
+    Ascending,              //Plays Note on lowest available Instrument (Balances Notes across Instruments).
+    Descending,             //Plays Note on highest available Instrument (Balances Notes across Instruments).
+    Stack                   //TODO    Play Notes Polyphonicaly on lowest available Instrument until full.
+};

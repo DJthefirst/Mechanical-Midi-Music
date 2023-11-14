@@ -18,6 +18,7 @@ public:
     void begin() override;
     void readMessage() override;
     void sendMessage(uint8_t message[], uint8_t length) override;
+    void sendMessage(String msg);
 
 private:
     bool startUSB();

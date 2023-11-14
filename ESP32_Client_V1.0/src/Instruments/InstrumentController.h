@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Constants.h"
-#include "Device.h"
-#include "Platform.h"
 #include <cstdint>
 using std::int8_t;
 
@@ -25,7 +23,7 @@ public:
     //Required Functions
     virtual void reset(uint8_t instrument) = 0;
     virtual void resetAll() = 0;
-    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
+    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
     virtual void stopAll() = 0;
 

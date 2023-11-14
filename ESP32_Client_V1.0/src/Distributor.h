@@ -21,17 +21,7 @@ using std::int32_t;
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
 #include "MidiMessage.h"
-
-//Algorythmic Methods to Distribute Notes Amoungst Instruments.
-enum class DistributionMethod
-{ 
-    StraightThrough = 0,    //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
-    RoundRobin,             //Distributes Notes in a circular manner.
-    RoundRobinBalance,      //Distributes Notes in a circular manner (Balances Notes across Instruments).
-    Ascending,              //Plays Note on lowest available Instrument (Balances Notes across Instruments).
-    Descending,             //Plays Note on highest available Instrument (Balances Notes across Instruments).
-    Stack                   //TODO    Play Notes Polyphonicaly on lowest available Instrument until full.
-};
+#include "Device.h"
 
 //Size of Distributor when convered to Byte array
 static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 16;
@@ -66,7 +56,7 @@ public:
     void processMessage(MidiMessage message);
 
     /* Returns a Byte array representing this Distributor */
-    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES>  toSerial();
+    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> toSerial();
 
     uint16_t getChannels();
     uint32_t getInstruments();
@@ -84,7 +74,7 @@ public:
 private:
 
     //Midi Message Events
-    void noteOnEvent(uint8_t key, uint8_t velocity);
+    void noteOnEvent(uint8_t key, uint8_t velocity, uint8_t channel);
     void noteOffEvent(uint8_t key, uint8_t velocity);
     void keyPressureEvent(uint8_t key, uint8_t velocity);
     void controlChangeEvent(uint8_t controller, uint8_t value);

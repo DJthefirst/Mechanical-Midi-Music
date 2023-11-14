@@ -2,6 +2,8 @@
 
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
+#include "Device.h"
+
 #include <cstdint>
 using std::int8_t;
 
@@ -24,7 +26,7 @@ public:
 
     void reset(uint8_t instrument) override;
     void resetAll() override;
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
     void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
     void stopAll() override;
 
@@ -32,4 +34,15 @@ public:
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
+
+private:
+    void setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
+    void setInstumentLedOff(uint8_t instrument);
+    
+    //LEDs
+    void resetLEDs();
+    void setupLEDs();
+    
+
+
 };

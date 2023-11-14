@@ -1,6 +1,6 @@
+#include "Extras/AddrLED.h"
 #include "Instruments/PwmDriver.h"
 #include "InterruptTimer.h"
-#include "Constants.h"
 #include "Arduino.h"
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
@@ -10,7 +10,7 @@ static uint8_t m_numActiveNotes;
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
-static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
+static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
 static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 PwmDriver::PwmDriver()
@@ -19,6 +19,9 @@ PwmDriver::PwmDriver()
     for(uint8_t i=0; i < pins.size(); i++){
         pinMode(pins[i], OUTPUT);
     }
+
+    //Setup FAST LED
+    setupLEDs();
 
     // With all pins setup, let's do a first run reset
     resetAll();
@@ -41,7 +44,7 @@ void PwmDriver::resetAll()
     stopAll();
 }
 
-void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -54,6 +57,7 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
+        setInstumentLedOn(instrument, channel, note, velocity);
         return;
     //}
 }
@@ -66,6 +70,7 @@ void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         m_activePeriod[instrument] = 0;
         digitalWrite(pins[instrument], 0);
         m_numActiveNotes--;
+        setInstumentLedOff(instrument);
         return;
     }
 }
@@ -81,6 +86,7 @@ void PwmDriver::stopAll(){
     for(uint8_t i = 0; i < pins.size(); i++){
         digitalWrite(pins[i], LOW);
     }
+    resetLEDs();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,3 +162,38 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
     m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);
 
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//FAST LED Helper Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef ADDRESSABLE_LEDS
+
+// Addressable LED Strip
+AddrLED addrLEDs;
+
+void PwmDriver::setupLEDs(){
+    addrLEDs.setup();
+}
+
+//Set an Instrument Led to on
+void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
+    CHSV color = addrLEDs.getColor(instrument, channel, note, velocity);
+    addrLEDs.setLedOn(instrument, color);
+}
+
+//Set an Instrument Led to off
+void PwmDriver::setInstumentLedOff(uint8_t instrument){
+    addrLEDs.setLedOff(instrument);
+}
+
+//Reset Leds
+void PwmDriver::resetLEDs(){
+    addrLEDs.reset();
+}
+
+#else
+void PwmDriver::setupLEDs(){}
+void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
+void PwmDriver::setInstumentLedOff(uint8_t instrument){}
+void PwmDriver::resetLEDs(){}
+#endif
