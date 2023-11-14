@@ -29,10 +29,6 @@ private:
 
     InstrumentController* m_ptrInstrumentController;
     Network* m_ptrNetwork;
-
-    #ifdef LOCAL_STORAGE 
-        LocalStorage localStorage; 
-    #endif
  
 public:
     //Set Network Connection

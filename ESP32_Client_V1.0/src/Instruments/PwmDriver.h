@@ -38,5 +38,11 @@ public:
 private:
     void setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
     void setInstumentLedOff(uint8_t instrument);
+    
+    //LEDs
     void resetLEDs();
+    void setupLEDs();
+    
+
+
 };

@@ -391,6 +391,9 @@ std::array<uint8_t, NUM_DISTRIBUTOR_CFG_BYTES> MessageHandler::getDistributorSer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef LOCAL_STORAGE
 
+//Device Local Storage Solution
+LocalStorage localStorage; 
+
 void MessageHandler::localStorageInit(){
     localStorage = LocalStorage();
 }
