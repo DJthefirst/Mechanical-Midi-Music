@@ -16,6 +16,7 @@
 
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
+#include "Instruments/FloppyDrive.h"
 
 #include "Extras/LocalStorage.h"
 
@@ -28,10 +29,9 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-//FloppyDrives  instrumentController; //Not Yet Implemented
-PwmDriver       instrumentController;
+FloppyDrive  instrumentController;
+//PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
-//StepperMotors instrumentController; //Not Yet Implemented
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
 

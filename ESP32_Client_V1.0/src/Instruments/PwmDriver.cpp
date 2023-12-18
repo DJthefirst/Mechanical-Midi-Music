@@ -76,6 +76,7 @@ void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 }
 
 void PwmDriver::stopAll(){
+    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
     m_numActiveNotes = 0;
     m_activeNotes = {};
     m_notePeriod = {};
@@ -153,9 +154,7 @@ bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
 }
 
 void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
-    m_pitchBend[instrument] = bend;
-    
-    
+    m_pitchBend[instrument] = bend; 
     if(m_notePeriod[instrument] == 0) return;
     //Calculate Pitch Bend
     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;

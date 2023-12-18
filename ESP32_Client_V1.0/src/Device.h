@@ -34,7 +34,8 @@ namespace Device
     //#define ARDUINO_ARCH_ESP32
 
     //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-    const std::array<uint8_t,8> pins = {2,4,18,19,21,22,23,32};
+    const std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
+     25, 26, 27, 32, 33};
     
     const char platformName[] = "ESP32";
     const PlatformType platform = PLATFORM_ESP32;
