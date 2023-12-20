@@ -16,7 +16,7 @@
 		'Arduino Nano'
 	];
 
-	let selectedBaudRate: number;
+	let selectedBaudRate = 115200;
 	let baudRates = [
 		{ value: 1200 },
 		{ value: 2400 },

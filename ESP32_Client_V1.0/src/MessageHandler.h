@@ -55,6 +55,7 @@ private:
     void processSysEX(MidiMessage message);
 
     //SysEx functions
+    void sysExDeviceReady(MidiMessage message);
     void sysExResetDeviceConfig(MidiMessage message);
     void sysExGetDeviceConstruct(MidiMessage message);
     void sysExGetDeviceName(MidiMessage message);
@@ -77,6 +78,7 @@ private:
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);
     void localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data);
-    void localStorageClaerDistributors();
+    void localStorageClearDistributors();
+    void localStorageReset();
  
 };

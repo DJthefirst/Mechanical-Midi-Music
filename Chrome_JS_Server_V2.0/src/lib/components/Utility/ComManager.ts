@@ -53,6 +53,11 @@ export default class SerialManager {
 		await this.syncDistributors(device);
 	}
 
+	public async resetDevice(device: Device) {
+		sysExCmd(device, CONST.SYSEX_ResetDeviceCfg, '');
+		this.syncDevice(device);
+	}
+
 	public async syncDistributors(device: Device) {
 		sysExCmd(device, CONST.SYSEX_GetNumDistributors, '');
 		let numDistributors = await device.getConnection().receive();
@@ -88,6 +93,6 @@ function sysExCmd(device: Device, cmd: string, payload?: any) {
 
 function to14BitStr(num: number) {
 	let result = (num & 0b01111111).toHexString();
-	let result2 = ((num >> 8) & 0b01111111).toHexString();
+	let result2 = ((num >> 7) & 0b01111111).toHexString();
 	return result2 + result;
 }

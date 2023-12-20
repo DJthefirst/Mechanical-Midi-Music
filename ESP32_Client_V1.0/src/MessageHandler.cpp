@@ -67,6 +67,9 @@ void MessageHandler::processSysEX(MidiMessage message)
 
     switch(message.sysExCommand()){
         
+        case (SYSEX_DeviceReady):
+            sysExDeviceReady(message);
+            break;
         case (SYSEX_ResetDeviceConfig):
             sysExResetDeviceConfig(message);
             break;
@@ -154,7 +157,7 @@ void MessageHandler::processCC(MidiMessage message)
                 (*m_ptrInstrumentController).setEffectCrtl_2(message.CC_Value());
                 break;
             case(MIDI_CC_DamperPedal):
-                m_distributors[i].setDamperPedal(message.CC_Value()< 64);
+                m_distributors[i].setDamperPedal(message.CC_Value()> 64);
                 break;
             case(MIDI_CC_Mute):
                 (*m_ptrInstrumentController).stopAll();
@@ -204,8 +207,17 @@ void MessageHandler::distributeMessage(MidiMessage message)
 //Handle SysEx MIDI Messages (Used For Device Config)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MessageHandler::sysExDeviceReady(MidiMessage message){
+    //Respond with device ready
+    (*m_ptrNetwork).sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
+}
+
 void MessageHandler::sysExResetDeviceConfig(MidiMessage message){
-    m_distributors.clear();
+    removeAllDistributors();
+    localStorageReset();
+
+    char name[20] = "New Device";
+    localStorageSetDeviceName(name);
 }
 
 void MessageHandler::sysExGetDeviceConstruct(MidiMessage message){
@@ -372,7 +384,7 @@ void MessageHandler::removeAllDistributors()
 {
     (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
     m_distributors.clear();
-    localStorageClaerDistributors();
+    localStorageClearDistributors();
 }
 
 Distributor& MessageHandler::getDistributor(uint8_t index){
@@ -422,9 +434,15 @@ void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, uint8
     localStorage.SetDistributorConstruct(distributorID,data);
 }
 
-void MessageHandler::localStorageClaerDistributors(){
+void MessageHandler::localStorageClearDistributors(){
     localStorage.SetNumOfDistributors(m_distributors.size());
 }
+
+void MessageHandler::localStorageReset(){
+    localStorage.ResetDeviceConfig();
+    localStorage = LocalStorage();
+}
+
 #else
 void MessageHandler::localStorageInit(){}
 void MessageHandler::localStorageSetDeviceName(char* name){}
@@ -432,4 +450,5 @@ void MessageHandler::localStorageAddDistributor(){}
 void MessageHandler::localStorageRemoveDistributor(uint8_t id){}
 void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data){}
 void MessageHandler::localStorageClaerDistributors(){}
+void MessageHandler::localStorageReset(){}
 #endif
