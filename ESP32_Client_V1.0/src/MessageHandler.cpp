@@ -157,7 +157,7 @@ void MessageHandler::processCC(MidiMessage message)
                 (*m_ptrInstrumentController).setEffectCrtl_2(message.CC_Value());
                 break;
             case(MIDI_CC_DamperPedal):
-                m_distributors[i].setDamperPedal(message.CC_Value()< 64);
+                m_distributors[i].setDamperPedal(message.CC_Value()> 64);
                 break;
             case(MIDI_CC_Mute):
                 (*m_ptrInstrumentController).stopAll();
