@@ -29,8 +29,8 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-FloppyDrive  instrumentController;
-//PwmDriver       instrumentController;
+//FloppyDrive  instrumentController;
+PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
@@ -108,6 +108,8 @@ void setup() {
   // distributor4.setDistributionMethod(DistributionMethod::Ascending);
   // messageHandler.addDistributor(distributor4);
 
+  //Send Device Ready to Connect
+  connection.sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
 }
 
 void loop() {

@@ -322,7 +322,7 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
 
     return distributorObj;
 
-    //Usefull Idea
+    //Usefull Idea?
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);
 }

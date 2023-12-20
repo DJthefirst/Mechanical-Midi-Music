@@ -1,3 +1,4 @@
+import * as CONST from './Constants';
 import { SYSEX_RegExpEnd, SYSEX_RegExpMsg } from './Constants';
 
 export default class SerialConnection {
@@ -19,9 +20,20 @@ export default class SerialConnection {
 		// @ts-ignore
 		this.port = await navigator.serial.requestPort(); // Prompt user to select any serial port.
 		await this.port.open({ baudRate: baudRate });
-		await sleep(200); // ESP32 D15->GND to Suppress Boot Messages, Delay for Boot
+		await sleep(750); // ESP32 D15->GND to Suppress Boot Messages, Delay for Boot //200
 		this.reader = this.port.readable.getReader();
 		this.writer = this.port.writable.getWriter();
+
+
+		//Add Timeout and Delay for first connection.
+		// let stall = true;
+		// setTimeout(()=> {stall = false},2000);
+
+		// while(stall){
+		// 	let msg = await this.receive(500);
+		// 	if (msg != null && msg[0] == Number(CONST.SYSEX_DeviceReady)) return;
+		// }
+
 	}
 
 	async close() {
@@ -31,24 +43,41 @@ export default class SerialConnection {
 	}
 
 	//readHexByteArray
-	async receive(): Promise<Uint8Array | null> {
+	async receive(timeoutLen = 0): Promise<Uint8Array | null> {
 		let hexString: string = '';
 		let result;
-		while (true) {
+
+		let stall = true;
+		let timeOutID;
+		if(timeoutLen != 0) timeOutID = setTimeout(()=> {stall = false},timeoutLen);
+
+		while(stall){
+			//@ts-ignore
+			const {value, done} = await this.reader.read();
+			for (let num of value) {
+				hexString += num.toHexString();
+				clearTimeout(timeOutID);
+				timeOutID = setTimeout(()=> {stall = false}, 500);
+				stall = true;
+			}
+			
+				
 			if ((result = SYSEX_RegExpMsg.exec(hexString)) !== null) {
 				return result[1].toHex();
 			}
+
 			if ((result = SYSEX_RegExpEnd.exec(hexString)) !== null) {
 				console.log('Bad Msg' + String(result[0]));
 				return null;
-			}
-
-			const { value, done } = await this.reader.read();
-			for (let num of value) {
-				hexString += num.toHexString();
+				
 			}
 		}
+		console.log('Msg Timedout');
+		return null;
 	}
+
+
+
 
 	async sendHexString(hexString: string) {
 		//SendMsg

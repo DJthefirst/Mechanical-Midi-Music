@@ -1,6 +1,8 @@
 import {} from '../Utility/helpers';
 
 export class Distributor {
+	private muted: boolean;
+
 	private id: number;
 	public channels: number;
 	public instruments: number;
@@ -24,6 +26,7 @@ export class Distributor {
 		noteOverwrite: boolean
 	) {
 		this.id = 0;
+		this.muted = false;
 		this.channels = channels;
 		this.instruments = instruments;
 		this.distributionMethod = distributionMethod;
@@ -37,6 +40,14 @@ export class Distributor {
 
 	public getId() {
 		return this.id;
+	}
+
+	public getMuted() {
+		return this.muted;
+	}
+
+	public toggleMuted() {
+		this.muted = !this.muted;
 	}
 
 	public getConstruct() {
