@@ -88,7 +88,7 @@ export class Device {
 
 	// Updates DeviceStore from Message
 	public update(array: Uint8Array) {
-		this.id = array[0] + array[1];
+		this.id = (array[0] << 7) + array[1];
 		this.numInstruments = array[3];
 		this.instrumentType = array[4];
 		this.platform = array[5];

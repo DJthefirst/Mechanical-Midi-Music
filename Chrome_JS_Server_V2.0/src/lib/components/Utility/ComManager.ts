@@ -93,6 +93,6 @@ function sysExCmd(device: Device, cmd: string, payload?: any) {
 
 function to14BitStr(num: number) {
 	let result = (num & 0b01111111).toHexString();
-	let result2 = ((num >> 8) & 0b01111111).toHexString();
+	let result2 = ((num >> 7) & 0b01111111).toHexString();
 	return result2 + result;
 }
