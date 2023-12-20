@@ -49,7 +49,6 @@ export class Distributor {
 
 	public toggleMuted() {
 		this.muted = !this.muted;
-		console.log(this.muted)
 	}
 
 	public getConstruct() {

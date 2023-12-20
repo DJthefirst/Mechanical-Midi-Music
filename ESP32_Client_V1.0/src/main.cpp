@@ -73,9 +73,6 @@ void setup() {
     localStorage.GetDistributorConstruct(i,data);
     messageHandler.addDistributor(data);
   }
-
-  //Reset previous config if needed.
-  //localStorage.ResetDeviceConfig();
   #endif
 
   //----Testing Demo Setup Config----//

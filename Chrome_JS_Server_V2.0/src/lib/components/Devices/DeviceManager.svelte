@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
-	import { connectDevice } from './Device';
 
 	$: formDeviceID = 0x0001;
 	$: formDeviceName = '';
@@ -12,8 +11,12 @@
 		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formOmniModeEnable);
 	}
 
-	function addDevice() {
-		connectDevice(115200);
+	function resetDevice() {
+		$selectedDeviceStore.clearDistributors().then(() => {
+			$selectedDeviceStore = $selectedDeviceStore;
+		}).then(() => {
+			$selectedDeviceStore.reset();
+		})
 	}
 
 	async function removeDevice() {
@@ -69,7 +72,7 @@
 	</div>
 	<div class="flex justify-center m-2">
 		<button on:click={() => saveDevice()} class="button-player-green mx-2">Update Device</button>
-		<button on:click={() => addDevice()} class="button-player-green mx-2">Add Device</button>
+		<button on:click={() => resetDevice()} class="button-player-green mx-2">Reset Device</button>
 		<button on:click={() => removeDevice()} class="button-player-red mx-2">Remove Device</button>
 		<button on:click={() => clearDevices()} class="button-player-red mx-2">Clear Devices</button>
 	</div>

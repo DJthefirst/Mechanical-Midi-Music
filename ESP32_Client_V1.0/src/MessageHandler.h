@@ -77,6 +77,7 @@ private:
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);
     void localStorageUpdateDistributor(uint16_t distributorID, uint8_t* data);
-    void localStorageClaerDistributors();
+    void localStorageClearDistributors();
+    void localStorageReset();
  
 };

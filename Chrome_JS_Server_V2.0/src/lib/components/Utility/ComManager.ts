@@ -53,6 +53,11 @@ export default class SerialManager {
 		await this.syncDistributors(device);
 	}
 
+	public async resetDevice(device: Device) {
+		sysExCmd(device, CONST.SYSEX_ResetDeviceCfg, '');
+		this.syncDevice(device);
+	}
+
 	public async syncDistributors(device: Device) {
 		sysExCmd(device, CONST.SYSEX_GetNumDistributors, '');
 		let numDistributors = await device.getConnection().receive();

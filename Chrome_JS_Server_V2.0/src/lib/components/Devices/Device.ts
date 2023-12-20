@@ -55,6 +55,10 @@ export class Device {
 		return this.distributors;
 	}
 
+	public reset() {
+		comManager.resetDevice(this);
+	}
+
 	// Removes This Device from GUI
 	public remove() {
 		disconnectDevice(this);
@@ -130,7 +134,6 @@ export class Device {
 	}
 
 	public async removeDistributor(distributor: Distributor) {
-		console.log(distributor);
 		this.distributors = [];
 		await comManager.removeDistributor(this, distributor);
 	}

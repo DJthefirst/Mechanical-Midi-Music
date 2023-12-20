@@ -40,4 +40,4 @@
   //A 14 bit number Representing this Devices ID
   const static uint16_t SYSEX_DEV_ID = 0x01;
   //Firmware Version 14bit
-  const static uint16_t FIRMWARE_VERSION = 03;
+  const static uint16_t FIRMWARE_VERSION = 04;
