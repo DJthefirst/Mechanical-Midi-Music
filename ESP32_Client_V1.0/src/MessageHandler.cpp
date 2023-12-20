@@ -67,6 +67,9 @@ void MessageHandler::processSysEX(MidiMessage message)
 
     switch(message.sysExCommand()){
         
+        case (SYSEX_DeviceReady):
+            sysExDeviceReady(message);
+            break;
         case (SYSEX_ResetDeviceConfig):
             sysExResetDeviceConfig(message);
             break;
@@ -203,6 +206,11 @@ void MessageHandler::distributeMessage(MidiMessage message)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Handle SysEx MIDI Messages (Used For Device Config)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MessageHandler::sysExDeviceReady(MidiMessage message){
+    //Respond with device ready
+    (*m_ptrNetwork).sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
+}
 
 void MessageHandler::sysExResetDeviceConfig(MidiMessage message){
     removeAllDistributors();

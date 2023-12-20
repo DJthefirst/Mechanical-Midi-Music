@@ -55,6 +55,7 @@ private:
     void processSysEX(MidiMessage message);
 
     //SysEx functions
+    void sysExDeviceReady(MidiMessage message);
     void sysExResetDeviceConfig(MidiMessage message);
     void sysExGetDeviceConstruct(MidiMessage message);
     void sysExGetDeviceName(MidiMessage message);
