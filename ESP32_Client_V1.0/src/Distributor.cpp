@@ -76,6 +76,9 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
         return;
     }
 
+    //Check if Distributor is muted
+    if(m_muted)return;
+
     //Get Next Instument Based on Distribution Method and Play Note
     uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
@@ -296,9 +299,10 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
     std::array<std::uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> distributorObj;
 
     uint8_t distributorBoolByte = 0;
-    if(this->m_damperPedal)   distributorBoolByte |= (1 << 0);
-    if(this->m_polyphonic)    distributorBoolByte |= (1 << 1);
-    if(this->m_noteOverwrite) distributorBoolByte |= (1 << 2);
+    if(this->m_muted)         distributorBoolByte |= (1 << 0);
+    if(this->m_damperPedal)   distributorBoolByte |= (1 << 1);
+    if(this->m_polyphonic)    distributorBoolByte |= (1 << 2);
+    if(this->m_noteOverwrite) distributorBoolByte |= (1 << 3);
 
 
     //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
@@ -322,7 +326,7 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
 
     return distributorObj;
 
-    //Usefull Idea
+    //Usefull Idea?
     //memcpy(&distributorObj[4], &m_channels, 2);
     //memcpy(&distributorObj[6], &m_instruments, 4);
 }
@@ -352,9 +356,10 @@ void Distributor::setDistributor(uint8_t data[]){
     m_channels = channels; // 1
     m_instruments = instruments; // 1,2
     m_distributionMethod = distribMethod;
-    m_damperPedal = (data[11] & 0x01) != 0;
-    m_polyphonic = (data[11] & 0x02) != 0;
-    m_noteOverwrite = (data[11] & 0x04) != 0;
+    m_muted = (data[11] & 0x01) != 0;
+    m_damperPedal = (data[11] & 0x02) != 0;
+    m_polyphonic = (data[11] & 0x04) != 0;
+    m_noteOverwrite = (data[11] & 0x08) != 0;
     m_minNote = data[12];
     m_maxNote = data[13];
     m_numPolyphonicNotes = (data[14]);
@@ -362,6 +367,11 @@ void Distributor::setDistributor(uint8_t data[]){
 
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
+}
+
+void Distributor::setMuted(bool muted){
+    if(m_muted != muted) (*m_ptrInstrumentController).stopAll();
+    m_muted = muted;
 }
 
 void Distributor::setDamperPedal(bool damper){

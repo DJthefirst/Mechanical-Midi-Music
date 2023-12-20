@@ -64,27 +64,31 @@ const uint8_t MIDI_CC_Polyphonic = 127;
 //SYSEX Custom Protocal
 const uint8_t SYSEX_ID = 0x7D; //Educational MIDI ID
 
-const uint8_t SYSEX_ResetDeviceConfig = 0x00;
-const uint8_t SYSEX_GetDeviceConstruct = 0x02;
-const uint8_t SYSEX_GetDeviceName = 0x03;
-const uint8_t SYSEX_GetDeviceBoolean = 0x04;
-const uint8_t SYSEX_SetDeviceConstruct = 0x09;
-const uint8_t SYSEX_SetDeviceName = 0x0A;
-const uint8_t SYSEX_SetDeviceBoolean = 0x0B;
+const uint8_t SYSEX_DeviceReady = 0x00;
+const uint8_t SYSEX_ResetDeviceConfig = 0x01;
 
-const uint8_t SYSEX_SetDistributor = 0x10;
-const uint8_t SYSEX_RemoveDistributor = 0x11;
-const uint8_t SYSEX_RemoveAllDistributors = 0x12;
-const uint8_t SYSEX_GetNumOfDistributors = 0x13;
-const uint8_t SYSEX_GetDistributorConstruct = 0x15;
+const uint8_t SYSEX_GetDeviceConstruct = 0x11;
+const uint8_t SYSEX_GetDeviceName = 0x12;
+const uint8_t SYSEX_GetDeviceBoolean = 0x13;
 
-// const uint8_t SYSEX_SetDistributorConstruct = 0x16;
-const uint8_t SYSEX_SetDistributorChannels = 0x17;
-const uint8_t SYSEX_SetDistributorInstruments = 0x18;
-const uint8_t SYSEX_SetDistributorMethod = 0x19;
-const uint8_t SYSEX_SetDistributorBoolValues = 0x1A;
-const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x1B;
-const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x1C;
+const uint8_t SYSEX_SetDeviceConstruct = 0x21;
+const uint8_t SYSEX_SetDeviceName = 0x22;
+const uint8_t SYSEX_SetDeviceBoolean = 0x23;
+
+const uint8_t SYSEX_RemoveDistributor = 0x30;
+const uint8_t SYSEX_RemoveAllDistributors = 0x40;
+const uint8_t SYSEX_GetNumOfDistributors = 0x31;
+const uint8_t SYSEX_AddDistributor = 0x32;
+
+const uint8_t SYSEX_GetDistributorConstruct = 0x34;
+
+const uint8_t SYSEX_SetDistributor = 0x44;
+const uint8_t SYSEX_SetDistributorChannels = 0x45;
+const uint8_t SYSEX_SetDistributorInstruments = 0x46;
+const uint8_t SYSEX_SetDistributorMethod = 0x47;
+const uint8_t SYSEX_SetDistributorBoolValues = 0x48;
+const uint8_t SYSEX_SetDistributorMinMaxNotes = 0x49;
+const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x4A;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;

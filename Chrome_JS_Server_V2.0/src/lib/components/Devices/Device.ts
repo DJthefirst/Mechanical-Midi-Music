@@ -102,12 +102,13 @@ export class Device {
 		let instruments =
 			(array[5] << 28) + (array[6] << 21) + (array[7] << 14) + (array[8] << 7) + array[9];
 		let distributionMethod = array[10];
+		let muted = (array[11] & 0b00000001) != 0;
+		let damper = (array[11] & 0b00000010) != 0;
+		let polyphonic = (array[11] & 0b00000100) != 0;
+		let noteOverwrite = (array[11] & 0b00001000) != 0;
 		let minNote = array[12];
 		let maxNote = array[13];
 		let maxPolypnonic = array[14];
-		let damper = (array[15] & 0b00000001) != 0;
-		let polyphonic = (array[15] & 0b00000010) != 0;
-		let noteOverwrite = (array[15] & 0b00000100) != 0;
 
 		let distributor = new Distributor(
 			channels,
@@ -116,6 +117,7 @@ export class Device {
 			minNote,
 			maxNote,
 			maxPolypnonic,
+			muted,
 			damper,
 			polyphonic,
 			noteOverwrite

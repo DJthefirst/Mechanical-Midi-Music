@@ -1,39 +1,43 @@
 #pragma once
+#include <vector>
+#include "Constants.h"
 
-#include "Instruments/InstrumentController.h"
-#include "Instruments/PwmDriver.h"
+//---------- Uncomment Your Selected Device Type ----------
 
-//---------- Uncomment Your Selected Instrument Type ----------
-
-//FloppyDrives  instrumentController; //Not Yet Implemented
-PwmDriver     instrumentController;
-//StepperL298n  instrumentController;
-//StepperMotors instrumentController; //Not Yet Implemented
-//ShiftRegister instrumentController;
-//Dulcimer      instrumentController;
-
-//---------- Define Your Device Settings ----------
-
-    //Absolute max number of Polyphonic notes is 16
-    #define MAX_POLYPHONIC_NOTES = 1
-    //Absolute max number of Instruments is 32
-    #define MAX_NUM_INSTRUMENTS = 8
-    //Absolute Lowest Note Min=0
-    #define MIN_MIDI_NOTE = 36 //C1 //36-83 dulcimer
-    //Absolute Highest Note Max=127
-    #define MAX_MIDI_NOTE = 83 //B4
-    //A 14 bit number Representing this Devices ID
-    #define SYSEX_DEV_ID = 0x01
-    //Firmware Version 14bit
-    #define FIRMWARE_VERSION = 03
-    //Device Name
-    #define DEVICE_NAME = "Test Instrument"
-    //Interupt frequency. Faster produces accurate notes 
-    // but leads to instability
-    #define TIMER_RESOLUTION = 40
+  //#define PLATFORM_ESP32
+  //#define PLATFORM_ESP8266
+  //#define PLATFORM_ARDUINO_UNO
+  //#define PLATFORM_ARDUINO_MEGA
+  //#define PLATFORM_ARDUINO_DUE
+  //#define PLATFORM_ARDUINO_MICRO
+  //#define PLATFORM_ARDUINO_NANO
 
 //---------- Uncomment Your Desired Settings ----------
 
-    #define LOCAL_STORAGE_ENABLE
+  //Save Configuration On PowerOff
+  #define LOCAL_STORAGE
 
-    #define LIGHTING = NONE
+  //Lighting effects
+  //#define ADDRESSABLE_LEDS
+
+//Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
+  // constexpr int TIMER_RESOLUTION = 8; //40
+
+//---------- Device Configuration ----------
+
+  //Instrument type
+  const static uint8_t INSTRUMENT_TYPE = INSTRUMENT_PWM;
+  //Platform type
+  const static uint8_t PLATFORM_TYPE = PLATFORM_ESP32;
+  //Absolute max number of Polyphonic notes is 16
+  const static uint8_t MAX_POLYPHONIC_NOTES = 1;
+  //Absolute max number of Instruments is 32
+  const static uint8_t MAX_NUM_INSTRUMENTS = 8; 
+  //Absolute Lowest Note Min=0
+  const static uint8_t MIN_MIDI_NOTE = 0; 
+  //Absolute Highest Note Max=127
+  const static uint8_t MAX_MIDI_NOTE = 127;
+  //A 14 bit number Representing this Devices ID
+  const static uint16_t SYSEX_DEV_ID = 0x01;
+  //Firmware Version 14bit
+  const static uint16_t FIRMWARE_VERSION = 01;

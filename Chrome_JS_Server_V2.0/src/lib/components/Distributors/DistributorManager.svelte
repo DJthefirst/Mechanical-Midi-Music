@@ -2,9 +2,20 @@
 	import { selectedDeviceStore, selectedDistributorStore } from '$lib/store/stores';
 	import { Distributor } from './Distributor';
 
+	let selectedDistributionMethod: number;
+	let distributionMethods = [
+		{ value: 0, method: 'StriaghtThrough'},
+		{ value: 1, method: 'RoundRobin'},
+		{ value: 2, method: 'RoundRobinBalance'},
+		{ value: 3, method: 'Ascending'},
+		{ value: 4, method: 'Descending'},
+		{ value: 5, method: 'Stack'}
+	
+	];
+
 	$: formChannels = '1-4';
 	$: formInstruments = '1-4';
-	$: formDistributionMethod = 1;
+	$: formDistributionMethod = 2;
 	$: formDamperEnable = false;
 	$: formPolyphonicEnable = false;
 	$: formNoteOverwrite = false;
@@ -16,6 +27,8 @@
 	async function saveDistributor(addDistributor: boolean) {
 		if ($selectedDistributorStore === undefined) addDistributor = true;
 
+		console.log($selectedDistributorStore.getMuted())
+
 		let distributor = new Distributor(
 			listedItemsToNumber(formChannels),
 			listedItemsToNumber(formInstruments),
@@ -23,10 +36,12 @@
 			formNoteMin,
 			formNoteMax,
 			formNumPolyphonicNotes,
+			addDistributor ? false : $selectedDistributorStore.getMuted(), //Muted
 			formDamperEnable,
 			formPolyphonicEnable,
 			formNoteOverwrite
 		);
+		console.log(distributor)
 
 		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
 		else distributor.setId($selectedDistributorStore.getId());
@@ -114,7 +129,7 @@
 		});
 	}
 
-	// Update Form on Selected Distributir Change
+	// Update Form on Selected Distributor Change
 	$: if ($selectedDistributorStore !== undefined) updateForm();
 	function updateForm() {
 		formChannels = NumberToListedItems($selectedDistributorStore.channels);
@@ -152,6 +167,14 @@
 				class="bg-gray-dark rounded-md px-3 py-1 m-3 w-48 font-semibold"
 			/>
 		</div>
+	</div>
+	<div>
+		<label for="distributionMethodSelect" class="font-semibold my-2 ml-4">Distribution Method</label>
+		<select bind:value={formDistributionMethod} class="w-64 rounded-md m-3 px-4 py-1 bg-gray-dark">
+			{#each distributionMethods as distributionMethod}
+				<option value={distributionMethod.value}>{distributionMethod.method}</option>
+			{/each}
+		</select>
 	</div>
 	<div class="flex justify-start flex-wrap">
 		<div>
