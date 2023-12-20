@@ -40,13 +40,14 @@ private:
     uint32_t m_instruments = 0; //Represents Enabled Instruments
 
     //Settings
+    bool m_muted = false;
     bool m_damperPedal = false;
     bool m_polyphonic = true;
     bool m_noteOverwrite = false;
     uint8_t m_minNote = 0;
     uint8_t m_maxNote = 127;
     uint8_t m_numPolyphonicNotes = 1;
-    DistributionMethod m_distributionMethod = DistributionMethod::StraightThrough;
+    DistributionMethod m_distributionMethod = DistributionMethod::RoundRobinBalance;
 
 public:
 
@@ -63,8 +64,9 @@ public:
 
     void setDistributor(uint8_t profile[]);
     void setDistributionMethod(DistributionMethod);
-    void setDamperPedal(bool);
-    void setPolyphonic(bool);
+    void setMuted(bool muted);
+    void setDamperPedal(bool enable);
+    void setPolyphonic(bool enable);
     void setNoteOverwrite(bool noteOverwrite);
     void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
     void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);

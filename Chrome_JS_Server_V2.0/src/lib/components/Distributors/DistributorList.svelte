@@ -24,6 +24,7 @@
 		$selectedDeviceStore;
 		updateDistributorList();
 	}
+
 	export function updateDistributorList() {
 		let distributorList = new DistributorList();
 		if ($selectedDeviceStore !== undefined) {
@@ -48,14 +49,31 @@
 	<p class="text-center font-bold">Distributor List</p>
 	<div class="h-full">
 		{#each $distributorListStore as distributor}
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div
-				class="{distributor.getId() == $selectedDistributorStore.getId()
-					? 'bg-gray-select'
-					: 'bg-gray-dark hover:bg-gray-700'} 
-                    m-2 rounded-xl flex flex-row flex-wrap justify-start select-none cursor-pointer"
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div
+		class="m-2 rounded-xl relative select-none"
+	>
+			<!-- Mute Button -->
+			<div class="{distributor.getMuted()
+				? 'bg-btn-red-default'
+				: 'bg-gray-700'}
+				border-2 border-gray-500 absolute top-0 right-0
+				m-2 w-8 h-8 rounded-xl flex justify-center items-center select-none cursor-pointer"
+				on:click={async() => {distributor.toggleMuted();
+					await $selectedDeviceStore.saveDistributor(distributor).then(() => {
+						$selectedDeviceStore = $selectedDeviceStore;})}}
+				>
+					<span class="text-white text-center font-bold" >M</span>
+			</div>
+
+			<!-- Distributor Info -->
+			<div class="{distributor.getId() == $selectedDistributorStore.getId()
+				? 'bg-gray-select'
+				: 'bg-gray-dark hover:bg-gray-700'} 
+				p-2 pr-8 rounded-xl flex flex-row flex-wrap justify-start"
 				on:click={() => ($selectedDistributorStore = distributor)}
 			>
+
 				<div class="flex flex-col p-2 w-60">
 					<label>
 						Distributor ID:
@@ -109,6 +127,7 @@
 					</div>
 				</div>
 			</div>
+		</div>
 		{/each}
 	</div>
 </div>

@@ -1,7 +1,6 @@
 import {} from '../Utility/helpers';
 
 export class Distributor {
-	private muted: boolean;
 
 	private id: number;
 	public channels: number;
@@ -10,6 +9,7 @@ export class Distributor {
 	public minNote: number;
 	public maxNote: number;
 	public maxPolypnonic: number;
+	public muted: boolean;
 	public damper: boolean;
 	public polyphonic: boolean;
 	public noteOverwrite: boolean;
@@ -21,18 +21,19 @@ export class Distributor {
 		minNote: number,
 		maxNote: number,
 		maxPolypnonic: number,
+		muted: boolean,
 		damper: boolean,
 		polyphonic: boolean,
 		noteOverwrite: boolean
 	) {
 		this.id = 0;
-		this.muted = false;
 		this.channels = channels;
 		this.instruments = instruments;
 		this.distributionMethod = distributionMethod;
 		this.minNote = minNote;
 		this.maxNote = maxNote;
 		this.maxPolypnonic = maxPolypnonic;
+		this.muted = muted;
 		this.damper = damper;
 		this.polyphonic = polyphonic;
 		this.noteOverwrite = noteOverwrite;
@@ -48,11 +49,12 @@ export class Distributor {
 
 	public toggleMuted() {
 		this.muted = !this.muted;
+		console.log(this.muted)
 	}
 
 	public getConstruct() {
 		let booleanValues =
-			(this.damper ? 0x01 : 0) | (this.polyphonic ? 0x02 : 0) | (this.noteOverwrite ? 0x04 : 0);
+		(this.muted ? 0x01 : 0) |(this.damper ? 0x02 : 0) | (this.polyphonic ? 0x04 : 0) | (this.noteOverwrite ? 0x08 : 0);
 
 		let construct = '';
 		construct += to7BitStr(this.id, 2);
@@ -78,6 +80,7 @@ export class Distributor {
 		minNote: number,
 		maxNote: number,
 		maxPolypnonic: number,
+		muted: boolean,
 		damper: boolean,
 		polyphonic: boolean,
 		noteOverwrite: boolean
@@ -88,6 +91,7 @@ export class Distributor {
 		this.minNote = minNote;
 		this.maxNote = maxNote;
 		this.maxPolypnonic = maxPolypnonic;
+		this.muted = muted;
 		this.damper = damper;
 		this.polyphonic = polyphonic;
 		this.noteOverwrite = noteOverwrite;

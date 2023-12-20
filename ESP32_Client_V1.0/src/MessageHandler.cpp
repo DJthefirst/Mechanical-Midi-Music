@@ -307,9 +307,10 @@ void MessageHandler::sysExSetDistributorMethod(MidiMessage message){
 }
 
 void MessageHandler::sysExSetDistributorBoolValues(MidiMessage message){
-    getDistributor(message.sysExDistributorID()).setDamperPedal((message.buffer[7] & 0x01) != 0);
-    getDistributor(message.sysExDistributorID()).setPolyphonic((message.buffer[7] & 0x02) != 0);
-    getDistributor(message.sysExDistributorID()).setNoteOverwrite((message.buffer[7] & 0x04) != 0);
+    getDistributor(message.sysExDistributorID()).setMuted((message.buffer[7] & 0x01) != 0);
+    getDistributor(message.sysExDistributorID()).setDamperPedal((message.buffer[7] & 0x02) != 0);
+    getDistributor(message.sysExDistributorID()).setPolyphonic((message.buffer[7] & 0x04) != 0);
+    getDistributor(message.sysExDistributorID()).setNoteOverwrite((message.buffer[7] & 0x08) != 0);
 }
 
 void MessageHandler::sysExSetDistributorMinMaxNotes(MidiMessage message){

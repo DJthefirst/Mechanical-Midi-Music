@@ -27,6 +27,8 @@
 	async function saveDistributor(addDistributor: boolean) {
 		if ($selectedDistributorStore === undefined) addDistributor = true;
 
+		console.log($selectedDistributorStore.getMuted())
+
 		let distributor = new Distributor(
 			listedItemsToNumber(formChannels),
 			listedItemsToNumber(formInstruments),
@@ -34,10 +36,12 @@
 			formNoteMin,
 			formNoteMax,
 			formNumPolyphonicNotes,
+			addDistributor ? false : $selectedDistributorStore.getMuted(), //Muted
 			formDamperEnable,
 			formPolyphonicEnable,
 			formNoteOverwrite
 		);
+		console.log(distributor)
 
 		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
 		else distributor.setId($selectedDistributorStore.getId());
@@ -125,7 +129,7 @@
 		});
 	}
 
-	// Update Form on Selected Distributir Change
+	// Update Form on Selected Distributor Change
 	$: if ($selectedDistributorStore !== undefined) updateForm();
 	function updateForm() {
 		formChannels = NumberToListedItems($selectedDistributorStore.channels);
