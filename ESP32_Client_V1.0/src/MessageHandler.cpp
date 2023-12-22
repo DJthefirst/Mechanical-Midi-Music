@@ -360,6 +360,9 @@ void MessageHandler::addDistributor(uint8_t data[])
 
 void MessageHandler::setDistributor(uint8_t data[])
 {
+    //Clear active Notes
+    (*m_ptrInstrumentController).stopAll();
+
     // If Distributor exists update it.
     uint16_t distributorID = data[0] << 7| (data[1]);
     if (distributorID < m_distributors.size()){

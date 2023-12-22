@@ -86,6 +86,11 @@ export class Device {
 		await comManager.saveDistributor(this, distributor);
 	}
 
+	// Save Distributor Config to device or adds a new Distributor by ID
+	public async saveDistributorBool(distributor: Distributor) {
+		await comManager.saveDistributorBool(this, distributor);
+	}
+
 	// Updates DeviceStore from Message
 	public update(array: Uint8Array) {
 		this.id = (array[0] << 7) + array[1];

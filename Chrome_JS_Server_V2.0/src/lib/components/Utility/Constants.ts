@@ -22,14 +22,15 @@ export const SYSEX_GetNumDistributors = '31';
 export const SYSEX_AddDistributor = '32';
 
 export const SYSEX_GetDistributorID = '34';
-export const SYSEX_SetDistributorID_Channels = '35';
-export const SYSEX_SetDistributorID_Instruments = '36';
-export const SYSEX_SetDistributorID_DistributionMethod = '37';
-export const SYSEX_SetDistributorID_Boolean = '38';
-export const SYSEX_SetDistributorID_MinMaxNotes = '39';
-export const SYSEX_SetDistributorID_NumPolyphonicNotes = '3A';
 
 export const SYSEX_RemoveAllDistributors = '40';
 export const SYSEX_GetAllDistributors = '41';
+
 export const SYSEX_SetDistributor = '44';
+export const SYSEX_SetDistributorID_Channels = '45';
+export const SYSEX_SetDistributorID_Instruments = '46';
+export const SYSEX_SetDistributorID_DistributionMethod = '47';
+export const SYSEX_SetDistributorID_Boolean = '48';
+export const SYSEX_SetDistributorID_MinMaxNotes = '49';
+export const SYSEX_SetDistributorID_NumPolyphonicNotes = '4A';
 
