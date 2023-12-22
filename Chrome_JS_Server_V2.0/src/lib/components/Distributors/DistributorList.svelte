@@ -60,7 +60,7 @@
 				border-2 border-gray-500 absolute top-0 right-0
 				m-2 w-8 h-8 rounded-xl flex justify-center items-center select-none cursor-pointer"
 				on:click={async() => {distributor.toggleMuted();
-					await $selectedDeviceStore.saveDistributor(distributor).then(() => {
+					await $selectedDeviceStore.saveDistributorBool(distributor).then(() => {
 						$selectedDeviceStore = $selectedDeviceStore;})}}
 				>
 					<span class="text-white text-center font-bold" >M</span>

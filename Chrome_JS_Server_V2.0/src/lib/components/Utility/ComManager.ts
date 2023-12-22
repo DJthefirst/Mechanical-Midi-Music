@@ -45,6 +45,11 @@ export default class SerialManager {
 		await this.syncDevice(device);
 	}
 
+	public async saveDistributorBool(device: Device, distributor: Distributor) {
+		sysExCmd(device, CONST.SYSEX_SetDistributorID_Boolean, distributor.getIdStr() + distributor.getBoolean());
+		await this.syncDevice(device);
+	}
+
 	public async syncDevice(device: Device) {
 		sysExCmd(device, CONST.SYSEX_GetDeviceConstructOnly, '');
 		let deviceConstruct = await device.getConnection().receive();
