@@ -26,7 +26,7 @@
 
 //---------- Uncomment Your Selected Device Config ----------
 
-  //#include "Configs/AirCompressor.h"
+  #include "Configs/AirCompressor.h"
   //#include "Configs/TestInstrument.h"
   //#include "Configs/FloppyDrives.h"
   //#include "Configs/StepperMotor.h"
