@@ -26,7 +26,7 @@ void NetworkUSB::readMessage() {
     MidiMessage message;
 
     //Wait until full message to begin reading the buffer
-    if (messageLength >= 3){
+    if (messageLength >= NETWORK_MIN_MSG_BYTES){
         message.buffer[0] = Serial.read();
         messageLength = 0;
 

@@ -15,7 +15,7 @@
 //---------- Uncomment Your Desired Settings ----------
 
   //Save Configuration On PowerOff
-  #define LOCAL_STORAGE
+  //#define LOCAL_STORAGE
 
   //Lighting effects
   //#define ADDRESSABLE_LEDS

@@ -1,3 +1,4 @@
+#pragma once
 #include <FastLED.h>
 
 //FAST LED Variables

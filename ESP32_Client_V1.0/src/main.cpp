@@ -17,6 +17,10 @@
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
 #include "Instruments/FloppyDrive.h"
+#include "Instruments/DrumSimple.h"
+#include "Instruments/ShiftRegister.h"
+
+#include "Instruments/DJthefirst/Dulcimer.h"
 
 #include "Extras/LocalStorage.h"
 
@@ -29,11 +33,12 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
+//DrumSimple instrumentController;
 //FloppyDrive  instrumentController;
-PwmDriver       instrumentController;
+//PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
-//Dulcimer      instrumentController;
+Dulcimer      instrumentController;
 
 //---------- Uncomment Your Selected COM Type ----------
 

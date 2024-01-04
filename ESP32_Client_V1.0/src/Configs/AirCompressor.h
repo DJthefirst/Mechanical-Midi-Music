@@ -18,7 +18,7 @@
   #define LOCAL_STORAGE
 
   //Lighting effects
-  //#define ADDRESSABLE_LEDS
+  #define ADDRESSABLE_LEDS
 
 //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
   constexpr int TIMER_RESOLUTION = 8; //40
@@ -40,4 +40,6 @@
   //A 14 bit number Representing this Devices ID
   const static uint16_t SYSEX_DEV_ID = 0x001;
   //Firmware Version 14bit
-  const static uint16_t FIRMWARE_VERSION = 04;
+  const static uint16_t FIRMWARE_VERSION = 04;\
+
+  //Pinnout "2,4,18,19,21,22,23,32,33"
