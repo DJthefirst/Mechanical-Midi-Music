@@ -167,28 +167,25 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ADDRESSABLE_LEDS
 
-// Addressable LED Strip
-AddrLED addrLEDs;
+    void PwmDriver::setupLEDs(){
+        AddrLEDs::addrLED.setup();
+    }
 
-void PwmDriver::setupLEDs(){
-    addrLEDs.setup();
-}
+    //Set an Instrument Led to on
+    void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
+        CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, note, velocity);
+        AddrLEDs::addrLED.setLedOn(instrument, color);
+    }
 
-//Set an Instrument Led to on
-void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-    CHSV color = addrLEDs.getColor(instrument, channel, note, velocity);
-    addrLEDs.setLedOn(instrument, color);
-}
+    //Set an Instrument Led to off
+    void PwmDriver::setInstumentLedOff(uint8_t instrument){
+        AddrLEDs::addrLED.setLedOff(instrument);
+    }
 
-//Set an Instrument Led to off
-void PwmDriver::setInstumentLedOff(uint8_t instrument){
-    addrLEDs.setLedOff(instrument);
-}
-
-//Reset Leds
-void PwmDriver::resetLEDs(){
-    addrLEDs.reset();
-}
+    //Reset Leds
+    void PwmDriver::resetLEDs(){
+        AddrLEDs::addrLED.reset();
+    }
 
 #else
 void PwmDriver::setupLEDs(){}

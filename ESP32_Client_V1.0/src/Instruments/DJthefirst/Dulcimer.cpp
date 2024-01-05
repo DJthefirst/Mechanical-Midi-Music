@@ -42,6 +42,9 @@ Dulcimer::Dulcimer()
     pinMode(pins[3], OUTPUT); //Reset Serial
     pinMode(pins[4], OUTPUT); //Reset Registers
 
+    //Setup FAST LED
+    setupLEDs();
+
     // With all pins setup, let's do a first run reset
     resetAll();
     delay(500); // Wait a half second for safety
@@ -67,6 +70,7 @@ void Dulcimer::resetAll()
     m_currentTick = {};
     m_currentState = {};
     updateShiftRegister();
+    resetLEDs();
 }
 
 void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
@@ -74,11 +78,11 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = RegisterMap[note - startNote];
     if(notePos == 255)return; //False Notes
-
     m_activeDuration[notePos] = NOTE_ONTIME;
     m_currentTick[notePos] = 0;
     m_currentState[notePos] = HIGH;
     updateShiftRegister();
+    setInstumentLedOn(instrument, channel, notePos, velocity);
     m_numActiveNotes++;
     return;
     
@@ -87,7 +91,8 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
 void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
-    uint8_t notePos = note - startNote;
+    uint8_t notePos = RegisterMap[note - startNote];
+    setInstumentLedOff(notePos);
     if (!m_currentState[notePos]) return;
     reset(notePos);
     m_numActiveNotes--;
@@ -163,15 +168,18 @@ void Dulcimer::updateShiftRegister(uint8_t instrument) {
 
 uint8_t Dulcimer::getNumActiveNotes(uint8_t instrument)
 {
-    return 0;
+    return 1;
 }
  
 bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    if((note < startNote) || (note >= endNote)) return(false);
-    uint8_t notePos = RegisterMap[note - startNote];
+    //TODO Fix this for LEDs
+    return true;
 
-    return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
+    // if((note < startNote) || (note >= endNote)) return(false);
+    // uint8_t notePos = RegisterMap[note - startNote];
+
+    // return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,32 +187,29 @@ bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ADDRESSABLE_LEDS
 
-// Addressable LED Strip
-//AddrLED addrLEDs;
-
 void Dulcimer::setupLEDs(){
-    //addrLEDs.setup();
+    AddrLEDs::addrLED.setup();
 }
 
 //Set an Instrument Led to on
-void Dulcimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-    //CHSV color = addrLEDs.getColor(instrument, channel, note, velocity);
-    //addrLEDs.setLedOn(instrument, color);
+void Dulcimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t notePos, uint8_t velocity){
+    CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, notePos, 127);
+    AddrLEDs::addrLED.setLedOn(notePos*3, color);
 }
 
 //Set an Instrument Led to off
-void Dulcimer::setInstumentLedOff(uint8_t instrument){
-    //addrLEDs.setLedOff(instrument);
+void Dulcimer::setInstumentLedOff(uint8_t notePos){
+    AddrLEDs::addrLED.setLedOff(notePos*3);
 }
 
 //Reset Leds
 void Dulcimer::resetLEDs(){
-    //addrLEDs.reset();
+    AddrLEDs::addrLED.reset();
 }
 
 #else
 void Dulcimer::setupLEDs(){}
 void Dulcimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void Dulcimer::setInstumentLedOff(uint8_t instrument){}
+void Dulcimer::setInstumentLedOff(uint8_t note){}
 void Dulcimer::resetLEDs(){}
 #endif

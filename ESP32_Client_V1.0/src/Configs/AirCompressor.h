@@ -18,7 +18,7 @@
   #define LOCAL_STORAGE
 
   //Lighting effects
-  //#define ADDRESSABLE_LEDS
+  #define ADDRESSABLE_LEDS
 
 //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
   constexpr int TIMER_RESOLUTION = 8; //40

@@ -3,7 +3,8 @@
 
 //FAST LED Variables
 #define LED_PIN     33
-#define NUM_LEDS    8
+//#define NUM_LEDS    8
+#define NUM_LEDS    114
 #define BRIGHTNESS  255
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
@@ -38,4 +39,8 @@ class AddrLED{
 
     private:
 
+};
+
+namespace AddrLEDs {
+   static AddrLED addrLED = AddrLED();
 };
