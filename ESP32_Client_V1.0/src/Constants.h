@@ -9,6 +9,9 @@
 using std::int8_t;
 using std::int16_t;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//General Constants
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Bit Masks
 const uint8_t MSB_BITMASK = 0x80;
@@ -67,10 +70,12 @@ const uint8_t SYSEX_ID = 0x7D; //Educational MIDI ID
 const uint8_t SYSEX_DeviceReady = 0x00;
 const uint8_t SYSEX_ResetDeviceConfig = 0x01;
 
+const uint8_t SYSEX_GetDeviceConstructWithDistributors = 0x10;
 const uint8_t SYSEX_GetDeviceConstruct = 0x11;
 const uint8_t SYSEX_GetDeviceName = 0x12;
 const uint8_t SYSEX_GetDeviceBoolean = 0x13;
 
+const uint8_t SYSEX_SetDeviceConstructWithDistributors = 0x20;
 const uint8_t SYSEX_SetDeviceConstruct = 0x21;
 const uint8_t SYSEX_SetDeviceName = 0x22;
 const uint8_t SYSEX_SetDeviceBoolean = 0x23;
@@ -78,9 +83,17 @@ const uint8_t SYSEX_SetDeviceBoolean = 0x23;
 const uint8_t SYSEX_RemoveDistributor = 0x30;
 const uint8_t SYSEX_RemoveAllDistributors = 0x40;
 const uint8_t SYSEX_GetNumOfDistributors = 0x31;
+const uint8_t SYSEX_GetAllDistributors = 0x41;
 const uint8_t SYSEX_AddDistributor = 0x32;
+const uint8_t SYSEX_ToggleMuteDistributor = 0x42;
 
 const uint8_t SYSEX_GetDistributorConstruct = 0x34;
+const uint8_t SYSEX_GetDistributorChannels = 0x35;
+const uint8_t SYSEX_GetDistributorInstruments = 0x36;
+const uint8_t SYSEX_GetDistributorMethod = 0x37;
+const uint8_t SYSEX_GetDistributorBoolValues = 0x38;
+const uint8_t SYSEX_GetDistributorMinMaxNotes = 0x39;
+const uint8_t SYSEX_GetDistributorNumPolyphonicNotes = 0x3A;
 
 const uint8_t SYSEX_SetDistributor = 0x44;
 const uint8_t SYSEX_SetDistributorChannels = 0x45;
@@ -92,9 +105,6 @@ const uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x4A;
 
 //MIDI Constants
 const uint16_t MIDI_CTRL_CENTER = 0x2000;
-
-//Device Constructs
-const uint8_t BOOL_OMNIMODE = 0x01;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Enums
@@ -127,5 +137,5 @@ enum class DistributionMethod
     RoundRobinBalance,      //Distributes Notes in a circular manner (Balances Notes across Instruments).
     Ascending,              //Plays Note on lowest available Instrument (Balances Notes across Instruments).
     Descending,             //Plays Note on highest available Instrument (Balances Notes across Instruments).
-    Stack                   //TODO    Play Notes Polyphonicaly on lowest available Instrument until full.
+    Stack                   //TODO Play Notes Polyphonicaly on lowest available Instrument until full.
 };

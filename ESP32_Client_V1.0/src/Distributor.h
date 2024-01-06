@@ -24,7 +24,12 @@ using std::int32_t;
 #include "Device.h"
 
 //Size of Distributor when convered to Byte array
-static const uint8_t NUM_DISTRIBUTOR_CFG_BYTES = 16;
+static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 16;
+
+static const uint8_t DISTRIBUTOR_BOOL_MUTED         = 0x01;
+static const uint8_t DISTRIBUTOR_BOOL_DAMPERPEDAL   = 0x02;
+static const uint8_t DISTRIBUTOR_BOOL_POLYPHONIC    = 0x04;
+static const uint8_t DISTRIBUTOR_BOOL_NOTEOVERWRITE = 0x08;
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
 class Distributor{
@@ -57,7 +62,7 @@ public:
     void processMessage(MidiMessage message);
 
     /* Returns a Byte array representing this Distributor */
-    std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> toSerial();
+    std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
     uint16_t getChannels();
     uint32_t getInstruments();

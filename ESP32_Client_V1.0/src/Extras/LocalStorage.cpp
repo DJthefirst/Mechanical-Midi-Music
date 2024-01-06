@@ -139,13 +139,13 @@ void LocalStorage::SetNumOfDistributors(uint8_t numOfDistributors){
 
 void LocalStorage::GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct){
     const char *key = Uint16ToKey(distributorNum).c_str();
-    err = ReadNvsBlob(key, construct, NUM_DISTRIBUTOR_CFG_BYTES);
+    err = ReadNvsBlob(key, construct, DISTRIBUTOR_NUM_CFG_BYTES);
     //if (err != ESP_OK) printf("Error (%s) saving run time blob to NVS!\n", esp_err_to_name(err));
 }
 
 void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, uint8_t * construct){
     const char *key = Uint16ToKey(distributorNum).c_str();
-    WriteNvsBlob(key, construct , NUM_DISTRIBUTOR_CFG_BYTES);
+    WriteNvsBlob(key, construct , DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
 // Get key from valueHelper

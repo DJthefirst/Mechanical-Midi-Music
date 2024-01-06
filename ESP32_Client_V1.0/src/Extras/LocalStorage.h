@@ -32,3 +32,9 @@ public:
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
     void SetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
 }; 
+
+//#ifndef LOCAL_STORAGE
+namespace LocalStorages {
+   static LocalStorage localStorage = LocalStorage();
+};
+//#endif

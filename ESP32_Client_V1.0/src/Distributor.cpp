@@ -107,7 +107,7 @@ void Distributor::programChangeEvent(uint8_t Program)
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
 {
-    //Not Yet Implemented
+    //Not Yet Implemented 
 }
 
 void Distributor::pitchBendEvent(uint16_t pitchBend)
@@ -167,7 +167,7 @@ uint8_t Distributor::nextInstrument()
             // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
 
-            // If no active notes this must be the least active Instrument return
+            // If there are no active notes this must be the least active Instrument return
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
             if(activeNotes == 0) return m_currentInstrument;
 
@@ -294,21 +294,21 @@ bool Distributor::distributorHasInstrument(int instrumentId){
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
+std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
-    std::array<std::uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> distributorObj;
+    std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj;
 
     uint8_t distributorBoolByte = 0;
-    if(this->m_muted)         distributorBoolByte |= (1 << 0);
-    if(this->m_damperPedal)   distributorBoolByte |= (1 << 1);
-    if(this->m_polyphonic)    distributorBoolByte |= (1 << 2);
-    if(this->m_noteOverwrite) distributorBoolByte |= (1 << 3);
+    if(this->m_muted)         distributorBoolByte |= DISTRIBUTOR_BOOL_MUTED;
+    if(this->m_damperPedal)   distributorBoolByte |= DISTRIBUTOR_BOOL_DAMPERPEDAL;
+    if(this->m_polyphonic)    distributorBoolByte |= DISTRIBUTOR_BOOL_POLYPHONIC;
+    if(this->m_noteOverwrite) distributorBoolByte |= DISTRIBUTOR_BOOL_NOTEOVERWRITE;
 
 
     //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
     // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
-    distributorObj[0] = 0; //Distributor ID MSB
-    distributorObj[1] = 0; //Distributor ID LSB
+    distributorObj[0] = 0; //Distributor ID MSB Set in MsgHandler
+    distributorObj[1] = 0; //Distributor ID LSB Set in MsgHandler
     distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
     distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
     distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
@@ -356,10 +356,10 @@ void Distributor::setDistributor(uint8_t data[]){
     m_channels = channels; // 1
     m_instruments = instruments; // 1,2
     m_distributionMethod = distribMethod;
-    m_muted = (data[11] & 0x01) != 0;
-    m_damperPedal = (data[11] & 0x02) != 0;
-    m_polyphonic = (data[11] & 0x04) != 0;
-    m_noteOverwrite = (data[11] & 0x08) != 0;
+    m_muted = (data[11] & DISTRIBUTOR_BOOL_MUTED) != 0;
+    m_damperPedal = (data[11] & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0;
+    m_polyphonic = (data[11] & DISTRIBUTOR_BOOL_POLYPHONIC) != 0;
+    m_noteOverwrite = (data[11] & DISTRIBUTOR_BOOL_NOTEOVERWRITE) != 0;
     m_minNote = data[12];
     m_maxNote = data[13];
     m_numPolyphonicNotes = (data[14]);

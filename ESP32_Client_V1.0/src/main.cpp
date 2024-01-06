@@ -35,17 +35,16 @@
 
 //DrumSimple instrumentController;
 //FloppyDrive  instrumentController;
-//PwmDriver       instrumentController;
+PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
-Dulcimer      instrumentController;
+//Dulcimer      instrumentController;
 
 //---------- Uncomment Your Selected COM Type ----------
 
 NetworkUSB connection;
 //NetworkUDP connection; //Not Yet Implemented
 //NetworkDIN connection; //Not Yet Implemented
-
 
 //Create a new message handler
 MessageHandler messageHandler(&instrumentController);
@@ -60,27 +59,26 @@ void setup() {
   connection.begin();  
   delay(100);
 
-
- 
+  //TODO move into local Storage?
+  //TODO currently LocalStorage is a shared namespace how could I pass  
   #ifdef LOCAL_STORAGE
-  //Load Previous Config from memory
-  uint8_t data[20];
-  LocalStorage localStorage = LocalStorage();
+    //Load Previous Config from memory
+    uint8_t data[DEVICE_NUM_NAME_BYTES];
+  
+    //Device Config
+    Device::Name = LocalStorages::localStorage.GetDeviceName(data);
+    //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
-  //Device Config
-  Device::Name = localStorage.GetDeviceName(data);
-  //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
-
-  //Distributor Config
-  uint8_t numDistributors = localStorage.GetNumOfDistributors();
-  for(uint8_t i = 0; i < numDistributors; i++){
-    uint8_t data[20];
-    localStorage.GetDistributorConstruct(i,data);
-    messageHandler.addDistributor(data);
-  }
+    //Distributor Config
+    uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
+    for(uint8_t i = 0; i < numDistributors; i++){
+      uint8_t data[DISTRIBUTOR_NUM_CFG_BYTES];
+      LocalStorages::localStorage.GetDistributorConstruct(i,data);
+      messageHandler.addDistributor(data);
+    }
   #endif
 
-  //----Testing Demo Setup Config----//
+  //----Default Distributor Setup Config----//
 
   // //Distributor 1
   // Distributor distributor1(&instrumentController);
@@ -109,6 +107,8 @@ void setup() {
   // distributor4.setInstruments(0x000000FF); // 1-8
   // distributor4.setDistributionMethod(DistributionMethod::Ascending);
   // messageHandler.addDistributor(distributor4);
+
+
 
   //Send Device Ready to Connect
   connection.sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
