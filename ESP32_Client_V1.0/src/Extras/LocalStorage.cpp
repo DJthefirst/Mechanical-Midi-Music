@@ -1,10 +1,13 @@
 //TODO: Add Error handling
 
+#include "Device.h"
+#ifdef LOCAL_STORAGE
+
 #include <iostream>
 #include <string>
 #include "LocalStorage.h"
 #include "Distributor.h"
-#include "Device.h"
+
 
 esp_err_t err;
 nvs_handle_t handle;
@@ -159,3 +162,5 @@ std::string LocalStorage::Uint16ToKey(uint16_t value){
 
     return(key);
 }
+
+#endif

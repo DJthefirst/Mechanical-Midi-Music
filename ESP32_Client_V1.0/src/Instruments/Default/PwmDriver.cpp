@@ -1,6 +1,6 @@
 #include "Extras/AddrLED.h"
-#include "Instruments/PwmDriver.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/PwmDriver.h"
+#include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 

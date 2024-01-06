@@ -1,15 +1,9 @@
 #pragma once
+#include "Device.h"
+
+#ifdef ADDRESSABLE_LEDS
 #include <FastLED.h>
 
-//FAST LED Variables
-#define LED_PIN     33
-//#define NUM_LEDS    8
-#define NUM_LEDS    114
-#define BRIGHTNESS  255
-#define LED_TYPE    WS2811
-#define COLOR_ORDER GRB
-
-#define UPDATES_PER_SECOND 100
 
 enum LED_HUE_METHOD{
     HUE_BY_NOTE = 0,
@@ -41,6 +35,7 @@ class AddrLED{
 
 };
 
-namespace AddrLEDs {
-   static AddrLED addrLED = AddrLED();
-};
+    namespace AddrLEDs {
+    static AddrLED addrLED = AddrLED();
+    };
+#endif

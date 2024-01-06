@@ -15,40 +15,19 @@
 #include "Networks/NetworkDIN.h"
 
 #include "Instruments/InstrumentController.h"
-#include "Instruments/PwmDriver.h"
-#include "Instruments/FloppyDrive.h"
-#include "Instruments/DrumSimple.h"
-#include "Instruments/ShiftRegister.h"
+#include "Instruments/Default/PwmDriver.h"
+#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/Default/ShiftRegister.h"
 
+#include "Instruments/DJthefirst/DrumSimple.h"
 #include "Instruments/DJthefirst/Dulcimer.h"
 
 #include "Extras/LocalStorage.h"
 
-//---------- Uncomment Your Selected Device Config ----------
+DEVICE_TYPE instrumentController;
+NETWORK_TYPE connection;
 
-  #include "Configs/AirCompressor.h"
-  //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperMotor.h"
-
-//---------- Uncomment Your Selected Instrument Type ----------
-
-//DrumSimple instrumentController;
-//FloppyDrive  instrumentController;
-PwmDriver       instrumentController;
-//StepperL298n  instrumentController;
-//ShiftRegister instrumentController;
-//Dulcimer      instrumentController;
-
-//---------- Uncomment Your Selected COM Type ----------
-
-NetworkUSB connection;
-//NetworkUDP connection; //Not Yet Implemented
-//NetworkDIN connection; //Not Yet Implemented
-
-//Create a new message handler
 MessageHandler messageHandler(&instrumentController);
-
 
 void setup() {
   connection = NetworkUSB();
@@ -60,7 +39,6 @@ void setup() {
   delay(100);
 
   //TODO move into local Storage?
-  //TODO currently LocalStorage is a shared namespace how could I pass  
   #ifdef LOCAL_STORAGE
     //Load Previous Config from memory
     uint8_t data[DEVICE_NUM_NAME_BYTES];
@@ -107,8 +85,6 @@ void setup() {
   // distributor4.setInstruments(0x000000FF); // 1-8
   // distributor4.setDistributionMethod(DistributionMethod::Ascending);
   // messageHandler.addDistributor(distributor4);
-
-
 
   //Send Device Ready to Connect
   connection.sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);

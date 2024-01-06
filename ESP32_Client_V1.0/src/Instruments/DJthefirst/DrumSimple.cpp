@@ -1,12 +1,12 @@
-#include "Instruments/ShiftRegister.h"
-#include "InterruptTimer.h"
+#include "Instruments/DJthefirst/DrumSimple.h"
+#include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 
-const uint8_t startNote = 38; //Inclusive
-const uint8_t endNote = 77; //Exclusive
+const uint8_t startNote = 36; //Inclusive
+const uint8_t endNote = 44; //Exclusive
 
-const uint8_t MAX_NUM_NOTES = endNote - startNote;
+const uint8_t MAX_NUM_NOTES = endNote - startNote > MAX_NUM_INSTRUMENTS? MAX_NUM_INSTRUMENTS : endNote - startNote;
 
 static uint8_t m_numActiveNotes;
 
@@ -15,14 +15,12 @@ static std::array<uint16_t,MAX_NUM_NOTES> m_activeDuration; //Note Played
 static std::array<uint16_t,MAX_NUM_NOTES> m_currentTick; //Timeing
 static std::array<bool,MAX_NUM_NOTES> m_currentState; //IO
 
-ShiftRegister::ShiftRegister()
+DrumSimple::DrumSimple()
 {
     //Setup pins
-    pinMode(pins[0], OUTPUT); //Serial Data
-    pinMode(pins[1], OUTPUT); //Serial Clock
-    pinMode(pins[2], OUTPUT); //Load Registers
-    pinMode(pins[3], OUTPUT); //Reset Serial
-    pinMode(pins[4], OUTPUT); //Reset Registers
+    for(uint8_t i=0; i < pins.size(); i++){
+        pinMode(pins[i], OUTPUT);
+    }
 
     // With all pins setup, let's do a first run reset
     resetAll();
@@ -33,54 +31,56 @@ ShiftRegister::ShiftRegister()
 
 }
 
-void ShiftRegister::reset(uint8_t notePos)
+void DrumSimple::reset(uint8_t notePos)
 {
     m_activeDuration[notePos] = 0;
     m_currentTick[notePos] = 0;
     m_currentState[notePos] = LOW;
-    updateShiftRegister();
+
+    digitalWrite(pins[notePos], LOW);
 }
 
-void ShiftRegister::resetAll()
+void DrumSimple::resetAll()
 {
     m_numActiveNotes = 0;
     m_activeDuration = {};
     m_currentTick = {};
     m_currentState = {};
-    // Reset Shift Registers
-    // digitalWrite(pins[3], LOW); //Reset Serial
-    // digitalWrite(pins[4], LOW); //Reset Registers
-    // delayMicroseconds(1); //Stabilize 
-    // digitalWrite(pins[3],  HIGH); //Reset Serial
-    // digitalWrite(pins[4],  HIGH); //Reset Registers
-    updateShiftRegister();
+
+    for(uint8_t i = 0; i < pins.size(); i++){
+        digitalWrite(pins[i], LOW);
+    }
 }
 
-void ShiftRegister::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
+void DrumSimple::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = (note - startNote);
 
     m_activeDuration[notePos] = NOTE_ONTIME;
     m_currentTick[notePos] = 0;
-    m_currentState[notePos] = HIGH;
-    updateShiftRegister();
+    // m_currentState[notePos] = HIGH;
+    // digitalWrite(pins[notePos], HIGH);
+    m_currentState[notePos] = !m_currentState[notePos];
+    digitalWrite(pins[notePos], m_currentState[notePos]);
     m_numActiveNotes++;
     return;
     
 }
 
-void ShiftRegister::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void DrumSimple::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((note < startNote) || (note >= endNote)) return;
     uint8_t notePos = note - startNote;
-    if (!m_currentState[notePos]) return;
-    reset(notePos);
+    if(notePos == 0){
+        if (!m_currentState[notePos]) return;
+        reset(notePos);
+    }
     m_numActiveNotes--;
     return;
 }
 
-void ShiftRegister::stopAll(){
+void DrumSimple::stopAll(){
     resetAll();
 }
 
@@ -97,13 +97,14 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 #pragma GCC push_options
 #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ShiftRegister::Tick()
+void ICACHE_RAM_ATTR DrumSimple::Tick()
 #else
-void ShiftRegister::tick()
+void DrumSimple::tick()
 #endif
 {
     //Turn off note if its Duration has expired
-    for (int i = 0; i < MAX_NUM_NOTES; i++) {
+    // for (int i = 0; i < MAX_NUM_NOTES; i++) {
+    for (int i = 0; i < 1; i++) {
         if(m_numActiveNotes == 0)break;
 
         if (m_activeDuration[i] > 0){
@@ -112,7 +113,7 @@ void ShiftRegister::tick()
                 m_currentState[i] = LOW;
                 m_activeDuration[i] = 0;
                 m_currentTick[i] = 0;
-                updateShiftRegister();
+                digitalWrite(pins[i], LOW);
                 continue;
             }
             m_currentTick[i]++;
@@ -120,39 +121,18 @@ void ShiftRegister::tick()
     }
 }
 
-
-#ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ShiftRegister::updateShiftRegister() {
-#else
-void ShiftRegister::updateShiftRegister(uint8_t instrument) {
-#endif
-
-    // Write and Shift Data
-    for(uint8_t i=0; i < MAX_NUM_NOTES; i++ ){
-        digitalWrite(pins[0], m_currentState[i]); //Serial Data
-        digitalWrite(pins[1], HIGH); //Serial Clock
-        delayMicroseconds(1); //Stabilize 
-        digitalWrite(pins[1],  LOW); //Serial Clock
-    }
-    // Toggle Load
-    digitalWrite(pins[2], HIGH); //Register Load
-    delayMicroseconds(1); //Stabilize 
-    digitalWrite(pins[2], LOW); //Register Load
-    digitalWrite(pins[0], LOW); //Serial Data
-        
-}
 #pragma GCC pop_options
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ShiftRegister::getNumActiveNotes(uint8_t instrument)
+uint8_t DrumSimple::getNumActiveNotes(uint8_t instrument)
 {
     return 0;
 }
  
-bool ShiftRegister::isNoteActive(uint8_t instrument, uint8_t note)
+bool DrumSimple::isNoteActive(uint8_t instrument, uint8_t note)
 {
     if((note < startNote) || (note >= endNote)) return(false);
     uint8_t notePos = note - startNote;
