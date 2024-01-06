@@ -18,6 +18,7 @@ class MessageHandler;
 class Network{
     
 protected:
+    const static uint8_t NETWORK_MIN_MSG_BYTES = 3;
     MessageHandler* m_ptrMessageHandler;
     
 public:

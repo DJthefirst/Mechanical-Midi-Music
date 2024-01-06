@@ -1,5 +1,7 @@
 #include "AddrLed.h"
 
+#ifdef ADDRESSABLE_LEDS
+
 //Setup FAST LED
 void AddrLED::setup(){
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
@@ -61,3 +63,5 @@ void AddrLED::reset(){
     }
     //FastLED.show();
 }
+
+#endif

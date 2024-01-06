@@ -1,5 +1,5 @@
-#include "Instruments/FloppyDrive.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 

@@ -1,5 +1,5 @@
-#include "Instruments/StepperL298n.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/StepperL298n.h"
+#include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 

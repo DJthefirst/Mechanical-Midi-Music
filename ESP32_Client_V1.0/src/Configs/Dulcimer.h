@@ -2,7 +2,7 @@
 #include <vector>
 #include "Constants.h"
 
-#define DEVICE_TYPE PwmDriver  
+#define DEVICE_TYPE Dulcimer
 #define NETWORK_TYPE NetworkUSB
 
 //---------- Uncomment Your Desired Settings ----------
@@ -16,7 +16,7 @@
   //FAST LED Variables
   #ifdef ADDRESSABLE_LEDS
     #define LED_PIN     33
-    #define NUM_LEDS    8
+    #define NUM_LEDS    114
     #define BRIGHTNESS  255
     #define LED_TYPE    WS2811
     #define COLOR_ORDER GRB

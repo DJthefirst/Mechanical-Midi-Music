@@ -15,36 +15,19 @@
 #include "Networks/NetworkDIN.h"
 
 #include "Instruments/InstrumentController.h"
-#include "Instruments/PwmDriver.h"
-#include "Instruments/FloppyDrive.h"
+#include "Instruments/Default/PwmDriver.h"
+#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/Default/ShiftRegister.h"
+
+#include "Instruments/DJthefirst/DrumSimple.h"
+#include "Instruments/DJthefirst/Dulcimer.h"
 
 #include "Extras/LocalStorage.h"
 
-//---------- Uncomment Your Selected Device Config ----------
+DEVICE_TYPE instrumentController;
+NETWORK_TYPE connection;
 
-  //#include "Configs/AirCompressor.h"
-  //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperMotor.h"
-
-//---------- Uncomment Your Selected Instrument Type ----------
-
-//FloppyDrive  instrumentController;
-PwmDriver       instrumentController;
-//StepperL298n  instrumentController;
-//ShiftRegister instrumentController;
-//Dulcimer      instrumentController;
-
-//---------- Uncomment Your Selected COM Type ----------
-
-NetworkUSB connection;
-//NetworkUDP connection; //Not Yet Implemented
-//NetworkDIN connection; //Not Yet Implemented
-
-
-//Create a new message handler
 MessageHandler messageHandler(&instrumentController);
-
 
 void setup() {
   connection = NetworkUSB();
@@ -55,27 +38,25 @@ void setup() {
   connection.begin();  
   delay(100);
 
-
- 
+  //TODO move into local Storage?
   #ifdef LOCAL_STORAGE
-  //Load Previous Config from memory
-  uint8_t data[20];
-  LocalStorage localStorage = LocalStorage();
+    //Load Previous Config from memory
+    uint8_t data[DEVICE_NUM_NAME_BYTES];
+  
+    //Device Config
+    Device::Name = LocalStorages::localStorage.GetDeviceName(data);
+    //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
-  //Device Config
-  Device::Name = localStorage.GetDeviceName(data);
-  //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
-
-  //Distributor Config
-  uint8_t numDistributors = localStorage.GetNumOfDistributors();
-  for(uint8_t i = 0; i < numDistributors; i++){
-    uint8_t data[20];
-    localStorage.GetDistributorConstruct(i,data);
-    messageHandler.addDistributor(data);
-  }
+    //Distributor Config
+    uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
+    for(uint8_t i = 0; i < numDistributors; i++){
+      uint8_t data[DISTRIBUTOR_NUM_CFG_BYTES];
+      LocalStorages::localStorage.GetDistributorConstruct(i,data);
+      messageHandler.addDistributor(data);
+    }
   #endif
 
-  //----Testing Demo Setup Config----//
+  //----Default Distributor Setup Config----//
 
   // //Distributor 1
   // Distributor distributor1(&instrumentController);

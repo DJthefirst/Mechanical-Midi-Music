@@ -2,7 +2,7 @@
  * MidiMessage.h
  * 
  * A simple Array wrapper representing a MidiMessage with helper 
- * to help parse Midi Messages
+ * functions to parse Midi Messages
  */
 
 #pragma once
@@ -30,8 +30,8 @@ struct MidiMessage
     //SYSEX MSG Helpers
     uint8_t sysExID(){return buffer[1];}
     uint16_t deviceID(){return (buffer[2] << 7) | buffer[3];} //Combine message SysEx ID LSB and MSB
-    uint8_t sysExCommand(){return buffer[4];}
-    uint8_t* sysExCmdOffset(){return buffer + 5;} 
+    uint8_t sysExCommand(){return buffer[4];} 
+    uint8_t* sysExCmdPayload(){return buffer + 5;} //Returns the start of data from a SysEx message
 
     uint16_t sysExDistributorID(){return (buffer[5] << 7) | buffer[6];}
 };

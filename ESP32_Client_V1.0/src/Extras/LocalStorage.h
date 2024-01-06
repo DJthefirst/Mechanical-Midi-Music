@@ -1,8 +1,12 @@
 #pragma once
+#include "Device.h"
+
+#ifdef LOCAL_STORAGE
 
 #include "nvs_flash.h"
 #include "nvs.h"
 #include <cstdint>
+#include <string>
 using std::int8_t;
 
 class LocalStorage{
@@ -32,3 +36,8 @@ public:
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
     void SetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
 }; 
+
+namespace LocalStorages {
+    static LocalStorage localStorage = LocalStorage();
+};
+#endif
