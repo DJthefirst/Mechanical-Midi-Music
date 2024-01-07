@@ -1,8 +1,9 @@
 #include "Instruments/DJthefirst/Dulcimer.h"
+
+#include "Arduino.h"
 #include "Instruments/InterruptTimer.h"
 #include "Extras/AddrLED.h"
 #include "Constants.h"
-#include "Arduino.h"
 
 const uint8_t startNote = 48; //Inclusive 50
 const uint8_t endNote = 84; //Exclusive 98

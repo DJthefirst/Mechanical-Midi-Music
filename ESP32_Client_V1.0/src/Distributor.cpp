@@ -129,19 +129,21 @@ void Distributor::pitchBendEvent(uint16_t pitchBend)
 uint8_t Distributor::nextInstrument()
 {
     bool validInsturment = false;
-    uint8_t insturmentLeastActive = 0;
+    uint8_t insturmentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
 
     switch(m_distributionMethod){
 
+    // Return the Instument ID matching the current Messages Channel ID
     case(DistributionMethod::StraightThrough):
         
-        // Return the Instument ID matching the current Messages Channel ID
         m_currentInstrument = m_currentChannel;
         if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
 
+    // Return the next instrument in the instrument pool
     case(DistributionMethod::RoundRobin):
+
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             m_currentInstrument++;
 
@@ -154,10 +156,10 @@ uint8_t Distributor::nextInstrument()
         }
         return NONE;
         
-
+    // Iterate through every instrument in the instrument pool starting at the current instrument
+    // Return the first instument that has the lowest number of active notes.
     case(DistributionMethod::RoundRobinBalance):
 
-        insturmentLeastActive = NONE;
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             // Increment current Instrument
             m_currentInstrument++;
@@ -185,7 +187,7 @@ uint8_t Distributor::nextInstrument()
         }
         return insturmentLeastActive;
 
-
+    // Return the least active instrument starting at the instrument 0
     case(DistributionMethod::Ascending):
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
@@ -194,18 +196,22 @@ uint8_t Distributor::nextInstrument()
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
 
+            // Check if instrument has the least active notes 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
+            // If there are no active notes this must be the least active instrument return
+            if(activeNotes == 0) return i;
+
+            // Update least active instrument
             if(activeNotes < leastActiveNotes)
             {
                 leastActiveNotes = activeNotes;
                 insturmentLeastActive = i;
             }
-
-            if(activeNotes == 0) return insturmentLeastActive;
         }
         return validInsturment ? m_currentInstrument : NONE;
 
+    // Return the least active instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
 
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
@@ -214,10 +220,13 @@ uint8_t Distributor::nextInstrument()
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
             
+            // Check if instrument has the least active notes 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
-            if(activeNotes == 0) return insturmentLeastActive;
+            // If there are no active notes this must be the least active Instrument return
+            if(activeNotes == 0) return i;
 
+            // Update least active instrument
             if(activeNotes < leastActiveNotes)
             {
                 leastActiveNotes = activeNotes;
@@ -234,18 +243,21 @@ uint8_t Distributor::nextInstrument()
 }
 
 //Returns the instument which the first note is played or NONE.
+//*Note this function is optimised for nonpolyphonic playback and the Distribution method.
 uint8_t Distributor::checkForNote(uint8_t note)
 {
     uint8_t instrument = m_currentInstrument;
 
     switch(m_distributionMethod){
 
+    // Check for note being played on the instrument in the current channel position
     case(DistributionMethod::StraightThrough):
         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
             return m_currentChannel;
         }
         break;
 
+    // Check for note being played on the instrument iterating backwards through all instruments
     case(DistributionMethod::RoundRobin):
     case(DistributionMethod::RoundRobinBalance):
         //Iterate through each instrument in reverse
@@ -260,6 +272,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
+    // Check for note being played on the instrument starting at instrument 0
     case(DistributionMethod::Ascending):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
@@ -269,6 +282,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
+    // Check for note being played on the instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 

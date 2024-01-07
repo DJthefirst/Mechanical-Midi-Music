@@ -7,17 +7,19 @@
 
 #pragma once
 
-#include <vector>
-#include <cstdint>
-using std::int8_t;
-
+#include "Device.h"
+#include "Extras/LocalStorage.h"
 #include "Instruments/InstrumentController.h"
 #include "Networks/Network.h"
 #include "Distributor.h"
 #include "MidiMessage.h"
-#include "Device.h"
+#include "Constants.h"
 
-#include "Extras/LocalStorage.h"
+#include <array>
+#include <vector>
+#include <cstdint>
+using std::int8_t;
+using std::int16_t;
 
 class Network;
 

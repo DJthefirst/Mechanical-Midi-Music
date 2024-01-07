@@ -6,9 +6,10 @@
 #pragma once
 
 #include "Arduino.h"
+#include "Constants.h"
+#include <array>
 #include <stdint.h>
 #include <cstdint>
-#include "Constants.h"
 using std::int8_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

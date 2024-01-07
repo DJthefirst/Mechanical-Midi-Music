@@ -8,9 +8,8 @@
 #pragma once
 
 #include "Arduino.h"
-#include <cstdint>
-
 #include "Networks/Network.h"
+#include <cstdint>
 
 class NetworkUSB : public Network{
 public:

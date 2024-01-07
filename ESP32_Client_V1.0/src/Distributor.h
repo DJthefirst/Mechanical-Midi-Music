@@ -12,16 +12,16 @@
 
 #pragma once
 
+#include "Device.h"
+#include "Instruments/InstrumentController.h"
+#include "MidiMessage.h"
+#include "Constants.h"
+
 #include <array>
 #include <cstdint>
 using std::int8_t;
 using std::int16_t;
 using std::int32_t;
-
-#include "Constants.h"
-#include "Instruments/InstrumentController.h"
-#include "MidiMessage.h"
-#include "Device.h"
 
 //Size of Distributor when convered to Byte array
 static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 16;
