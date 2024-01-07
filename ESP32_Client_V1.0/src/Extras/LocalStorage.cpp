@@ -37,6 +37,7 @@ bool LocalStorage::OpenNvs(){
     return(true);
 }
 
+//Load blob data sructure from flash memory
 esp_err_t LocalStorage::ReadNvsBlob(const char *key, uint8_t* result, uint8_t arrayLength){
     
     size_t arraySize = sizeof(uint8_t)*arrayLength;
@@ -98,8 +99,6 @@ void LocalStorage::WriteNvsU8(const char *key, uint8_t value){
     //if (err != ESP_OK) Serial.printf("Error (%s) in SetU8Commit!\n", esp_err_to_name(err));
     nvs_close(handle);
 }
-
-
 
 void LocalStorage::ResetDeviceConfig(){
     nvs_flash_erase();

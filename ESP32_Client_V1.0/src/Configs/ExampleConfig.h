@@ -31,7 +31,7 @@
     #define LOCAL_STORAGE
 
     //Addressable LED Lighting effects
-    #define ADDRESSABLE_LEDS
+    //#define ADDRESSABLE_LEDS
 
     //FAST LED Variables
     #ifdef ADDRESSABLE_LEDS
