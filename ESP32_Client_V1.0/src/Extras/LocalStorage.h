@@ -16,7 +16,7 @@ private:
     std::string Uint16ToKey(uint16_t value);
     esp_err_t ReadNvsBlob(const char *key, uint8_t* result, uint8_t arrayLength);
     uint8_t ReadNvsU8(const char *key, uint8_t defaultValue);
-    esp_err_t WriteNvsBlob(const char *key, uint8_t* data, uint8_t arrayLength);
+    esp_err_t WriteNvsBlob(const char *key, const uint8_t* data, uint8_t arrayLength);
     void WriteNvsU8(const char *key, uint8_t value);
 
 public:
@@ -28,13 +28,13 @@ public:
     void GetDeviceConstruct();
     void SetDeviceConstruct();
     const char* GetDeviceName(uint8_t* data);
-    void SetDeviceName(char* name);
+    void SetDeviceName(const char* name);
     uint8_t GetDeviceBoolean();
     void SetDeviceBoolean(uint8_t deviceBoolean);
     uint8_t GetNumOfDistributors();
     void SetNumOfDistributors(uint8_t numOfDistributors);
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
-    void SetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
+    void SetDistributorConstruct(uint16_t distributorNum, const uint8_t* construct);
 }; 
 
 namespace LocalStorages {

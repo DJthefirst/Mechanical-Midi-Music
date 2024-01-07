@@ -1,8 +1,8 @@
 #pragma once
-
-#include "Constants.h"
-#include "Instruments/InstrumentController.h"
 #include "Device.h"
+#include "Instruments/InstrumentController.h"
+#include "Constants.h"
+
 #include <cstdint>
 using std::int8_t;
 

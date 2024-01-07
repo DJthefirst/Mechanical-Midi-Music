@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include <cstdint>
 using std::int8_t;
+using std::int16_t;
 
 
 class InstrumentController{

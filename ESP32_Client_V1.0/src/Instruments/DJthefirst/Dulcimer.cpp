@@ -1,8 +1,9 @@
 #include "Instruments/DJthefirst/Dulcimer.h"
+
+#include "Arduino.h"
 #include "Instruments/InterruptTimer.h"
 #include "Extras/AddrLED.h"
 #include "Constants.h"
-#include "Arduino.h"
 
 const uint8_t startNote = 48; //Inclusive 50
 const uint8_t endNote = 84; //Exclusive 98
@@ -46,7 +47,7 @@ Dulcimer::Dulcimer()
     setupLEDs();
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument

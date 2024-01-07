@@ -33,5 +33,6 @@ struct MidiMessage
     uint8_t sysExCommand(){return buffer[4];} 
     uint8_t* sysExCmdPayload(){return buffer + 5;} //Returns the start of data from a SysEx message
 
+    //Return Distributor ID
     uint16_t sysExDistributorID(){return (buffer[5] << 7) | buffer[6];}
 };

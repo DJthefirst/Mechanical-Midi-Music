@@ -24,7 +24,7 @@ PwmDriver::PwmDriver()
     setupLEDs();
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -53,9 +53,9 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  ui
     //Remove this if statement condition for note overwrite
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
-        m_notePeriod[instrument] = noteDoubleTicks[note];
+        m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-        m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+        m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         setInstumentLedOn(instrument, channel, note, velocity);
         return;
@@ -150,6 +150,7 @@ uint8_t PwmDriver::getNumActiveNotes(uint8_t instrument)
  
 bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 

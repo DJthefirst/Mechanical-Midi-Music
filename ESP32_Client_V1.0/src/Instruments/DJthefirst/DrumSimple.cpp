@@ -23,7 +23,7 @@ DrumSimple::DrumSimple()
     }
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -137,5 +137,5 @@ bool DrumSimple::isNoteActive(uint8_t instrument, uint8_t note)
     if((note < startNote) || (note >= endNote)) return(false);
     uint8_t notePos = note - startNote;
 
-    return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
+    return ((m_activeDuration[ notePos ] != 0) ? true : false);
 }
