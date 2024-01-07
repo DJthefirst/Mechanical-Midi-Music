@@ -22,11 +22,11 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 //Message Processor
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Determine Type of MIDI Msg and Call Associated Event
 void Distributor::processMessage(MidiMessage message)
 {
     m_currentChannel = message.channel();
 
-    //Determine Type of MIDI Msg and Call Associated Event
     switch(message.type()){
 
     case(MIDI_NoteOff):
@@ -59,15 +59,16 @@ void Distributor::processMessage(MidiMessage message)
 //Event Handlers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Find the first Instrument playing the given Note and stop it.
 void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    //Find the first Instrument playing the given Note and Stop it.
     uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
         (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
     }
 }
 
+//Get Next Instument Based on Distribution Method and Play Note
 void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
 {
     //Check if note has 0 velocity representing a note off event
@@ -76,19 +77,19 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
         return;
     }
 
-    //Check if Distributor is muted
+    //Check if distributor is muted
     if(m_muted)return;
 
-    //Get Next Instument Based on Distribution Method and Play Note
+    //Get next instrument based on distribution method and play note
     uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
         (*m_ptrInstrumentController).playNote(instrument, Note, Velocity, channel);
     }
 }
 
+//Find the first active instrument playing said note and update its velocity
 void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
-    //Find the First Active Instrument playing said Note and update its Velocity
     uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
         (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
@@ -110,9 +111,9 @@ void Distributor::channelPressureEvent(uint8_t Velocity)
     //Not Yet Implemented 
 }
 
+//Update Each Instruments Pitch Bend Value
 void Distributor::pitchBendEvent(uint16_t pitchBend)
 {
-    //Update Each Instruments Pitch Bend Value
     for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
         if((m_instruments & (1 << i)) != 0){
             (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
@@ -232,6 +233,7 @@ uint8_t Distributor::nextInstrument()
     }
 }
 
+//Returns the instument which the first note is played or NONE.
 uint8_t Distributor::checkForNote(uint8_t note)
 {
     uint8_t nextInstrument = m_currentInstrument;
@@ -286,6 +288,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
 //Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Returns true if a distributor contains the designated instument in its pool.
 bool Distributor::distributorHasInstrument(int instrumentId){
     return ((m_instruments & (1 << instrumentId)) != 0);
 }
@@ -294,6 +297,7 @@ bool Distributor::distributorHasInstrument(int instrumentId){
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Returns Distributor construct without ID
 std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
     std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj;
@@ -307,8 +311,8 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 
     //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
     // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
-    distributorObj[0] = 0; //Distributor ID MSB Set in MsgHandler
-    distributorObj[1] = 0; //Distributor ID LSB Set in MsgHandler
+    distributorObj[0] = 0; //Distributor ID MSB Generated in MsgHandler
+    distributorObj[1] = 0; //Distributor ID LSB Generated in MsgHandler
     distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
     distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
     distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
@@ -331,14 +335,17 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     //memcpy(&distributorObj[6], &m_instruments, 4);
 }
 
+//Returns Distributor Channels
 uint16_t Distributor::getChannels(){
     return m_channels;
 }
 
+//Returns Distributor Channels
 uint32_t Distributor::getInstruments(){
     return m_instruments;
 }
 
+//Configures Distributor from construct
 void Distributor::setDistributor(uint8_t data[]){
     // Decode Distributor Construct
     uint16_t channels = 
@@ -365,40 +372,49 @@ void Distributor::setDistributor(uint8_t data[]){
     m_numPolyphonicNotes = (data[14]);
 }
 
+//Configures Distributor Distribution Method
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
 }
 
+//Configures Distributor Boolean
 void Distributor::setMuted(bool muted){
     if(m_muted != muted) (*m_ptrInstrumentController).stopAll();
     m_muted = muted;
 }
 
+//Configures Distributor Damper Pedal
 void Distributor::setDamperPedal(bool damper){
     m_damperPedal = damper;
 }
 
+//Configures Distributor Polphonic Notes
 void Distributor::setPolyphonic(bool polyphonic){
     m_polyphonic = polyphonic;
 }
 
+//Configures Distributor Note Overwrite
 void Distributor::setNoteOverwrite(bool noteOverwrite){
     m_noteOverwrite = noteOverwrite;
 }
 
+//Configures Distributor Minimum and Maximum Notes
 void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
     m_minNote = minNote;
     m_maxNote = maxNote;
 }
 
+//Configures Distributor maximum number of Polyphonic notes
 void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
     m_numPolyphonicNotes = numPolyphonicNotes;
 }
-    
+
+//Configures Distributor accepted MIDI channels
 void Distributor::setChannels(uint16_t channels){
     m_channels = channels;
 }
     
+//Configures Distributor Instrument Pool
 void Distributor::setInstruments(uint32_t instruments){
     m_instruments = instruments;
 }

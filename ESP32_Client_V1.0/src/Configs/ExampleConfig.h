@@ -1,3 +1,11 @@
+/*
+ * ExampleConfig.h
+ *
+ * This is a Template Configuration file where you can
+ * quickly configure the defualt settings for your Device
+ * 
+ */
+
 #pragma once
 #include <vector>
 #include "Constants.h"
@@ -22,7 +30,7 @@
     //Save Configuration On PowerOff
     #define LOCAL_STORAGE
 
-    //Lighting effects
+    //Addressable LED Lighting effects
     #define ADDRESSABLE_LEDS
 
     //FAST LED Variables

@@ -40,20 +40,22 @@ void setup() {
 
   //TODO move into local Storage?
   #ifdef LOCAL_STORAGE
+  {
     //Load Previous Config from memory
-    uint8_t data[DEVICE_NUM_NAME_BYTES];
+    uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
   
     //Device Config
-    Device::Name = LocalStorages::localStorage.GetDeviceName(data);
+    Device::Name = LocalStorages::localStorage.GetDeviceName(deviceName);
     //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
     //Distributor Config
     uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
     for(uint8_t i = 0; i < numDistributors; i++){
-      uint8_t data[DISTRIBUTOR_NUM_CFG_BYTES];
-      LocalStorages::localStorage.GetDistributorConstruct(i,data);
-      messageHandler.addDistributor(data);
+      uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
+      LocalStorages::localStorage.GetDistributorConstruct(i,distributorData);
+      messageHandler.addDistributor(distributorData);
     }
+  }
   #endif
 
   //----Default Distributor Setup Config----//

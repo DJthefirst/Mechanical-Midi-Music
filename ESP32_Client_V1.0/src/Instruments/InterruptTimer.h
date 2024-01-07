@@ -22,7 +22,7 @@ namespace InterruptTimer {
 constexpr float BEND_OCTAVES = 200/(float)1200;
 
 // The period of notes in microseconds
-constexpr uint16_t notePeriods[128] = {
+constexpr uint16_t NOTE_PERIODS[128] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     30578, 28861, 27242, 25713, 24270, 22909, 21622, 20409, 19263, 18182, 17161, 16198, //C1 - B1
@@ -49,14 +49,14 @@ constexpr std::array<std::uint16_t,128> compute_divided_ticks(const int divisor)
 {
     std::array<std::uint16_t,128> noteDoubleTicks{};
     for(int i=0;i<128;++i)
-        noteDoubleTicks[i] = notePeriods[i]/divisor;
+        noteDoubleTicks[i] = NOTE_PERIODS[i]/divisor;
     
     return noteDoubleTicks;
 }
 
-constexpr auto noteTicks = compute_divided_ticks(TIMER_RESOLUTION);
+constexpr auto NOTE_TICKS = compute_divided_ticks(TIMER_RESOLUTION);
 
 // In some cases a pulse will only happen every-other tick (e.g. if the tick is
 // toggling a pin on and off and pulses happen on rising signal) so to simplify
 // the math multiply the RESOLUTION by 2 here.
-constexpr auto noteDoubleTicks = compute_divided_ticks(TIMER_RESOLUTION*2);
+constexpr auto NOTE_TICKS_DOUBLE = compute_divided_ticks(TIMER_RESOLUTION*2);
