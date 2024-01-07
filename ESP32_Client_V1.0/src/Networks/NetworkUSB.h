@@ -17,8 +17,8 @@ public:
     NetworkUSB() = default;
     void begin() override;
     void readMessage() override;
-    void sendMessage(uint8_t message[], uint8_t length) override;
-    void sendMessage(String msg);
+    void sendMessage(const uint8_t message[], uint8_t length) override;
+    void sendMessage(String msg) override;
 
 private:
     bool startUSB();

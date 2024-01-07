@@ -89,7 +89,7 @@ void setup() {
   // messageHandler.addDistributor(distributor4);
 
   //Send Device Ready to Connect
-  connection.sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
+  connection.sendMessage(&SYSEX_DeviceReady,(uint8_t)true);
 }
 
 void loop() {

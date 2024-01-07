@@ -24,7 +24,7 @@ PwmDriver::PwmDriver()
     setupLEDs();
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -150,6 +150,7 @@ uint8_t PwmDriver::getNumActiveNotes(uint8_t instrument)
  
 bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 

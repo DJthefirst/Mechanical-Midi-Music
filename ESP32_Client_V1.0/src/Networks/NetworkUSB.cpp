@@ -42,7 +42,7 @@ void NetworkUSB::readMessage() {
 }
 
 //Send Byte arrays wrapped in SysEx Messages 
-void NetworkUSB::sendMessage(uint8_t message[], uint8_t length) {
+void NetworkUSB::sendMessage(const uint8_t message[], uint8_t length) {
     //Midi Message Header SysExStart, MidiID, DeviceID_1, DeviceID_0.
     uint8_t header[] = {0xF0, SYSEX_ID, 0x7F, 0x7F};
     //Midi Message Tail SysEx End.

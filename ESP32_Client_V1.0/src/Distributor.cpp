@@ -236,7 +236,7 @@ uint8_t Distributor::nextInstrument()
 //Returns the instument which the first note is played or NONE.
 uint8_t Distributor::checkForNote(uint8_t note)
 {
-    uint8_t nextInstrument = m_currentInstrument;
+    uint8_t instrument = m_currentInstrument;
 
     switch(m_distributionMethod){
 
@@ -248,14 +248,15 @@ uint8_t Distributor::checkForNote(uint8_t note)
 
     case(DistributionMethod::RoundRobin):
     case(DistributionMethod::RoundRobinBalance):
+        //Iterate through each instrument in reverse
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             //Decrement Instrument with Underflow Protection
-            if(nextInstrument == 0) nextInstrument = MAX_NUM_INSTRUMENTS;
-            nextInstrument--;
+            if(instrument == 0) instrument = MAX_NUM_INSTRUMENTS;
+            instrument--;
 
             //Check if valid instrument
-            if(!distributorHasInstrument(nextInstrument)) continue;
-            if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)) return nextInstrument;
+            if(!distributorHasInstrument(instrument)) continue;
+            if((*m_ptrInstrumentController).isNoteActive(instrument, note)) return instrument;
         }
         break;
 
