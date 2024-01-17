@@ -35,14 +35,14 @@
   //Absolute max number of Polyphonic notes is 16
   const static uint8_t MAX_POLYPHONIC_NOTES = 1;
   //Absolute max number of Instruments is 32
-  const static uint8_t MAX_NUM_INSTRUMENTS = 8; 
+  const static uint8_t MAX_NUM_INSTRUMENTS = 1; 
   //Absolute Lowest Note Min=0
   const static uint8_t MIN_MIDI_NOTE = 36; 
-  //Absolute Highest Note Max=127
+  //Absolute Highest Note Max=127                      
   const static uint8_t MAX_MIDI_NOTE = 83;
   //A 14 bit number Representing this Devices ID
-  const static uint16_t SYSEX_DEV_ID = 0x001;
+  const static uint16_t SYSEX_DEV_ID = 0x004;
   //Firmware Version 14bit
   const static uint16_t FIRMWARE_VERSION = 04;
-  //Pinout
-  const std::array<uint8_t,8> pins = {2,4,18,19,21,22,23,32};
+  //Pinout -- SerialData, SerialClock, LoadRegister, ResetSerial, ResetRegister
+  const std::array<uint8_t,8> pins = {23,19,21,18,22,13};
