@@ -20,16 +20,16 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 
     //Set the color of the led
     switch(m_hueMethod){
-        case HUE_BY_NOTE:
+        case LED_HUE_METHOD::NOTE:
             hue = (note%25)*10; //Hue by Note
             break;
-        case HUE_BY_PITCH:
+        case LED_HUE_METHOD::PITCH:
             hue = (note%128)*2; //Hue by Pitch
             break;
-        case HUE_BY_ID:
+        case LED_HUE_METHOD::ID:
             hue = (id%2)*125; //Hue by id Position
             break;
-        case HUE_BY_CHANNEL:
+        case LED_HUE_METHOD::CHANNEL:
             hue = (channel%4)*64; //Hue by Channel & Time
             break;
     }

@@ -5,17 +5,17 @@
 #include <FastLED.h>
 
 
-enum LED_HUE_METHOD{
-    HUE_BY_NOTE = 0,
-    HUE_BY_PITCH,
-    HUE_BY_ID,
-    HUE_BY_CHANNEL
+enum class LED_HUE_METHOD{
+    NOTE = 0,
+    PITCH,
+    ID,
+    CHANNEL
 };
 
 class AddrLED{
     private:
         CRGB leds[NUM_LEDS];
-        LED_HUE_METHOD m_hueMethod = HUE_BY_CHANNEL;
+        LED_HUE_METHOD m_hueMethod = LED_HUE_METHOD::CHANNEL;
         bool m_hueTimeProgression = true;
         bool m_brightnessByVelocity = true;
 
