@@ -166,26 +166,26 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
     void PwmDriver::setupLEDs(){
-        AddrLEDs::addrLED.setup();
+        AddrLED::get().setup();
     }
 
     //Set an Instrument Led to on
     void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-        CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, note, velocity);
-        AddrLEDs::addrLED.setLedOn(instrument, color);
+        CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
+        AddrLED::get().setLedOn(instrument, color);
     }
 
     //Set an Instrument Led to off
     void PwmDriver::setInstumentLedOff(uint8_t instrument){
-        AddrLEDs::addrLED.setLedOff(instrument);
+        AddrLED::get().setLedOff(instrument);
     }
 
     //Reset Leds
     void PwmDriver::resetLEDs(){
-        AddrLEDs::addrLED.reset();
+        AddrLED::get().reset();
     }
 
 #else

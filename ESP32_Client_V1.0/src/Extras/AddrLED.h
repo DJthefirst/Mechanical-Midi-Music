@@ -1,7 +1,7 @@
 #pragma once
 #include "Device.h"
 
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 #include <FastLED.h>
 
 
@@ -31,11 +31,16 @@ class AddrLED{
         //Reset Leds
         void reset();
 
-    private:
+        //Singleton
+        AddrLED(const AddrLED&) = delete;
+        static AddrLED& get(){
+            static AddrLED addrLed;
+            return addrLed;
+        }
 
+    private:
+        //Singleton Constructor
+        AddrLED(){};
 };
 
-    namespace AddrLEDs {
-    static AddrLED addrLED = AddrLED();
-    };
 #endif

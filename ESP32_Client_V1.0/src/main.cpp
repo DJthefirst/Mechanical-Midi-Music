@@ -31,14 +31,14 @@ void setup() {
     uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
   
     //Device Config
-    Device::Name = LocalStorages::localStorage.GetDeviceName(deviceName);
+    Device::Name = LocalStorage::get().GetDeviceName(deviceName);
     //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
     //Distributor Config
-    uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
+    uint8_t numDistributors = LocalStorage::get().GetNumOfDistributors();
     for(uint8_t i = 0; i < numDistributors; i++){
       uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-      LocalStorages::localStorage.GetDistributorConstruct(i,distributorData);
+      LocalStorage::get().GetDistributorConstruct(i,distributorData);
       messageHandler.addDistributor(distributorData);
     }
   }

@@ -12,7 +12,6 @@
 //Message Handler constructor used to pass in a ptr to the instrument controller.
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
-    localStorageInit();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +71,7 @@ MidiMessage MessageHandler::processSysEX(MidiMessage& message)
         case (SYSEX_ResetDeviceConfig):
             return sysExResetDeviceConfig(message);
         case (SYSEX_GetDeviceConstructWithDistributors):
-            return MidiMessage(); //TODO
+            break; //TODO
         case (SYSEX_GetDeviceConstruct):
             return sysExGetDeviceConstruct(message);
         case (SYSEX_GetDeviceName):
@@ -80,7 +79,7 @@ MidiMessage MessageHandler::processSysEX(MidiMessage& message)
         case (SYSEX_GetDeviceBoolean):
             return sysExGetDeviceBoolean(message);
         case (SYSEX_SetDeviceConstructWithDistributors):
-            return MidiMessage(); //TODO
+            break; //TODO
         case (SYSEX_SetDeviceConstruct):
             return sysExSetDeviceConstruct(message);
         case (SYSEX_SetDeviceName):
@@ -89,36 +88,36 @@ MidiMessage MessageHandler::processSysEX(MidiMessage& message)
             return sysExSetDeviceBoolean(message);
         case (SYSEX_RemoveDistributor):
             removeDistributor(message.sysExDistributorID());
-            return MidiMessage();
+            break;
         case (SYSEX_RemoveAllDistributors):
             removeAllDistributors();
-            return MidiMessage();
+            break;
         case (SYSEX_GetNumOfDistributors):
             return sysExGetNumOfDistributors(message);
         case (SYSEX_GetAllDistributors):
             return sysExGetNumOfDistributors(message);
         case (SYSEX_AddDistributor):
             setDistributor(message.sysExCmdPayload());
-            return MidiMessage();
+            break;
         case (SYSEX_ToggleMuteDistributor):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_GetDistributorConstruct):
             return sysExGetDistributorConstruct(message);
         case (SYSEX_GetDistributorChannels):
             return sysExGetDistributorChannels(message);
         case (SYSEX_GetDistributorInstruments):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_GetDistributorMethod):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_GetDistributorBoolValues):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_GetDistributorMinMaxNotes):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_GetDistributorNumPolyphonicNotes):
-            return MidiMessage();//TODO
+            break;//TODO
         case (SYSEX_SetDistributor):
             setDistributor(message.sysExCmdPayload());
-            return MidiMessage();
+            break;
         case (SYSEX_SetDistributorChannels):
             return sysExSetDistributorChannels(message);
         case (SYSEX_SetDistributorInstruments):
@@ -132,6 +131,7 @@ MidiMessage MessageHandler::processSysEX(MidiMessage& message)
         case (SYSEX_SetDistributorNumPolyphonicNotes):
             return sysExSetDistributorNumPolyphonicNotes(message);
     }
+    return MidiMessage();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -434,40 +434,35 @@ std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> MessageHandler::getDistributorSer
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef EXTRA_LOCAL_STORAGE
 
-void MessageHandler::localStorageInit(){
-    LocalStorages::localStorage = LocalStorage();
-}
-
 void MessageHandler::localStorageSetDeviceName(char* name){
-    LocalStorages::localStorage.SetDeviceName(name);
-    Device::Name = LocalStorages::localStorage.GetDeviceName(reinterpret_cast<uint8_t*>(name));
+    LocalStorage::get().SetDeviceName(name);
+    Device::Name = LocalStorage::get().GetDeviceName(reinterpret_cast<uint8_t*>(name));
 }
 
 void MessageHandler::localStorageAddDistributor(){
     uint8_t index = m_distributors.size()-1;
-    LocalStorages::localStorage.SetDistributorConstruct(index,getDistributorSerial(index).data());
-    LocalStorages::localStorage.SetNumOfDistributors(m_distributors.size());
+    LocalStorage::get().SetDistributorConstruct(index,getDistributorSerial(index).data());
+    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
 }
 
 void MessageHandler::localStorageRemoveDistributor(uint8_t id){
-    LocalStorages::localStorage.SetNumOfDistributors(m_distributors.size());
+    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
 
     for(int i = id; i < m_distributors.size(); i++){
-        LocalStorages::localStorage.SetDistributorConstruct(i,getDistributorSerial(i).data());
+        LocalStorage::get().SetDistributorConstruct(i,getDistributorSerial(i).data());
     }
 }
 
 void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data){
-    LocalStorages::localStorage.SetDistributorConstruct(distributorID,data);
+    LocalStorage::get().SetDistributorConstruct(distributorID,data);
 }
 
 void MessageHandler::localStorageClearDistributors(){
-    LocalStorages::localStorage.SetNumOfDistributors(m_distributors.size());
+    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
 }
 
 void MessageHandler::localStorageReset(){
-    LocalStorages::localStorage.ResetDeviceConfig();
-    LocalStorages::localStorage = LocalStorage();
+    LocalStorage::get().ResetDeviceConfig();
 }
 
 #else

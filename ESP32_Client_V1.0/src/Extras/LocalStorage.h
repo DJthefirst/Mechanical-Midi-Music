@@ -20,8 +20,6 @@ private:
     void WriteNvsU8(const char *key, uint8_t value);
 
 public:
-    explicit LocalStorage();
-
     void Test();
 
     void ResetDeviceConfig();
@@ -35,9 +33,19 @@ public:
     void SetNumOfDistributors(uint8_t numOfDistributors);
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
     void SetDistributorConstruct(uint16_t distributorNum, const uint8_t* construct);
+
+    //Singleton
+    LocalStorage(const LocalStorage&) = delete;
+    static LocalStorage& get(){
+        static LocalStorage localStorage;
+        return localStorage;
+    }
+
+private:
+
+    //Singleton Constructor
+    LocalStorage();
+
 }; 
 
-namespace LocalStorages {
-    static LocalStorage localStorage = LocalStorage();
-};
 #endif

@@ -1,6 +1,6 @@
 #include "AddrLed.h"
 
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
 //Setup FAST LED
 void AddrLED::setup(){

@@ -31,8 +31,8 @@ private:
 
     InstrumentController* m_ptrInstrumentController;
  
+    
 public:
-
     //Message Handler 
     explicit MessageHandler(InstrumentController* ptrInstrumentController);
     MidiMessage processMessage(MidiMessage& message);
@@ -46,7 +46,7 @@ public:
     void removeAllDistributors();
     Distributor& getDistributor(uint8_t id);
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> getDistributorSerial(uint8_t id);
-    
+
 private:
     //Main Midi Functions
     void distributeMessage(MidiMessage& message);
@@ -91,7 +91,6 @@ private:
     MidiMessage sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     //Local Storage
-    void localStorageInit();
     void localStorageSetDeviceName(char* name);
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);
