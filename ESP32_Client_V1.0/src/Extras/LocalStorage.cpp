@@ -1,7 +1,7 @@
 //TODO: Add Error handling
 
 #include "Device.h"
-#ifdef LOCAL_STORAGE
+#ifdef EXTRA_LOCAL_STORAGE
 
 #include <iostream>
 #include <string>

@@ -7,39 +7,25 @@
  */
 
 #include <Arduino.h>
-#include "Distributor.h"
-#include "MessageHandler.h"
+
+#include "Device.h"
 #include "Networks/Network.h"
-#include "Networks/NetworkUDP.h"
-#include "Networks/NetworkUSB.h"
-#include "Networks/NetworkDIN.h"
-
 #include "Instruments/InstrumentController.h"
-#include "Instruments/Default/PwmDriver.h"
-#include "Instruments/Default/FloppyDrive.h"
-#include "Instruments/Default/ShiftRegister.h"
-
-#include "Instruments/DJthefirst/DrumSimple.h"
-#include "Instruments/DJthefirst/Dulcimer.h"
+#include "MessageHandler.h"
 
 #include "Extras/LocalStorage.h"
 
-DEVICE_TYPE instrumentController;
-NETWORK_TYPE connection;
-
+networkType network = networkType();
+instrumentType instrumentController = instrumentType(); 
 MessageHandler messageHandler(&instrumentController);
 
 void setup() {
-  connection = NetworkUSB();
-
-  //Initialize MessageHandler and Begin Network Connection
-  messageHandler.setNetwork(&connection);
-  connection.setMessageHandler(&messageHandler);
-  connection.begin();  
+  //Begin Network Commmunication
+  network.begin();  
   delay(100);
 
   //TODO move into local Storage?
-  #ifdef LOCAL_STORAGE
+  #ifdef EXTRA_LOCAL_STORAGE
   {
     //Load Previous Config from memory
     uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
@@ -59,10 +45,16 @@ void setup() {
   #endif
 
   //Send Device Ready to Connect
-  connection.sendMessage(&SYSEX_DeviceReady,(uint8_t)true);
+  network.sendMessage(MidiMessage(&SYSEX_DeviceReady,(uint8_t)true));
 }
 
 //Periodicaly Read Incoming Messages
 void loop() {
-  connection.readMessage();
+  MidiMessage message = network.readMessage();
+  if (message.isValid()){
+    message = messageHandler.processMessage(message);
+  }
+  if (message.isValid()){
+    network.sendMessage(message);
+  }
 }

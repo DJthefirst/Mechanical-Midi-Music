@@ -30,15 +30,12 @@ private:
     std::vector<Distributor> m_distributors;
 
     InstrumentController* m_ptrInstrumentController;
-    Network* m_ptrNetwork;
  
 public:
-    //Set Network Connection
-    void setNetwork(Network* ptrNetwork);
 
     //Message Handler 
     explicit MessageHandler(InstrumentController* ptrInstrumentController);
-    void processMessage(MidiMessage& message);
+    MidiMessage processMessage(MidiMessage& message);
 
     //Distributors
     void addDistributor(); // Internal Function
@@ -54,44 +51,44 @@ private:
     //Main Midi Functions
     void distributeMessage(MidiMessage& message);
     void processCC(MidiMessage& message);
-    void processSysEX(MidiMessage& message);
+    MidiMessage processSysEX(MidiMessage& message);
 
     //SysEx functions
-    void sysExDeviceReady(MidiMessage& message);
-    void sysExResetDeviceConfig(MidiMessage& message);
+    MidiMessage sysExDeviceReady(MidiMessage& message);
+    MidiMessage sysExResetDeviceConfig(MidiMessage& message);
 
-    void sysExGetDeviceConstructWithDistributors(MidiMessage& message);
-    void sysExGetDeviceConstruct(MidiMessage& message);
-    void sysExGetDeviceName(MidiMessage& message);
-    void sysExGetDeviceBoolean(MidiMessage& message);
+    MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
+    MidiMessage sysExGetDeviceConstruct(MidiMessage& message);
+    MidiMessage sysExGetDeviceName(MidiMessage& message);
+    MidiMessage sysExGetDeviceBoolean(MidiMessage& message);
 
-    void sysExSetDeviceConstructWithDistributors(MidiMessage& message);
-    void sysExSetDeviceConstruct(MidiMessage& message);
-    void sysExSetDeviceName(MidiMessage& message);
-    void sysExSetDeviceBoolean(MidiMessage& message);
+    MidiMessage sysExSetDeviceConstructWithDistributors(MidiMessage& message);
+    MidiMessage sysExSetDeviceConstruct(MidiMessage& message);
+    MidiMessage sysExSetDeviceName(MidiMessage& message);
+    MidiMessage sysExSetDeviceBoolean(MidiMessage& message);
 
     // void sysExRemoveDistributor(MidiMessage& message); //Already a Dedicated Function
     // void sysExRemoveAllDistributors(MidiMessage& message); //Already a Dedicated Function
-    void sysExGetNumOfDistributors(MidiMessage& message);
-    void sysExGetAllDistributors(MidiMessage& message);
+    MidiMessage sysExGetNumOfDistributors(MidiMessage& message);
+    MidiMessage sysExGetAllDistributors(MidiMessage& message);
     // void sysExAddDistributor(MidiMessage& message); //SetDistributor Provides this Function
-    void sysExToggleMuteDistributor(MidiMessage& message);
+    MidiMessage sysExToggleMuteDistributor(MidiMessage& message);
     
-    void sysExGetDistributorConstruct(MidiMessage& message);
-    void sysExGetDistributorChannels(MidiMessage& message);
-    void sysExGetDistributorInstruments(MidiMessage& message);
-    void sysExGetDistributorMethod(MidiMessage& message);
-    void sysExGetDistributorBoolValues(MidiMessage& message);
-    void sysExGetDistributorMinMaxNotes(MidiMessage& message);
-    void sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
+    MidiMessage sysExGetDistributorConstruct(MidiMessage& message);
+    MidiMessage sysExGetDistributorChannels(MidiMessage& message);
+    MidiMessage sysExGetDistributorInstruments(MidiMessage& message);
+    MidiMessage sysExGetDistributorMethod(MidiMessage& message);
+    MidiMessage sysExGetDistributorBoolValues(MidiMessage& message);
+    MidiMessage sysExGetDistributorMinMaxNotes(MidiMessage& message);
+    MidiMessage sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     // void sysExSetDistributor(MidiMessage& message); //Already a Dedicated Function
-    void sysExSetDistributorChannels(MidiMessage& message);
-    void sysExSetDistributorInstruments(MidiMessage& message);
-    void sysExSetDistributorMethod(MidiMessage& message);
-    void sysExSetDistributorBoolValues(MidiMessage& message);
-    void sysExSetDistributorMinMaxNotes(MidiMessage& message);
-    void sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
+    MidiMessage sysExSetDistributorChannels(MidiMessage& message);
+    MidiMessage sysExSetDistributorInstruments(MidiMessage& message);
+    MidiMessage sysExSetDistributorMethod(MidiMessage& message);
+    MidiMessage sysExSetDistributorBoolValues(MidiMessage& message);
+    MidiMessage sysExSetDistributorMinMaxNotes(MidiMessage& message);
+    MidiMessage sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     //Local Storage
     void localStorageInit();

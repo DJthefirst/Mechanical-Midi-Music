@@ -1,7 +1,7 @@
 #pragma once
 #include "Device.h"
 
-#ifdef LOCAL_STORAGE
+#ifdef EXTRA_LOCAL_STORAGE
 
 #include "nvs_flash.h"
 #include "nvs.h"
