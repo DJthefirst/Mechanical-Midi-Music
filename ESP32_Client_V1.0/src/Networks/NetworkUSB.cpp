@@ -20,23 +20,28 @@ bool NetworkUSB::startUSB() {
 
 /* Waits for buffer to fill with a new msg (>3 Bytes). */
 MidiMessage NetworkUSB::readMessage() {
-    int messageLength = Serial.available();
-
-    MidiMessage message;
+    uint8_t messageLength = 0;
+    MidiMessage message = MidiMessage();
 
     //Wait until full message to begin reading the buffer
-    if (messageLength >= NETWORK_MIN_MSG_BYTES){
-        message.buffer[0] = Serial.read();
-        messageLength = 0;
-
-        //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
-        while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
-            messageLength++;
-            if(messageLength == MAX_PACKET_LENGTH) return MidiMessage(); //TODO: Error     
-            message.buffer[messageLength] = Serial.read();
-        }      
-        message.length = messageLength;
+    if (Serial.available() && (Serial.peek() & MSB_BITMASK) != 0){
+        message.buffer[messageLength] = Serial.read();
+        messageLength = 1;
     }
+
+    //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
+    while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){   
+        message.buffer[messageLength] = Serial.read();
+
+        messageLength++;
+        if(messageLength == MAX_PACKET_LENGTH){
+            messageLength = 0;
+            Serial.println("Bad Message");
+            break;
+        }
+    }      
+
+    message.length = messageLength;
     return message;
 }
 

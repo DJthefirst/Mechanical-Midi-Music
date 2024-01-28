@@ -2,6 +2,7 @@
 #include "Instruments/Default/PwmDriver.h"
 #include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
+#include <bitset>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
@@ -11,7 +12,7 @@ static uint8_t m_numActiveNotes;
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
-static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
+static std::bitset<MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 PwmDriver::PwmDriver()
 {
@@ -82,7 +83,7 @@ void PwmDriver::stopAll(){
     m_notePeriod = {};
     m_activePeriod = {};
     m_currentTick = {};
-    m_currentState = {};
+    m_currentState.reset();
 
     for(uint8_t i = 0; i < pins.size(); i++){
         digitalWrite(pins[i], LOW);
@@ -133,7 +134,7 @@ void PwmDriver::togglePin(uint8_t instrument)
 #endif
 {
     //Pulse the control pin
-    m_currentState[instrument] = !m_currentState[instrument];
+    m_currentState.flip(instrument);
     digitalWrite(pins[instrument], m_currentState[instrument]);
         
 }

@@ -31,7 +31,7 @@ struct MidiMessage
         //Midi SysEx Message Payload
         std::copy(payload, payload+payloadLength, buffer+header.size());
         //Midi Message Tail SysEx End.
-        const uint8_t tail = 0x7F;
+        const uint8_t tail = 0xF7;
         buffer[header.size()+payloadLength] = tail;
         
         length = header.size() + payloadLength + 1;    

@@ -3,6 +3,7 @@ export const SYSEX_RegExpEnd = /^(?:[0-9a-fA-F][0-9a-fA-F])*F7/di;
 
 export const SYSEX_START = 'F07D';
 export const SYSEX_END = 'F7';
+export const SYSEX_BroadcastID = '0000';
 
 export const SYSEX_DeviceReady = '00';
 export const SYSEX_ResetDeviceCfg = '01';

@@ -466,11 +466,10 @@ void MessageHandler::localStorageReset(){
 }
 
 #else
-void MessageHandler::localStorageInit(){}
-void MessageHandler::localStorageSetDeviceName(char* name){}
-void MessageHandler::localStorageAddDistributor(){}
-void MessageHandler::localStorageRemoveDistributor(uint8_t id){}
-void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data){}
-void MessageHandler::localStorageClearDistributors(){}
-void MessageHandler::localStorageReset(){}
+    void MessageHandler::localStorageSetDeviceName(char* name){}
+    void MessageHandler::localStorageAddDistributor(){}
+    void MessageHandler::localStorageRemoveDistributor(uint8_t id){}
+    void MessageHandler::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data){}
+    void MessageHandler::localStorageClearDistributors(){}
+    void MessageHandler::localStorageReset(){}
 #endif
