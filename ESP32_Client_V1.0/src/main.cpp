@@ -36,8 +36,8 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-//FloppyDrive  instrumentController;
-PwmDriver       instrumentController;
+FloppyDrive  instrumentController;
+//PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
