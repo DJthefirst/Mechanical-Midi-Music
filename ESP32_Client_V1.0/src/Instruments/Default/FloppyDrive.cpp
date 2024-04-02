@@ -1,5 +1,5 @@
-#include "Instruments/FloppyDrive.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 
@@ -26,7 +26,7 @@ FloppyDrive::FloppyDrive()
     }
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -69,9 +69,9 @@ void FloppyDrive::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, u
     //Remove this if statement condition for note overwrite
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
-        m_notePeriod[instrument] = noteDoubleTicks[note];
+        m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-        m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+        m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         return;
     //}

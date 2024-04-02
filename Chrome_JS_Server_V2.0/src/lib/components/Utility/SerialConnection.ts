@@ -20,19 +20,20 @@ export default class SerialConnection {
 		// @ts-ignore
 		this.port = await navigator.serial.requestPort(); // Prompt user to select any serial port.
 		await this.port.open({ baudRate: baudRate });
-		await sleep(750); // ESP32 D15->GND to Suppress Boot Messages, Delay for Boot //200
 		this.reader = this.port.readable.getReader();
 		this.writer = this.port.writable.getWriter();
 
+		//Request if device ready If device is not ready there will be no response
+		this.sendHexString(CONST.SYSEX_START + "0000" + CONST.SYSEX_DeviceReady + CONST.SYSEX_END);
 
 		//Add Timeout and Delay for first connection.
-		// let stall = true;
-		// setTimeout(()=> {stall = false},2000);
+		let stall = true;
+		setTimeout(()=> {stall = false},5000);
 
-		// while(stall){
-		// 	let msg = await this.receive(500);
-		// 	if (msg != null && msg[0] == Number(CONST.SYSEX_DeviceReady)) return;
-		// }
+		while(stall){
+			let msg = await this.receive(500);
+			if (msg != null && msg[0] == Number(CONST.SYSEX_DeviceReady)) return;
+		}
 
 	}
 

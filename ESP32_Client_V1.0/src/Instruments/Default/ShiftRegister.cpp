@@ -1,5 +1,5 @@
-#include "Instruments/ShiftRegister.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/ShiftRegister.h"
+#include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 
@@ -11,9 +11,9 @@ const uint8_t MAX_NUM_NOTES = endNote - startNote;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes
-static uint16_t m_activeDuration[MAX_NUM_NOTES];//Note Played
-static uint8_t m_currentTick[MAX_NUM_NOTES]; //Timeing
-static bool m_currentState[MAX_NUM_NOTES]; //IO
+static std::array<uint16_t,MAX_NUM_NOTES> m_activeDuration; //Note Played
+static std::array<uint16_t,MAX_NUM_NOTES> m_currentTick; //Timeing
+static std::array<bool,MAX_NUM_NOTES> m_currentState; //IO
 
 ShiftRegister::ShiftRegister()
 {
@@ -25,7 +25,7 @@ ShiftRegister::ShiftRegister()
     pinMode(pins[4], OUTPUT); //Reset Registers
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -44,9 +44,9 @@ void ShiftRegister::reset(uint8_t notePos)
 void ShiftRegister::resetAll()
 {
     m_numActiveNotes = 0;
-    std::fill(&m_activeDuration[0],&m_activeDuration[0]+sizeof(m_activeDuration),0);
-    std::fill(&m_currentTick[0],&m_currentTick[0]+sizeof(m_currentTick),0);
-    std::fill(&m_currentState[0],&m_currentState[0]+sizeof(m_currentState),LOW);
+    m_activeDuration = {};
+    m_currentTick = {};
+    m_currentState = {};
     // Reset Shift Registers
     // digitalWrite(pins[3], LOW); //Reset Serial
     // digitalWrite(pins[4], LOW); //Reset Registers
@@ -104,7 +104,7 @@ void ShiftRegister::tick()
 {
     //Turn off note if its Duration has expired
     for (int i = 0; i < MAX_NUM_NOTES; i++) {
-        if(m_numActiveNotes == 0)continue;
+        if(m_numActiveNotes == 0)break;
 
         if (m_activeDuration[i] > 0){
             if (m_currentTick[i] >= m_activeDuration[i]) {
@@ -157,5 +157,5 @@ bool ShiftRegister::isNoteActive(uint8_t instrument, uint8_t note)
     if((note < startNote) || (note >= endNote)) return(false);
     uint8_t notePos = note - startNote;
 
-    return ((m_activeDuration[ note-startNote ] != 0) ? true : false);
+    return ((m_activeDuration[ notePos ] != 0) ? true : false);
 }

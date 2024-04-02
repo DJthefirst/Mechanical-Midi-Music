@@ -18,6 +18,7 @@ class MessageHandler;
 class Network{
     
 protected:
+    const static uint8_t NETWORK_MIN_MSG_BYTES = 3;
     MessageHandler* m_ptrMessageHandler;
     
 public:
@@ -25,6 +26,6 @@ public:
     
     virtual void begin() = 0;
     virtual void readMessage() = 0;
-    virtual void sendMessage(uint8_t* message, uint8_t length) = 0;
+    virtual void sendMessage(const uint8_t* message, uint8_t length) = 0;
     virtual void sendMessage(String msg) = 0;
 };

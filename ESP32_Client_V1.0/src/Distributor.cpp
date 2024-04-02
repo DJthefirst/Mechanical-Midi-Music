@@ -22,11 +22,11 @@ Distributor::Distributor(InstrumentController* ptrInstrumentController)
 //Message Processor
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Determine Type of MIDI Msg and Call Associated Event
 void Distributor::processMessage(MidiMessage message)
 {
     m_currentChannel = message.channel();
 
-    //Determine Type of MIDI Msg and Call Associated Event
     switch(message.type()){
 
     case(MIDI_NoteOff):
@@ -59,15 +59,16 @@ void Distributor::processMessage(MidiMessage message)
 //Event Handlers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Find the first Instrument playing the given Note and stop it.
 void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    //Find the first Instrument playing the given Note and Stop it.
     uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
         (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
     }
 }
 
+//Get Next Instument Based on Distribution Method and Play Note
 void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
 {
     //Check if note has 0 velocity representing a note off event
@@ -76,19 +77,19 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
         return;
     }
 
-    //Check if Distributor is muted
+    //Check if distributor is muted
     if(m_muted)return;
 
-    //Get Next Instument Based on Distribution Method and Play Note
+    //Get next instrument based on distribution method and play note
     uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
         (*m_ptrInstrumentController).playNote(instrument, Note, Velocity, channel);
     }
 }
 
+//Find the first active instrument playing said note and update its velocity
 void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
-    //Find the First Active Instrument playing said Note and update its Velocity
     uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
         (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
@@ -107,12 +108,12 @@ void Distributor::programChangeEvent(uint8_t Program)
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
 {
-    //Not Yet Implemented
+    //Not Yet Implemented 
 }
 
+//Update Each Instruments Pitch Bend Value
 void Distributor::pitchBendEvent(uint16_t pitchBend)
 {
-    //Update Each Instruments Pitch Bend Value
     for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
         if((m_instruments & (1 << i)) != 0){
             (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
@@ -128,19 +129,21 @@ void Distributor::pitchBendEvent(uint16_t pitchBend)
 uint8_t Distributor::nextInstrument()
 {
     bool validInsturment = false;
-    uint8_t insturmentLeastActive = 0;
+    uint8_t insturmentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
 
     switch(m_distributionMethod){
 
+    // Return the Instument ID matching the current Messages Channel ID
     case(DistributionMethod::StraightThrough):
         
-        // Return the Instument ID matching the current Messages Channel ID
         m_currentInstrument = m_currentChannel;
         if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         return NONE;
 
+    // Return the next instrument in the instrument pool
     case(DistributionMethod::RoundRobin):
+
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             m_currentInstrument++;
 
@@ -153,10 +156,10 @@ uint8_t Distributor::nextInstrument()
         }
         return NONE;
         
-
+    // Iterate through every instrument in the instrument pool starting at the current instrument
+    // Return the first instument that has the lowest number of active notes.
     case(DistributionMethod::RoundRobinBalance):
 
-        insturmentLeastActive = NONE;
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             // Increment current Instrument
             m_currentInstrument++;
@@ -167,7 +170,7 @@ uint8_t Distributor::nextInstrument()
             // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
 
-            // If no active notes this must be the least active Instrument return
+            // If there are no active notes this must be the least active Instrument return
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
             if(activeNotes == 0) return m_currentInstrument;
 
@@ -184,7 +187,7 @@ uint8_t Distributor::nextInstrument()
         }
         return insturmentLeastActive;
 
-
+    // Return the least active instrument starting at the instrument 0
     case(DistributionMethod::Ascending):
 
         for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
@@ -193,18 +196,22 @@ uint8_t Distributor::nextInstrument()
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
 
+            // Check if instrument has the least active notes 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
+            // If there are no active notes this must be the least active instrument return
+            if(activeNotes == 0) return i;
+
+            // Update least active instrument
             if(activeNotes < leastActiveNotes)
             {
                 leastActiveNotes = activeNotes;
                 insturmentLeastActive = i;
             }
-
-            if(activeNotes == 0) return insturmentLeastActive;
         }
         return validInsturment ? m_currentInstrument : NONE;
 
+    // Return the least active instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
 
         for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
@@ -213,10 +220,13 @@ uint8_t Distributor::nextInstrument()
             if(!distributorHasInstrument(i)) continue;
             validInsturment = true;
             
+            // Check if instrument has the least active notes 
             uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
-            if(activeNotes == 0) return insturmentLeastActive;
+            // If there are no active notes this must be the least active Instrument return
+            if(activeNotes == 0) return i;
 
+            // Update least active instrument
             if(activeNotes < leastActiveNotes)
             {
                 leastActiveNotes = activeNotes;
@@ -232,31 +242,37 @@ uint8_t Distributor::nextInstrument()
     }
 }
 
+//Returns the instument which the first note is played or NONE.
+//*Note this function is optimised for nonpolyphonic playback and the Distribution method.
 uint8_t Distributor::checkForNote(uint8_t note)
 {
-    uint8_t nextInstrument = m_currentInstrument;
+    uint8_t instrument = m_currentInstrument;
 
     switch(m_distributionMethod){
 
+    // Check for note being played on the instrument in the current channel position
     case(DistributionMethod::StraightThrough):
         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
             return m_currentChannel;
         }
         break;
 
+    // Check for note being played on the instrument iterating backwards through all instruments
     case(DistributionMethod::RoundRobin):
     case(DistributionMethod::RoundRobinBalance):
+        //Iterate through each instrument in reverse
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
             //Decrement Instrument with Underflow Protection
-            if(nextInstrument == 0) nextInstrument = MAX_NUM_INSTRUMENTS;
-            nextInstrument--;
+            if(instrument == 0) instrument = MAX_NUM_INSTRUMENTS;
+            instrument--;
 
             //Check if valid instrument
-            if(!distributorHasInstrument(nextInstrument)) continue;
-            if((*m_ptrInstrumentController).isNoteActive(nextInstrument, note)) return nextInstrument;
+            if(!distributorHasInstrument(instrument)) continue;
+            if((*m_ptrInstrumentController).isNoteActive(instrument, note)) return instrument;
         }
         break;
 
+    // Check for note being played on the instrument starting at instrument 0
     case(DistributionMethod::Ascending):
         for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
 
@@ -266,6 +282,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
         }
         break;
 
+    // Check for note being played on the instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
         for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
 
@@ -286,6 +303,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
 //Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Returns true if a distributor contains the designated instument in its pool.
 bool Distributor::distributorHasInstrument(int instrumentId){
     return ((m_instruments & (1 << instrumentId)) != 0);
 }
@@ -294,21 +312,22 @@ bool Distributor::distributorHasInstrument(int instrumentId){
 //Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
+//Returns Distributor construct without ID
+std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
-    std::array<std::uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> distributorObj;
+    std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj;
 
     uint8_t distributorBoolByte = 0;
-    if(this->m_muted)         distributorBoolByte |= (1 << 0);
-    if(this->m_damperPedal)   distributorBoolByte |= (1 << 1);
-    if(this->m_polyphonic)    distributorBoolByte |= (1 << 2);
-    if(this->m_noteOverwrite) distributorBoolByte |= (1 << 3);
+    if(this->m_muted)         distributorBoolByte |= DISTRIBUTOR_BOOL_MUTED;
+    if(this->m_damperPedal)   distributorBoolByte |= DISTRIBUTOR_BOOL_DAMPERPEDAL;
+    if(this->m_polyphonic)    distributorBoolByte |= DISTRIBUTOR_BOOL_POLYPHONIC;
+    if(this->m_noteOverwrite) distributorBoolByte |= DISTRIBUTOR_BOOL_NOTEOVERWRITE;
 
 
     //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
     // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
-    distributorObj[0] = 0; //Distributor ID MSB
-    distributorObj[1] = 0; //Distributor ID LSB
+    distributorObj[0] = 0; //Distributor ID MSB Generated in MsgHandler
+    distributorObj[1] = 0; //Distributor ID LSB Generated in MsgHandler
     distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
     distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
     distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
@@ -331,14 +350,17 @@ std::array<uint8_t,NUM_DISTRIBUTOR_CFG_BYTES> Distributor::toSerial()
     //memcpy(&distributorObj[6], &m_instruments, 4);
 }
 
+//Returns Distributor Channels
 uint16_t Distributor::getChannels(){
     return m_channels;
 }
 
+//Returns Distributor Channels
 uint32_t Distributor::getInstruments(){
     return m_instruments;
 }
 
+//Configures Distributor from construct
 void Distributor::setDistributor(uint8_t data[]){
     // Decode Distributor Construct
     uint16_t channels = 
@@ -356,49 +378,58 @@ void Distributor::setDistributor(uint8_t data[]){
     m_channels = channels; // 1
     m_instruments = instruments; // 1,2
     m_distributionMethod = distribMethod;
-    m_muted = (data[11] & 0x01) != 0;
-    m_damperPedal = (data[11] & 0x02) != 0;
-    m_polyphonic = (data[11] & 0x04) != 0;
-    m_noteOverwrite = (data[11] & 0x08) != 0;
+    m_muted = (data[11] & DISTRIBUTOR_BOOL_MUTED) != 0;
+    m_damperPedal = (data[11] & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0;
+    m_polyphonic = (data[11] & DISTRIBUTOR_BOOL_POLYPHONIC) != 0;
+    m_noteOverwrite = (data[11] & DISTRIBUTOR_BOOL_NOTEOVERWRITE) != 0;
     m_minNote = data[12];
     m_maxNote = data[13];
     m_numPolyphonicNotes = (data[14]);
 }
 
+//Configures Distributor Distribution Method
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
 }
 
+//Configures Distributor Boolean
 void Distributor::setMuted(bool muted){
     if(m_muted != muted) (*m_ptrInstrumentController).stopAll();
     m_muted = muted;
 }
 
+//Configures Distributor Damper Pedal
 void Distributor::setDamperPedal(bool damper){
     m_damperPedal = damper;
 }
 
+//Configures Distributor Polphonic Notes
 void Distributor::setPolyphonic(bool polyphonic){
     m_polyphonic = polyphonic;
 }
 
+//Configures Distributor Note Overwrite
 void Distributor::setNoteOverwrite(bool noteOverwrite){
     m_noteOverwrite = noteOverwrite;
 }
 
+//Configures Distributor Minimum and Maximum Notes
 void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
     m_minNote = minNote;
     m_maxNote = maxNote;
 }
 
+//Configures Distributor maximum number of Polyphonic notes
 void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
     m_numPolyphonicNotes = numPolyphonicNotes;
 }
-    
+
+//Configures Distributor accepted MIDI channels
 void Distributor::setChannels(uint16_t channels){
     m_channels = channels;
 }
     
+//Configures Distributor Instrument Pool
 void Distributor::setInstruments(uint32_t instruments){
     m_instruments = instruments;
 }

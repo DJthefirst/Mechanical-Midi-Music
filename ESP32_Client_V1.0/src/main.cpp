@@ -15,11 +15,15 @@
 #include "Networks/NetworkDIN.h"
 
 #include "Instruments/InstrumentController.h"
-#include "Instruments/PwmDriver.h"
-#include "Instruments/FloppyDrive.h"
-//#include "Instruments/Pwm8A04.h"
-//#include "Instruments/StepperA4988.h"
-//#include "Instruments/InstrAD9833.h"
+#include "Instruments/Default/PwmDriver.h"
+#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/Default/ShiftRegister.h"
+//#include "Instruments/Default/Pwm8A04.h"
+//#include "Instruments/Default/StepperA4988.h"
+//#include "Instruments/Default/InstrAD9833.h"
+
+#include "Instruments/DJthefirst/DrumSimple.h"
+#include "Instruments/DJthefirst/Dulcimer.h"
 
 #include "Extras/LocalStorage.h"
 
@@ -32,11 +36,8 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-//StepperA4988 instrumentController;
-//InstrAD9833 instrumentController;
-//Pwm8A04 instrumentController;
-FloppyDrive   instrumentController;
-//PwmDriver     instrumentController;
+//FloppyDrive  instrumentController;
+PwmDriver       instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
@@ -51,7 +52,6 @@ NetworkUSB connection;
 //Create a new message handler
 MessageHandler messageHandler(&instrumentController);
 
-
 void setup() {
   connection = NetworkUSB();
 
@@ -61,27 +61,24 @@ void setup() {
   connection.begin();  
   delay(100);
 
-
- 
+  //TODO move into local Storage?
   #ifdef LOCAL_STORAGE
-  //Load Previous Config from memory
-  uint8_t data[20];
-  LocalStorage localStorage = LocalStorage();
+  {
+    //Load Previous Config from memory
+    uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
+  
+    //Device Config
+    Device::Name = LocalStorages::localStorage.GetDeviceName(deviceName);
+    //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
-  //Device Config
-  Device::Name = localStorage.GetDeviceName(data);
-  //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
-
-  //Distributor Config
-  uint8_t numDistributors = localStorage.GetNumOfDistributors();
-  for(uint8_t i = 0; i < numDistributors; i++){
-    uint8_t data[20];
-    localStorage.GetDistributorConstruct(i,data);
-    messageHandler.addDistributor(data);
+    //Distributor Config
+    uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
+    for(uint8_t i = 0; i < numDistributors; i++){
+      uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
+      LocalStorages::localStorage.GetDistributorConstruct(i,distributorData);
+      messageHandler.addDistributor(distributorData);
+    }
   }
-
-  //Reset previous config if needed.
-  //localStorage.ResetDeviceConfig();
   #endif
 
   //----Testing Demo Setup Config----//
@@ -107,7 +104,7 @@ void setup() {
   // distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
   // messageHandler.addDistributor(distributor3);
 
-  //Distributor 4
+  // //Distributor 4
   // Distributor distributor4(&instrumentController);
   // distributor4.setChannels(0x0008); // 4
   // distributor4.setInstruments(0x000000FF); // 1-8
@@ -115,11 +112,10 @@ void setup() {
   // messageHandler.addDistributor(distributor4);
 
   //Send Device Ready to Connect
-  connection.sendMessage((uint8_t*)&SYSEX_DeviceReady,(uint8_t)1);
+  connection.sendMessage(&SYSEX_DeviceReady,(uint8_t)true);
 }
 
+//Periodicaly Read Incoming Messages
 void loop() {
-  //Periodicaly Read Incoming Messages
   connection.readMessage();
 }
-

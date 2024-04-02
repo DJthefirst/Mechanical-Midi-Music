@@ -27,8 +27,6 @@
 	async function saveDistributor(addDistributor: boolean) {
 		if ($selectedDistributorStore === undefined) addDistributor = true;
 
-		console.log($selectedDistributorStore.getMuted())
-
 		let distributor = new Distributor(
 			listedItemsToNumber(formChannels),
 			listedItemsToNumber(formInstruments),
@@ -41,7 +39,6 @@
 			formPolyphonicEnable,
 			formNoteOverwrite
 		);
-		console.log(distributor)
 
 		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
 		else distributor.setId($selectedDistributorStore.getId());

@@ -1,10 +1,13 @@
 //TODO: Add Error handling
 
+#include "Device.h"
+#ifdef LOCAL_STORAGE
+
 #include <iostream>
 #include <string>
 #include "LocalStorage.h"
 #include "Distributor.h"
-#include "Device.h"
+
 
 esp_err_t err;
 nvs_handle_t handle;
@@ -34,6 +37,7 @@ bool LocalStorage::OpenNvs(){
     return(true);
 }
 
+//Load blob data sructure from flash memory
 esp_err_t LocalStorage::ReadNvsBlob(const char *key, uint8_t* result, uint8_t arrayLength){
     
     size_t arraySize = sizeof(uint8_t)*arrayLength;
@@ -77,7 +81,7 @@ uint8_t LocalStorage::ReadNvsU8(const char *key, uint8_t defaultValue){
     return(value);
 }
 
-esp_err_t LocalStorage::WriteNvsBlob(const char *key, uint8_t* data, uint8_t arrayLength){
+esp_err_t LocalStorage::WriteNvsBlob(const char *key, const uint8_t* data, uint8_t arrayLength){
     size_t arraySize = sizeof(uint8_t)*arrayLength;
     
     OpenNvs();
@@ -95,8 +99,6 @@ void LocalStorage::WriteNvsU8(const char *key, uint8_t value){
     //if (err != ESP_OK) Serial.printf("Error (%s) in SetU8Commit!\n", esp_err_to_name(err));
     nvs_close(handle);
 }
-
-
 
 void LocalStorage::ResetDeviceConfig(){
     nvs_flash_erase();
@@ -116,8 +118,8 @@ const char* LocalStorage::GetDeviceName(uint8_t* data){
     return name;
 }
 
-void LocalStorage::SetDeviceName(char* name){ 
-    uint8_t* data = reinterpret_cast<uint8_t*>(name);
+void LocalStorage::SetDeviceName(const char* name){ 
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(name);
     WriteNvsBlob("Device_name", data ,20);
 }
 
@@ -138,14 +140,16 @@ void LocalStorage::SetNumOfDistributors(uint8_t numOfDistributors){
 }
 
 void LocalStorage::GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct){
-    const char *key = Uint16ToKey(distributorNum).c_str();
-    err = ReadNvsBlob(key, construct, NUM_DISTRIBUTOR_CFG_BYTES);
+    std::string key = Uint16ToKey(distributorNum);
+    const char *ptr_key = key.c_str();
+    err = ReadNvsBlob(ptr_key, construct, DISTRIBUTOR_NUM_CFG_BYTES);
     //if (err != ESP_OK) printf("Error (%s) saving run time blob to NVS!\n", esp_err_to_name(err));
 }
 
-void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, uint8_t * construct){
-    const char *key = Uint16ToKey(distributorNum).c_str();
-    WriteNvsBlob(key, construct , NUM_DISTRIBUTOR_CFG_BYTES);
+void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, const uint8_t* construct){
+    std::string key = Uint16ToKey(distributorNum);
+    const char *ptr_key = key.c_str();
+    WriteNvsBlob(ptr_key, construct , DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
 // Get key from valueHelper
@@ -159,3 +163,5 @@ std::string LocalStorage::Uint16ToKey(uint16_t value){
 
     return(key);
 }
+
+#endif

@@ -1,6 +1,6 @@
 #include "Extras/AddrLED.h"
-#include "Instruments/PwmDriver.h"
-#include "InterruptTimer.h"
+#include "Instruments/Default/PwmDriver.h"
+#include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
@@ -24,7 +24,7 @@ PwmDriver::PwmDriver()
     setupLEDs();
 
     // With all pins setup, let's do a first run reset
-    resetAll();
+    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
@@ -53,9 +53,9 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  ui
     //Remove this if statement condition for note overwrite
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
-        m_notePeriod[instrument] = noteDoubleTicks[note];
+        m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
         double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-        m_activePeriod[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+        m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         setInstumentLedOn(instrument, channel, note, velocity);
         return;
@@ -110,7 +110,7 @@ void PwmDriver::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)continue;
+        if(m_numActiveNotes == 0)break;
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
@@ -150,6 +150,7 @@ uint8_t PwmDriver::getNumActiveNotes(uint8_t instrument)
  
 bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
@@ -167,28 +168,25 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ADDRESSABLE_LEDS
 
-// Addressable LED Strip
-AddrLED addrLEDs;
+    void PwmDriver::setupLEDs(){
+        AddrLEDs::addrLED.setup();
+    }
 
-void PwmDriver::setupLEDs(){
-    addrLEDs.setup();
-}
+    //Set an Instrument Led to on
+    void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
+        CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, note, velocity);
+        AddrLEDs::addrLED.setLedOn(instrument, color);
+    }
 
-//Set an Instrument Led to on
-void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-    CHSV color = addrLEDs.getColor(instrument, channel, note, velocity);
-    addrLEDs.setLedOn(instrument, color);
-}
+    //Set an Instrument Led to off
+    void PwmDriver::setInstumentLedOff(uint8_t instrument){
+        AddrLEDs::addrLED.setLedOff(instrument);
+    }
 
-//Set an Instrument Led to off
-void PwmDriver::setInstumentLedOff(uint8_t instrument){
-    addrLEDs.setLedOff(instrument);
-}
-
-//Reset Leds
-void PwmDriver::resetLEDs(){
-    addrLEDs.reset();
-}
+    //Reset Leds
+    void PwmDriver::resetLEDs(){
+        AddrLEDs::addrLED.reset();
+    }
 
 #else
 void PwmDriver::setupLEDs(){}

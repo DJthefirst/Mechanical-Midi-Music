@@ -2,7 +2,7 @@
 #include <vector>
 #include "Constants.h"
 
-#define DEVICE_TYPE PwmDriver  
+#define DEVICE_TYPE Dulcimer
 #define NETWORK_TYPE NetworkUSB
 
 //---------- Uncomment Your Desired Settings ----------
@@ -11,12 +11,12 @@
   #define LOCAL_STORAGE
 
   //Lighting effects
-  //#define ADDRESSABLE_LEDS
+  #define ADDRESSABLE_LEDS
 
   //FAST LED Variables
   #ifdef ADDRESSABLE_LEDS
     #define LED_PIN     33
-    #define NUM_LEDS    8
+    #define NUM_LEDS    114
     #define BRIGHTNESS  255
     #define LED_TYPE    WS2811
     #define COLOR_ORDER GRB
@@ -35,7 +35,7 @@
   //Absolute max number of Polyphonic notes is 16
   const static uint8_t MAX_POLYPHONIC_NOTES = 1;
   //Absolute max number of Instruments is 32
-  const static uint8_t MAX_NUM_INSTRUMENTS = 7; 
+  const static uint8_t MAX_NUM_INSTRUMENTS = 8; 
   //Absolute Lowest Note Min=0
   const static uint8_t MIN_MIDI_NOTE = 36; 
   //Absolute Highest Note Max=127

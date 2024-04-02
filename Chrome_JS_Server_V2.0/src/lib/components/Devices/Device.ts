@@ -55,6 +55,10 @@ export class Device {
 		return this.distributors;
 	}
 
+	public reset() {
+		comManager.resetDevice(this);
+	}
+
 	// Removes This Device from GUI
 	public remove() {
 		disconnectDevice(this);
@@ -82,9 +86,14 @@ export class Device {
 		await comManager.saveDistributor(this, distributor);
 	}
 
+	// Save Distributor Config to device or adds a new Distributor by ID
+	public async saveDistributorBool(distributor: Distributor) {
+		await comManager.saveDistributorBool(this, distributor);
+	}
+
 	// Updates DeviceStore from Message
 	public update(array: Uint8Array) {
-		this.id = array[0] + array[1];
+		this.id = (array[0] << 7) + array[1];
 		this.numInstruments = array[3];
 		this.instrumentType = array[4];
 		this.platform = array[5];
@@ -130,7 +139,6 @@ export class Device {
 	}
 
 	public async removeDistributor(distributor: Distributor) {
-		console.log(distributor);
 		this.distributors = [];
 		await comManager.removeDistributor(this, distributor);
 	}
