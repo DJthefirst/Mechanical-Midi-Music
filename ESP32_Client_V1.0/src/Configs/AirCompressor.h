@@ -18,7 +18,7 @@
   #define LOCAL_STORAGE
 
   //Lighting effects
-  #define ADDRESSABLE_LEDS
+  //#define ADDRESSABLE_LEDS
 
 //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
   constexpr int TIMER_RESOLUTION = 8; //40
@@ -32,7 +32,7 @@
   //Absolute max number of Polyphonic notes is 16
   const static uint8_t MAX_POLYPHONIC_NOTES = 1;
   //Absolute max number of Instruments is 32
-  const static uint8_t MAX_NUM_INSTRUMENTS = 8; 
+  const static uint8_t MAX_NUM_INSTRUMENTS = 7; 
   //Absolute Lowest Note Min=0
   const static uint8_t MIN_MIDI_NOTE = 36; 
   //Absolute Highest Note Max=127

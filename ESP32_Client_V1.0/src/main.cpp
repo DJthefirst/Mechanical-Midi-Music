@@ -17,6 +17,9 @@
 #include "Instruments/InstrumentController.h"
 #include "Instruments/PwmDriver.h"
 #include "Instruments/FloppyDrive.h"
+//#include "Instruments/Pwm8A04.h"
+//#include "Instruments/StepperA4988.h"
+//#include "Instruments/InstrAD9833.h"
 
 #include "Extras/LocalStorage.h"
 
@@ -29,8 +32,11 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-//FloppyDrive  instrumentController;
-PwmDriver       instrumentController;
+//StepperA4988 instrumentController;
+//InstrAD9833 instrumentController;
+//Pwm8A04 instrumentController;
+FloppyDrive   instrumentController;
+//PwmDriver     instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
@@ -101,7 +107,7 @@ void setup() {
   // distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
   // messageHandler.addDistributor(distributor3);
 
-  // //Distributor 4
+  //Distributor 4
   // Distributor distributor4(&instrumentController);
   // distributor4.setChannels(0x0008); // 4
   // distributor4.setInstruments(0x000000FF); // 1-8
