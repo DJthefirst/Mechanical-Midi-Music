@@ -2,7 +2,7 @@
 #include <vector>
 #include "Constants.h"
 
-#define DEVICE_TYPE PwmDriver  
+#define DEVICE_TYPE FloppyDrive
 #define NETWORK_TYPE NetworkUSB
 
 //---------- Uncomment Your Desired Settings ----------
@@ -29,13 +29,13 @@
 //---------- Device Configuration ----------
 
   //Instrument type
-  const static uint8_t INSTRUMENT_TYPE = INSTRUMENT_PWM;
+  const static uint8_t INSTRUMENT_TYPE = INSTRUMENT_FloppyDrive;
   //Platform type
   const static uint8_t PLATFORM_TYPE = PLATFORM_ESP32;
   //Absolute max number of Polyphonic notes is 16
   const static uint8_t MAX_POLYPHONIC_NOTES = 1;
   //Absolute max number of Instruments is 32
-  const static uint8_t MAX_NUM_INSTRUMENTS = 8; 
+  const static uint8_t MAX_NUM_INSTRUMENTS = 7; 
   //Absolute Lowest Note Min=0
   const static uint8_t MIN_MIDI_NOTE = 36; 
   //Absolute Highest Note Max=127
@@ -45,4 +45,4 @@
   //Firmware Version 14bit
   const static uint16_t FIRMWARE_VERSION = 04;
   //Pinout
-  const std::array<uint8_t,8> pins = {2,4,18,19,21,22,23,32};
+  const std::array<uint8_t,14> pins = {2,4,18,19,21,22,23,25,26,27,12,13,32,33};

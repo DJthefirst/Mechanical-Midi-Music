@@ -42,6 +42,7 @@ void Distributor::processMessage(MidiMessage message)
         controlChangeEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_ProgramChange):
+        
         programChangeEvent(message.buffer[1]);
         break;
     case(MIDI_ChannelPressure):
@@ -104,6 +105,7 @@ void Distributor::controlChangeEvent(uint8_t Controller, uint8_t Value)
 void Distributor::programChangeEvent(uint8_t Program)
 {
     //Not Yet Implemented
+    (*m_ptrInstrumentController).resetAll();
 }
 
 void Distributor::channelPressureEvent(uint8_t Velocity)

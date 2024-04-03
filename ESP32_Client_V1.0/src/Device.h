@@ -20,9 +20,9 @@ using std::int8_t;
 
   //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
-  #include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperMotor.h"
+  //#include "Configs/TestInstrument.h"
+  #include "Configs/FloppyDrives.h"
+  //#include "Configs/StepperSynth.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Device Defaults
@@ -44,7 +44,7 @@ namespace Device{
     //#define ARDUINO_ARCH_ESP32
 
     //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-    const std::array<uint8_t,14> pins = {2,4,18,19,21,22,23,25,26,27,12,13,32,33};
+    //const std::array<uint8_t,14> pins = {2,4,18,19,21,22,23,25,26,27,12,13,32,33};
     // const std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
     //  25, 26, 27, 32, 33};
     
