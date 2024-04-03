@@ -154,14 +154,14 @@ bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
-    m_pitchBend[instrument] = bend; 
-    if(m_notePeriod[instrument] == 0) return;
-    //Calculate Pitch Bend
-    double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-    m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);
+// void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
+//     m_pitchBend[instrument] = bend; 
+//     if(m_notePeriod[instrument] == 0) return;
+//     //Calculate Pitch Bend
+//     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
+//     m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);
 
-}
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
@@ -188,9 +188,9 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
         AddrLEDs::addrLED.reset();
     }
 
-#else
-void PwmDriver::setupLEDs(){}
-void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void PwmDriver::setInstumentLedOff(uint8_t instrument){}
-void PwmDriver::resetLEDs(){}
-#endif
+// #else
+// void PwmDriver::setupLEDs(){}
+// void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
+// void PwmDriver::setInstumentLedOff(uint8_t instrument){}
+// void PwmDriver::resetLEDs(){}
+// #endif
