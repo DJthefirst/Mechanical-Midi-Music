@@ -18,9 +18,9 @@
 #include "Instruments/Default/PwmDriver.h"
 #include "Instruments/Default/FloppyDrive.h"
 #include "Instruments/Default/ShiftRegister.h"
-//#include "Instruments/Default/Pwm8A04.h"
-//#include "Instruments/Default/StepperA4988.h"
-//#include "Instruments/Default/InstrAD9833.h"
+#include "Instruments/Default/Pwm8A04.h"
+#include "Instruments/Default/StepperA4988.h"
+#include "Instruments/Default/InstrAD9833.h"
 
 #include "Instruments/DJthefirst/DrumSimple.h"
 #include "Instruments/DJthefirst/Dulcimer.h"
@@ -36,8 +36,9 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-FloppyDrive  instrumentController;
-//PwmDriver       instrumentController;
+FloppyDrive     instrumentController;
+//StepperA4988    instrumentController;
+//PwmDriver     instrumentController;
 //StepperL298n  instrumentController;
 //ShiftRegister instrumentController;
 //Dulcimer      instrumentController;
