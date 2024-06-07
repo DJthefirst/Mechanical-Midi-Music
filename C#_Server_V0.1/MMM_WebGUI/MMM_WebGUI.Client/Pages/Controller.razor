@@ -1,0 +1,55 @@
+﻿@page "/controller"
+@rendermode InteractiveWebAssembly
+
+
+
+<script>
+	//Initilize Code??
+</script>
+
+<div
+	class="grid-cols-1 grid-rows-1 grid text-white md:grid-cols-5 xl:grid-cols-7 md:grid-rows-2 md:h-screen"
+>
+	<div class="div-grid overflow-auto md:row-span-2 md:h-screen md:col-span-3 xl:col-span-3">
+		<div>
+			<Player />
+		</div>
+		<div>
+			<DeviceManager />
+		</div>
+		<div>
+			<DistributorManager />
+		</div>
+	</div>
+	<div
+		class="div-grid row-span-1 overflow-auto md:col-start-4 xl:col-start-4 md:col-span-2 md:row-start-1 xl:row-auto xl:h-screen"
+	>
+		<DeviceList />
+	</div>
+	<div
+		class="div-grid row-span-1 overflow-auto md:col-start-4 xl:col-start-6 md:col-span-2 md:row-start-2 xl:row-auto xl:h-screen"
+	>
+		<DistributorList />
+	</div>
+</div>
+
+
+
+@*
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="... bg-blue-500" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
+*@

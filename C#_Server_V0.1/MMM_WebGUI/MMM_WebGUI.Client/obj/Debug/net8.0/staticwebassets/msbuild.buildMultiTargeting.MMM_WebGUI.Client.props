@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\MMM_WebGUI.Client.props" />
+</Project>

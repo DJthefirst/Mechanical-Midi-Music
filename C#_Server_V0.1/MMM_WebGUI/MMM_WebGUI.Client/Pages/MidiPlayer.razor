@@ -1,0 +1,66 @@
+﻿@page "/midiplayer"
+
+<PageTitle>MIDI Player</PageTitle>
+
+<div class="bg-gray-dark w-full rounded-md">
+	<ol class="max-h-[calc(16rem)] h-screen w-full list-decimal overflow-y-scroll p-2">
+		@*{#if curSong !== null}
+			{#each playlist as node} *@
+				<div
+					class="li-player-song {curSong == node.getElement() ? 'bg-gray-select font-semibold' : 'hover:bg-gray-700'}"
+					on:click={() => setNode(node)}
+				>
+					<li class="pl-2">{node.getElement().title.slice(0,25)}</li>
+					<span class=".self-end pl-4 font-semibold">{secondsToTime(node.getElement().time)}</span>
+				</div>
+	@*	{/each}
+		{/if} *@ 
+	</ol>
+	<div class="m-0 w-full p-0">
+		<input
+			class="slider-player w-full cursor-pointer"
+			type="range"
+			min="0"
+			max="1000"
+			<!-- on:click={player != null && player.jumpMS(this.value)}
+	bind:value={curMS} -->
+	/>
+	</div>
+	<div class="flex flex-row justify-between px-2 pb-3 pt-1">
+	<span>- 1:59@* {curTime} *@ </span>
+
+		<i
+			class="material-icons {doLoop ? 'bg-gray-select' : 'bg-gray-dark hover:bg-gray-700'} rounded-full cursor-pointer select-none p-1 my-1"
+			<!-- on:click={() => (doLoop = !doLoop)} --> loop</i>
+
+		<i
+			class="material-icons my-1 cursor-pointer select-none rounded-full p-1 hover:bg-gray-700"
+			<!-- on:click={() => (curMS > 5000 ? player.jumpMS((curMS -= 5000)) : null)} --> fast_rewind</i>
+
+		<i
+			class="material-icons bg-gray-select cursor-pointer select-none rounded-full p-2"
+			<!-- on:click={() => togglePlay()}>{doPlay ? 'pause' : 'play_arrow'} --> play_arrow</i>
+
+
+		<i
+			class="material-icons my-1 cursor-pointer select-none rounded-full p-1 hover:bg-gray-700"
+			<!-- on:click={() => stop()} --> stop</i>
+
+		<i
+			class="material-icons my-1 cursor-pointer select-none rounded-full p-1 hover:bg-gray-700"
+			fast_forward </i
+		>
+
+		<i
+			class="material-icons my-1 cursor-pointer select-none rounded-full p-1 hover:bg-gray-700"
+			<!--on:click={() => nextSong()} --> shortcut</i
+		>
+
+		<span>@*{secondsToTime(curSongTime)}*@ 2:00 </span>
+	</div>
+</div>
+
+
+@code {
+
+}
