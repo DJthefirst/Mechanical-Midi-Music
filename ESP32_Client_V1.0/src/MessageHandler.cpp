@@ -457,7 +457,7 @@ std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> MessageHandler::getDistributorSer
 
 void MessageHandler::localStorageSetDeviceName(char* name){
     LocalStorage::get().SetDeviceName(name);
-    Device::Name = LocalStorage::get().GetDeviceName(reinterpret_cast<uint8_t*>(name));
+    Device::Name = LocalStorage::get().GetDeviceName();
 }
 
 void MessageHandler::localStorageAddDistributor(){

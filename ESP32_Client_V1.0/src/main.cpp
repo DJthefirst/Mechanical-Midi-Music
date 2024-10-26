@@ -29,11 +29,8 @@ void setup() {
   //TODO move into local Storage?
   #ifdef EXTRA_LOCAL_STORAGE
   {
-    //Load Previous Config from memory
-    uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
-  
     //Device Config
-    Device::Name = LocalStorage::get().GetDeviceName(deviceName);
+    Device::Name = LocalStorage::get().GetDeviceName();
     //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
     //Distributor Config

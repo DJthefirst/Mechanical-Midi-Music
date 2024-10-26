@@ -25,8 +25,8 @@ public:
     void ResetDeviceConfig();
     void GetDeviceConstruct();
     void SetDeviceConstruct();
-    const char* GetDeviceName(uint8_t* data);
-    void SetDeviceName(const char* name);
+    std::string GetDeviceName();
+    void SetDeviceName(std::string name);
     uint8_t GetDeviceBoolean();
     void SetDeviceBoolean(uint8_t deviceBoolean);
     uint8_t GetNumOfDistributors();
