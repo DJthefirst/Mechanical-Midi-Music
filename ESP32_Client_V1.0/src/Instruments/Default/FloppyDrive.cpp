@@ -151,6 +151,13 @@ void FloppyDrive::togglePin(uint8_t instrument)
     //Increment/Decrement Head position
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
 
+    //Hybrid Drive Setup
+    // //Toggle Direction if the Drive Head is at a limit. #3 being a 5in Floppy
+    // if ((m_headPosition[instrument] == m_maxHeadPos) || (m_headPosition[instrument] == m_minHeadPos) || ( instrument == 2 && m_headPosition[instrument] == 80)){
+    //     m_pinStateDir[instrument] = !m_pinStateDir[instrument];
+    //     digitalWrite(pins[instrument*2+1], m_pinStateDir[instrument]);
+    // }
+
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == m_maxHeadPos) || (m_headPosition[instrument] == m_minHeadPos)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];

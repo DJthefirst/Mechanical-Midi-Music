@@ -1,6 +1,6 @@
 #include "AddrLed.h"
 
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef ADDRESSABLE_LEDS
 
 //Setup FAST LED
 void AddrLED::setup(){
@@ -20,16 +20,16 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 
     //Set the color of the led
     switch(m_hueMethod){
-        case LED_HUE_METHOD::NOTE:
+        case HUE_BY_NOTE:
             hue = (note%25)*10; //Hue by Note
             break;
-        case LED_HUE_METHOD::PITCH:
+        case HUE_BY_PITCH:
             hue = (note%128)*2; //Hue by Pitch
             break;
-        case LED_HUE_METHOD::ID:
+        case HUE_BY_ID:
             hue = (id%2)*125; //Hue by id Position
             break;
-        case LED_HUE_METHOD::CHANNEL:
+        case HUE_BY_CHANNEL:
             hue = (channel%4)*64; //Hue by Channel & Time
             break;
     }
@@ -47,6 +47,13 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 //Set LED on by id
 void AddrLED::setLedOn(uint8_t id,CHSV color){
     leds[id] = color;
+    FastLED.show();
+}
+
+//Set LED on by id
+void AddrLED::setLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color){
+
+    for(int i=idStart; i <= idEnd; i++)leds[i] = color;
     FastLED.show();
 }
 

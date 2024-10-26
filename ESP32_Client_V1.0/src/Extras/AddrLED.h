@@ -27,6 +27,8 @@ class AddrLED{
         //Set LED on by id
         void setLedOn(uint8_t id,CHSV color);
         //Set an id LED to off
+        void setLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color);
+        //Set an id LED to off
         void setLedOff(uint8_t id);
         //Reset Leds
         void reset();

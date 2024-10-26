@@ -104,6 +104,7 @@ void Distributor::controlChangeEvent(uint8_t Controller, uint8_t Value)
 void Distributor::programChangeEvent(uint8_t Program)
 {
     //Not Yet Implemented
+    (*m_ptrInstrumentController).resetAll();
 }
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
@@ -137,9 +138,36 @@ uint8_t Distributor::nextInstrument()
     // Return the Instument ID matching the current Messages Channel ID
     case(DistributionMethod::StraightThrough):
         
-        m_currentInstrument = m_currentChannel;
-        if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
-        return NONE;
+        // m_currentInstrument = m_currentChannel;
+        // if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
+        // return NONE;
+
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+            // Increment current Instrument
+            m_currentInstrument++;
+
+            // Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            // Check if valid instrument
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+
+            // If there are no active notes this must be the least active Instrument return
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+            if(activeNotes == 0) return m_currentInstrument;
+
+            // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
+            if(insturmentLeastActive == NONE){
+                insturmentLeastActive = m_currentInstrument;
+                continue;
+            }
+
+            // Update the Least Active Instrument if needed.
+            if(activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
+                insturmentLeastActive = m_currentInstrument;
+            }
+        }
+        return insturmentLeastActive;
 
     // Return the next instrument in the instrument pool
     case(DistributionMethod::RoundRobin):

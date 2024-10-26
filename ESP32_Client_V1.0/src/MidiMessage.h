@@ -11,7 +11,7 @@
 using std::int8_t;
 using std::int16_t;
 
-constexpr uint16_t MAX_PACKET_LENGTH = 64; //256
+constexpr uint16_t MAX_PACKET_LENGTH = 128; //256
 constexpr uint8_t SYSEX_HeaderSize = 6;
 
 struct MidiMessage

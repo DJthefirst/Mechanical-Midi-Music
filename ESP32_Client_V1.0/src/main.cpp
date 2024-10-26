@@ -1,10 +1,12 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V1.0
+ *  Version: V2.0
  *  Author: DJthefirst
  *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
  *----------------------------------------------------------------------------------------------------
  */
+
+//See Device.h and the Configs folder for Device Setup.
 
 #include <Arduino.h>
 
