@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include <optional>
 #include "Constants.h"
 #include "MidiMessage.h"
 
@@ -23,5 +24,5 @@ public:
     virtual void begin() = 0;
     virtual void sendMessage(MidiMessage message) = 0;
     virtual void sendMessage(String message) = 0;
-    virtual MidiMessage readMessage() = 0;
+    virtual std::optional<MidiMessage> readMessage() = 0;
 };

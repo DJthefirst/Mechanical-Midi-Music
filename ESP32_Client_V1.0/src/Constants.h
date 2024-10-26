@@ -66,9 +66,13 @@ constexpr uint8_t MIDI_CC_Polyphonic = 127;
 
 //SYSEX Custom Protocal
 constexpr uint8_t SYSEX_ID = 0x7D; //Educational MIDI ID
+constexpr uint16_t SYSEX_Broadcast = 0x0000;
+constexpr uint16_t SYSEX_Server = 0x3FFF; //Server address is the MAX uint14
 
 constexpr uint8_t SYSEX_DeviceReady = 0x00;
 constexpr uint8_t SYSEX_ResetDeviceConfig = 0x01;
+constexpr uint8_t SYSEX_DiscoverDevices = 0x01;
+constexpr uint8_t SYSEX_Message = 0x01;
 
 constexpr uint8_t SYSEX_GetDeviceConstructWithDistributors = 0x10;
 constexpr uint8_t SYSEX_GetDeviceConstruct = 0x11;
@@ -80,28 +84,28 @@ constexpr uint8_t SYSEX_SetDeviceConstruct = 0x21;
 constexpr uint8_t SYSEX_SetDeviceName = 0x22;
 constexpr uint8_t SYSEX_SetDeviceBoolean = 0x23;
 
-constexpr uint8_t SYSEX_RemoveDistributor = 0x30;
-constexpr uint8_t SYSEX_RemoveAllDistributors = 0x40;
-constexpr uint8_t SYSEX_GetNumOfDistributors = 0x31;
-constexpr uint8_t SYSEX_GetAllDistributors = 0x41;
-constexpr uint8_t SYSEX_AddDistributor = 0x32;
-constexpr uint8_t SYSEX_ToggleMuteDistributor = 0x42;
+constexpr uint8_t SYSEX_GetNumOfDistributors = 0x30;
+constexpr uint8_t SYSEX_AddDistributor = 0x31;
+constexpr uint8_t SYSEX_GetAllDistributors = 0x32;
+constexpr uint8_t SYSEX_RemoveDistributor = 0x33;
+constexpr uint8_t SYSEX_RemoveAllDistributors = 0x34;
+constexpr uint8_t SYSEX_ToggleMuteDistributor = 0x35;
 
-constexpr uint8_t SYSEX_GetDistributorConstruct = 0x34;
-constexpr uint8_t SYSEX_GetDistributorChannels = 0x35;
-constexpr uint8_t SYSEX_GetDistributorInstruments = 0x36;
-constexpr uint8_t SYSEX_GetDistributorMethod = 0x37;
-constexpr uint8_t SYSEX_GetDistributorBoolValues = 0x38;
-constexpr uint8_t SYSEX_GetDistributorMinMaxNotes = 0x39;
-constexpr uint8_t SYSEX_GetDistributorNumPolyphonicNotes = 0x3A;
+constexpr uint8_t SYSEX_GetDistributorConstruct = 0x40;
+constexpr uint8_t SYSEX_GetDistributorChannels = 0x41;
+constexpr uint8_t SYSEX_GetDistributorInstruments = 0x42;
+constexpr uint8_t SYSEX_GetDistributorMethod = 0x43;
+constexpr uint8_t SYSEX_GetDistributorBoolValues = 0x44;
+constexpr uint8_t SYSEX_GetDistributorMinMaxNotes = 0x45;
+constexpr uint8_t SYSEX_GetDistributorNumPolyphonicNotes = 0x46;
 
-constexpr uint8_t SYSEX_SetDistributor = 0x44;
-constexpr uint8_t SYSEX_SetDistributorChannels = 0x45;
-constexpr uint8_t SYSEX_SetDistributorInstruments = 0x46;
-constexpr uint8_t SYSEX_SetDistributorMethod = 0x47;
-constexpr uint8_t SYSEX_SetDistributorBoolValues = 0x48;
-constexpr uint8_t SYSEX_SetDistributorMinMaxNotes = 0x49;
-constexpr uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x4A;
+constexpr uint8_t SYSEX_SetDistributor = 0x50;
+constexpr uint8_t SYSEX_SetDistributorChannels = 0x51;
+constexpr uint8_t SYSEX_SetDistributorInstruments = 0x52;
+constexpr uint8_t SYSEX_SetDistributorMethod = 0x53;
+constexpr uint8_t SYSEX_SetDistributorBoolValues = 0x54;
+constexpr uint8_t SYSEX_SetDistributorMinMaxNotes = 0x55;
+constexpr uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x56;
 
 //MIDI Constants
 constexpr uint16_t MIDI_CTRL_CENTER = 0x2000;

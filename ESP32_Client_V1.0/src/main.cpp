@@ -45,16 +45,17 @@ void setup() {
   #endif
 
   //Send Device Ready to Connect
-  network.sendMessage(MidiMessage(&SYSEX_DeviceReady,(uint8_t)true));
+  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, &SYSEX_DeviceReady, 1));
 }
 
 //Periodicaly Read Incoming Messages
 void loop() {
-  MidiMessage message = network.readMessage();
-  if (message.isValid()){
-    message = messageHandler.processMessage(message);
-  }
-  if (message.isValid()){
-    network.sendMessage(message);
-  }
+  std::optional<MidiMessage> message = network.readMessage();
+
+  //If the network returns a new message process it.
+  if (!message) return;
+  message = messageHandler.processMessage(*message);
+  
+  //If there is a response send message.
+  if (message) network.sendMessage(*message);
 }

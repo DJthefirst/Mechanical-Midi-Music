@@ -17,7 +17,7 @@ public:
     void begin() override;
     void sendMessage(MidiMessage message) override;
     void sendMessage(String message) override;
-    MidiMessage readMessage() override;
+    std::optional<MidiMessage> readMessage() override;
 
 private:
     bool startUSB();

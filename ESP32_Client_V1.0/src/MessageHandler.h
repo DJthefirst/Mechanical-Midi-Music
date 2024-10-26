@@ -18,6 +18,7 @@
 #include <array>
 #include <vector>
 #include <cstdint>
+#include <optional>
 using std::int8_t;
 using std::int16_t;
 
@@ -28,6 +29,8 @@ class MessageHandler{
 private:
     
     std::vector<Distributor> m_distributors;
+    uint16_t m_src = SYSEX_DEV_ID;
+    uint16_t m_dest;
 
     InstrumentController* m_ptrInstrumentController;
  
@@ -35,7 +38,7 @@ private:
 public:
     //Message Handler 
     explicit MessageHandler(InstrumentController* ptrInstrumentController);
-    MidiMessage processMessage(MidiMessage& message);
+    std::optional<MidiMessage> processMessage(MidiMessage& message);
 
     //Distributors
     void addDistributor(); // Internal Function
@@ -51,21 +54,21 @@ private:
     //Main Midi Functions
     void distributeMessage(MidiMessage& message);
     void processCC(MidiMessage& message);
-    MidiMessage processSysEX(MidiMessage& message);
+    std::optional<MidiMessage> processSysEX(MidiMessage& message);
 
     //SysEx functions
     MidiMessage sysExDeviceReady(MidiMessage& message);
-    MidiMessage sysExResetDeviceConfig(MidiMessage& message);
+    void sysExResetDeviceConfig(MidiMessage& message);
 
     MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
     MidiMessage sysExGetDeviceConstruct(MidiMessage& message);
     MidiMessage sysExGetDeviceName(MidiMessage& message);
     MidiMessage sysExGetDeviceBoolean(MidiMessage& message);
 
-    MidiMessage sysExSetDeviceConstructWithDistributors(MidiMessage& message);
-    MidiMessage sysExSetDeviceConstruct(MidiMessage& message);
-    MidiMessage sysExSetDeviceName(MidiMessage& message);
-    MidiMessage sysExSetDeviceBoolean(MidiMessage& message);
+    void sysExSetDeviceConstructWithDistributors(MidiMessage& message);
+    void sysExSetDeviceConstruct(MidiMessage& message);
+    void sysExSetDeviceName(MidiMessage& message);
+    void sysExSetDeviceBoolean(MidiMessage& message);
 
     // void sysExRemoveDistributor(MidiMessage& message); //Already a Dedicated Function
     // void sysExRemoveAllDistributors(MidiMessage& message); //Already a Dedicated Function
@@ -83,12 +86,12 @@ private:
     MidiMessage sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     // void sysExSetDistributor(MidiMessage& message); //Already a Dedicated Function
-    MidiMessage sysExSetDistributorChannels(MidiMessage& message);
-    MidiMessage sysExSetDistributorInstruments(MidiMessage& message);
-    MidiMessage sysExSetDistributorMethod(MidiMessage& message);
-    MidiMessage sysExSetDistributorBoolValues(MidiMessage& message);
-    MidiMessage sysExSetDistributorMinMaxNotes(MidiMessage& message);
-    MidiMessage sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
+    void sysExSetDistributorChannels(MidiMessage& message);
+    void sysExSetDistributorInstruments(MidiMessage& message);
+    void sysExSetDistributorMethod(MidiMessage& message);
+    void sysExSetDistributorBoolValues(MidiMessage& message);
+    void sysExSetDistributorMinMaxNotes(MidiMessage& message);
+    void sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     //Local Storage
     void localStorageSetDeviceName(char* name);

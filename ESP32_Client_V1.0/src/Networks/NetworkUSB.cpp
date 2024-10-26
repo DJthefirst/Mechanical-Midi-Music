@@ -19,7 +19,7 @@ bool NetworkUSB::startUSB() {
 }
 
 /* Waits for buffer to fill with a new msg (>3 Bytes). */
-MidiMessage NetworkUSB::readMessage() {
+std::optional<MidiMessage> NetworkUSB::readMessage() {
     uint8_t messageLength = 0;
     MidiMessage message = MidiMessage();
 
@@ -35,13 +35,12 @@ MidiMessage NetworkUSB::readMessage() {
 
         messageLength++;
         if(messageLength == MAX_PACKET_LENGTH){
-            messageLength = 0;
             Serial.println("Bad Message");
-            break;
+            return {};
         }
     }      
-
-    message.length = messageLength;
+    
+    if (messageLength == 0) return {};
     return message;
 }
 
