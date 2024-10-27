@@ -39,9 +39,10 @@ void Distributor::processMessage(MidiMessage message)
         keyPressureEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_ControlChange):
-        controlChangeEvent(message.buffer[1],message.buffer[2]);
+        // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
         break;
     case(MIDI_ProgramChange):
+        
         programChangeEvent(message.buffer[1]);
         break;
     case(MIDI_ChannelPressure):
@@ -96,14 +97,10 @@ void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
     }
 }
 
-void Distributor::controlChangeEvent(uint8_t Controller, uint8_t Value)
-{
-    //Implemented in MessageHandler
-}
-
 void Distributor::programChangeEvent(uint8_t Program)
 {
     //Not Yet Implemented
+    (*m_ptrInstrumentController).resetAll();
 }
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
@@ -137,9 +134,36 @@ uint8_t Distributor::nextInstrument()
     // Return the Instument ID matching the current Messages Channel ID
     case(DistributionMethod::StraightThrough):
         
-        m_currentInstrument = m_currentChannel;
-        if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
-        return NONE;
+        // m_currentInstrument = m_currentChannel;
+        // if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
+        // return NONE;
+
+        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+            // Increment current Instrument
+            m_currentInstrument++;
+
+            // Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            // Check if valid instrument
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+
+            // If there are no active notes this must be the least active Instrument return
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+            if(activeNotes == 0) return m_currentInstrument;
+
+            // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
+            if(insturmentLeastActive == NONE){
+                insturmentLeastActive = m_currentInstrument;
+                continue;
+            }
+
+            // Update the Least Active Instrument if needed.
+            if(activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
+                insturmentLeastActive = m_currentInstrument;
+            }
+        }
+        return insturmentLeastActive;
 
     // Return the next instrument in the instrument pool
     case(DistributionMethod::RoundRobin):
@@ -344,10 +368,6 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     distributorObj[15] = 0; //Reserved
 
     return distributorObj;
-
-    //Usefull Idea?
-    //memcpy(&distributorObj[4], &m_channels, 2);
-    //memcpy(&distributorObj[6], &m_instruments, 4);
 }
 
 //Returns Distributor Channels

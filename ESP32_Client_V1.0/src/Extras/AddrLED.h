@@ -1,21 +1,21 @@
 #pragma once
 #include "Device.h"
 
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 #include <FastLED.h>
 
-
-enum LED_HUE_METHOD{
-    HUE_BY_NOTE = 0,
-    HUE_BY_PITCH,
-    HUE_BY_ID,
-    HUE_BY_CHANNEL
+//TODO make configurable from GUI.
+enum class HUE_METHOD{
+    NOTE = 0,
+    PITCH,
+    ID,
+    CHANNEL
 };
 
 class AddrLED{
     private:
-        CRGB leds[NUM_LEDS];
-        LED_HUE_METHOD m_hueMethod = HUE_BY_CHANNEL;
+        std::array<CRGB, NUM_LEDS> leds;
+        HUE_METHOD m_hueMethod = HUE_METHOD::CHANNEL;
         bool m_hueTimeProgression = true;
         bool m_brightnessByVelocity = true;
 
@@ -25,17 +25,26 @@ class AddrLED{
         //Generate LED color
         CHSV getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t velocity);
         //Set LED on by id
-        void setLedOn(uint8_t id,CHSV color);
+        void turnLedOn(uint8_t id,CHSV color);
         //Set an id LED to off
-        void setLedOff(uint8_t id);
+        void turnLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color);
+        //Set an id LED to off
+        void turnLedOff(uint8_t id);
         //Reset Leds
         void reset();
 
-    private:
+        //Singleton
+        AddrLED(const AddrLED&) = delete;
+        AddrLED& operator=(const AddrLED&) = delete;
 
+        static AddrLED& get(){
+            static AddrLED addrLed;
+            return addrLed;
+        }
+
+    private:
+        //Singleton Constructor
+        AddrLED(){};
 };
 
-    namespace AddrLEDs {
-    static AddrLED addrLED = AddrLED();
-    };
 #endif

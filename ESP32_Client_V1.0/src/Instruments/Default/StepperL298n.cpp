@@ -120,9 +120,9 @@ it's crucial that any computations here be kept to a minimum!
 
 Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-#pragma GCC push_options
-#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
-#ifdef ARDUINO_ARCH_ESP32
+//#pragma GCC push_options (Legacy)
+// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
+#ifdef ARDUINO_ARCH_ESP32 
 void ICACHE_RAM_ATTR StepperL298n::Tick()
 #else
 void StepperL298n::tick()
@@ -185,7 +185,7 @@ void StepperL298n::stepMotor(uint8_t instrument)
 
     }   
 }
-#pragma GCC pop_options
+//#pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters

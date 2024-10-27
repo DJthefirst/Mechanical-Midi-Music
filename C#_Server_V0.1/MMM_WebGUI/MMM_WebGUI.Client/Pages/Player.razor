@@ -1,0 +1,34 @@
+﻿@page "/player"
+
+<PageTitle>Player</PageTitle>
+
+<div class="div-outline">
+	<p class="text-center font-bold">MIDI Player</p>
+	<div class="flex min-h-96 select-none flex-row justify-end">
+		<div class="w-full p-2">
+			<MidiPlayer /> 
+		</div>
+		<div class="mb-3 mr-2 flex w-56 min-w-56 flex-col justify-between">
+			<div class="m-0 flex flex-col justify-center">
+				
+				<input bind:this={fileInput} accept="audio/midi, audio/x-midi" bind:files multiple type="file" class="invisible h-0 w-0">
+				<button class="button-player-green w-full" on:click={()=>fileInput.click()}
+					><i class="material-icons">add</i> Add Songs</button
+				>
+				<button class="button-player-red w-full" on:click={player.removeSong}
+					><i class="material-icons">remove</i> Remove Song</button
+				>
+				<button class="button-player-red w-full" on:click={player.clearPlayList}
+					><i class="material-icons">playlist_remove</i> Clear Playlist</button
+				>
+			</div>
+			<MidiPorts/>
+			<MidiPorts/>
+		</div>
+	</div>
+</div>
+
+
+@code {
+
+}

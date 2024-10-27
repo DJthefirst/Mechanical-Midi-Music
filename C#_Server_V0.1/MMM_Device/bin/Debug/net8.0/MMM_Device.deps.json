@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "MMM_Device/1.0.0": {
+        "runtime": {
+          "MMM_Device.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MMM_Device/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

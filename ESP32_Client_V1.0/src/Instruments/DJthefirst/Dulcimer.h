@@ -13,7 +13,7 @@ private:
     static void updateShiftRegister();
 
     //Local MIDI Device Atributes
-    const static uint16_t NOTE_ONTIME = 800;
+    const static uint16_t NOTE_ONTIME = 900;
     const static bool SUSTAIN = false;
 
 public: 

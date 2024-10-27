@@ -23,14 +23,22 @@ export default class SerialConnection {
 		this.reader = this.port.readable.getReader();
 		this.writer = this.port.writable.getWriter();
 
+		// let stall = true;
+		// setTimeout(()=> {stall = false},5000);
+		
+		// while(stall){
+		// 	let msg = await this.receive(500);
+		// 	if (msg != null && msg[0] == Number(CONST.SYSEX_DeviceReady)) break;
+		// }
+
 		//Request if device ready If device is not ready there will be no response
-		this.sendHexString(CONST.SYSEX_START + "0000" + CONST.SYSEX_DeviceReady + CONST.SYSEX_END);
+		this.sendHexString(CONST.SYSEX_START + CONST.SYSEX_ServerID + CONST.SYSEX_BroadcastID + CONST.SYSEX_DeviceReady + CONST.SYSEX_END);
 
 		//Add Timeout and Delay for first connection.
-		let stall = true;
-		setTimeout(()=> {stall = false},5000);
-
-		while(stall){
+		let stall2 = true;
+		setTimeout(()=> {stall2 = false},5000);
+		
+		while(stall2){
 			let msg = await this.receive(500);
 			if (msg != null && msg[0] == Number(CONST.SYSEX_DeviceReady)) return;
 		}

@@ -1,7 +1,7 @@
 //TODO: Add Error handling
 
 #include "Device.h"
-#ifdef LOCAL_STORAGE
+#ifdef EXTRA_LOCAL_STORAGE
 
 #include <iostream>
 #include <string>
@@ -105,22 +105,18 @@ void LocalStorage::ResetDeviceConfig(){
 }
 
 //TODO Use Smart Pointer?
-const char* LocalStorage::GetDeviceName(uint8_t* data){
-    err = ReadNvsBlob("Device_name", data, 20);
+std::string LocalStorage::GetDeviceName(){
+    std::string name(' ', 20);
+    err = ReadNvsBlob("Device_name", (uint8_t*)&name[0], 20);
 
     if (err == ESP_ERR_NVS_NOT_FOUND){
-        char name[20];
-        for(int i=0; i<20; i++) name[i] = Device::Name.c_str()[i];
-        SetDeviceName(name);
-        return Device::Name.c_str();
+        return Device::Name;
     }
-    char* name = reinterpret_cast<char*>(data);
     return name;
 }
 
-void LocalStorage::SetDeviceName(const char* name){ 
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(name);
-    WriteNvsBlob("Device_name", data ,20);
+void LocalStorage::SetDeviceName(std::string name){ 
+    WriteNvsBlob("Device_name", (uint8_t*)(&name[0]), name.length());
 }
 
 uint8_t LocalStorage::GetDeviceBoolean(){

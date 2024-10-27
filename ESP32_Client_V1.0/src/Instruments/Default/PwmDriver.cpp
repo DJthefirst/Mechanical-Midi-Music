@@ -2,6 +2,7 @@
 #include "Instruments/Default/PwmDriver.h"
 #include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
+#include <bitset>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
@@ -11,7 +12,7 @@ static uint8_t m_numActiveNotes;
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
-static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
+static std::bitset<MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 PwmDriver::PwmDriver()
 {
@@ -82,7 +83,7 @@ void PwmDriver::stopAll(){
     m_notePeriod = {};
     m_activePeriod = {};
     m_currentTick = {};
-    m_currentState = {};
+    m_currentState.reset();
 
     for(uint8_t i = 0; i < pins.size(); i++){
         digitalWrite(pins[i], LOW);
@@ -100,8 +101,8 @@ it's crucial that any computations here be kept to a minimum!
 
 Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-#pragma GCC push_options
-#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
+// #pragma GCC push_options (Legacy)
+// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR PwmDriver::Tick()
 #else
@@ -110,7 +111,7 @@ void PwmDriver::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)break;
+        if(m_numActiveNotes == 0)return;
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
@@ -133,11 +134,11 @@ void PwmDriver::togglePin(uint8_t instrument)
 #endif
 {
     //Pulse the control pin
-    m_currentState[instrument] = !m_currentState[instrument];
+    m_currentState.flip(instrument);
     digitalWrite(pins[instrument], m_currentState[instrument]);
         
 }
-#pragma GCC pop_options
+// #pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
@@ -166,26 +167,26 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
     void PwmDriver::setupLEDs(){
-        AddrLEDs::addrLED.setup();
+        AddrLED::get().setup();
     }
 
     //Set an Instrument Led to on
     void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-        CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, note, velocity);
-        AddrLEDs::addrLED.setLedOn(instrument, color);
+        CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
+        AddrLED::get().turnLedOn(instrument, color);
     }
 
     //Set an Instrument Led to off
     void PwmDriver::setInstumentLedOff(uint8_t instrument){
-        AddrLEDs::addrLED.setLedOff(instrument);
+        AddrLED::get().turnLedOff(instrument);
     }
 
     //Reset Leds
     void PwmDriver::resetLEDs(){
-        AddrLEDs::addrLED.reset();
+        AddrLED::get().reset();
     }
 
 #else

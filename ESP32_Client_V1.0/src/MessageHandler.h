@@ -18,6 +18,7 @@
 #include <array>
 #include <vector>
 #include <cstdint>
+#include <optional>
 using std::int8_t;
 using std::int16_t;
 
@@ -28,17 +29,16 @@ class MessageHandler{
 private:
     
     std::vector<Distributor> m_distributors;
+    uint16_t m_src = SYSEX_DEV_ID;
+    uint16_t m_dest;
 
     InstrumentController* m_ptrInstrumentController;
-    Network* m_ptrNetwork;
  
+    
 public:
-    //Set Network Connection
-    void setNetwork(Network* ptrNetwork);
-
     //Message Handler 
     explicit MessageHandler(InstrumentController* ptrInstrumentController);
-    void processMessage(MidiMessage& message);
+    std::optional<MidiMessage> processMessage(MidiMessage& message);
 
     //Distributors
     void addDistributor(); // Internal Function
@@ -49,21 +49,21 @@ public:
     void removeAllDistributors();
     Distributor& getDistributor(uint8_t id);
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> getDistributorSerial(uint8_t id);
-    
+
 private:
     //Main Midi Functions
     void distributeMessage(MidiMessage& message);
     void processCC(MidiMessage& message);
-    void processSysEX(MidiMessage& message);
+    std::optional<MidiMessage> processSysEX(MidiMessage& message);
 
     //SysEx functions
-    void sysExDeviceReady(MidiMessage& message);
+    MidiMessage sysExDeviceReady(MidiMessage& message);
     void sysExResetDeviceConfig(MidiMessage& message);
 
-    void sysExGetDeviceConstructWithDistributors(MidiMessage& message);
-    void sysExGetDeviceConstruct(MidiMessage& message);
-    void sysExGetDeviceName(MidiMessage& message);
-    void sysExGetDeviceBoolean(MidiMessage& message);
+    MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
+    MidiMessage sysExGetDeviceConstruct(MidiMessage& message);
+    MidiMessage sysExGetDeviceName(MidiMessage& message);
+    MidiMessage sysExGetDeviceBoolean(MidiMessage& message);
 
     void sysExSetDeviceConstructWithDistributors(MidiMessage& message);
     void sysExSetDeviceConstruct(MidiMessage& message);
@@ -72,18 +72,18 @@ private:
 
     // void sysExRemoveDistributor(MidiMessage& message); //Already a Dedicated Function
     // void sysExRemoveAllDistributors(MidiMessage& message); //Already a Dedicated Function
-    void sysExGetNumOfDistributors(MidiMessage& message);
-    void sysExGetAllDistributors(MidiMessage& message);
+    MidiMessage sysExGetNumOfDistributors(MidiMessage& message);
+    MidiMessage sysExGetAllDistributors(MidiMessage& message);
     // void sysExAddDistributor(MidiMessage& message); //SetDistributor Provides this Function
-    void sysExToggleMuteDistributor(MidiMessage& message);
+    MidiMessage sysExToggleMuteDistributor(MidiMessage& message);
     
-    void sysExGetDistributorConstruct(MidiMessage& message);
-    void sysExGetDistributorChannels(MidiMessage& message);
-    void sysExGetDistributorInstruments(MidiMessage& message);
-    void sysExGetDistributorMethod(MidiMessage& message);
-    void sysExGetDistributorBoolValues(MidiMessage& message);
-    void sysExGetDistributorMinMaxNotes(MidiMessage& message);
-    void sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
+    MidiMessage sysExGetDistributorConstruct(MidiMessage& message);
+    MidiMessage sysExGetDistributorChannels(MidiMessage& message);
+    MidiMessage sysExGetDistributorInstruments(MidiMessage& message);
+    MidiMessage sysExGetDistributorMethod(MidiMessage& message);
+    MidiMessage sysExGetDistributorBoolValues(MidiMessage& message);
+    MidiMessage sysExGetDistributorMinMaxNotes(MidiMessage& message);
+    MidiMessage sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     // void sysExSetDistributor(MidiMessage& message); //Already a Dedicated Function
     void sysExSetDistributorChannels(MidiMessage& message);
@@ -94,7 +94,6 @@ private:
     void sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
 
     //Local Storage
-    void localStorageInit();
     void localStorageSetDeviceName(char* name);
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);

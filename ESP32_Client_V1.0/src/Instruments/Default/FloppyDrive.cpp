@@ -116,8 +116,8 @@ it's crucial that any computations here be kept to a minimum!
 
 Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-#pragma GCC push_options
-#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
+// #pragma GCC push_options (Legacy)
+// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR FloppyDrive::Tick()
 #else
@@ -126,7 +126,7 @@ void FloppyDrive::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)continue;
+        if(m_numActiveNotes == 0)return;
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
@@ -151,6 +151,14 @@ void FloppyDrive::togglePin(uint8_t instrument)
     //Increment/Decrement Head position
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
 
+    //Hybrid Drive Setup
+    // //Toggle Direction if the Drive Head is at a limit. #3 being a 5in Floppy
+
+    // if ((m_headPosition[instrument] == m_maxHeadPos) || (m_headPosition[instrument] == m_minHeadPos) || ( instrument == 2 && m_headPosition[instrument] == 80)){
+    //     m_pinStateDir[instrument] = !m_pinStateDir[instrument];
+    //     digitalWrite(pins[instrument*2+1], m_pinStateDir[instrument]);
+    // }
+
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == m_maxHeadPos) || (m_headPosition[instrument] == m_minHeadPos)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
@@ -162,7 +170,7 @@ void FloppyDrive::togglePin(uint8_t instrument)
     digitalWrite(pins[instrument*2], m_pinStateStep[instrument]);
         
 }
-#pragma GCC pop_options
+//#pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters

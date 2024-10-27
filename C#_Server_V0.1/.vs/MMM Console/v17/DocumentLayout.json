@@ -1,0 +1,115 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6C07B2D5-08FD-42F2-9C8B-AD7C53B671FD}|MMM_Console\\MMM_Console.csproj|c:\\users\\djber\\documents\\projects\\mechanical midi music\\mechanical-midi-music\\c#_server_v0.1\\mmm_console\\mmm_console.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{6C07B2D5-08FD-42F2-9C8B-AD7C53B671FD}|MMM_Console\\MMM_Console.csproj|solutionrelative:mmm_console\\mmm_console.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2F1CB8F-31AC-4B34-AF3A-F68C59C2AD4D}|MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj|c:\\users\\djber\\documents\\projects\\mechanical midi music\\mechanical-midi-music\\c#_server_v0.1\\mmm_webgui\\mmm_webgui.client\\mmm_webgui.client.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{F2F1CB8F-31AC-4B34-AF3A-F68C59C2AD4D}|MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj|solutionrelative:mmm_webgui\\mmm_webgui.client\\mmm_webgui.client.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{072EA120-5540-4E67-A8D9-E9B1F20A5E6A}|MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj|c:\\users\\djber\\documents\\projects\\mechanical midi music\\mechanical-midi-music\\c#_server_v0.1\\mmm_webgui\\mmm_webgui\\mmm_webgui.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{072EA120-5540-4E67-A8D9-E9B1F20A5E6A}|MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj|solutionrelative:mmm_webgui\\mmm_webgui\\mmm_webgui.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C07B2D5-08FD-42F2-9C8B-AD7C53B671FD}|MMM_Console\\MMM_Console.csproj|c:\\users\\djber\\documents\\projects\\mechanical midi music\\mechanical-midi-music\\c#_server_v0.1\\mmm_console\\commandlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C07B2D5-08FD-42F2-9C8B-AD7C53B671FD}|MMM_Console\\MMM_Console.csproj|solutionrelative:mmm_console\\commandlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{072EA120-5540-4E67-A8D9-E9B1F20A5E6A}|MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj|c:\\users\\djber\\documents\\projects\\mechanical midi music\\mechanical-midi-music\\c#_server_v0.1\\mmm_webgui\\mmm_webgui\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{072EA120-5540-4E67-A8D9-E9B1F20A5E6A}|MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj|solutionrelative:mmm_webgui\\mmm_webgui\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 236,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:7:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MMM_WebGUI.Client.csproj",
+              "DocumentMoniker": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj",
+              "RelativeDocumentMoniker": "MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj",
+              "ToolTip": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj",
+              "RelativeToolTip": "MMM_WebGUI\\MMM_WebGUI.Client\\MMM_WebGUI.Client.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-06-07T18:39:20.532Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MMM_WebGUI.csproj",
+              "DocumentMoniker": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj",
+              "RelativeDocumentMoniker": "MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj",
+              "ToolTip": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj",
+              "RelativeToolTip": "MMM_WebGUI\\MMM_WebGUI\\MMM_WebGUI.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-06-07T18:39:19.434Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CommandList.cs",
+              "DocumentMoniker": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_Console\\CommandList.cs",
+              "RelativeDocumentMoniker": "MMM_Console\\CommandList.cs",
+              "ToolTip": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_Console\\CommandList.cs",
+              "RelativeToolTip": "MMM_Console\\CommandList.cs",
+              "ViewState": "AQIAAD8AAAAAAAAAAAAIwAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-07T18:32:45.56Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MMM_Console.csproj",
+              "DocumentMoniker": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_Console\\MMM_Console.csproj",
+              "RelativeDocumentMoniker": "MMM_Console\\MMM_Console.csproj",
+              "ToolTip": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_Console\\MMM_Console.csproj",
+              "RelativeToolTip": "MMM_Console\\MMM_Console.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-06-07T18:31:48.905Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Routes.razor",
+              "DocumentMoniker": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI\\Components\\Routes.razor",
+              "RelativeDocumentMoniker": "MMM_WebGUI\\MMM_WebGUI\\Components\\Routes.razor",
+              "ToolTip": "C:\\Users\\djber\\Documents\\Projects\\Mechanical Midi Music\\Mechanical-Midi-Music\\C#_Server_V0.1\\MMM_WebGUI\\MMM_WebGUI\\Components\\Routes.razor",
+              "RelativeToolTip": "MMM_WebGUI\\MMM_WebGUI\\Components\\Routes.razor",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-06-07T18:30:45.21Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

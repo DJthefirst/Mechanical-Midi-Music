@@ -1,7 +1,7 @@
 #pragma once
 #include "Device.h"
 
-#ifdef LOCAL_STORAGE
+#ifdef EXTRA_LOCAL_STORAGE
 
 #include "nvs_flash.h"
 #include "nvs.h"
@@ -20,24 +20,32 @@ private:
     void WriteNvsU8(const char *key, uint8_t value);
 
 public:
-    explicit LocalStorage();
-
     void Test();
 
     void ResetDeviceConfig();
     void GetDeviceConstruct();
     void SetDeviceConstruct();
-    const char* GetDeviceName(uint8_t* data);
-    void SetDeviceName(const char* name);
+    std::string GetDeviceName();
+    void SetDeviceName(std::string name);
     uint8_t GetDeviceBoolean();
     void SetDeviceBoolean(uint8_t deviceBoolean);
     uint8_t GetNumOfDistributors();
     void SetNumOfDistributors(uint8_t numOfDistributors);
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
     void SetDistributorConstruct(uint16_t distributorNum, const uint8_t* construct);
+
+    //Singleton
+    LocalStorage(const LocalStorage&) = delete;
+    static LocalStorage& get(){
+        static LocalStorage localStorage;
+        return localStorage;
+    }
+
+private:
+
+    //Singleton Constructor
+    LocalStorage();
+
 }; 
 
-namespace LocalStorages {
-    static LocalStorage localStorage = LocalStorage();
-};
 #endif
