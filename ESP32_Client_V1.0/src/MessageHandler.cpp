@@ -31,11 +31,11 @@ std::optional<MidiMessage> MessageHandler::processMessage(MidiMessage& message)
                 break;
 
             case(MIDI_SysStop):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 break;
 
             case(MIDI_SysReset):
-                (*m_ptrInstrumentController).resetAll();
+                m_ptrInstrumentController->resetAll();
                 break;
 
             default:
@@ -175,49 +175,49 @@ void MessageHandler::processCC(MidiMessage& message)
             switch(message.CC_Control()){
 
             case(MIDI_CC_ModulationWheel):
-                (*m_ptrInstrumentController).setModulationWheel(message.CC_Value());
+                m_ptrInstrumentController->setModulationWheel(message.CC_Value());
                 break;
             case(MIDI_CC_FootPedal):
-                (*m_ptrInstrumentController).setFootPedal(message.CC_Value());
+                m_ptrInstrumentController->setFootPedal(message.CC_Value());
                 break;
             case(MIDI_CC_Volume):
-                (*m_ptrInstrumentController).setVolume(message.CC_Value());
+                m_ptrInstrumentController->setVolume(message.CC_Value());
                 break;
             case(MIDI_CC_Expression):
-                (*m_ptrInstrumentController).setExpression(message.CC_Value());
+                m_ptrInstrumentController->setExpression(message.CC_Value());
                 break;
             case(MIDI_CC_EffectCrtl_1):
-                (*m_ptrInstrumentController).setEffectCrtl_1(message.CC_Value());
+                m_ptrInstrumentController->setEffectCrtl_1(message.CC_Value());
                 break;
             case(MIDI_CC_EffectCrtl_2):
-                (*m_ptrInstrumentController).setEffectCrtl_2(message.CC_Value());
+                m_ptrInstrumentController->setEffectCrtl_2(message.CC_Value());
                 break;
             case(MIDI_CC_DamperPedal):
                 m_distributors[i].setDamperPedal(message.CC_Value()> 64);
                 break;
             case(MIDI_CC_Mute):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 break;
             case(MIDI_CC_Reset):
-                (*m_ptrInstrumentController).resetAll();
+                m_ptrInstrumentController->resetAll();
                 break;
             case(MIDI_CC_AllNotesOff):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 break;
             case(MIDI_CC_OmniModeOff):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 //m_OmniMode = false;
                 break;
             case(MIDI_CC_OmniModeOn):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 //m_OmniMode = true;
                 break;
             case(MIDI_CC_Monophonic):
                 m_distributors[i].setPolyphonic(false);
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 break;
             case(MIDI_CC_Polyphonic):
-                (*m_ptrInstrumentController).stopAll();
+                m_ptrInstrumentController->stopAll();
                 m_distributors[i].setPolyphonic(true);
                 break;
             }
@@ -404,7 +404,7 @@ void MessageHandler::addDistributor(uint8_t data[])
 void MessageHandler::setDistributor(uint8_t data[])
 {
     //Clear active Notes
-    (*m_ptrInstrumentController).stopAll();
+    m_ptrInstrumentController->stopAll();
 
     // If Distributor exists update it.
     uint16_t distributorID = data[0] << 7| (data[1]);
@@ -421,7 +421,7 @@ void MessageHandler::setDistributor(uint8_t data[])
 //Removes the designated Distributor from the Distribution Pool
 void MessageHandler::removeDistributor(uint8_t id)
 {
-    (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
+    m_ptrInstrumentController->stopAll(); //Safety Stops all Playing Notes
     if(id >= m_distributors.size()) id = m_distributors.size();
     m_distributors.erase(m_distributors.begin() + id);
     localStorageRemoveDistributor(id);
@@ -430,7 +430,7 @@ void MessageHandler::removeDistributor(uint8_t id)
 //Clear Distribution Pool
 void MessageHandler::removeAllDistributors()
 {
-    (*m_ptrInstrumentController).stopAll(); //Safety Stops all Playing Notes
+    m_ptrInstrumentController->stopAll(); //Safety Stops all Playing Notes
     m_distributors.clear();
     localStorageClearDistributors();
 }

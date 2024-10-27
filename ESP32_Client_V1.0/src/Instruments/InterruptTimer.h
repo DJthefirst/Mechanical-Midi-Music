@@ -24,7 +24,7 @@ constexpr float BEND_OCTAVES = 200/(float)1200;
 
 
 // The frequency of notes in hz
-constexpr double noteFrequency[128] = {
+constexpr std::array<double, 128> noteFrequency = {
     8.175799, 8.661957, 9.177024, 9.722718, 10.300861, 10.913383, 11.562325, 12.249857, 12.978272, 13.750000, 14.567617, 15.433853, //C-1 - B-1
     16.351598, 17.323914, 18.354048, 19.445436, 20.601722, 21.826765, 23.124651, 24.499715, 25.956544, 27.500000, 29.135235, 30.867706, //C0 - B0
     32.703196, 34.647829, 36.708096, 38.890873, 41.203445, 43.653530, 46.249303, 48.999429, 51.913087, 55.000000, 58.270470, 61.735413, //C1 - B1
@@ -43,7 +43,7 @@ constexpr double noteFrequency[128] = {
 //constexpr uint16_t noteFrequency[128]
 
 // The period of notes in microseconds
-constexpr uint16_t NOTE_PERIODS[128] = {
+constexpr std::array<uint16_t, 128> NOTE_PERIODS = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     30578, 28861, 27242, 25713, 24270, 22909, 21622, 20409, 19263, 18182, 17161, 16198, //C1 - B1

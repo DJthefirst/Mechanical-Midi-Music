@@ -39,9 +39,11 @@
 
     #include "Instruments/Default/PwmDriver.h"
     #include "Instruments/Default/FloppyDrive.h"
+    #include "Instruments/Default/InstrAD9833.h"
+    #include "Instruments/Default/Pwm8A04.h"
     #include "Instruments/Default/ShiftRegister.h"
-    #include "Instruments/DJthefirst/DrumSimple.h"
-    #include "Instruments/DJthefirst/Dulcimer.h"
+    //#include "Instruments/Default/StepperA4988.h"
+    //#include "Instruments/Default/StepperL298n.h"
 
 //---------- Uncomment Your Selected COM Type ----------
 

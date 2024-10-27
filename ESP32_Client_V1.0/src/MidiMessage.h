@@ -17,8 +17,7 @@ constexpr uint8_t SYSEX_HeaderSize = 6;
 struct MidiMessage
 {
     uint8_t length = 0;
-    uint8_t buffer[MAX_PACKET_LENGTH];
-
+    std::array<uint8_t, MAX_PACKET_LENGTH> buffer;
     bool isValid() {return length != 0;}
 
     //Generate Empty Midi Message
@@ -29,7 +28,7 @@ struct MidiMessage
         
         //Midi Message Header SysExStart, MidiID, DeviceID_1, DeviceID_0.
         const std::array<uint8_t, 2> header = {0xF0, SYSEX_ID};
-        std::copy(header.data(), header.data()+header.size(), buffer);
+        std::copy(header.data(), header.data()+header.size(), buffer.begin());
 
         //SYSEX Src and Dest addresses
         buffer[2] = (src >> 7) & 0x7F;
@@ -38,7 +37,8 @@ struct MidiMessage
         buffer[5] = (dest & 0x7F);
 
         //Midi SysEx Message Payload
-        std::copy(payload, payload+payloadLength, buffer+SYSEX_HeaderSize);
+        std::copy(payload, payload+payloadLength, buffer.begin()+SYSEX_HeaderSize);
+        //std::copy(payload, payload+payloadLength, buffer+SYSEX_HeaderSize);
 
         //Midi Message Tail SysEx End.
         const uint8_t tail = 0xF7;
@@ -61,7 +61,8 @@ struct MidiMessage
     uint16_t SourceID(){return (buffer[2] << 7) | buffer[3];} //Combine message SysEx ID LSB and MSB
     uint16_t DestinationID(){return (buffer[4] << 7) | buffer[5];} //Combine message SysEx ID LSB and MSB
     uint8_t sysExCommand(){return buffer[6];} 
-    uint8_t* sysExCmdPayload(){return buffer + 7;} //Returns the start of data from a SysEx message
+    uint8_t* sysExCmdPayload(){return buffer.begin() + 7;} //Returns the start of data from a SysEx message
+    //uint8_t* sysExCmdPayload(){return buffer + 7;} //Returns the start of data from a SysEx message
 
     //Return Distributor ID
     uint16_t sysExDistributorID(){return (buffer[7] << 7) | buffer[8];}

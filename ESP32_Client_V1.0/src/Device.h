@@ -20,10 +20,10 @@ using std::int8_t;
 
   //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
-  //#include "Configs/TestInstrument.h"
+  #include "Configs/TestInstrument.h"
   //#include "Configs/FloppyDrives.h"
   //#include "Configs/StepperMotor.h"
-  #include "Configs/ExampleConfig.h"
+  //#include "Configs/ExampleConfig.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Device Defaults

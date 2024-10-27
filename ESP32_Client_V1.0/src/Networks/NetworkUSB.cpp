@@ -14,8 +14,8 @@ void NetworkUSB::begin() {
 
 // connect to USB – returns true if successful or false if not
 bool NetworkUSB::startUSB() {
-    bool connected = true; //TODO add automatic connection
-    return connected;
+    //TODO add automatic connection
+    return true;
 }
 
 /* Waits for buffer to fill with a new msg (>3 Bytes). */
@@ -47,7 +47,7 @@ std::optional<MidiMessage> NetworkUSB::readMessage() {
 //Send Byte arrays wrapped in SysEx Messages 
 void NetworkUSB::sendMessage(MidiMessage message) {
     //Write the message to Serial
-    Serial.write(message.buffer, message.length);
+    Serial.write(message.buffer.data(), message.length);
 }
 
 //Serial print Strings for Debug

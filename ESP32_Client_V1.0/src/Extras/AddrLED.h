@@ -14,7 +14,7 @@ enum class HUE_METHOD{
 
 class AddrLED{
     private:
-        CRGB leds[NUM_LEDS];
+        std::array<CRGB, NUM_LEDS> leds;
         HUE_METHOD m_hueMethod = HUE_METHOD::CHANNEL;
         bool m_hueTimeProgression = true;
         bool m_brightnessByVelocity = true;

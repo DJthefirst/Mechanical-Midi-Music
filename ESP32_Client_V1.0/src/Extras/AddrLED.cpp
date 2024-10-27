@@ -4,7 +4,7 @@
 
 //Setup FAST LED
 void AddrLED::setup(){
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds.data(), NUM_LEDS).setCorrection( TypicalLEDStrip );
     FastLED.setBrightness(  BRIGHTNESS );
 }
 
