@@ -12,6 +12,16 @@ const uint8_t MAX_NUM_NOTES = endNote - startNote;
 const uint8_t MAX_NUM_REGISTERS = 48;
 
 static uint8_t m_numActiveNotes;
+// static bool powerEnabled = false;
+
+enum PinName{
+    PIN_SerialData,
+    PIN_SerialClock,
+    PIN_LoadRegister,
+    PIN_ResetSerial,
+    PIN_ResetRegister,
+    //PIN_24vSense
+};
 
 //Map Registers to Notes                                      
 // const uint8_t RegisterMap[MAX_NUM_REGISTERS] = { 0,  1,  2,  3,  4,  5,  6,  7,
@@ -37,11 +47,12 @@ static std::array<bool,MAX_NUM_REGISTERS> m_currentState; //IO
 Dulcimer::Dulcimer()
 {
     //Setup pins
-    pinMode(pins[0], OUTPUT); //Serial Data
-    pinMode(pins[1], OUTPUT); //Serial Clock
-    pinMode(pins[2], OUTPUT); //Load Registers
-    pinMode(pins[3], OUTPUT); //Reset Serial
-    pinMode(pins[4], OUTPUT); //Reset Registers
+    pinMode(pins[PIN_SerialData], OUTPUT); //Serial Data
+    pinMode(pins[PIN_SerialClock], OUTPUT); //Serial Clock
+    pinMode(pins[PIN_LoadRegister], OUTPUT); //Load Registers
+    pinMode(pins[PIN_ResetSerial], OUTPUT); //Reset Serial
+    pinMode(pins[PIN_ResetRegister], OUTPUT); //Reset Registers
+    //pinMode(pins[PIN_24vSense], INPUT);
 
     //Setup FAST LED
     setupLEDs();
@@ -70,8 +81,17 @@ void Dulcimer::resetAll()
     m_activeDuration = {};
     m_currentTick = {};
     m_currentState = {};
-    updateShiftRegister();
     resetLEDs();
+
+    // updateShiftRegister();
+    //Reset Shift Registers
+    //if(powerEnabled){
+        digitalWrite(pins[PIN_ResetRegister], LOW); //Serial Clock
+        digitalWrite(pins[PIN_ResetSerial], LOW); //Serial Clock
+        delayMicroseconds(1); //Stabilize 
+        digitalWrite(pins[PIN_ResetRegister], HIGH); //Serial Clock
+        digitalWrite(pins[PIN_ResetSerial], HIGH); //Serial Clock
+    //}
 }
 
 void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
@@ -122,9 +142,23 @@ void ICACHE_RAM_ATTR Dulcimer::Tick()
 void Dulcimer::tick()
 #endif
 {
+    // if((m_numActiveNotes == 0) || (!powerEnabled)){
+    //     powerEnabled = digitalRead(PIN_24vSense);
+    //     if(powerEnabled){     
+    //         digitalWrite(pins[PIN_ResetRegister], HIGH); //Serial Clock
+    //         digitalWrite(pins[PIN_ResetSerial], HIGH); //Serial Clock
+    //     }
+    //     else{
+    //         digitalWrite(pins[PIN_ResetRegister], LOW); //Serial Clock
+    //         digitalWrite(pins[PIN_ResetSerial], LOW); //Serial Clock
+    //     }
+    //     return;
+    // }
+
+
+    if(m_numActiveNotes == 0)return;
     //Turn off note if its Duration has expired
     for (int i = 0; i < MAX_NUM_REGISTERS; i++) {
-        if(m_numActiveNotes == 0)break;
 
         if (m_activeDuration[i] > 0){
             if (m_currentTick[i] >= m_activeDuration[i]) {
@@ -148,17 +182,17 @@ void Dulcimer::updateShiftRegister(uint8_t instrument) {
 #endif
 
     for(uint8_t i=0; i <= MAX_NUM_REGISTERS; i++ ){
-        digitalWrite(pins[0], m_currentState[MAX_NUM_REGISTERS - i]); //Serial Data
-        digitalWrite(pins[1], HIGH); //Serial Clock
+        digitalWrite(pins[PIN_SerialData], m_currentState[MAX_NUM_REGISTERS - i]); //Serial Data
+        digitalWrite(pins[PIN_SerialClock], HIGH); //Serial Clock
         delayMicroseconds(1); //Stabilize 
-        digitalWrite(pins[1],  LOW); //Serial Clock
+        digitalWrite(pins[PIN_SerialClock],  LOW); //Serial Clock
     }
 
     // Toggle Load
-    digitalWrite(pins[2], HIGH); //Register Load
+    digitalWrite(pins[PIN_LoadRegister], HIGH); //Register Load
     delayMicroseconds(1); //Stabilize 
-    digitalWrite(pins[2], LOW); //Register Load
-    digitalWrite(pins[0], LOW); //Serial Data
+    digitalWrite(pins[PIN_LoadRegister], LOW); //Register Load
+    digitalWrite(pins[PIN_SerialData], LOW); //Serial Data
         
 }
 #pragma GCC pop_options
@@ -186,26 +220,26 @@ bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
 void Dulcimer::setupLEDs(){
-    AddrLEDs::addrLED.setup();
+    AddrLED::get().setup();
 }
 
 //Set an Instrument Led to on
 void Dulcimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t notePos, uint8_t velocity){
-    CHSV color = AddrLEDs::addrLED.getColor(instrument, channel, notePos, 127);
-    AddrLEDs::addrLED.setLedOn(notePos*3, color);
+    CHSV color = AddrLED::get().getColor(instrument, channel, notePos, 127);
+    AddrLED::get().turnLedOn(notePos*3, color);
 }
 
 //Set an Instrument Led to off
 void Dulcimer::setInstumentLedOff(uint8_t notePos){
-    AddrLEDs::addrLED.setLedOff(notePos*3);
+    AddrLED::get().turnLedOff(notePos*3);
 }
 
 //Reset Leds
 void Dulcimer::resetLEDs(){
-    AddrLEDs::addrLED.reset();
+    AddrLED::get().reset();
 }
 
 #else

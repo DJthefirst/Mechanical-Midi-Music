@@ -92,7 +92,7 @@ function sysExCmd(device: Device, cmd: string, payload?: any) {
 	if (payload == 'undefined') payload = '';
 	device
 		.getConnection()
-		.sendHexString(CONST.SYSEX_START + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END);
+		.sendHexString(CONST.SYSEX_START + "7F7F" + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END);
 	console.log(CONST.SYSEX_START + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END);
 }
 

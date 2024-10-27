@@ -104,7 +104,7 @@ void ShiftRegister::tick()
 {
     //Turn off note if its Duration has expired
     for (int i = 0; i < MAX_NUM_NOTES; i++) {
-        if(m_numActiveNotes == 0)break;
+        if(m_numActiveNotes == 0)return;
 
         if (m_activeDuration[i] > 0){
             if (m_currentTick[i] >= m_activeDuration[i]) {

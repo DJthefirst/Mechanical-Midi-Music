@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
 #include "Device.h"
@@ -6,11 +7,12 @@
 #include <cstdint>
 using std::int8_t;
 
-/* Set the Freq on AD9833 Signal Generator*/
-class InstrAD9833 : public InstrumentController{
+/* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
+class StepperSynth : public InstrumentController{
 public:
 
 private:
+    static void togglePin(uint8_t instrument);
 
     //Local MIDI Device Atributes
     uint8_t m_program = 0;
@@ -19,7 +21,8 @@ private:
 
 
 public: 
-    InstrAD9833();
+    StepperSynth();
+    static void Tick();
 
     void reset(uint8_t instrument) override;
     void resetAll() override;
@@ -33,11 +36,12 @@ public:
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
 
 private:
-    void setInstrumentFrequency(uint8_t instrument, float frequency);
     void setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
     void setInstumentLedOff(uint8_t instrument);
+    void updateShiftRegister();
     
     //LEDs
     void resetLEDs();
     void setupLEDs();
+
 };

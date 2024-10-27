@@ -1,8 +1,8 @@
 /*
- * StepperSynth.h
+ * FloppySynth.h
  *
- * This is an instrument with an array of 10 Stepper Motors
- * 
+ * This is an instrument with an array of Floppy Drives
+ * Including 3.5in and 5in Drives. Also HDDs
  * 
  */
 
@@ -12,7 +12,7 @@
 //---------- Device Configuration ----------
 
     //Instrument type
-    constexpr Instrument INSTRUMENT_TYPE = Instrument::StepperMotor;
+    constexpr Instrument INSTRUMENT_TYPE = Instrument::FloppyDrive;
     //Platform type
     constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
     //Absolute max number of Polyphonic notes is 16
@@ -37,7 +37,7 @@
     #include "Networks/NetworkUSB.h"
     #include "Networks/NetworkDIN.h"
 
-    #include "Instruments/DJthefirst/StepperSynth.h"
+    #include "Instruments/DJthefirst/FloppySynth.h"
 
 //---------- Uncomment Your Selected COM Type ----------
 
@@ -46,7 +46,8 @@
     // using networkType = NetworkDIN;
 
 //---------- Uncomment Your Selected Instrument Type ----------
-    using instrumentType = StepperSynth;
+    
+    using instrumentType = FloppySynth;
 
 //---------- Uncomment Your Desired Extras ----------
 
@@ -59,9 +60,9 @@
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
         #define LED_PIN     18
-        #define NUM_LEDS    50
+        #define NUM_LEDS    64
         #define BRIGHTNESS  255
         #define LED_TYPE    WS2811
         #define COLOR_ORDER GRB
-        #define UPDATES_PER_SECOND 100
+        #define UPDATES_PER_SECOND 10
     #endif

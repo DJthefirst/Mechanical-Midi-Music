@@ -1,82 +1,44 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V1.0
+ *  Version: V2.0
  *  Author: DJthefirst
  *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
  *----------------------------------------------------------------------------------------------------
  */
 
+//See Device.h and the Configs folder for Device Setup.
+
 #include <Arduino.h>
-#include "Distributor.h"
-#include "MessageHandler.h"
+
+#include "Device.h"
 #include "Networks/Network.h"
-#include "Networks/NetworkUDP.h"
-#include "Networks/NetworkUSB.h"
-#include "Networks/NetworkDIN.h"
-
 #include "Instruments/InstrumentController.h"
-#include "Instruments/Default/PwmDriver.h"
-#include "Instruments/Default/FloppyDrive.h"
-#include "Instruments/Default/ShiftRegister.h"
-#include "Instruments/Default/Pwm8A04.h"
-#include "Instruments/Default/StepperA4988.h"
-#include "Instruments/Default/InstrAD9833.h"
-
-#include "Instruments/DJthefirst/DrumSimple.h"
-#include "Instruments/DJthefirst/Dulcimer.h"
+#include "MessageHandler.h"
 
 #include "Extras/LocalStorage.h"
 
-//---------- Uncomment Your Selected Device Config ----------
+networkType network = networkType();
+instrumentType instrumentController = instrumentType(); 
 
-  //#include "Configs/AirCompressor.h"
-  //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperMotor.h"
-
-//---------- Uncomment Your Selected Instrument Type ----------
-
-FloppyDrive     instrumentController;
-//StepperA4988    instrumentController;
-//PwmDriver     instrumentController;
-//StepperL298n  instrumentController;
-//ShiftRegister instrumentController;
-//Dulcimer      instrumentController;
-
-//---------- Uncomment Your Selected COM Type ----------
-
-NetworkUSB connection;
-//NetworkUDP connection; //Not Yet Implemented
-//NetworkDIN connection; //Not Yet Implemented
-
-
-//Create a new message handler
 MessageHandler messageHandler(&instrumentController);
 
 void setup() {
-  connection = NetworkUSB();
-
-  //Initialize MessageHandler and Begin Network Connection
-  messageHandler.setNetwork(&connection);
-  connection.setMessageHandler(&messageHandler);
-  connection.begin();  
+  //Begin Network Commmunication
+  network.begin();  
   delay(100);
 
   //TODO move into local Storage?
-  #ifdef LOCAL_STORAGE
+  #ifdef EXTRA_LOCAL_STORAGE
   {
-    //Load Previous Config from memory
-    uint8_t deviceName[DEVICE_NUM_NAME_BYTES];
-  
     //Device Config
-    Device::Name = LocalStorages::localStorage.GetDeviceName(deviceName);
+    Device::Name = LocalStorage::get().GetDeviceName();
     //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
     //Distributor Config
-    uint8_t numDistributors = LocalStorages::localStorage.GetNumOfDistributors();
+    uint8_t numDistributors = LocalStorage::get().GetNumOfDistributors();
     for(uint8_t i = 0; i < numDistributors; i++){
       uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-      LocalStorages::localStorage.GetDistributorConstruct(i,distributorData);
+      LocalStorage::get().GetDistributorConstruct(i,distributorData);
       messageHandler.addDistributor(distributorData);
     }
   }
@@ -113,10 +75,17 @@ void setup() {
   // messageHandler.addDistributor(distributor4);
 
   //Send Device Ready to Connect
-  connection.sendMessage(&SYSEX_DeviceReady,(uint8_t)true);
+  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, &SYSEX_DeviceReady, 1));
 }
 
 //Periodicaly Read Incoming Messages
 void loop() {
-  connection.readMessage();
+  std::optional<MidiMessage> message = network.readMessage();
+
+  //If the network returns a new message process it.
+  if (!message) return;
+  message = messageHandler.processMessage(*message);
+  
+  //If there is a response send message.
+  if (message) network.sendMessage(*message);
 }

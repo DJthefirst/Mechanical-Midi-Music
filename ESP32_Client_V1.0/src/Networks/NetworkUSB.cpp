@@ -5,7 +5,6 @@
  * 
  */
 #include "NetworkUSB.h"
-#include "MessageHandler.h"
 
 void NetworkUSB::begin() {
     Serial.begin(115200);
@@ -15,43 +14,40 @@ void NetworkUSB::begin() {
 
 // connect to USB – returns true if successful or false if not
 bool NetworkUSB::startUSB() {
-    bool connected = true; //TODO add automatic connection
-    return connected;
+    //TODO add automatic connection
+    return true;
 }
 
-/* Waits for buffer to fill with a new msg (>3 Bytes). The Msg is sent to the msg handler */
-void NetworkUSB::readMessage() {
-    int messageLength = Serial.available();
-
-    MidiMessage message;
+/* Waits for buffer to fill with a new msg (>3 Bytes). */
+std::optional<MidiMessage> NetworkUSB::readMessage() {
+    uint8_t messageLength = 0;
+    MidiMessage message = MidiMessage();
 
     //Wait until full message to begin reading the buffer
-    if (messageLength >= NETWORK_MIN_MSG_BYTES){
-        message.buffer[0] = Serial.read();
-        messageLength = 0;
-
-        //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
-        while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){
-            messageLength++;
-            if(messageLength == MAX_PACKET_LENGTH) return; //TODO: Error     
-            message.buffer[messageLength] = Serial.read();
-        }      
-        message.length = messageLength;
-        (*m_ptrMessageHandler).processMessage(message);
+    if (Serial.available() && (Serial.peek() & MSB_BITMASK) != 0){
+        message.buffer[messageLength] = Serial.read();
+        messageLength = 1;
     }
+
+    //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
+    while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){   
+        message.buffer[messageLength] = Serial.read();
+
+        messageLength++;
+        if(messageLength == MAX_PACKET_LENGTH){
+            Serial.println("Bad Message");
+            return {};
+        }
+    }      
+    
+    if (messageLength == 0) return {};
+    return message;
 }
 
 //Send Byte arrays wrapped in SysEx Messages 
-void NetworkUSB::sendMessage(const uint8_t message[], uint8_t length) {
-    //Midi Message Header SysExStart, MidiID, DeviceID_1, DeviceID_0.
-    uint8_t header[] = {0xF0, SYSEX_ID, 0x7F, 0x7F};
-    //Midi Message Tail SysEx End.
-    uint8_t tail[] = {0xF7};
-
+void NetworkUSB::sendMessage(MidiMessage message) {
     //Write the message to Serial
-    Serial.write(header,4);
-    Serial.write(message,length);
-    Serial.write(tail,1);
+    Serial.write(message.buffer.data(), message.length);
 }
 
 //Serial print Strings for Debug

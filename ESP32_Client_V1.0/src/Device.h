@@ -20,18 +20,19 @@ using std::int8_t;
 
   //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
-  //#include "Configs/TestInstrument.h"
-  #include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperSynth.h"
+  #include "Configs/TestInstrument.h"
+  //#include "Configs/FloppyDrives.h"
+  //#include "Configs/StepperMotor.h"
+  //#include "Configs/ExampleConfig.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Device Defaults
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Device Construct Constants
-const uint8_t DEVICE_NUM_NAME_BYTES = 20;
-const uint8_t DEVICE_NUM_CFG_BYTES = 30;
-const uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
+constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
+constexpr uint8_t DEVICE_NUM_CFG_BYTES = 30;
+constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
 
 namespace Device{
     //Golbal Device Default Attribues
@@ -40,16 +41,11 @@ namespace Device{
 
     //---------- Default Pinout and Platform ----------
 
-#ifndef PLATFORM_ESP32
-    //#define ARDUINO_ARCH_ESP32
-
-    //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-    //const std::array<uint8_t,14> pins = {2,4,18,19,21,22,23,25,26,27,12,13,32,33};
-    // const std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
-    //  25, 26, 27, 32, 33};
-    
-    const char platformName[] = "ESP32";
-    const PlatformType platform = PLATFORM_ESP32;
+    #ifndef PLATFORM_ESP32
+        //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
+        //constexpr std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
+        //                                    25, 26, 27, 32, 33};
+        constexpr Platform platform = Platform::_ESP32;
 
     #elif PLATFORM_ESP8266
         //#define ARDUINO_ARCH_ESP32
@@ -100,7 +96,7 @@ namespace Device{
 
     static uint8_t GetDeviceBoolean(){
         uint8_t deviceBoolByte = 0;
-        if(Device::OmniMode) deviceBoolByte |= (1 << 0);
+        if(Device::OmniMode) deviceBoolByte |= (1 << 0); //bit 0
         return deviceBoolByte;
     }
 
@@ -111,8 +107,8 @@ namespace Device{
         deviceObj[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
         deviceObj[2] = GetDeviceBoolean();
         deviceObj[3] = MAX_NUM_INSTRUMENTS;
-        deviceObj[4] = INSTRUMENT_TYPE;
-        deviceObj[5] = PLATFORM_TYPE;
+        deviceObj[4] = static_cast<uint8_t>(INSTRUMENT_TYPE);
+        deviceObj[5] = static_cast<uint8_t>(PLATFORM_TYPE);
         deviceObj[6] = MIN_MIDI_NOTE;
         deviceObj[7] = MAX_MIDI_NOTE;
         deviceObj[8] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);

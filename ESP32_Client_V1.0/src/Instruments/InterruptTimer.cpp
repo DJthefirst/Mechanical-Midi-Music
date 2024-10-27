@@ -13,7 +13,7 @@ void InterruptTimer::initialize(uint32_t microseconds, void (*isr)()) {
 #elif ARDUINO_ARCH_ESP32
 
     //Create a timer to update instruments periodicaly every one ms	
-    hw_timer_t * timer = NULL;
+    hw_timer_t * timer = nullptr;
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, isr, true);
     timerAlarmWrite(timer, microseconds, true);
