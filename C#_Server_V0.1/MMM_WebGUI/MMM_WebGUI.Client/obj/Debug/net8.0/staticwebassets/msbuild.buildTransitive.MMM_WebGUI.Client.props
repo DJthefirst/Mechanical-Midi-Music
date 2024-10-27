@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\MMM_WebGUI.Client.props" />
+</Project>

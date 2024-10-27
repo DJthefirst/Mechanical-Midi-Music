@@ -19,6 +19,7 @@
 
 networkType network = networkType();
 instrumentType instrumentController = instrumentType(); 
+
 MessageHandler messageHandler(&instrumentController);
 
 void setup() {
@@ -42,6 +43,36 @@ void setup() {
     }
   }
   #endif
+
+  //----Testing Demo Setup Config----//
+
+  // //Distributor 1
+  // Distributor distributor1(&instrumentController);
+  // distributor1.setChannels(0x0001); // 1
+  // distributor1.setInstruments(0x000000FF); // 1-8
+  // distributor1.setDistributionMethod(DistributionMethod::RoundRobinBalance);
+  // messageHandler.addDistributor(distributor1);
+
+  // //Distributor 2
+  // Distributor distributor2(&instrumentController);
+  // distributor2.setChannels(0x0002); // 2
+  // distributor2.setInstruments(0x000000FF); // 1-8
+  // distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
+  // messageHandler.addDistributor(distributor2);
+
+  // //Distributor 3
+  // Distributor distributor3(&instrumentController);
+  // distributor3.setChannels(0x0004); // 3
+  // distributor3.setInstruments(0x000000FF); // 1-8
+  // distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
+  // messageHandler.addDistributor(distributor3);
+
+  // //Distributor 4
+  // Distributor distributor4(&instrumentController);
+  // distributor4.setChannels(0x0008); // 4
+  // distributor4.setInstruments(0x000000FF); // 1-8
+  // distributor4.setDistributionMethod(DistributionMethod::Ascending);
+  // messageHandler.addDistributor(distributor4);
 
   //Send Device Ready to Connect
   network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, &SYSEX_DeviceReady, 1));

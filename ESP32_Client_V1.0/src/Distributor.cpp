@@ -42,6 +42,7 @@ void Distributor::processMessage(MidiMessage message)
         // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
         break;
     case(MIDI_ProgramChange):
+        
         programChangeEvent(message.buffer[1]);
         break;
     case(MIDI_ChannelPressure):
