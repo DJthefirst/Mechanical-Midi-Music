@@ -220,7 +220,7 @@ bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef ADDRESSABLE_LEDS
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
 void Dulcimer::setupLEDs(){
     AddrLED::get().setup();
@@ -229,12 +229,12 @@ void Dulcimer::setupLEDs(){
 //Set an Instrument Led to on
 void Dulcimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t notePos, uint8_t velocity){
     CHSV color = AddrLED::get().getColor(instrument, channel, notePos, 127);
-    AddrLED::get().setLedOn(notePos*3, color);
+    AddrLED::get().turnLedOn(notePos*3, color);
 }
 
 //Set an Instrument Led to off
 void Dulcimer::setInstumentLedOff(uint8_t notePos){
-    AddrLED::get().setLedOff(notePos*3);
+    AddrLED::get().turnLedOff(notePos*3);
 }
 
 //Reset Leds

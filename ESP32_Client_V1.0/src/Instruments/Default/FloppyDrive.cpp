@@ -116,8 +116,8 @@ it's crucial that any computations here be kept to a minimum!
 
 Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-#pragma GCC push_options
-#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
+// #pragma GCC push_options (Legacy)
+// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR FloppyDrive::Tick()
 #else
@@ -126,7 +126,7 @@ void FloppyDrive::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)continue;
+        if(m_numActiveNotes == 0)return;
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
@@ -169,7 +169,7 @@ void FloppyDrive::togglePin(uint8_t instrument)
     digitalWrite(pins[instrument*2], m_pinStateStep[instrument]);
         
 }
-#pragma GCC pop_options
+//#pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters

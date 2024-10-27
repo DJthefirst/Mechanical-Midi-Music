@@ -230,33 +230,30 @@ void FloppySynth::setPitchBend(uint8_t instrument, uint16_t bend){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef ADDRESSABLE_LEDS
-
-// Addressable LED Strip
-AddrLED addrLEDs;
+#ifdef EXTRA_ADDRESSABLE_LEDS
 
 void FloppySynth::setupLEDs(){
-    addrLEDs.setup();
+    AddrLED::get().setup();
 }
 
 //Set an Instrument Led to on
 void FloppySynth::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-    CHSV color = addrLEDs.getColor(instrument, channel, note, velocity);
+    CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
     uint8_t indexMap[] = {2,3,4,5,6,7,8,0,1,9,10};
     instrument = indexMap[instrument];
-    addrLEDs.setLedsOn(instrument*8+3, instrument*8+5, color);
+    AddrLED::get().turnLedsOn(instrument*8+3, instrument*8+5, color);
 }
 
 //Set an Instrument Led to off
 void FloppySynth::setInstumentLedOff(uint8_t instrument){
     uint8_t indexMap[] = {2,3,4,5,6,7,8,0,1,9,10};
     instrument = indexMap[instrument];
-    addrLEDs.setLedsOn(instrument*8+3, instrument*8+5, CHSV(0,0,0));
+    AddrLED::get().turnLedsOn(instrument*8+3, instrument*8+5, CHSV(0,0,0));
 }
 
 //Reset Leds
 void FloppySynth::resetLEDs(){
-    addrLEDs.reset();
+    AddrLED::get().reset();
 }
 
 #else

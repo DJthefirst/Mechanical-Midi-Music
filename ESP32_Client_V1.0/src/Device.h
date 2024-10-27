@@ -43,8 +43,8 @@ namespace Device{
 
     #ifndef PLATFORM_ESP32
         //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-        static std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
-                                            25, 26, 27, 32, 33};
+        //constexpr std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
+        //                                    25, 26, 27, 32, 33};
         constexpr Platform platform = Platform::_ESP32;
 
     #elif PLATFORM_ESP8266
@@ -96,7 +96,7 @@ namespace Device{
 
     static uint8_t GetDeviceBoolean(){
         uint8_t deviceBoolByte = 0;
-        if(Device::OmniMode) deviceBoolByte |= (1 << 0);
+        if(Device::OmniMode) deviceBoolByte |= (1 << 0); //bit 0
         return deviceBoolByte;
     }
 

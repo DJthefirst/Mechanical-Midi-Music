@@ -5,6 +5,7 @@
 	import { midiNodeStore } from '$lib/store/stores';
 	import {FileDB} from '../Utility/FileDB';
 	import { onMount } from 'svelte';
+	import { Console } from 'console';
 	SMF(JZZ);
 
 	$: playlist = new Playlist();
@@ -171,6 +172,7 @@
 	</ol>
 	<div class="w-full p-0 m-0">
 		<input
+			id= "PlayerNavBar"
 			class="slider-player w-full cursor-pointer"
 			type="range"
 			min="0"

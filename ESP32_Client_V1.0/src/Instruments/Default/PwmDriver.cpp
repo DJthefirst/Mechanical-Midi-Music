@@ -101,8 +101,8 @@ it's crucial that any computations here be kept to a minimum!
 
 Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
  */
-#pragma GCC push_options
-#pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy
+// #pragma GCC push_options (Legacy)
+// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR PwmDriver::Tick()
 #else
@@ -111,7 +111,7 @@ void PwmDriver::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)break;
+        if(m_numActiveNotes == 0)return;
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
@@ -138,7 +138,7 @@ void PwmDriver::togglePin(uint8_t instrument)
     digitalWrite(pins[instrument], m_currentState[instrument]);
         
 }
-#pragma GCC pop_options
+// #pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
@@ -176,12 +176,12 @@ void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
     //Set an Instrument Led to on
     void PwmDriver::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
         CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
-        AddrLED::get().setLedOn(instrument, color);
+        AddrLED::get().turnLedOn(instrument, color);
     }
 
     //Set an Instrument Led to off
     void PwmDriver::setInstumentLedOff(uint8_t instrument){
-        AddrLED::get().setLedOff(instrument);
+        AddrLED::get().turnLedOff(instrument);
     }
 
     //Reset Leds

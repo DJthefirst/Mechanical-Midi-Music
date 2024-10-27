@@ -39,7 +39,7 @@ void Distributor::processMessage(MidiMessage message)
         keyPressureEvent(message.buffer[1],message.buffer[2]);
         break;
     case(MIDI_ControlChange):
-        controlChangeEvent(message.buffer[1],message.buffer[2]);
+        // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
         break;
     case(MIDI_ProgramChange):
         programChangeEvent(message.buffer[1]);
@@ -94,11 +94,6 @@ void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
     if(instrument != NONE){
         (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
     }
-}
-
-void Distributor::controlChangeEvent(uint8_t Controller, uint8_t Value)
-{
-    //Implemented in MessageHandler
 }
 
 void Distributor::programChangeEvent(uint8_t Program)
@@ -372,10 +367,6 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     distributorObj[15] = 0; //Reserved
 
     return distributorObj;
-
-    //Usefull Idea?
-    //memcpy(&distributorObj[4], &m_channels, 2);
-    //memcpy(&distributorObj[6], &m_instruments, 4);
 }
 
 //Returns Distributor Channels
