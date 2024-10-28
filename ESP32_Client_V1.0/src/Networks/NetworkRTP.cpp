@@ -73,13 +73,13 @@
 // }
 
 
-// MidiMessage NetworkRTP::readMessage() {
+// std::optional<MidiMessage> NetworkRTP::readMessage() {
 //     MIDI.read();
 //     MidiMessage message;
 //     if (buffer.size() > 0){
 //         message = buffer[0];
 //         buffer.erase(buffer.begin());
-//         Serial.write(message.buffer, message.length);
+//         Serial.write(message.buffer.data(), message.length);
 //     }
 
 //     return message;
