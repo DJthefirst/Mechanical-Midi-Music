@@ -38,8 +38,8 @@ class AddrLED{
         AddrLED& operator=(const AddrLED&) = delete;
 
         static AddrLED& get(){
-            static AddrLED addrLed;
-            return addrLed;
+            static AddrLED addrLED;
+            return addrLED;
         }
 
     private:
