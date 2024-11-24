@@ -33,29 +33,47 @@
     //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
     constexpr int TIMER_RESOLUTION = 8; //40 Default
 
-    #include "Networks/NetworkUDP.h"
+    #include "Networks/NetworkSerial.h"
     #include "Networks/NetworkUSB.h"
+    #include "Networks/NetworkSerial.h"
+    #include "Networks/NetworkUSB.h"
+    #include "Networks/NetworkUDP.h"
     #include "Networks/NetworkDIN.h"
+    #include "Networks/NetworkRTP.h"
+    #include "Networks/NetworkBLE.h"
 
     #include "Instruments/Default/PwmDriver.h"
     #include "Instruments/Default/FloppyDrive.h"
+    #include "Instruments/Default/InstrAD9833.h"
     #include "Instruments/Default/ShiftRegister.h"
     #include "Instruments/DJthefirst/DrumSimple.h"
     #include "Instruments/DJthefirst/Dulcimer.h"
 
 //---------- Uncomment Your Selected COM Type ----------
 
-    using networkType = NetworkUSB;
+    using networkType = NetworkSerial;
+    // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
-
+    
+    #define MMM_NETWORK_SERIAL
+    
 //---------- Uncomment Your Selected Instrument Type ----------
-    using instrumentType = PwmDriver;
+
+     using instrumentType = InstrAD9833;
+    // using instrumentType = PwmDriver;
     // using instrumentType = DrumSimple;
     // using instrumentType = FloppyDrive;
     // using instrumentType = StepperL298n;
     // using instrumentType = ShiftRegister;
     // using instrumentType = Dulcimer;
+
+    #define MMM_INSTRUMENT_PWMDRIVER
+    //#define MMM_INSTRUMENT_DRUMSIMPLE
+    //#define MMM_INSTRUMENT_FLOPPYDRIVE
+    //#define MMM_INSTRUMENT_STEPPERL2968N
+    //#define MMM_INSTRUMENT_SHIFTREGISTER
+    //#define MMM_INSTRUMENT_DULCIMER
 
 //---------- Uncomment Your Desired Extras ----------
 
@@ -63,7 +81,7 @@
     #define EXTRA_LOCAL_STORAGE
 
     //Addressable LED Lighting effects
-    #define EXTRA_ADDRESSABLE_LEDS
+    //#define EXTRA_ADDRESSABLE_LEDS
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS

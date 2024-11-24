@@ -22,8 +22,6 @@ DrumSimple::DrumSimple()
         pinMode(pins[i], OUTPUT);
     }
 
-    // With all pins setup, let's do a first run reset
-    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument

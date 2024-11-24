@@ -36,7 +36,7 @@
     #include "Networks/NetworkSerial.h"
     #include "Networks/NetworkDIN.h"
     #include "Networks/NetworkUDP.h"
-
+    #include "Networks/NetworkUSB.h"
 
     #include "Instruments/Default/PwmDriver.h"
 
@@ -47,6 +47,9 @@
     // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
+
+    #define MMM_NETWORK_SERIAL
+
 
 //---------- Uncomment Your Selected Instrument Type ----------
     

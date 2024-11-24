@@ -44,8 +44,6 @@ Pwm8A04::Pwm8A04()
     //Setup FAST LED
     setupLEDs();
 
-    // With all pins setup, let's do a first run reset
-    resetAll();
     delay(500); // Wait a half second for safety
 
     //Initalize Default values

@@ -52,8 +52,6 @@ StepperL298n::StepperL298n()
     //     pinMode(pins[4*i+3], OUTPUT);
     // }
 
-    // With all pins setup, let's do a first run reset
-    this->resetAll();
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument

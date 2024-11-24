@@ -33,8 +33,9 @@
     //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
     constexpr int TIMER_RESOLUTION = 8; //40 Default
 
-    #include "Networks/NetworkUDP.h"
+    #include "Networks/NetworkSerial.h"
     #include "Networks/NetworkUSB.h"
+    #include "Networks/NetworkUDP.h"
     #include "Networks/NetworkDIN.h"
 
     #include "Instruments/Default/PwmDriver.h"
@@ -47,11 +48,15 @@
 
 //---------- Uncomment Your Selected COM Type ----------
 
-    using networkType = NetworkUSB;
+    using networkType = NetworkSerial;
+    // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
 
+    #define MMM_NETWORK_SERIAL
+
 //---------- Uncomment Your Selected Instrument Type ----------
+
     using instrumentType = PwmDriver;
     // using instrumentType = DrumSimple;
     // using instrumentType = FloppyDrive;

@@ -4,6 +4,10 @@
 //  * Network that supports Serial Communication.
 //  * 
 //  */
+
+#ifdef MMM_NETWORK_BLE
+using networkType = NetworkBLE;
+
 // #include "NetworkBLE.h"
 // #include <Arduino.h>
 // #include <BLEMidi.h>
@@ -87,62 +91,64 @@
 //     Serial.println(msg);
 // }
 
-// #include "NetworkBLE.h"
-// #include <BLEMIDI_Transport.h>
-// #include <hardware/BLEMIDI_ESP32_NimBLE.h>
-// #include <Arduino.h>
-// #include <vector>
-// #include <array>
+#include "NetworkBLE.h"
+#include <BLEMIDI_Transport.h>
+#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+#include <Arduino.h>
+#include <vector>
+#include <array>
 
-// BLEMIDI_CREATE_INSTANCE("MechnicalMidiMusic", MIDI);
-// std::vector<MidiMessage> buffer;
+BLEMIDI_CREATE_INSTANCE("MechnicalMidiMusic", MIDI2);
+std::vector<MidiMessage> buffer2;
 
-// void NoteOnMessage(byte channel, byte note, byte velocity) {
-//     MidiMessage midiMessage;
-//     std::array<uint8_t,3> msg = {MIDI_NoteOn || (channel-1), note, velocity}; 
-//     std::copy(msg.data(), msg.data() + msg.size(), midiMessage.buffer);
-//     midiMessage.length = msg.size();
-//     buffer.push_back(midiMessage);
-// }
+void NoteOnMessage2(byte channel, byte note, byte velocity) {
+    MidiMessage midiMessage;
+    std::array<uint8_t,3> msg = {MIDI_NoteOn || (channel-1), note, velocity}; 
+    std::copy(msg.data(), msg.data() + msg.size(), midiMessage.buffer.data());
+    midiMessage.length = msg.size();
+    buffer2.push_back(midiMessage);
+}
 
-// void NoteOffMessage(byte channel, byte note, byte velocity) {
-//     MidiMessage midiMessage;
-//     std::array<uint8_t,3> msg = {MIDI_NoteOff || (channel-1), note, velocity}; 
-//     std::copy(msg.data(), msg.data() + msg.size(), midiMessage.buffer);
-//     midiMessage.length = msg.size();
-//     buffer.push_back(midiMessage);
-// }
+void NoteOffMessage2(byte channel, byte note, byte velocity) {
+    MidiMessage midiMessage;
+    std::array<uint8_t,3> msg = {MIDI_NoteOff || (channel-1), note, velocity}; 
+    std::copy(msg.data(), msg.data() + msg.size(), midiMessage.buffer.data());
+    midiMessage.length = msg.size();
+    buffer2.push_back(midiMessage);
+}
 
-// void NetworkBLE::begin() {
-//     Serial.begin(115200);
-//     while (!Serial);
-//     // BLEMIDI.setHandleConnected(OnConnected);
-//     // BLEMIDI.setHandleDisconnected(OnDisconnected);
+void NetworkBLE::begin() {
+    Serial.begin(115200);
+    while (!Serial);
+    // BLEMIDI.setHandleConnected(OnConnected);
+    // BLEMIDI.setHandleDisconnected(OnDisconnected);
 
-//     MIDI.setHandleNoteOff(NoteOffMessage);
-//     MIDI.setHandleNoteOn(NoteOnMessage);
+    MIDI2.setHandleNoteOff(NoteOffMessage2);
+    MIDI2.setHandleNoteOn(NoteOnMessage2);
   
-//     MIDI.begin();
-// }
+    MIDI2.begin();
+}
 
 
-// MidiMessage NetworkBLE::readMessage() {
-//     MIDI.read();
-//     MidiMessage message;
-//     if (buffer.size() > 0){
-//         message = buffer[0];
-//         buffer.erase(buffer.begin());
-//     }
+std::optional<MidiMessage> NetworkBLE::readMessage() {
+    MIDI2.read();
+    MidiMessage message;
+    if (buffer2.size() > 0){
+        message = buffer2[0];
+        buffer2.erase(buffer2.begin());
+    }
 
-//     return message;
-// } 
+    return message;
+} 
 
-// //Send Byte arrays wrapped in SysEx Messages 
-// void NetworkBLE::sendMessage(MidiMessage message) {
+//Send Byte arrays wrapped in SysEx Messages 
+void NetworkBLE::sendMessage(MidiMessage message) {
 
-// }
+}
 
-// //Serial print Strings for Debug
-// void NetworkBLE::sendMessage(String msg) {
+//Serial print Strings for Debug
+void NetworkBLE::sendMessage(String msg) {
 
-// }
+}
+
+#endif

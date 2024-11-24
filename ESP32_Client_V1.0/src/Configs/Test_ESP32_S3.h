@@ -36,6 +36,8 @@
     #include "Networks/NetworkUDP.h"
     #include "Networks/NetworkUSB.h"
     #include "Networks/NetworkDIN.h"
+    #include "Networks/NetworkRTP.h"
+    #include "Networks/NetworkBLE.h"
 
     #include "Instruments/Default/PwmDriver.h"
     #include "Instruments/Default/FloppyDrive.h"
@@ -43,13 +45,20 @@
     #include "Instruments/DJthefirst/DrumSimple.h"
     #include "Instruments/DJthefirst/Dulcimer.h"
 
+
 //---------- Uncomment Your Selected COM Type ----------
 
-    using networkType = NetworkUSB;
+    // using networkType = NetworkSerial;
+    // using networkType = NetworkUSB;
+    // using networkType = NetworkRTP;
+    using networkType = NetworkBLE;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
 
+    #define MMM_NETWORK_SERIAL
+
 //---------- Uncomment Your Selected Instrument Type ----------
+
     using instrumentType = PwmDriver;
     // using instrumentType = DrumSimple;
     // using instrumentType = FloppyDrive;
