@@ -74,6 +74,9 @@ void setup() {
   // distributor4.setDistributionMethod(DistributionMethod::Ascending);
   // messageHandler.addDistributor(distributor4);
 
+  //Reset All pins to default
+  instrumentController.resetAll();
+
   //Send Device Ready to Connect
   network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, &SYSEX_DeviceReady, 1));
 }

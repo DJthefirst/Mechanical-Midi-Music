@@ -12,7 +12,7 @@
 //---------- Device Configuration ----------
 
     //Instrument type
-    constexpr Instrument INSTRUMENT_TYPE = Instrument::ShiftRegister;
+    constexpr Instrument INSTRUMENT_TYPE = Instrument::PWM;
     //Platform type
     constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
     //Absolute max number of Polyphonic notes is 16
@@ -33,16 +33,18 @@
     //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
     constexpr int TIMER_RESOLUTION = 8; //40 Default
 
-    #include "Networks/NetworkUDP.h"
-    #include "Networks/NetworkUSB.h"
+    #include "Networks/NetworkSerial.h"
     #include "Networks/NetworkDIN.h"
+    #include "Networks/NetworkUDP.h"
+
 
     #include "Instruments/Default/PwmDriver.h"
 
 
 //---------- Uncomment Your Selected COM Type ----------
 
-    using networkType = NetworkUSB;
+    using networkType = NetworkSerial;
+    // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
 
@@ -60,7 +62,7 @@
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-      #define LED_PIN     18
+      #define LED_PIN     33
       #define NUM_LEDS    8
       #define BRIGHTNESS  255
       #define LED_TYPE    WS2811
