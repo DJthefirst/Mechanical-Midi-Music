@@ -1,8 +1,8 @@
 /*
- * TestInstrument.h
+ * AirCompressor.h
  *
- * This Configuration reprents an ESP32 connected
- * with 8 buzzers used for tesing & validation.
+ * This is an instrument uses PWM signals to switch
+ * solenoids up to 1.2khz chopping air into sound.
  * 
  */
 
@@ -20,9 +20,9 @@
     //Absolute max number of Instruments is 32
     constexpr uint8_t MAX_NUM_INSTRUMENTS = 8; 
     //Absolute Lowest Note Min=0
-    constexpr uint8_t MIN_MIDI_NOTE = 0; 
+    constexpr uint8_t MIN_MIDI_NOTE = 36; 
     //Absolute Highest Note Max=127
-    constexpr uint8_t MAX_MIDI_NOTE = 127;
+    constexpr uint8_t MAX_MIDI_NOTE = 83;
     //A 14 bit number Representing this Devices ID
     constexpr uint16_t SYSEX_DEV_ID = 0x001;
     //Firmware Version 14bit
@@ -33,20 +33,13 @@
     //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
     constexpr int TIMER_RESOLUTION = 8; //40 Default
 
-
     #include "Networks/NetworkSerial.h"
-    #include "Networks/NetworkUSB.h"
-    #include "Networks/NetworkUDP.h"
     #include "Networks/NetworkDIN.h"
-    #include "Networks/NetworkRTP.h"
-    #include "Networks/NetworkBLE.h"
+    #include "Networks/NetworkUDP.h"
+    #include "Networks/NetworkUSB.h"
 
-    #include "Instruments/Default/PwmDriver.h"
-    #include "Instruments/Default/FloppyDrive.h"
     #include "Instruments/Default/InstrAD9833.h"
-    #include "Instruments/Default/ShiftRegister.h"
-    #include "Instruments/DJthefirst/DrumSimple.h"
-    #include "Instruments/DJthefirst/Dulcimer.h"
+
 
 //---------- Uncomment Your Selected COM Type ----------
 
@@ -54,25 +47,15 @@
     // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
-    
+
     #define MMM_NETWORK_SERIAL
-    
+
+
 //---------- Uncomment Your Selected Instrument Type ----------
+    
+    using instrumentType = InstrAD9833;
 
-     using instrumentType = InstrAD9833;
-    // using instrumentType = PwmDriver;
-    // using instrumentType = DrumSimple;
-    // using instrumentType = FloppyDrive;
-    // using instrumentType = StepperL298n;
-    // using instrumentType = ShiftRegister;
-    // using instrumentType = Dulcimer;
-
-    #define MMM_INSTRUMENT_PWMDRIVER
-    //#define MMM_INSTRUMENT_DRUMSIMPLE
-    //#define MMM_INSTRUMENT_FLOPPYDRIVE
-    //#define MMM_INSTRUMENT_STEPPERL2968N
-    //#define MMM_INSTRUMENT_SHIFTREGISTER
-    //#define MMM_INSTRUMENT_DULCIMER
+    #define MMM_INSTRUMENT_AD9833
 
 //---------- Uncomment Your Desired Extras ----------
 
@@ -84,10 +67,10 @@
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-        #define LED_PIN     33
-        #define NUM_LEDS    8
-        #define BRIGHTNESS  255
-        #define LED_TYPE    WS2811
-        #define COLOR_ORDER GRB
-        #define UPDATES_PER_SECOND 100
+      #define LED_PIN     33
+      #define NUM_LEDS    8
+      #define BRIGHTNESS  255
+      #define LED_TYPE    WS2811
+      #define COLOR_ORDER GRB
+      #define UPDATES_PER_SECOND 100
     #endif

@@ -18,14 +18,15 @@ using std::int8_t;
 
 //---------- Uncomment Your Selected Device Config ----------
 
-  #include "Configs/AirCompressor.h"
+  //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
   //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperMotor.h"
+  //#include "Configs/FloppySynth.h"
+  //#include "Configs/StepperSynth.h"
   //#include "Configs/ExampleConfig.h"
 
   //#include "Configs/Test_ESP32_S3.h"
+  #include "Configs/AD9833.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Device Defaults
