@@ -98,6 +98,10 @@
 						<span class="font-semibold">{device.numInstruments}</span>
 					</label>
 					<label class="px-2"
+						>Number of SubInstruments:
+						<span class="font-semibold">{device.numSubInstruments}</span>
+					</label>
+					<label class="px-2"
 						>Notes:
 						<span class="font-semibold"
 							>{device.noteMin.toMidiNote()} <b>-</b> {device.noteMax.toMidiNote()}</span

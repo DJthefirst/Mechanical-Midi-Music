@@ -6,6 +6,7 @@
  * 
  */
 
+
 #pragma once
 #include <array>
 
@@ -17,9 +18,14 @@
     constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
     //Absolute max number of Polyphonic notes is 16
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
-    //Absolute max number of Instruments is 32
-    constexpr uint8_t MAX_NUM_INSTRUMENTS = 8; 
-    //Absolute Lowest Note Min=0
+
+    //Max Number of Instruments is 32
+    constexpr uint8_t NUM_INSTRUMENTS = 4; 
+    //Multiplies Instruments into individual sub instruments
+    constexpr uint8_t NUM_SUBINSTRUMENTS = 2; 
+    //Absolute max number of Instruments is 128???
+    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENTS * NUM_SUBINSTRUMENTS; 
+
     constexpr uint8_t MIN_MIDI_NOTE = 0; 
     //Absolute Highest Note Max=127
     constexpr uint8_t MAX_MIDI_NOTE = 127;
@@ -54,13 +60,15 @@
     // using networkType = NetworkUSB;
     // using networkType = NetworkUDP;
     // using networkType = NetworkDIN;
-    
+
     #define MMM_NETWORK_SERIAL
-    
+
+
 //---------- Uncomment Your Selected Instrument Type ----------
 
-     using instrumentType = InstrAD9833;
+    using instrumentType = InstrAD9833;
     // using instrumentType = PwmDriver;
+    // using instrumentType = PwmDriverStacked;
     // using instrumentType = DrumSimple;
     // using instrumentType = FloppyDrive;
     // using instrumentType = StepperL298n;
@@ -80,14 +88,15 @@
     #define EXTRA_LOCAL_STORAGE
 
     //Addressable LED Lighting effects
-    //#define EXTRA_ADDRESSABLE_LEDS
+    #define EXTRA_ADDRESSABLE_LEDS
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-        #define LED_PIN     33
-        #define NUM_LEDS    8
-        #define BRIGHTNESS  255
-        #define LED_TYPE    WS2811
-        #define COLOR_ORDER GRB
-        #define UPDATES_PER_SECOND 100
+      #define LED_PIN     33
+      #define NUM_LEDS    8
+      #define BRIGHTNESS  255
+      #define LED_TYPE    WS2811
+      #define COLOR_ORDER GRB
+      #define UPDATES_PER_SECOND 100
     #endif
+

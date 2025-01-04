@@ -34,7 +34,7 @@ using std::int8_t;
 
 //Device Construct Constants
 constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
-constexpr uint8_t DEVICE_NUM_CFG_BYTES = 30;
+constexpr uint8_t DEVICE_NUM_CFG_BYTES = 32;
 constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
 
 namespace Device{
@@ -109,17 +109,18 @@ namespace Device{
         deviceObj[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
         deviceObj[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
         deviceObj[2] = GetDeviceBoolean();
-        deviceObj[3] = MAX_NUM_INSTRUMENTS;
-        deviceObj[4] = static_cast<uint8_t>(INSTRUMENT_TYPE);
-        deviceObj[5] = static_cast<uint8_t>(PLATFORM_TYPE);
-        deviceObj[6] = MIN_MIDI_NOTE;
-        deviceObj[7] = MAX_MIDI_NOTE;
-        deviceObj[8] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
-        deviceObj[9] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
+        deviceObj[3] = NUM_INSTRUMENTS;
+        deviceObj[4] = NUM_SUBINSTRUMENTS;
+        deviceObj[5] = static_cast<uint8_t>(INSTRUMENT_TYPE);
+        deviceObj[6] = static_cast<uint8_t>(PLATFORM_TYPE);
+        deviceObj[7] = MIN_MIDI_NOTE;
+        deviceObj[8] = MAX_MIDI_NOTE;
+        deviceObj[9] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
+        deviceObj[10] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
 
         for(uint8_t i = 0; i < 20; i++){
-            if (Device::Name.size() >  i) deviceObj[10+i] = Device::Name[i];
-            else deviceObj[10+i] = 0;
+            if (Device::Name.size() >  i) deviceObj[12+i] = Device::Name[i];
+            else deviceObj[12+i] = 0;
         }
 
         return deviceObj;
