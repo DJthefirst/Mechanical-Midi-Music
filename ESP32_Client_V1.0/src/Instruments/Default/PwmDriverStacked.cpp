@@ -4,11 +4,11 @@
 #include "Arduino.h"
 #include <bitset>
 
-constexpr uint8_t VELOCITY_STEP = (127 / NUM_STACKED_INSTRUMENTS);
+constexpr uint8_t VELOCITY_STEP = (127 / NUM_SUBINSTRUMENTS);
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
-static std::array<uint8_t,NUM_INSTRUMENT_GROUPS> m_activeNotes;
-static std::array<uint8_t,NUM_INSTRUMENT_GROUPS> m_activeNoteVelocities;
+static std::array<uint8_t,NUM_INSTRUMENTS> m_activeNotes;
+static std::array<uint8_t,NUM_INSTRUMENTS> m_activeNoteVelocities;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes
@@ -57,10 +57,10 @@ void PwmDriverStacked::playNote(uint8_t group, uint8_t note, uint8_t velocity,  
         m_activeNotes[group] = (MSB_BITMASK | note);
         m_activeNoteVelocities[group] = (MSB_BITMASK | velocity);
 
-        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; ++i){
+        for(int i = 0; i < NUM_INSTRUMENTS; ++i){
             if(velocity < VELOCITY_STEP*i) return;
 
-            uint8_t instrument = (group*NUM_STACKED_INSTRUMENTS)+i;
+            uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
             m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
             double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
             m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
@@ -77,9 +77,9 @@ void PwmDriverStacked::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
         m_activeNotes[group] = 0;
         m_activeNoteVelocities[group] = 0;
 
-        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; ++i){
+        for(int i = 0; i < NUM_INSTRUMENTS; ++i){
 
-            uint8_t instrument = (group*NUM_STACKED_INSTRUMENTS)+i;
+            uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
             if(instrument >= MAX_NUM_INSTRUMENTS)return;
 
             m_notePeriod[instrument] = 0;

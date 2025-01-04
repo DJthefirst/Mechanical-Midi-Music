@@ -16,6 +16,7 @@ export class Device {
 	public id: number;
 	public isOnmiMode: boolean;
 	public numInstruments: number;
+	public numSubInstruments: number;
 	public instrumentType: number;
 	public platform: number;
 	public noteMin: number;
@@ -27,6 +28,7 @@ export class Device {
 		connection: Connection,
 		id: number,
 		numInstruments: number,
+		numSubInstruments: number,
 		instrumentType: number,
 		platform: number,
 		noteMin: number,
@@ -37,6 +39,7 @@ export class Device {
 		this.connection = connection;
 		this.id = id;
 		(this.isOnmiMode = false), (this.numInstruments = numInstruments);
+		this.numSubInstruments = numSubInstruments;
 		this.instrumentType = instrumentType;
 		this.platform = platform;
 		this.noteMin = noteMin;
@@ -95,12 +98,13 @@ export class Device {
 	public update(array: Uint8Array) {
 		this.id = (array[0] << 7) + array[1];
 		this.numInstruments = array[3];
-		this.instrumentType = array[4];
-		this.platform = array[5];
-		this.noteMin = array[6];
-		this.noteMax = array[7];
-		this.version = array[8] << (7 + array[9]);
-		this.name = String.fromCharCode(...array.slice(10, 30).filter((val) => val !== 0)); //@ts-ignore
+		this.numSubInstruments = array[4];
+		this.instrumentType = array[5];
+		this.platform = array[6];
+		this.noteMin = array[7];
+		this.noteMax = array[8];
+		this.version = array[9] << (7 + array[10]);
+		this.name = String.fromCharCode(...array.slice(12, 32).filter((val) => val !== 0)); //@ts-ignore
 		deviceListStore.set(deviceList);
 	}
 
@@ -152,7 +156,7 @@ export class Device {
 // Connects Device from GUI
 export async function connectDevice(baudRate: number) {
 	let connection = new SerialConnection();
-	let device = new Device(connection, 0, 0, 0, 0, 0, 127, 0, 'Not Connected');
+	let device = new Device(connection, 0, 0, 0, 0, 0, 0, 127, 0, 'Not Connected');
 	await connection.open(baudRate);
 	connection.getPort().ondisconnect = () => {
 		device.remove();

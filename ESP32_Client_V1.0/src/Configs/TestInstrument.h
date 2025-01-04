@@ -19,12 +19,12 @@
     //Absolute max number of Polyphonic notes is 16
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
-    //Max Number of Instrument groups is 32
-    constexpr uint8_t NUM_INSTRUMENT_GROUPS = 4; 
-    //Multiplies Instrument groups into individual instruments
-    constexpr uint8_t NUM_STACKED_INSTRUMENTS = 2; 
+    //Max Number of Instruments is 32
+    constexpr uint8_t NUM_INSTRUMENTS = 4; 
+    //Multiplies Instruments into individual sub instruments
+    constexpr uint8_t NUM_SUBINSTRUMENTS = 2; 
     //Absolute max number of Instruments is 128???
-    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENT_GROUPS * NUM_STACKED_INSTRUMENTS; 
+    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENTS * NUM_SUBINSTRUMENTS; 
 
     constexpr uint8_t MIN_MIDI_NOTE = 36; 
     //Absolute Highest Note Max=127
