@@ -111,7 +111,7 @@ void Distributor::channelPressureEvent(uint8_t Velocity)
 //Update Each Instruments Pitch Bend Value
 void Distributor::pitchBendEvent(uint16_t pitchBend)
 {
-    for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+    for(uint8_t i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
         if((m_instruments & (1 << i)) != 0){
             (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
         }
@@ -138,12 +138,12 @@ uint8_t Distributor::nextInstrument()
         // if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
         // return NONE;
 
-        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
             // Increment current Instrument
             m_currentInstrument++;
 
             // Loop to first instrument if end is reached
-            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENT_GROUPS) ? 0 : m_currentInstrument;
 
             // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
@@ -168,11 +168,11 @@ uint8_t Distributor::nextInstrument()
     // Return the next instrument in the instrument pool
     case(DistributionMethod::RoundRobin):
 
-        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
             m_currentInstrument++;
 
             //Loop to first instrument if end is reached
-            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENT_GROUPS) ? 0 : m_currentInstrument;
 
             //Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
@@ -184,12 +184,12 @@ uint8_t Distributor::nextInstrument()
     // Return the first instument that has the lowest number of active notes.
     case(DistributionMethod::RoundRobinBalance):
 
-        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
             // Increment current Instrument
             m_currentInstrument++;
 
             // Loop to first instrument if end is reached
-            m_currentInstrument = (m_currentInstrument >= MAX_NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENT_GROUPS) ? 0 : m_currentInstrument;
 
             // Check if valid instrument
             if(!distributorHasInstrument(m_currentInstrument)) continue;
@@ -214,7 +214,7 @@ uint8_t Distributor::nextInstrument()
     // Return the least active instrument starting at the instrument 0
     case(DistributionMethod::Ascending):
 
-        for(int i = 0; (i < MAX_NUM_INSTRUMENTS); i++){
+        for(int i = 0; (i < NUM_INSTRUMENT_GROUPS); i++){
 
             // Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
@@ -238,7 +238,7 @@ uint8_t Distributor::nextInstrument()
     // Return the least active instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
 
-        for(int i = (MAX_NUM_INSTRUMENTS - 1); (i >= 0); i--){
+        for(int i = (NUM_INSTRUMENT_GROUPS - 1); (i >= 0); i--){
         
             // Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
@@ -285,9 +285,9 @@ uint8_t Distributor::checkForNote(uint8_t note)
     case(DistributionMethod::RoundRobin):
     case(DistributionMethod::RoundRobinBalance):
         //Iterate through each instrument in reverse
-        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
             //Decrement Instrument with Underflow Protection
-            if(instrument == 0) instrument = MAX_NUM_INSTRUMENTS;
+            if(instrument == 0) instrument = NUM_INSTRUMENT_GROUPS;
             instrument--;
 
             //Check if valid instrument
@@ -298,7 +298,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
 
     // Check for note being played on the instrument starting at instrument 0
     case(DistributionMethod::Ascending):
-        for(int i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+        for(int i = 0; i < NUM_INSTRUMENT_GROUPS; i++){
 
             //Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
@@ -308,7 +308,7 @@ uint8_t Distributor::checkForNote(uint8_t note)
 
     // Check for note being played on the instrument starting at the last instrument iterating in reverse.
     case(DistributionMethod::Descending):
-        for(int i = (MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
+        for(int i = (NUM_INSTRUMENT_GROUPS - 1); i >= 0; i--){
 
             //Check if valid instrument
             if(!distributorHasInstrument(i)) continue;

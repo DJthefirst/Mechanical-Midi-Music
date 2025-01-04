@@ -17,8 +17,14 @@
     constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
     //Absolute max number of Polyphonic notes is 16
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
-    //Absolute max number of Instruments is 32
-    constexpr uint8_t MAX_NUM_INSTRUMENTS = 10; 
+
+    //Max Number of Instrument groups is 32
+    constexpr uint8_t NUM_INSTRUMENT_GROUPS = 10; 
+    //Multiplies Instrument groups into individual instruments
+    constexpr uint8_t NUM_STACKED_INSTRUMENTS = 1; 
+    //Absolute max number of Instruments is 128???
+    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENT_GROUPS * NUM_STACKED_INSTRUMENTS; 
+
     //Absolute Lowest Note Min=0
     constexpr uint8_t MIN_MIDI_NOTE = 36; 
     //Absolute Highest Note Max=127
