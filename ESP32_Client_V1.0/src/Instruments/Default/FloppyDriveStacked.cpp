@@ -142,7 +142,7 @@ void FloppyDriveStacked::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)return;
+        //if(m_numActiveNotes == 0)return; //TODO: Check if any notes are active
 
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
