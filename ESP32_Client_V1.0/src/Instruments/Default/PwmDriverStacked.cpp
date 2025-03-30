@@ -57,8 +57,11 @@ void PwmDriverStacked::playNote(uint8_t group, uint8_t note, uint8_t velocity,  
         m_activeNotes[group] = (MSB_BITMASK | note);
         m_activeNoteVelocities[group] = (MSB_BITMASK | velocity);
 
-        for(int i = 0; i < NUM_INSTRUMENTS; ++i){
-            if(velocity < VELOCITY_STEP*i) return;
+        for(int i = 0; i < NUM_SUBINSTRUMENTS; ++i){
+            if(velocity < VELOCITY_STEP*i) break;
+            uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
+            if(instrument >= MAX_NUM_INSTRUMENTS) break;
+
 
             uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
             m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
@@ -77,7 +80,7 @@ void PwmDriverStacked::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
         m_activeNotes[group] = 0;
         m_activeNoteVelocities[group] = 0;
 
-        for(int i = 0; i < NUM_INSTRUMENTS; ++i){
+        for(int i = 0; i < NUM_SUBINSTRUMENTS; ++i){
 
             uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
             if(instrument >= MAX_NUM_INSTRUMENTS)return;

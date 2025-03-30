@@ -1,10 +1,13 @@
-#include "Instruments/Default/FloppyDrive.h"
+#include "Instruments/Default/FloppyDriveStacked.h"
 #include "Instruments/InterruptTimer.h"
 #include "Constants.h"
 #include "Arduino.h"
 
+constexpr uint8_t VELOCITY_STEP = (127 / NUM_SUBINSTRUMENTS);
+
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
+static std::array<uint8_t,NUM_INSTRUMENTS> m_activeNoteVelocities;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes
@@ -19,7 +22,7 @@ static const uint16_t m_minHeadPos = 0;
 static const uint16_t m_maxHeadPos = 150; // 79 Tracks*2 for 3.5in or 49*2 for 5.25in
 static const bool enableVelocity = false;
 
-FloppyDrive::FloppyDrive()
+FloppyDriveStacked::FloppyDriveStacked()
 {
     //Setup pins
     for(uint8_t i=0; i < pins.size(); i++){
@@ -35,12 +38,12 @@ FloppyDrive::FloppyDrive()
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
 }
 
-void FloppyDrive::reset(uint8_t instrument)
+void FloppyDriveStacked::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void FloppyDrive::resetAll()
+void FloppyDriveStacked::resetAll()
 {
     stopAll();
 
@@ -59,7 +62,7 @@ void FloppyDrive::resetAll()
     }
 }
 
-void FloppyDrive::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
+void FloppyDriveStacked::playNote(uint8_t group, uint8_t note, uint8_t velocity, uint8_t channel)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -67,28 +70,42 @@ void FloppyDrive::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, u
     
     //Remove this if statement condition for note overwrite
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
-        m_activeNotes[instrument] = (MSB_BITMASK | note);
-        m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
-        double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-        m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
-        m_numActiveNotes++;
+        m_activeNotes[group] = (MSB_BITMASK | note);
+        m_activeNoteVelocities[group] = (MSB_BITMASK | velocity);    
+
+        for(int i = 0; i < NUM_SUBINSTRUMENTS; ++i){
+            if(velocity < VELOCITY_STEP*i) break;
+            uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
+            if(instrument >= MAX_NUM_INSTRUMENTS) break;
+    
+            m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
+            double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
+            m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+            m_numActiveNotes++;
+        }
         return;
     //}
 }
 
-void FloppyDrive::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void FloppyDriveStacked::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
 {
-    if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
-        m_activeNotes[instrument] = 0;
-        m_notePeriod[instrument] = 0;
-        m_activePeriod[instrument] = 0;
-        digitalWrite(pins[instrument], 0);
-        m_numActiveNotes--;
+    if((m_activeNotes[group] & (~MSB_BITMASK)) == note){
+        m_activeNotes[group] = 0;
+        m_activeNoteVelocities[group] = 0;
+
+        for(int i = 0; i < NUM_SUBINSTRUMENTS; ++i){
+            uint8_t instrument = (group*NUM_SUBINSTRUMENTS)+i;
+            
+            m_notePeriod[instrument] = 0;
+            m_activePeriod[instrument] = 0;
+            digitalWrite(pins[instrument], 0);
+            m_numActiveNotes--;
+        }
         return;
     }
 }
 
-void FloppyDrive::stopAll(){
+void FloppyDriveStacked::stopAll(){
     m_numActiveNotes = 0;
     std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
     m_activeNotes = {};
@@ -118,9 +135,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 // #pragma GCC push_options (Legacy)
 // #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR FloppyDrive::Tick()
+void ICACHE_RAM_ATTR FloppyDriveStacked::Tick()
 #else
-void FloppyDrive::tick()
+void FloppyDriveStacked::tick()
 #endif
 {
     // Go through every Instrument
@@ -142,9 +159,9 @@ void FloppyDrive::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR FloppyDrive::togglePin(uint8_t instrument)
+void ICACHE_RAM_ATTR FloppyDriveStacked::togglePin(uint8_t instrument)
 #else
-void FloppyDrive::togglePin(uint8_t instrument)
+void FloppyDriveStacked::togglePin(uint8_t instrument)
 #endif
 {
     //Increment/Decrement Head position
@@ -175,17 +192,17 @@ void FloppyDrive::togglePin(uint8_t instrument)
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t FloppyDrive::getNumActiveNotes(uint8_t instrument)
+uint8_t FloppyDriveStacked::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool FloppyDrive::isNoteActive(uint8_t instrument, uint8_t note)
+bool FloppyDriveStacked::isNoteActive(uint8_t instrument, uint8_t note)
 {
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void FloppyDrive::setPitchBend(uint8_t instrument, uint16_t bend){
+void FloppyDriveStacked::setPitchBend(uint8_t instrument, uint16_t bend){
     m_pitchBend[instrument] = bend;
     if(m_notePeriod[instrument] == 0) return;
     //Calculate Pitch Bend
