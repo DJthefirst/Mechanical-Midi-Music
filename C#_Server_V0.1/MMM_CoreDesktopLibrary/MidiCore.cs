@@ -48,7 +48,7 @@ class MidiCore : IMidiOutput
         {
             //string hexString = Convert.ToHexString(mevent[..length]);
             //hexString = string.Join(" ", Enumerable.Range(0, hexString.Length / 2).Select(i => hexString.Substring(i * 2, 2)));
-            //Console.WriteLine(hexString);
+            //Console.WriteLine(hexString); 
         }
 
         //Push messge to buffer
@@ -57,13 +57,11 @@ class MidiCore : IMidiOutput
             buffer.Enqueue(item);
         }
 
-        Console.WriteLine("'New Message!'");
-
         if (buffer.Peek() == 0xF0 && !buffer.Contains(0xF7)) return;
 
         string hexString = Convert.ToHexString(buffer.ToArray());
         hexString = string.Join(" ", Enumerable.Range(0, hexString.Length / 2).Select(i => hexString.Substring(i * 2, 2)));
-        Console.WriteLine(hexString);
+        //Console.WriteLine(hexString);
 
         //Check for SysEx messages to this controller
         SysExMsg? sysExMsg = null;
@@ -72,16 +70,28 @@ class MidiCore : IMidiOutput
             int endindex = (buffer.ToList().IndexOf(0xF7));
             sysExMsg = new SysExMsg(buffer.ToArray()[0..endindex]);
 
-            for (int i = 0; i <= endindex; i++)buffer.Dequeue();
-            
+            for (int i = 0; i <= endindex; i++) buffer.Dequeue();
+
+
+            if (sysExMsg.Destination() != 0x3FFF)
+            {
+                Console.WriteLine("Sent: " + hexString);
+            }
+            else
+            {
+                Console.WriteLine("Received: " + hexString);
+                //sysExMsg = null;
+            }
+
 
             if (sysExMsg.Destination() != 0x3FFF) throw new Exception();
-            Console.WriteLine("Sucess!");
+            //Console.WriteLine("Sucess!");
 
-        } catch { sysExMsg = null; Console.WriteLine("MSG FAIL!"); }
+        }
+        catch { sysExMsg = null; }//Console.WriteLine("MSG FAIL!"); }
 
-        //Filter out SysEx messages to this controller
-        if (sysExMsg != null) {
+			//Filter out SysEx messages to this controller
+			if (sysExMsg != null) {
 
             foreach (var action in sysExMsgCallBacks)
             {
@@ -90,12 +100,12 @@ class MidiCore : IMidiOutput
 
             //string hexString = Convert.ToHexString(mevent[..length]);
             //hexString = string.Join(" ", Enumerable.Range(0, hexString.Length / 2).Select(i => hexString.Substring(i * 2, 2)));
-            //Console.WriteLine("\nSysEx: " + hexString);
-            Console.WriteLine("Filtered");
+            Console.WriteLine("\nSysEx: " + hexString);
+            //Console.WriteLine("Filtered");
             return; //Maybe causes bug?
         }
 
-        Console.WriteLine("UnFiltered");
+        //Console.WriteLine("UnFiltered");
 
         //myactions.Add(new Action<byte[], int, int>((byte[] mevent, int offset, int length) => { Console.WriteLine("Action 1"); }));
         foreach (var action in midiMsgCallBacks)

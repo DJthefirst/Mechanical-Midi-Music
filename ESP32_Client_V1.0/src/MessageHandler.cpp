@@ -73,6 +73,9 @@ std::optional<MidiMessage> MessageHandler::processSysEX(MidiMessage& message)
         case (SYSEX_ResetDeviceConfig):
             sysExResetDeviceConfig(message); 
             return {};
+        case (SYSEX_DiscoverDevices):
+            return {sysExDiscoverDevices(message)};
+
         case (SYSEX_GetDeviceConstructWithDistributors):
             return {}; //TODO
 
@@ -246,7 +249,7 @@ void MessageHandler::distributeMessage(MidiMessage& message)
 
 //Respond with device ready
 MidiMessage MessageHandler::sysExDeviceReady(MidiMessage& message){
-    return MidiMessage(m_src,m_dest,&SYSEX_DeviceReady,(uint8_t)true);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),&SYSEX_DeviceReady,(uint8_t)true);
 }
 
 //Reset Distributors, LocalStorage and Set Device name to "New Device"
@@ -258,21 +261,29 @@ void MessageHandler::sysExResetDeviceConfig(MidiMessage& message){
     return;
 }
 
+//Respond with device ready
+MidiMessage MessageHandler::sysExDiscoverDevices(MidiMessage& message){
+    std::array<std::uint8_t,2> deviceID;
+    deviceID[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
+    deviceID[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),deviceID.data(),2);
+}
+
 //Respond with Device Construct
 MidiMessage MessageHandler::sysExGetDeviceConstruct(MidiMessage& message){
-    return MidiMessage(m_src, m_dest, Device::GetDeviceConstruct().data(), DEVICE_NUM_CFG_BYTES);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),Device::GetDeviceConstruct().data(), DEVICE_NUM_CFG_BYTES);
 }
 
 //Respond with Device Name
 MidiMessage MessageHandler::sysExGetDeviceName(MidiMessage& message){
     const uint8_t* name = reinterpret_cast<uint8_t*>(Device::Name.data());
-    return MidiMessage(m_src,m_dest,name,DEVICE_NUM_NAME_BYTES);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),name,DEVICE_NUM_NAME_BYTES);
 }
 
 //Respond with Device Boolean
 MidiMessage MessageHandler::sysExGetDeviceBoolean(MidiMessage& message){
     static uint8_t deviceBoolean = Device::GetDeviceBoolean();
-    return MidiMessage(m_src,m_dest,&deviceBoolean,1);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),&deviceBoolean,1);
 }
 
 //Configure Device Construct
@@ -294,10 +305,16 @@ void MessageHandler::sysExSetDeviceBoolean(MidiMessage& message){
 
 }
 
+// TODO: Return Multiple Messages
+// MidiMessage MessageHandler::sysExGetAllDistributors(MidiMessage& message){
+//     return MidiMessage(m_src,m_dest,message.sysExCommand(),&SYSEX_DeviceReady,(uint8_t)true);
+// }
+
+
 //Respond with the Number of Distributors
 MidiMessage MessageHandler::sysExGetNumOfDistributors(MidiMessage& message){
     uint8_t sizeByte = m_distributors.size();
-    return MidiMessage(m_src,m_dest,&sizeByte,1);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),&sizeByte,1);
 }
 
 //Respond with the requested Distributor Construct
@@ -306,7 +323,7 @@ MidiMessage MessageHandler::sysExGetDistributorConstruct(MidiMessage& message){
     //Set Return Distributor ID from message
     distributorBytes[0] = message.sysExCmdPayload()[0];
     distributorBytes[1] = message.sysExCmdPayload()[1];
-    return MidiMessage(m_src,m_dest,distributorBytes.data(),distributorBytes.size());
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),distributorBytes.data(),distributorBytes.size());
 }
 
 //Respond with the requested Distributor Channel Config
@@ -314,7 +331,7 @@ MidiMessage MessageHandler::sysExGetDistributorChannels(MidiMessage& message){
     uint16_t channels = getDistributor(message.sysExDistributorID()).getChannels();
     const uint8_t bytesToSend[2] = {static_cast<uint8_t>( channels >> 7) & 0x7F, 
                               static_cast<uint8_t>( channels >> 0) & 0x7F};
-    return MidiMessage(m_src,m_dest,bytesToSend,2);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),bytesToSend,2);
 }
 
 //Respond with the requested Distributor Instrument Config
@@ -324,7 +341,7 @@ MidiMessage MessageHandler::sysExGetDistributorInstruments(MidiMessage& message)
                               static_cast<uint8_t>( instruments >> 14) & 0x7F,
                               static_cast<uint8_t>( instruments >> 7) & 0x7F,
                               static_cast<uint8_t>( instruments >> 0) & 0x7F};
-    return MidiMessage(m_src,m_dest,bytesToSend,4);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),bytesToSend,4);
 }
 
 //Configure the designated Distributor's Channels

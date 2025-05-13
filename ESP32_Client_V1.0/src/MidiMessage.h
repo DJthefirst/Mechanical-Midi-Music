@@ -12,7 +12,7 @@ using std::int8_t;
 using std::int16_t;
 
 constexpr uint16_t MAX_PACKET_LENGTH = 128; //256
-constexpr uint8_t SYSEX_HeaderSize = 6;
+constexpr uint8_t SYSEX_HeaderSize = 7; //Header size of SysEx message
 
 struct MidiMessage
 {
@@ -24,7 +24,7 @@ struct MidiMessage
     MidiMessage() {};
 
     //Generate SysEx Midi Message from MMM Message
-    MidiMessage(uint16_t src, uint16_t dest, const uint8_t payload[], uint8_t payloadLength) {
+    MidiMessage(uint16_t src, uint16_t dest, uint8_t msgId, const uint8_t payload[], uint8_t payloadLength) {
         
         //Midi Message Header SysExStart, MidiID, DeviceID_1, DeviceID_0.
         const std::array<uint8_t, 2> header = {0xF0, SYSEX_ID};
@@ -35,6 +35,7 @@ struct MidiMessage
         buffer[3] = (src & 0x7F);
         buffer[4] = (dest >> 7) & 0x7F;
         buffer[5] = (dest & 0x7F);
+        buffer[6] = (msgId);
 
         //Midi SysEx Message Payload
         std::copy(payload, payload+payloadLength, buffer.begin()+SYSEX_HeaderSize);

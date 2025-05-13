@@ -6,8 +6,9 @@ using System.Reflection.Metadata;
 
 //SYSEX Custom Protocal
 public struct SysEx {
+	public const int Start = 0xF0;
 
-    public const int AddrBroadcast = 0; 
+	public const int AddrBroadcast = 0; 
     public const int AddrController = 0x3FFF; //14 bit
 
     public const byte ManufacturerID = 0x7D; //Educational MIDI ID
@@ -15,8 +16,9 @@ public struct SysEx {
     public const byte DeviceReady = 0x00;
     public const byte ResetDeviceConfig = 0x01;
     public const byte DiscoverDevices = 0x02;
+	public const byte Message = 0x03;
 
-    public const byte GetDeviceConstructWithDistributors = 0x10;
+	public const byte GetDeviceConstructWithDistributors = 0x10;
     public const byte GetDeviceConstruct = 0x11;
     public const byte GetDeviceName = 0x12;
     public const byte GetDeviceBoolean = 0x13;
@@ -26,28 +28,28 @@ public struct SysEx {
     public const byte SetDeviceName = 0x22;
     public const byte SetDeviceBoolean = 0x23;
 
-    public const byte RemoveDistributor = 0x30;
-    public const byte RemoveAllDistributors = 0x40;
-    public const byte GetNumOfDistributors = 0x31;
-    public const byte GetAllDistributors = 0x41;
-    public const byte AddDistributor = 0x32;
-    public const byte ToggleMuteDistributor = 0x42;
+	public const byte GetNumOfDistributors = 0x30;
+	public const byte AddDistributor = 0x31;
+	public const byte GetAllDistributors = 0x32;
+	public const byte RemoveDistributor = 0x33;
+    public const byte RemoveAllDistributors = 0x34;
+	public const byte ToggleMuteDistributor = 0x35;
 
-    public const byte GetDistributorConstruct = 0x34;
-    public const byte GetDistributorChannels = 0x35;
-    public const byte GetDistributorInstruments = 0x36;
-    public const byte GetDistributorMethod = 0x37;
-    public const byte GetDistributorBoolValues = 0x38;
-    public const byte GetDistributorMinMaxNotes = 0x39;
-    public const byte GetDistributorNumPolyphonicNotes = 0x3A;
+    public const byte GetDistributorConstruct = 0x40;
+    public const byte GetDistributorChannels = 0x41;
+    public const byte GetDistributorInstruments = 0x42;
+    public const byte GetDistributorMethod = 0x43;
+    public const byte GetDistributorBoolValues = 0x44;
+    public const byte GetDistributorMinMaxNotes = 0x45;
+    public const byte GetDistributorNumPolyphonicNotes = 0x46;
 
-    public const byte SetDistributor = 0x44;
-    public const byte SetDistributorChannels = 0x45;
-    public const byte SetDistributorInstruments = 0x46;
-    public const byte SetDistributorMethod = 0x47;
-    public const byte SetDistributorBoolValues = 0x48;
-    public const byte SetDistributorMinMaxNotes = 0x49;
-    public const byte SetDistributorNumPolyphonicNotes = 0x4A;
+	public const byte SetDistributorConstruct = 0x50;
+	public const byte SetDistributorChannels = 0x51;
+    public const byte SetDistributorInstruments = 0x52;
+    public const byte SetDistributorMethod = 0x53;
+    public const byte SetDistributorBoolValues = 0x54;
+    public const byte SetDistributorMinMaxNotes = 0x55;
+    public const byte SetDistributorNumPolyphonicNotes = 0x56;
 }
 
 public class SysExMsg
@@ -150,7 +152,7 @@ internal class DeviceConfig
                 break;
             case SysEx.GetDistributorNumPolyphonicNotes:
                 break;
-            case SysEx.SetDistributor: 
+            case SysEx.SetDistributorConstruct: 
                 break;
             case SysEx.SetDistributorChannels: 
                 break;
@@ -178,13 +180,15 @@ internal class DeviceConfig
     }
         public static void SendMessage(int destinationID, byte msgType ,List<byte> payload)
     {
-        byte[] header = [ 0xF0,
+        byte[] header = [ 
+            SysEx.Start,
             SysEx.ManufacturerID,
             0x7F, //source Destination
             0x7F, //source Destination
             (byte)(destinationID >> 7) ,
             (byte)(destinationID & 0x7F),
-            msgType];
+            msgType
+        ];
         byte[] tail = [0xF7];
         byte[] buffer = header.Concat(payload).Concat(tail).ToArray();
         MidiCore.SendMsg(buffer, 0, buffer.Length, 0);

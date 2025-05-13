@@ -25,6 +25,8 @@ using std::int8_t;
   #include "Configs/StepperSynthStacked.h"
   //#include "Configs/ExampleConfig.h"
 
+  //#include "Configs/AD9833.h"
+
   //#include "Configs/Test_ESP32_S3.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

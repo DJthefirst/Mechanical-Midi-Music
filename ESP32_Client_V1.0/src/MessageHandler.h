@@ -59,6 +59,7 @@ private:
     //SysEx functions
     MidiMessage sysExDeviceReady(MidiMessage& message);
     void sysExResetDeviceConfig(MidiMessage& message);
+    MidiMessage sysExDiscoverDevices(MidiMessage& message);
 
     MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
     MidiMessage sysExGetDeviceConstruct(MidiMessage& message);

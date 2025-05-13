@@ -1,10 +1,10 @@
 /*
- * StepperSynth.h
+ * AD9833.h
  *
- * This is an instrument with an array of 10 Stepper Motors
- * 
+ * A simple wrapper for the AD9833 Signal Generator
  * 
  */
+
 
 #pragma once
 #include <array>
@@ -12,20 +12,19 @@
 //---------- Device Configuration ----------
 
     //Instrument type
-    constexpr Instrument INSTRUMENT_TYPE = Instrument::StepperMotor;
+    constexpr Instrument INSTRUMENT_TYPE = Instrument::PWM;
     //Platform type
     constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
     //Absolute max number of Polyphonic notes is 16
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
-    //Max Number of Instrument groups is 32
+    //Max Number of Instruments is 32
     constexpr uint8_t NUM_INSTRUMENTS = 5; 
-    //Multiplies Instrument groups into individual instruments
-    constexpr uint8_t NUM_SUBINSTRUMENTS = 2; 
+    //Multiplies Instruments into individual sub instruments
+    constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
     //Absolute max number of Instruments is 128???
     constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENTS * NUM_SUBINSTRUMENTS; 
 
-    //Absolute Lowest Note Min=0
     constexpr uint8_t MIN_MIDI_NOTE = 36; 
     //Absolute Highest Note Max=127
     constexpr uint8_t MAX_MIDI_NOTE = 83;
@@ -34,17 +33,18 @@
     //Firmware Version 14bit
     constexpr uint16_t FIRMWARE_VERSION = 04;
     //Pinout
-    constexpr std::array<uint8_t,14> pins = {25,27,26,18,33,32,19,21,22,23,2,4,16,13};
+    constexpr std::array<uint8_t,8> pins = {2,4,18,19,21,22,23,32};
 
     //Interupt frequency. A smaller resolution produces more accurate notes but leads to instability.
     constexpr int TIMER_RESOLUTION = 8; //40 Default
 
     #include "Networks/NetworkSerial.h"
-    #include "Networks/NetworkUSB.h"
-    #include "Networks/NetworkUDP.h"
     #include "Networks/NetworkDIN.h"
+    #include "Networks/NetworkUDP.h"
+    #include "Networks/NetworkUSB.h"
 
-    #include "Instruments/DJthefirst/StepperSynthStacked.h"
+    #include "Instruments/Default/InstrAD9833.h"
+
 
 //---------- Uncomment Your Selected COM Type ----------
 
@@ -55,9 +55,10 @@
 
     #define MMM_NETWORK_SERIAL
 
-//---------- Uncomment Your Selected Instrument Type ----------
 
-    using instrumentType = StepperSynthStacked;
+//---------- Uncomment Your Selected Instrument Type ----------
+    
+    using instrumentType = InstrAD9833;
 
 //---------- Uncomment Your Desired Extras ----------
 
@@ -69,10 +70,11 @@
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-        #define LED_PIN     18
-        #define NUM_LEDS    50
-        #define BRIGHTNESS  255
-        #define LED_TYPE    WS2811
-        #define COLOR_ORDER GRB
-        #define UPDATES_PER_SECOND 100
+      #define LED_PIN     33
+      #define NUM_LEDS    8
+      #define BRIGHTNESS  255
+      #define LED_TYPE    WS2811
+      #define COLOR_ORDER GRB
+      #define UPDATES_PER_SECOND 100
     #endif
+

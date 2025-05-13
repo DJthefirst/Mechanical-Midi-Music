@@ -78,7 +78,7 @@ void setup() {
   instrumentController.resetAll();
 
   //Send Device Ready to Connect
-  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, &SYSEX_DeviceReady, 1));
+  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, SYSEX_DeviceReady, nullptr, 0));
 }
 
 //Periodicaly Read Incoming Messages
