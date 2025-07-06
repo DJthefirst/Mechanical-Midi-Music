@@ -1,4 +1,4 @@
-export const SYSEX_RegExpMsg = /F07D(?:[0-7][0-9a-fA-F]){2}7F7F((?:[0-7][0-9a-fA-F])*)F7/di;
+export const SYSEX_RegExpMsg = /F07D(?:[0-7][0-9a-fA-F]){2}7F7F(?:[0-7][0-9a-fA-F]){1}((?:[0-7][0-9a-fA-F])*)F7/di;
 export const SYSEX_RegExpEnd = /^(?:[0-9a-fA-F][0-9a-fA-F])*F7/di;
 
 export const SYSEX_START = 'F07D';
