@@ -20,6 +20,7 @@
 // static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
 // static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
 // static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
+// static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
 // static std::array<bool,MAX_NUM_INSTRUMENTS> m_currentState; //IO
 // static std::array<bool,MAX_NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
 
@@ -66,6 +67,7 @@
 //         m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
 //         double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
 //         m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
+//         m_noteCh[instrument] = channel;
 //         m_numActiveNotes++;
 //         setInstumentLedOn(instrument, channel, note, velocity);
 //         return;
@@ -81,6 +83,7 @@
 //         m_notePeriod[instrument] = 0;
 //         m_activePeriod[instrument] = 0;
 //         digitalWrite(pins[instrument + OFFSET_PINS], 0);
+//         m_noteCh[instrument] = -1; // -1 indicates no channel
 //         m_numActiveNotes--;
 //         setInstumentLedOff(instrument);
 //         return;
@@ -89,6 +92,7 @@
 
 // void StepperA4988::stopAll(){
 //     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+//     m_noteCh.fill(-1); // -1 indicates no channel
 //     m_numActiveNotes = 0;
 //     m_activeNotes = {};
 //     m_notePeriod = {};
@@ -191,6 +195,7 @@
 // void StepperA4988::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
 //     m_pitchBend[channel] = bend; 
 //     if(m_notePeriod[instrument] == 0) return;
+//     if(m_noteCh[instrument] != channel) return;
 //     //Calculate Pitch Bend
 //     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
 //     m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);

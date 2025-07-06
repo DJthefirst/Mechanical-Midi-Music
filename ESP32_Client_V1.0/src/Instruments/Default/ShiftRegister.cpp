@@ -13,6 +13,7 @@ static uint8_t m_numActiveNotes;
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_NOTES> m_activeDuration; //Note Played
 static std::array<uint16_t,MAX_NUM_NOTES> m_currentTick; //Timeing
+static std::array<uint8_t,MAX_NUM_NOTES> m_noteCh; //Midi Channel
 static std::array<bool,MAX_NUM_NOTES> m_currentState; //IO
 
 ShiftRegister::ShiftRegister()
@@ -41,6 +42,7 @@ void ShiftRegister::reset(uint8_t notePos)
 
 void ShiftRegister::resetAll()
 {
+    m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
     m_activeDuration = {};
     m_currentTick = {};
@@ -63,6 +65,7 @@ void ShiftRegister::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,
     m_currentTick[notePos] = 0;
     m_currentState[notePos] = HIGH;
     updateShiftRegister();
+    m_noteCh[instrument] = channel;
     m_numActiveNotes++;
     return;
     
@@ -74,6 +77,7 @@ void ShiftRegister::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     uint8_t notePos = note - startNote;
     if (!m_currentState[notePos]) return;
     reset(notePos);
+    m_noteCh[instrument] = -1; // -1 indicates no channel
     m_numActiveNotes--;
     return;
 }

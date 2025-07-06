@@ -13,6 +13,7 @@ static uint8_t m_numActiveNotes;
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_NOTES> m_activeDuration; //Note Played
 static std::array<uint16_t,MAX_NUM_NOTES> m_currentTick; //Timeing
+static std::array<uint8_t,MAX_NUM_NOTES> m_noteCh; //Midi Channel
 static std::array<bool,MAX_NUM_NOTES> m_currentState; //IO
 
 DrumSimple::DrumSimple()
@@ -40,6 +41,7 @@ void DrumSimple::reset(uint8_t notePos)
 
 void DrumSimple::resetAll()
 {
+    m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
     m_activeDuration = {};
     m_currentTick = {};
@@ -61,6 +63,7 @@ void DrumSimple::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, ui
     // digitalWrite(pins[notePos], HIGH);
     m_currentState[notePos] = !m_currentState[notePos];
     digitalWrite(pins[notePos], m_currentState[notePos]);
+    m_noteCh[instrument] = channel;
     m_numActiveNotes++;
     return;
     
@@ -74,6 +77,7 @@ void DrumSimple::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         if (!m_currentState[notePos]) return;
         reset(notePos);
     }
+    m_noteCh[instrument] = -1; // -1 indicates no channel
     m_numActiveNotes--;
     return;
 }

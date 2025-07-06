@@ -42,6 +42,7 @@ const uint8_t RegisterMap[MAX_NUM_REGISTERS] = {255,255, 14,255, 13,255, 12, 11,
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_REGISTERS> m_activeDuration; //Note Played
 static std::array<uint16_t,MAX_NUM_REGISTERS> m_currentTick; //Timeing
+static std::array<uint8_t,MAX_NUM_REGISTERS> m_noteCh; //Midi Channel
 static std::array<bool,MAX_NUM_REGISTERS> m_currentState; //IO
 
 Dulcimer::Dulcimer()
@@ -75,6 +76,7 @@ void Dulcimer::reset(uint8_t note)
 
 void Dulcimer::resetAll()
 {
+    m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
     m_activeDuration = {};
     m_currentTick = {};
@@ -102,6 +104,7 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     m_currentState[notePos] = HIGH;
     updateShiftRegister();
     setInstumentLedOn(instrument, channel, notePos, velocity);
+    m_noteCh[instrument] = channel;
     m_numActiveNotes++;
     return;
     
@@ -114,6 +117,7 @@ void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     setInstumentLedOff(notePos);
     if (!m_currentState[notePos]) return;
     reset(notePos);
+    m_noteCh[instrument] = -1; // -1 indicates no channel
     m_numActiveNotes--;
     return;
 }

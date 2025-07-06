@@ -26,7 +26,9 @@ AD9833 AD[NUM_AD9833] =
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
 static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
+static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
 static uint8_t m_numActiveNotes;
+
 
 //Instrument Attributes
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base Note
@@ -71,6 +73,7 @@ void InstrAD9833::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
         //double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         //m_activeFrequency[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_activeFrequency[instrument] = noteFrequency[note];
+        m_noteCh[instrument] = channel;
         m_numActiveNotes++;
         setInstrumentFrequency(instrument,noteFrequency[note]);
         //setInstumentLedOn(instrument, channel, note, velocity);
@@ -85,6 +88,7 @@ void InstrAD9833::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         m_noteFrequency[instrument] = 0;
         m_activeFrequency[instrument] = 0;
 
+        m_noteCh[instrument] = -1; // -1 indicates no channel
         m_numActiveNotes--;
         setInstrumentFrequency(instrument,0);
         //setInstumentLedOff(instrument);
@@ -94,6 +98,7 @@ void InstrAD9833::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 
 void InstrAD9833::stopAll(){
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+    m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
     m_activeNotes = {};
     m_noteFrequency = {};
@@ -153,6 +158,7 @@ bool InstrAD9833::isNoteActive(uint8_t instrument, uint8_t note)
 void InstrAD9833::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend; 
     if(m_noteFrequency[instrument] == 0) return;
+    if(m_noteCh[instrument] != channel) return;
     //Calculate Pitch Bend
     //double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
     //m_activePeriod[instrument] = m_notePeriod[instrument] / pow(2.0, BEND_OCTAVES * bendDeflection);
