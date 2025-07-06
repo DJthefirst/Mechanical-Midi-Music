@@ -17,7 +17,7 @@
 //     //Local MIDI Device Atributes
 //     uint8_t m_program = 0;
 //     uint8_t m_channelPressure = 0;
-//     uint16_t m_pitchBend[MAX_NUM_INSTRUMENTS];
+//     uint16_t m_pitchBend[NUM_MIDI_CH];
 
 
 // public: 
@@ -30,7 +30,7 @@
 //     void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
 //     void stopAll() override;
 
-//     void setPitchBend(uint8_t instrument, uint16_t value) override;
+//     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;
 
 //     uint8_t getNumActiveNotes(uint8_t instrument) override;
 //     bool isNoteActive(uint8_t instrument, uint8_t note) override;

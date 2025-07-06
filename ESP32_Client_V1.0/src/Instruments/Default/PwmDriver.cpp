@@ -30,7 +30,7 @@ PwmDriver::PwmDriver()
     InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
-    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
 }
 
 void PwmDriver::reset(uint8_t instrument)
@@ -53,7 +53,7 @@ void PwmDriver::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  ui
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
         m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
-        double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
+        double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         setInstumentLedOn(instrument, channel, note, velocity);
@@ -75,7 +75,7 @@ void PwmDriver::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 }
 
 void PwmDriver::stopAll(){
-    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_numActiveNotes = 0;
     m_activeNotes = {};
     m_notePeriod = {};
@@ -153,8 +153,8 @@ bool PwmDriver::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend){
-    m_pitchBend[instrument] = bend; 
+void PwmDriver::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+    m_pitchBend[channel] = bend; 
     if(m_notePeriod[instrument] == 0) return;
     //Calculate Pitch Bend
     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;

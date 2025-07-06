@@ -30,7 +30,7 @@ public:
 
     //Optional Setters
     virtual void setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
-    virtual void setPitchBend(uint8_t instrument, uint16_t value);
+    virtual void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel);
     virtual void setProgramChange(uint8_t value);
     virtual void setChannelPressure(uint8_t value);
     virtual void setModulationWheel(uint8_t value);

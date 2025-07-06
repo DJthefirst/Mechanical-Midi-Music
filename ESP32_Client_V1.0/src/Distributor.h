@@ -87,7 +87,7 @@ private:
     // void controlChangeEvent(uint8_t controller, uint8_t value);  --Implemented in MessageHandler--
     void programChangeEvent(uint8_t program);
     void channelPressureEvent( uint8_t velocity);
-    void pitchBendEvent(uint16_t pitchBend);
+    void pitchBendEvent(uint16_t pitchBend, uint8_t channel);
 
     // Returns the instument ID of the next instrument to be played.
     uint8_t nextInstrument();

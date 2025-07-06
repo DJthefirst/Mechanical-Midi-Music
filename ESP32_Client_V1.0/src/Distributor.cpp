@@ -49,7 +49,7 @@ void Distributor::processMessage(MidiMessage message)
         channelPressureEvent(message.buffer[1]);
         break;
     case(MIDI_PitchBend):
-        pitchBendEvent((message.buffer[1] << 7 | message.buffer[2]));
+        pitchBendEvent((message.buffer[1] << 7 | message.buffer[2]), m_currentChannel);
         break;
     case(MIDI_SysCommon):
         break;
@@ -109,11 +109,11 @@ void Distributor::channelPressureEvent(uint8_t Velocity)
 }
 
 //Update Each Instruments Pitch Bend Value
-void Distributor::pitchBendEvent(uint16_t pitchBend)
+void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
 {
     for(uint8_t i = 0; i < NUM_INSTRUMENTS; i++){
         if((m_instruments & (1 << i)) != 0){
-            (*m_ptrInstrumentController).setPitchBend(i, pitchBend);
+            (*m_ptrInstrumentController).setPitchBend(i, pitchBend, channel);
         }
     }
 }

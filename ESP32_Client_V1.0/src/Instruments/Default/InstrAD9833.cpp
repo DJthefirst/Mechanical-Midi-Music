@@ -45,7 +45,7 @@ InstrAD9833::InstrAD9833()
     delay(500); // Wait a half second for safety
 
     //Initalize Default values
-    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
 }
 
 void InstrAD9833::reset(uint8_t instrument)
@@ -68,7 +68,7 @@ void InstrAD9833::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
         m_noteFrequency[instrument] = noteFrequency[note];
-        //double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
+        //double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         //m_activeFrequency[instrument] = noteDoubleTicks[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_activeFrequency[instrument] = noteFrequency[note];
         m_numActiveNotes++;
@@ -93,7 +93,7 @@ void InstrAD9833::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 }
 
 void InstrAD9833::stopAll(){
-    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_numActiveNotes = 0;
     m_activeNotes = {};
     m_noteFrequency = {};
@@ -150,8 +150,8 @@ bool InstrAD9833::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void InstrAD9833::setPitchBend(uint8_t instrument, uint16_t bend){
-    m_pitchBend[instrument] = bend; 
+void InstrAD9833::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+    m_pitchBend[channel] = bend; 
     if(m_noteFrequency[instrument] == 0) return;
     //Calculate Pitch Bend
     //double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;

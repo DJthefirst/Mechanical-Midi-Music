@@ -109,6 +109,7 @@ constexpr uint8_t SYSEX_SetDistributorNumPolyphonicNotes = 0x56;
 
 //MIDI Constants
 constexpr uint16_t MIDI_CTRL_CENTER = 0x2000;
+constexpr uint8_t NUM_MIDI_CH = 16;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Enums

@@ -32,7 +32,7 @@ FloppyDrive::FloppyDrive()
     InterruptTimer::initialize(TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
-    std::fill_n(m_pitchBend, MAX_NUM_INSTRUMENTS, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
 }
 
 void FloppyDrive::reset(uint8_t instrument)
@@ -69,7 +69,7 @@ void FloppyDrive::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, u
     //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
         m_activeNotes[instrument] = (MSB_BITMASK | note);
         m_notePeriod[instrument] = NOTE_TICKS_DOUBLE[note];
-        double bendDeflection = ((double)m_pitchBend[instrument] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
+        double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
         m_activePeriod[instrument] = NOTE_TICKS_DOUBLE[note] / pow(2.0, BEND_OCTAVES * bendDeflection);
         m_numActiveNotes++;
         return;
@@ -185,8 +185,8 @@ bool FloppyDrive::isNoteActive(uint8_t instrument, uint8_t note)
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void FloppyDrive::setPitchBend(uint8_t instrument, uint16_t bend){
-    m_pitchBend[instrument] = bend;
+void FloppyDrive::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+    m_pitchBend[channel] = bend;
     if(m_notePeriod[instrument] == 0) return;
     //Calculate Pitch Bend
     double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;

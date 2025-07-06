@@ -13,7 +13,7 @@ bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
 void InstrumentController::setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
     //Not Yet Implemented
 }
-void InstrumentController::setPitchBend(uint8_t instrument, uint16_t bend){
+void InstrumentController::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     //Not Yet Implemented
 }
 void InstrumentController::setProgramChange(uint8_t value){
