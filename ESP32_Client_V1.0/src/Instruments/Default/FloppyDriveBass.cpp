@@ -1,5 +1,5 @@
 #include "Extras/AddrLED.h"
-#include "Instruments/Default/FloppyDriveStacked.h"
+#include "Instruments/Default/FloppyDriveBass.h"
 #include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
 
@@ -20,10 +20,10 @@ static std::array<bool,MAX_NUM_INSTRUMENTS> m_pinStateDir; //IO For Direction Pi
 
 static std::array<uint16_t,MAX_NUM_INSTRUMENTS> m_headPosition; //Position of Drive Head
 static const uint16_t m_minHeadPos = 0; 
-static const uint16_t m_maxHeadPos = 150; // 79 Tracks*2 for 3.5in or 49*2 for 5.25in
+static const uint16_t m_maxHeadPos = 80; // 79 Tracks*2 for 3.5in or 49*2 for 5.25in
 static const bool enableVelocity = false;
 
-FloppyDriveStacked::FloppyDriveStacked()
+FloppyDriveBass::FloppyDriveBass()
 {
     //Setup pins
     for(uint8_t i=0; i < pins.size(); i++){
@@ -39,12 +39,12 @@ FloppyDriveStacked::FloppyDriveStacked()
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
 }
 
-void FloppyDriveStacked::reset(uint8_t instrument)
+void FloppyDriveBass::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void FloppyDriveStacked::resetAll()
+void FloppyDriveBass::resetAll()
 {
     stopAll();
 
@@ -63,7 +63,7 @@ void FloppyDriveStacked::resetAll()
     }
 }
 
-void FloppyDriveStacked::playNote(uint8_t group, uint8_t note, uint8_t velocity, uint8_t channel)
+void FloppyDriveBass::playNote(uint8_t group, uint8_t note, uint8_t velocity, uint8_t channel)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -89,7 +89,7 @@ void FloppyDriveStacked::playNote(uint8_t group, uint8_t note, uint8_t velocity,
     //}
 }
 
-void FloppyDriveStacked::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
+void FloppyDriveBass::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[group] & (~MSB_BITMASK)) == note){
         m_activeNotes[group] = 0;
@@ -108,7 +108,7 @@ void FloppyDriveStacked::stopNote(uint8_t group, uint8_t note, uint8_t velocity)
     }
 }
 
-void FloppyDriveStacked::stopAll(){
+void FloppyDriveBass::stopAll(){
     m_numActiveNotes = 0;
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_noteCh.fill(-1); // -1 indicates no channel
@@ -139,9 +139,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 // #pragma GCC push_options (Legacy)
 // #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR FloppyDriveStacked::Tick()
+void ICACHE_RAM_ATTR FloppyDriveBass::Tick()
 #else
-void FloppyDriveStacked::tick()
+void FloppyDriveBass::tick()
 #endif
 {
     // Go through every Instrument
@@ -163,9 +163,9 @@ void FloppyDriveStacked::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR FloppyDriveStacked::togglePin(uint8_t instrument)
+void ICACHE_RAM_ATTR FloppyDriveBass::togglePin(uint8_t instrument)
 #else
-void FloppyDriveStacked::togglePin(uint8_t instrument)
+void FloppyDriveBass::togglePin(uint8_t instrument)
 #endif
 {
     //Increment/Decrement Head position
@@ -196,17 +196,17 @@ void FloppyDriveStacked::togglePin(uint8_t instrument)
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t FloppyDriveStacked::getNumActiveNotes(uint8_t instrument)
+uint8_t FloppyDriveBass::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool FloppyDriveStacked::isNoteActive(uint8_t instrument, uint8_t note)
+bool FloppyDriveBass::isNoteActive(uint8_t instrument, uint8_t note)
 {
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void FloppyDriveStacked::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+void FloppyDriveBass::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend;
     if(m_notePeriod[instrument] == 0) return;
     if(m_noteCh[instrument] != channel) return;
