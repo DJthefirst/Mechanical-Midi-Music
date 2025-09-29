@@ -106,17 +106,33 @@ void LocalStorage::ResetDeviceConfig(){
 
 //TODO Use Smart Pointer?
 std::string LocalStorage::GetDeviceName(){
-    std::string name(' ', 20);
-    err = ReadNvsBlob("Device_name", (uint8_t*)&name[0], 20);
+    // Read a fixed-size, space-padded name blob from NVS and convert to std::string
+    uint8_t tmp[DEVICE_NUM_NAME_BYTES];
+    // Initialize with null bytes to ensure trailing bytes are padded if stored blob is shorter
+    memset(tmp, 0x00, DEVICE_NUM_NAME_BYTES);
+    err = ReadNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
 
     if (err == ESP_ERR_NVS_NOT_FOUND){
         return Device::Name;
     }
+
+    // Convert to std::string and trim trailing spaces
+    std::string name(reinterpret_cast<char*>(tmp), DEVICE_NUM_NAME_BYTES);
+    size_t end = name.find_last_not_of(' ');
+    if (end != std::string::npos) name.erase(end + 1);
+    else name.clear();
+
     return name;
 }
 
 void LocalStorage::SetDeviceName(std::string name){ 
-    WriteNvsBlob("Device_name", (uint8_t*)(&name[0]), name.length());
+    // Write a fixed-size 20-byte space-padded blob to NVS
+    uint8_t tmp[DEVICE_NUM_NAME_BYTES];
+    // Initialize with spaces
+    memset(tmp, 0x20, DEVICE_NUM_NAME_BYTES);
+    size_t copyLen = std::min(name.length(), static_cast<size_t>(DEVICE_NUM_NAME_BYTES));
+    memcpy(tmp, name.c_str(), copyLen);
+    WriteNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
 }
 
 uint8_t LocalStorage::GetDeviceBoolean(){

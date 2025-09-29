@@ -8,6 +8,8 @@
 
 #include "MessageHandler.h"
 #include <Arduino.h>
+#include <cstring>  // For memcpy and strncpy
+#include <algorithm> // For std::min
 
 //Message Handler constructor used to pass in a ptr to the instrument controller.
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
@@ -196,7 +198,7 @@ void MessageHandler::processCC(MidiMessage& message)
                 m_ptrInstrumentController->setEffectCrtl_2(message.CC_Value());
                 break;
             case(MIDI_CC_DamperPedal):
-                m_distributors[i].setDamperPedal(message.CC_Value()> 64);
+                m_distributors[i].setDamperPedal(message.CC_Value()> 64); //Above 64 is ON else OFF
                 break;
             case(MIDI_CC_Mute):
                 m_ptrInstrumentController->stopAll();
@@ -276,8 +278,17 @@ MidiMessage MessageHandler::sysExGetDeviceConstruct(MidiMessage& message){
 
 //Respond with Device Name
 MidiMessage MessageHandler::sysExGetDeviceName(MidiMessage& message){
-    const uint8_t* name = reinterpret_cast<uint8_t*>(Device::Name.data());
-    return MidiMessage(m_src,m_dest,message.sysExCommand(),name,DEVICE_NUM_NAME_BYTES);
+    // Create a properly formatted buffer with null padding
+    uint8_t nameBuffer[DEVICE_NUM_NAME_BYTES];
+    
+    // Initialize entire buffer with null bytes
+    memset(nameBuffer, 0x00, DEVICE_NUM_NAME_BYTES);
+    
+    // Copy device name (up to the buffer size, ensuring we don't overflow)
+    size_t copyLength = std::min(Device::Name.length(), static_cast<size_t>(DEVICE_NUM_NAME_BYTES));
+    memcpy(nameBuffer, Device::Name.c_str(), copyLength);
+
+    return MidiMessage(m_src, m_dest, message.sysExCommand(), nameBuffer, DEVICE_NUM_NAME_BYTES);
 }
 
 //Respond with Device Boolean
@@ -294,9 +305,24 @@ void MessageHandler::sysExSetDeviceConstruct(MidiMessage& message){
 
 //Configure Device Name
 void MessageHandler::sysExSetDeviceName(MidiMessage& message){
-    char* deviceName = reinterpret_cast<char*>(message.sysExCmdPayload());
-    Device::Name = deviceName;
-    localStorageSetDeviceName(deviceName);
+    // Calculate payload length (total message length - SysEx header - end byte)
+    uint8_t payloadLength = message.length - SYSEX_HeaderSize - 1;
+    
+    // Safely create string from payload with length validation
+    std::string newName(reinterpret_cast<const char*>(message.sysExCmdPayload()), 
+                       std::min(payloadLength, static_cast<uint8_t>(DEVICE_NUM_NAME_BYTES - 1)));
+    
+    // Remove any null bytes from the end (clean up the string)
+    newName.erase(newName.find_last_not_of('\0') + 1);
+
+    // Assign the processed name (no padding needed for std::string)
+    Device::Name = newName;
+    
+    // Convert to C-string for local storage (ensure null termination)
+    char deviceNameBuffer[DEVICE_NUM_NAME_BYTES];
+    memset(deviceNameBuffer, 0x00, DEVICE_NUM_NAME_BYTES);
+    strncpy(deviceNameBuffer, newName.c_str(), DEVICE_NUM_NAME_BYTES - 1);
+    localStorageSetDeviceName(deviceNameBuffer);
 }
 
 //Configure Device Boolean
@@ -329,26 +355,26 @@ MidiMessage MessageHandler::sysExGetDistributorConstruct(MidiMessage& message){
 //Respond with the requested Distributor Channel Config
 MidiMessage MessageHandler::sysExGetDistributorChannels(MidiMessage& message){
     uint16_t channels = getDistributor(message.sysExDistributorID()).getChannels();
-    const uint8_t bytesToSend[2] = {static_cast<uint8_t>( channels >> 7) & 0x7F, 
-                              static_cast<uint8_t>( channels >> 0) & 0x7F};
+    const uint8_t bytesToSend[2] = {static_cast<uint8_t>(( channels >> 7) & 0x7F), 
+                              static_cast<uint8_t>(( channels >> 0) & 0x7F)};
     return MidiMessage(m_src,m_dest,message.sysExCommand(),bytesToSend,2);
 }
 
 //Respond with the requested Distributor Instrument Config
 MidiMessage MessageHandler::sysExGetDistributorInstruments(MidiMessage& message){
     uint32_t instruments = getDistributor(message.sysExDistributorID()).getInstruments();
-    const uint8_t bytesToSend[4] = {static_cast<uint8_t>( instruments >> 21) & 0x7F, 
-                              static_cast<uint8_t>( instruments >> 14) & 0x7F,
-                              static_cast<uint8_t>( instruments >> 7) & 0x7F,
-                              static_cast<uint8_t>( instruments >> 0) & 0x7F};
+    const uint8_t bytesToSend[4] = {static_cast<uint8_t>(( instruments >> 21) & 0x7F), 
+                              static_cast<uint8_t>(( instruments >> 14) & 0x7F),
+                              static_cast<uint8_t>(( instruments >> 7) & 0x7F),
+                              static_cast<uint8_t>(( instruments >> 0) & 0x7F)};
     return MidiMessage(m_src,m_dest,message.sysExCommand(),bytesToSend,4);
 }
 
 //Configure the designated Distributor's Channels
 void MessageHandler::sysExSetDistributorChannels(MidiMessage& message){
     uint16_t channels = ((message.sysExCmdPayload()[2] << 14) 
-                       & (message.sysExCmdPayload()[3] << 7) 
-                       & (message.sysExCmdPayload()[4] << 0));
+                       | (message.sysExCmdPayload()[3] << 7) 
+                       | (message.sysExCmdPayload()[4] << 0));
     getDistributor(message.sysExDistributorID()).setChannels(channels);
 }
 
@@ -374,7 +400,7 @@ void MessageHandler::sysExSetDistributorBoolValues(MidiMessage& message){
     
     getDistributor(message.sysExDistributorID()).setMuted((distributorBoolByte & DISTRIBUTOR_BOOL_MUTED) != 0);
     getDistributor(message.sysExDistributorID()).setDamperPedal((distributorBoolByte & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0);
-    getDistributor(message.sysExDistributorID()).setPolyphonic((distributorBoolByte & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0);
+    getDistributor(message.sysExDistributorID()).setPolyphonic((distributorBoolByte & DISTRIBUTOR_BOOL_POLYPHONIC) != 0);
     getDistributor(message.sysExDistributorID()).setNoteOverwrite((distributorBoolByte & DISTRIBUTOR_BOOL_NOTEOVERWRITE) != 0);
 }
 
@@ -439,6 +465,7 @@ void MessageHandler::setDistributor(uint8_t data[])
 void MessageHandler::removeDistributor(uint8_t id)
 {
     m_ptrInstrumentController->stopAll(); //Safety Stops all Playing Notes
+    if(m_distributors.size() == 0) return;
     if(id >= m_distributors.size()) id = m_distributors.size();
     m_distributors.erase(m_distributors.begin() + id);
     localStorageRemoveDistributor(id);
@@ -454,6 +481,7 @@ void MessageHandler::removeAllDistributors()
 
 //Returns the indexed Distributor from the Distribution Pool
 Distributor& MessageHandler::getDistributor(uint8_t index){
+    if(index >= m_distributors.size()) index = m_distributors.size()-1;
     return (m_distributors[index]);
 }
 

@@ -17,7 +17,7 @@ using std::int8_t;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //---------- Uncomment Your Selected Device Config ----------
-
+//#include "Configs/FloppySynth.h"
   //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
   //#include "Configs/TestInstrument.h"
@@ -35,7 +35,8 @@ using std::int8_t;
 
 //Device Construct Constants
 constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
-constexpr uint8_t DEVICE_NUM_CFG_BYTES = 32;
+constexpr uint8_t DEVICE_NAME_OFFSET= 20;
+constexpr uint8_t DEVICE_NUM_CFG_BYTES = 40;
 constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
 
 namespace Device{
@@ -119,9 +120,9 @@ namespace Device{
         deviceObj[9] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
         deviceObj[10] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
 
-        for(uint8_t i = 0; i < 20; i++){
-            if (Device::Name.size() >  i) deviceObj[12+i] = Device::Name[i];
-            else deviceObj[12+i] = 0;
+        for(uint8_t i = 0; i < DEVICE_NUM_NAME_BYTES; i++){
+            if (Device::Name.size() >  i) deviceObj[DEVICE_NAME_OFFSET+i] = Device::Name[i];
+            else deviceObj[DEVICE_NAME_OFFSET+i] = 0;
         }
 
         return deviceObj;

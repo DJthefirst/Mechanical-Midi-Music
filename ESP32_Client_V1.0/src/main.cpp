@@ -32,6 +32,8 @@ void setup() {
   {
     //Device Config
     Device::Name = LocalStorage::get().GetDeviceName();
+    // Normalize the stored blob to ensure consistent 20-byte space-padded format
+    LocalStorage::get().SetDeviceName(Device::Name);
     //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
     //Distributor Config
