@@ -100,8 +100,39 @@ void LocalStorage::WriteNvsU8(const char *key, uint8_t value){
     nvs_close(handle);
 }
 
+bool LocalStorage::EnsureNVSInitialized(){
+    // Check if NVS is properly initialized by attempting a simple operation
+    nvs_handle_t testHandle;
+    esp_err_t err = nvs_open("test", NVS_READONLY, &testHandle);
+    
+    if (err == ESP_ERR_NVS_NOT_INITIALIZED) {
+        // NVS is not initialized, initialize it
+        err = nvs_flash_init();
+        if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+            // NVS partition was truncated and needs to be erased
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            err = nvs_flash_init();
+        }
+        if (err != ESP_OK) {
+            return false;
+        }
+    } else if (err == ESP_OK) {
+        // NVS is working, close the test handle
+        nvs_close(testHandle);
+    }
+    // If err is ESP_ERR_NVS_NOT_FOUND, that's normal - the "test" namespace doesn't exist
+    
+    return true;
+}
+
 void LocalStorage::ResetDeviceConfig(){
     nvs_flash_erase();
+    // Reinitialize NVS after erasing
+    err = nvs_flash_init();
+    if (err != ESP_OK) {
+        // Handle any initialization errors
+        ESP_ERROR_CHECK(err);
+    }
 }
 
 //TODO Use Smart Pointer?
@@ -128,8 +159,8 @@ std::string LocalStorage::GetDeviceName(){
 void LocalStorage::SetDeviceName(std::string name){ 
     // Write a fixed-size 20-byte space-padded blob to NVS
     uint8_t tmp[DEVICE_NUM_NAME_BYTES];
-    // Initialize with spaces
-    memset(tmp, 0x20, DEVICE_NUM_NAME_BYTES);
+    memset(tmp, 0x20, DEVICE_NUM_NAME_BYTES); // Initialize with spaces
+
     size_t copyLen = std::min(name.length(), static_cast<size_t>(DEVICE_NUM_NAME_BYTES));
     memcpy(tmp, name.c_str(), copyLen);
     WriteNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);

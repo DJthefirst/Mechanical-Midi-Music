@@ -17,7 +17,7 @@ using std::int8_t;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //---------- Uncomment Your Selected Device Config ----------
-//#include "Configs/FloppySynth.h"
+  //#include "Configs/FloppySynth.h"
   //#include "Configs/AirCompressor.h"
   //#include "Configs/Dulcimer.h"
   //#include "Configs/TestInstrument.h"

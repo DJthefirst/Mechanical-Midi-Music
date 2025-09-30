@@ -21,7 +21,7 @@ private:
 
 public:
     void Test();
-
+    bool EnsureNVSInitialized();
     void ResetDeviceConfig();
     void GetDeviceConstruct();
     void SetDeviceConstruct();

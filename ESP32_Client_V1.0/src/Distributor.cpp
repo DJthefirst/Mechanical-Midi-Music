@@ -370,6 +370,10 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     return distributorObj;
 }
 
+bool Distributor::getMuted(){
+    return m_muted;
+}
+
 //Returns Distributor Channels
 uint16_t Distributor::getChannels(){
     return m_channels;
@@ -410,6 +414,10 @@ void Distributor::setDistributor(uint8_t data[]){
 //Configures Distributor Distribution Method
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     m_distributionMethod = distribution;
+}
+
+void Distributor::toggleMuted(){
+    m_muted = !m_muted;
 }
 
 //Configures Distributor Boolean

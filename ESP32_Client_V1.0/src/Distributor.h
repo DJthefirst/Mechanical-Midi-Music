@@ -24,7 +24,7 @@ using std::int16_t;
 using std::int32_t;
 
 //Size of Distributor when convered to Byte array
-static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 16;
+static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
 
 static const uint8_t DISTRIBUTOR_BOOL_MUTED         = 0x01;
 static const uint8_t DISTRIBUTOR_BOOL_DAMPERPEDAL   = 0x02;
@@ -64,6 +64,7 @@ public:
     /* Returns a Byte array representing this Distributor */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
+    bool getMuted();
     uint16_t getChannels();
     uint32_t getInstruments();
 
@@ -77,6 +78,8 @@ public:
     void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
     void setChannels(uint16_t channels);
     void setInstruments(uint32_t instruments);
+
+    void toggleMuted();
 
 private:
 

@@ -118,7 +118,8 @@ std::optional<MidiMessage> MessageHandler::processSysEX(MidiMessage& message)
             setDistributor(message.sysExCmdPayload());
             return {};
         case (SYSEX_ToggleMuteDistributor):
-            return {};//TODO
+            getDistributor(message.sysExDistributorID()).toggleMuted();
+            return {};
 
         case (SYSEX_GetDistributorConstruct):
             return sysExGetDistributorConstruct(message);
@@ -260,6 +261,7 @@ void MessageHandler::sysExResetDeviceConfig(MidiMessage& message){
     localStorageReset();
     char name[DEVICE_NUM_NAME_BYTES] = "New Device";
     localStorageSetDeviceName(name);
+    Device::Name = "New Device";
     return;
 }
 

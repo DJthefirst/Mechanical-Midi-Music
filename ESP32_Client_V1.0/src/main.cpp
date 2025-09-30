@@ -30,18 +30,24 @@ void setup() {
   //TODO move into local Storage?
   #ifdef EXTRA_LOCAL_STORAGE
   {
-    //Device Config
-    Device::Name = LocalStorage::get().GetDeviceName();
-    // Normalize the stored blob to ensure consistent 20-byte space-padded format
-    LocalStorage::get().SetDeviceName(Device::Name);
-    //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
+    // Ensure NVS is properly initialized
+    if (!LocalStorage::get().EnsureNVSInitialized()) {
+      // Handle NVS initialization failure - could log error or use defaults
+      // For now, continue with default values in Device namespace
+    } else {
+      //Device Config - only load if NVS is working
+      Device::Name = LocalStorage::get().GetDeviceName();
+      // Normalize the stored blob to ensure consistent 20-byte space-padded format
+      LocalStorage::get().SetDeviceName(Device::Name);
+      //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
-    //Distributor Config
-    uint8_t numDistributors = LocalStorage::get().GetNumOfDistributors();
-    for(uint8_t i = 0; i < numDistributors; i++){
-      uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-      LocalStorage::get().GetDistributorConstruct(i,distributorData);
-      messageHandler.addDistributor(distributorData);
+      //Distributor Config
+      uint8_t numDistributors = LocalStorage::get().GetNumOfDistributors();
+      for(uint8_t i = 0; i < numDistributors; i++){
+        uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
+        LocalStorage::get().GetDistributorConstruct(i,distributorData);
+        messageHandler.addDistributor(distributorData);
+      }
     }
   }
   #endif
