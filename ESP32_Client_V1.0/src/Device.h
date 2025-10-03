@@ -22,8 +22,9 @@ using std::int8_t;
   //#include "Configs/Dulcimer.h"
   //#include "Configs/TestInstrument.h"
   //#include "Configs/FloppyDrives.h"
-  #include "Configs/StepperSynthStacked.h"
+  //#include "Configs/StepperSynthStacked.h"
   //#include "Configs/ExampleConfig.h"
+  #include "Configs/ESP32_PWM.h"
 
   //#include "Configs/AD9833.h"
 
