@@ -94,6 +94,12 @@ private:
 
     // Returns the instument ID of the next instrument to be played.
     uint8_t nextInstrument();
+    // Split implementations for each distribution method (refactor helpers)
+    uint8_t nextInstrumentRoundRobinBalance();
+    uint8_t nextInstrumentRoundRobin();
+    uint8_t nextInstrumentAscending();
+    uint8_t nextInstrumentDescending();
+    uint8_t nextInstrumentStraightThrough();
     // Returns the instrument ID that is playing the given note else NONE(-1) if no instrument found.
     uint8_t checkForNote(uint8_t note);
 
@@ -102,4 +108,5 @@ private:
 
     /* Returns True if a Distributor Handles the given Instrument. */
     bool distributorHasInstrument(int instrumentId);
+    bool channelEnabled(uint8_t channel);
 };

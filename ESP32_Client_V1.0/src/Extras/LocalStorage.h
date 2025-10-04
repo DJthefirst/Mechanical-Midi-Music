@@ -27,6 +27,8 @@ public:
     void SetDeviceConstruct();
     std::string GetDeviceName();
     void SetDeviceName(std::string name);
+    uint16_t GetDeviceID();
+    void SetDeviceID(uint16_t id);
     uint8_t GetDeviceBoolean();
     void SetDeviceBoolean(uint8_t deviceBoolean);
     uint8_t GetNumOfDistributors();

@@ -2,7 +2,6 @@
 
 #include "Constants.h"
 #include "Instruments/InstrumentController.h"
-#include "Device.h"
 
 #include <cstdint>
 #include <array>
@@ -11,11 +10,9 @@ using std::int8_t;
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin using LedC */
 class ESP32_PwmTimer : public InstrumentController{
 public:
-
+    static constexpr Instrument Type = Instrument::PWM;
 private:
-    // LedC channel management
-    std::array<uint8_t, MAX_NUM_INSTRUMENTS> m_ledcChannels;
-    std::array<bool, MAX_NUM_INSTRUMENTS> m_channelActive;
+    // LedC channel management (arrays moved to .cpp file due to Config dependency)
     
     void initializeLedcChannel(uint8_t instrument, uint8_t pin);
     void setFrequency(uint8_t instrument, double frequency);

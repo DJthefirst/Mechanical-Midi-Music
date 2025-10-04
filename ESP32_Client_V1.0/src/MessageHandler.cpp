@@ -14,6 +14,8 @@
 //Message Handler constructor used to pass in a ptr to the instrument controller.
 MessageHandler::MessageHandler(InstrumentController* ptrInstrumentController){
     m_ptrInstrumentController = ptrInstrumentController;
+    // Ensure source ID matches current runtime device ID
+    m_src = Device::GetDeviceID();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +66,7 @@ std::optional<MidiMessage> MessageHandler::processSysEX(MidiMessage& message)
     //Check MIDI ID
     if(message.sysExID() != SYSEX_ID) return {};
     //Check Device ID or Global ID 0x00;
-    if(message.DestinationID() != SYSEX_DEV_ID && message.DestinationID() != 0x00) return {};
+    if(message.DestinationID() != Device::GetDeviceID() && message.DestinationID() != 0x00) return {};
     m_dest = message.SourceID();
 
     switch(message.sysExCommand()){
@@ -90,18 +92,28 @@ std::optional<MidiMessage> MessageHandler::processSysEX(MidiMessage& message)
         case (SYSEX_GetDeviceBoolean):
             return sysExGetDeviceBoolean(message);
 
+        case (SYSEX_GetDeviceID):
+            return sysExGetDeviceID(message);
+
         case (SYSEX_SetDeviceConstructWithDistributors):
             return {}; //TODO
 
         case (SYSEX_SetDeviceConstruct):
             sysExSetDeviceConstruct(message); 
             return {};
+
+        case (SYSEX_SetDeviceID):
+            sysExSetDeviceID(message);
+            return {};
+
         case (SYSEX_SetDeviceName):
             sysExSetDeviceName(message); 
             return {};
+            
         case (SYSEX_SetDeviceBoolean):
             sysExSetDeviceBoolean(message);
             return {};
+
         case (SYSEX_RemoveDistributor):
             removeDistributor(message.sysExDistributorID());
             return {};
@@ -268,8 +280,9 @@ void MessageHandler::sysExResetDeviceConfig(MidiMessage& message){
 //Respond with device ready
 MidiMessage MessageHandler::sysExDiscoverDevices(MidiMessage& message){
     std::array<std::uint8_t,2> deviceID;
-    deviceID[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
-    deviceID[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
+    uint16_t runtimeId = Device::GetDeviceID();
+    deviceID[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); //Device ID MSB
+    deviceID[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); //Device ID LSB
     return MidiMessage(m_src,m_dest,message.sysExCommand(),deviceID.data(),2);
 }
 
@@ -297,6 +310,28 @@ MidiMessage MessageHandler::sysExGetDeviceName(MidiMessage& message){
 MidiMessage MessageHandler::sysExGetDeviceBoolean(MidiMessage& message){
     static uint8_t deviceBoolean = Device::GetDeviceBoolean();
     return MidiMessage(m_src,m_dest,message.sysExCommand(),&deviceBoolean,1);
+}
+
+// Respond with Device ID (14-bit split into two 7-bit bytes)
+MidiMessage MessageHandler::sysExGetDeviceID(MidiMessage& message){
+    std::array<std::uint8_t,2> deviceID;
+    uint16_t runtimeId = Device::GetDeviceID();
+    deviceID[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F);
+    deviceID[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F);
+    return MidiMessage(m_src,m_dest,message.sysExCommand(),deviceID.data(),2);
+}
+
+// Set Device ID from incoming payload (expecting at least 2 bytes MSB,LSB)
+void MessageHandler::sysExSetDeviceID(MidiMessage& message){
+    if (message.length < SYSEX_HeaderSize + 2) return; // not enough data
+    uint8_t msb = message.sysExCmdPayload()[0];
+    uint8_t lsb = message.sysExCmdPayload()[1];
+    uint16_t newID = (static_cast<uint16_t>(msb) << 7) | static_cast<uint16_t>(lsb);
+    Device::SetDeviceID(newID);
+    // persist
+    LocalStorage::get().SetDeviceID(newID);
+    // update source id used for replies
+    m_src = Device::GetDeviceID();
 }
 
 //Configure Device Construct

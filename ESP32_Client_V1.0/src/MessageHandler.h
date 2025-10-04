@@ -29,7 +29,7 @@ class MessageHandler{
 private:
     
     std::vector<Distributor> m_distributors;
-    uint16_t m_src = SYSEX_DEV_ID;
+    uint16_t m_src = Device::GetDeviceID();
     uint16_t m_dest;
 
     InstrumentController* m_ptrInstrumentController;
@@ -63,11 +63,13 @@ private:
 
     MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
     MidiMessage sysExGetDeviceConstruct(MidiMessage& message);
+    MidiMessage sysExGetDeviceID(MidiMessage& message);
     MidiMessage sysExGetDeviceName(MidiMessage& message);
     MidiMessage sysExGetDeviceBoolean(MidiMessage& message);
 
     void sysExSetDeviceConstructWithDistributors(MidiMessage& message);
     void sysExSetDeviceConstruct(MidiMessage& message);
+    void sysExSetDeviceID(MidiMessage& message);
     void sysExSetDeviceName(MidiMessage& message);
     void sysExSetDeviceBoolean(MidiMessage& message);
 

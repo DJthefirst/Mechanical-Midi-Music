@@ -5,14 +5,14 @@
  * 
  */
 
-
+#include "NetworkSerial.h"
 #include "Device.h"
+
 #ifdef MMM_NETWORK_SERIAL
 
 void NetworkSerial::begin() {
     Serial.begin(115200);
-    startSerial
-();
+    startSerial();
 }
 
 
@@ -55,7 +55,7 @@ void NetworkSerial::sendMessage(MidiMessage message) {
 }
 
 //Serial print Strings for Debug
-void NetworkSerial::sendMessage(String msg) {
+void NetworkSerial::sendString(String msg) {
     Serial.println(msg);
 }
 

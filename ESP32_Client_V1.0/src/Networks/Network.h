@@ -21,8 +21,9 @@ protected:
     const static uint8_t NETWORK_MIN_MSG_BYTES = 3;
     
 public:
+    virtual ~Network() = default;
     virtual void begin() = 0;
     virtual void sendMessage(MidiMessage message) = 0;
-    virtual void sendMessage(String message) = 0;
+    virtual void sendString(String message) = 0;
     virtual std::optional<MidiMessage> readMessage() = 0;
 };

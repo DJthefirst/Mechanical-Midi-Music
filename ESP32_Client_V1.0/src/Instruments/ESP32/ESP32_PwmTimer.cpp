@@ -1,25 +1,31 @@
 #include "Extras/AddrLED.h"
 #include "Instruments/ESP32/ESP32_PwmTimer.h"
+#include "Device.h"
 #include "Instruments/InterruptTimer.h"
 #include "Arduino.h"
+#include "Instruments/NoteTable.h"
 #include <cmath>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
-static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_activeNotes;
+static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes for tracking active notes
-static std::array<double,MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base Note Frequency
-static std::array<double,MAX_NUM_INSTRUMENTS> m_activeFrequency;//Note Played with bend
-static std::array<uint8_t,MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
+static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base Note Frequency
+static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_activeFrequency;//Note Played with bend
+static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
+
+// LedC channel management (moved from header due to Config dependency)
+static std::array<uint8_t, Config::MAX_NUM_INSTRUMENTS> m_ledcChannels;
+static std::array<bool, Config::MAX_NUM_INSTRUMENTS> m_channelActive;
 
 ESP32_PwmTimer::ESP32_PwmTimer()
 {
     // Initialize LedC channels for each instrument
-    for(uint8_t i = 0; i < pins.size() && i < MAX_NUM_INSTRUMENTS; i++){
+    for(uint8_t i = 0; i < Config::PINS.size() && i < Config::MAX_NUM_INSTRUMENTS; i++){
         m_ledcChannels[i] = i; // Use channel number equal to instrument number
         m_channelActive[i] = false;
-        initializeLedcChannel(i, pins[i]);
+        initializeLedcChannel(i, Config::PINS[i]);
     }
 
     //Setup FAST LED
@@ -42,7 +48,7 @@ void ESP32_PwmTimer::initializeLedcChannel(uint8_t instrument, uint8_t pin)
 
 void ESP32_PwmTimer::setFrequency(uint8_t instrument, double frequency)
 {
-    if (instrument >= MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
     // Clamp frequency to valid range (50Hz - 20kHz)
     if (frequency < 50.0) frequency = 50.0;
@@ -56,7 +62,7 @@ void ESP32_PwmTimer::setFrequency(uint8_t instrument, double frequency)
 
 void ESP32_PwmTimer::stopChannel(uint8_t instrument)
 {
-    if (instrument >= MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
     // Set duty cycle to 0 to stop PWM output
     ledcWrite(m_ledcChannels[instrument], 0);
@@ -75,15 +81,14 @@ void ESP32_PwmTimer::resetAll()
 
 void ESP32_PwmTimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
-    if (instrument >= MAX_NUM_INSTRUMENTS || note >= 128) return;
+    if (instrument >= Config::MAX_NUM_INSTRUMENTS || note >= 128) return;
 
     // Store note information
     m_activeNotes[instrument] = (MSB_BITMASK | note);
-    m_noteFrequency[instrument] = noteFrequency[note];
+    m_noteFrequency[instrument] = NoteTables::noteFrequency[note];
     
     // Calculate pitch bend effect
-    double bendDeflection = ((double)m_pitchBend[channel] - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-    m_activeFrequency[instrument] = noteFrequency[note] * pow(2.0, BEND_OCTAVES * bendDeflection);
+    m_activeFrequency[instrument] = NoteTables::applyPitchBend(NoteTables::noteFrequency[note], m_pitchBend[channel]);
     
     m_noteCh[instrument] = channel;
     m_numActiveNotes++;
@@ -96,7 +101,7 @@ void ESP32_PwmTimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
 
 void ESP32_PwmTimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
-    if (instrument >= MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
     // Check if this instrument is playing the specified note
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
@@ -122,7 +127,7 @@ void ESP32_PwmTimer::stopAll(){
     m_activeFrequency = {};
 
     // Stop all LedC channels
-    for(uint8_t i = 0; i < MAX_NUM_INSTRUMENTS; i++){
+    for(uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
         stopChannel(i);
     }
     
@@ -154,9 +159,7 @@ void ESP32_PwmTimer::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t cha
     if(m_noteCh[instrument] != channel) return;
     
     // Calculate pitch bend effect
-    double bendDeflection = ((double)bend - (double)MIDI_CTRL_CENTER) / (double)MIDI_CTRL_CENTER;
-    m_activeFrequency[instrument] = m_noteFrequency[instrument] * pow(2.0, BEND_OCTAVES * bendDeflection);
-    
+    m_activeFrequency[instrument] = NoteTables::applyPitchBend(m_noteFrequency[instrument], bend);
     // Update the LedC frequency with the bent frequency
     setFrequency(instrument, m_activeFrequency[instrument]);
 }

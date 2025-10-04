@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <array>
 using std::int8_t;
 using std::int16_t;
 

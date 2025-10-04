@@ -195,6 +195,27 @@ void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, const uint8_
     WriteNvsBlob(ptr_key, construct , DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
+// Persist/Load Device ID as a 2-byte blob (MSB, LSB)
+uint16_t LocalStorage::GetDeviceID(){
+    uint8_t tmp[2];
+    // Default to compile-time SYSEX_DEV_ID if not found
+    tmp[0] = static_cast<uint8_t>((Device::GetDeviceID() >> 7) & 0x7F);
+    tmp[1] = static_cast<uint8_t>((Device::GetDeviceID() >> 0) & 0x7F);
+    esp_err_t r = ReadNvsBlob("Device_id", tmp, 2);
+    if (r == ESP_ERR_NVS_NOT_FOUND) {
+        return Device::GetDeviceID();
+    }
+    uint16_t id = (static_cast<uint16_t>(tmp[0]) << 7) | static_cast<uint16_t>(tmp[1]);
+    return id;
+}
+
+void LocalStorage::SetDeviceID(uint16_t id){
+    uint8_t tmp[2];
+    tmp[0] = static_cast<uint8_t>((id >> 7) & 0x7F);
+    tmp[1] = static_cast<uint8_t>((id >> 0) & 0x7F);
+    WriteNvsBlob("Device_id", tmp, 2);
+}
+
 // Get key from valueHelper
 std::string LocalStorage::Uint16ToKey(uint16_t value){
     const char hex[] = "0123456789abcdef";

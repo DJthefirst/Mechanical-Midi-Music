@@ -11,20 +11,28 @@
 #include <Arduino.h>
 
 #include "Device.h"
-#include "Networks/Network.h"
+#include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MessageHandler.h"
 
 #include "Extras/LocalStorage.h"
 
-networkType network = networkType();
-instrumentType instrumentController = instrumentType(); 
+// Optional features
+#ifdef ENABLE_LOCAL_STORAGE
+    // #include "extras/LocalStorage.h"
+#endif
+
+std::unique_ptr<MultiNetwork> network = CreateNetwork();
+InstrumentType instrumentController; 
 
 MessageHandler messageHandler(&instrumentController);
 
 void setup() {
+
+  //Device::validateConfiguration();
+
   //Begin Network Commmunication
-  network.begin();  
+  network->begin();  
   delay(100);
 
   //TODO move into local Storage?
@@ -37,8 +45,12 @@ void setup() {
     } else {
       //Device Config - only load if NVS is working
       Device::Name = LocalStorage::get().GetDeviceName();
+      // Load runtime device ID (if stored) and update Device runtime value
+      Device::SetDeviceID(LocalStorage::get().GetDeviceID());
       // Normalize the stored blob to ensure consistent 20-byte space-padded format
       LocalStorage::get().SetDeviceName(Device::Name);
+      // Persist runtime device ID back (ensures formatting/consistency)
+      LocalStorage::get().SetDeviceID(Device::GetDeviceID());
       //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
 
       //Distributor Config
@@ -86,17 +98,18 @@ void setup() {
   instrumentController.resetAll();
 
   //Send Device Ready to Connect
-  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, SYSEX_DeviceReady, nullptr, 0));
+  MidiMessage ready(Device::GetDeviceID(), SYSEX_Server, SYSEX_DeviceReady, nullptr, 0);
+  network->sendMessage(ready);
 }
 
 //Periodicaly Read Incoming Messages
 void loop() {
-  std::optional<MidiMessage> message = network.readMessage();
+  std::optional<MidiMessage> message = network->readMessage();
 
   //If the network returns a new message process it.
   if (!message) return;
   message = messageHandler.processMessage(*message);
   
   //If there is a response send message.
-  if (message) network.sendMessage(*message);
+  if (message) network->sendMessage(*message);
 }

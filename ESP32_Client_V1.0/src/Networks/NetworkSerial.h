@@ -16,7 +16,7 @@ public:
     NetworkSerial() = default;
     void begin() override;
     void sendMessage(MidiMessage message) override;
-    void sendMessage(String message) override;
+    void sendString(String message) override;
     std::optional<MidiMessage> readMessage() override;
 
 private:

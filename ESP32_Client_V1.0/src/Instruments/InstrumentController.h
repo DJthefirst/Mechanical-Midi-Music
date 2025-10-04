@@ -8,9 +8,8 @@ using std::int16_t;
 
 class InstrumentController{
 public:
-
+    static constexpr Instrument Type = Instrument::None;
 protected:
-
     //Local CC Effect Atributes
     uint16_t _ModulationWheel = 0;
     uint16_t _FootPedal = 0;
@@ -20,7 +19,6 @@ protected:
     uint16_t _EffectCrtl_2 = 0;
 
 public:
-
     //Required Functions
     virtual void reset(uint8_t instrument) = 0;
     virtual void resetAll() = 0;

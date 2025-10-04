@@ -76,13 +76,15 @@ constexpr uint8_t SYSEX_Message = 0x03;
 
 constexpr uint8_t SYSEX_GetDeviceConstructWithDistributors = 0x10;
 constexpr uint8_t SYSEX_GetDeviceConstruct = 0x11;
-constexpr uint8_t SYSEX_GetDeviceName = 0x12;
-constexpr uint8_t SYSEX_GetDeviceBoolean = 0x13;
+constexpr uint8_t SYSEX_GetDeviceID = 0x12;
+constexpr uint8_t SYSEX_GetDeviceName = 0x13;
+constexpr uint8_t SYSEX_GetDeviceBoolean = 0x14;
 
 constexpr uint8_t SYSEX_SetDeviceConstructWithDistributors = 0x20;
 constexpr uint8_t SYSEX_SetDeviceConstruct = 0x21;
-constexpr uint8_t SYSEX_SetDeviceName = 0x22;
-constexpr uint8_t SYSEX_SetDeviceBoolean = 0x23;
+constexpr uint8_t SYSEX_SetDeviceID = 0x22;
+constexpr uint8_t SYSEX_SetDeviceName = 0x23;
+constexpr uint8_t SYSEX_SetDeviceBoolean = 0x24;
 
 constexpr uint8_t SYSEX_GetNumOfDistributors = 0x30;
 constexpr uint8_t SYSEX_AddDistributor = 0x31;
@@ -117,6 +119,7 @@ constexpr uint8_t NUM_MIDI_CH = 16;
 
 enum class Instrument
 { 
+    None = 0,
     PWM = 1,
     ShiftRegister,
     StepperMotor,
