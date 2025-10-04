@@ -35,7 +35,7 @@ ESP32_PwmBase::ESP32_PwmBase()
 
 void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
 {
-    // Configure LedC channel
+    // Configure LedC channel - only do full setup once during initialization
     ledcSetup(m_ledcChannels[instrument], 1000, LEDC_RESOLUTION); // Start with 1kHz, will be changed when notes play
     ledcAttachPin(pin, m_ledcChannels[instrument]);
     ledcWrite(m_ledcChannels[instrument], 0); // Start with output off
@@ -46,11 +46,20 @@ void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
     // Clamp frequency to valid range (10Hz - 20kHz)
-    if (frequency < 50.0) frequency = 10.0;
+    if (frequency < 10.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
-    // Set up the channel with new frequency and 50% duty cycle
-    ledcSetup(m_ledcChannels[instrument], frequency, LEDC_RESOLUTION);
+    // Cache last frequency per instrument to avoid unnecessary updates
+    static std::array<double, Config::MAX_NUM_INSTRUMENTS> lastFrequency = {};
+    
+    // Only update if frequency changed significantly (>0.5Hz difference for better precision)
+    if (abs(lastFrequency[instrument] - frequency) > 0.5) {
+        // Use ledcChangeFrequency for much faster frequency updates (no full reconfiguration)
+        ledcChangeFrequency(m_ledcChannels[instrument], frequency, LEDC_RESOLUTION);
+        lastFrequency[instrument] = frequency;
+    }
+    
+    // Set duty cycle - this is fast and always needs to be done to ensure output is active
     ledcWrite(m_ledcChannels[instrument], DUTY_CYCLE_50_PERCENT);
     m_channelActive[instrument] = true;
 }
@@ -59,7 +68,7 @@ void ESP32_PwmBase::stopChannel(uint8_t instrument)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
-    // Set duty cycle to 0 to stop PWM output
+    // Set duty cycle to 0 to stop PWM output - this is very fast
     ledcWrite(m_ledcChannels[instrument], 0);
     m_channelActive[instrument] = false;
 }
@@ -76,19 +85,26 @@ void ESP32_PwmBase::resetAll()
 
 void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    // Early bounds checking for performance
     if (instrument >= Config::MAX_NUM_INSTRUMENTS || note >= 128) return;
 
+    // Cache the base frequency to avoid repeated lookups
+    const double baseFreq = NoteTables::noteFrequency[note];
+    
     // Store note information
     m_activeNotes[instrument] = (MSB_BITMASK | note);
-    m_noteFrequency[instrument] = NoteTables::noteFrequency[note];
-    
-    // Calculate pitch bend effect
-    m_activeFrequency[instrument] = NoteTables::applyPitchBend(NoteTables::noteFrequency[note], m_pitchBend[channel]);
-    
+    m_noteFrequency[instrument] = baseFreq;
     m_noteCh[instrument] = channel;
-    m_numActiveNotes++;
     
-    // Set the frequency using LedC
+    // Calculate final frequency with pitch bend applied
+    m_activeFrequency[instrument] = NoteTables::applyPitchBend(baseFreq, m_pitchBend[channel]);
+    
+    // Increment active note count only if this instrument wasn't already active
+    if (!m_channelActive[instrument]) {
+        m_numActiveNotes++;
+    }
+    
+    // Set the frequency using optimized LedC call
     setFrequency(instrument, m_activeFrequency[instrument]);
 }
 
@@ -96,17 +112,21 @@ void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
-    // Check if this instrument is playing the specified note
-    if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
+    // Check if this instrument is playing the specified note (optimized bit operation)
+    if((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0){
+        // Clear note information
         m_activeNotes[instrument] = 0;
         m_noteFrequency[instrument] = 0;
         m_activeFrequency[instrument] = 0;
-        
-        // Stop the LedC channel
-        stopChannel(instrument);
-        
         m_noteCh[instrument] = 255; // 255 indicates no channel
-        m_numActiveNotes--;
+        
+        // Decrement active note count only if channel was actually active
+        if (m_channelActive[instrument]) {
+            m_numActiveNotes--;
+        }
+        
+        // Stop the LedC channel (fast duty cycle set to 0)
+        stopChannel(instrument);
     }
 }
 
@@ -137,19 +157,20 @@ uint8_t ESP32_PwmBase::getNumActiveNotes(uint8_t instrument)
  
 bool ESP32_PwmBase::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    //Mask lower 7bits and return true if the instument is playing the respective note.
-    return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
+    //Mask lower 7bits and return true if the instrument is playing the respective note.
+    return ((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0);
 }
 
 void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend; 
     
-    // Only apply pitch bend if instrument is active and on the correct channel
-    if(m_noteFrequency[instrument] == 0) return;
-    if(m_noteCh[instrument] != channel) return;
+    // Early exit optimizations - check most likely fail conditions first
+    if(m_noteFrequency[instrument] == 0 || m_noteCh[instrument] != channel) return;
     
-    // Calculate pitch bend effect
-    m_activeFrequency[instrument] = NoteTables::applyPitchBend(m_noteFrequency[instrument], bend);
-    // Update the LedC frequency with the bent frequency
-    setFrequency(instrument, m_activeFrequency[instrument]);
+    // Calculate and apply pitch bend effect in one operation
+    const double bentFreq = NoteTables::applyPitchBend(m_noteFrequency[instrument], bend);
+    m_activeFrequency[instrument] = bentFreq;
+    
+    // Direct frequency update using optimized LedC call
+    setFrequency(instrument, bentFreq);
 }

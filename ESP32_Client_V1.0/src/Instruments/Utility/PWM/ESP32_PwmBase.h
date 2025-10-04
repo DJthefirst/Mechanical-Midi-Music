@@ -15,8 +15,8 @@ private:
     // LedC channel management (arrays moved to .cpp file due to Config dependency)
     
     void initializeLedcChannel(uint8_t instrument, uint8_t pin);
-    void setFrequency(uint8_t instrument, double frequency);
-    void stopChannel(uint8_t instrument);
+    inline void setFrequency(uint8_t instrument, double frequency);
+    inline void stopChannel(uint8_t instrument);
 
     //Local MIDI Device Atributes
     uint8_t m_program = 0;
@@ -40,6 +40,4 @@ public:
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
-
-
 };

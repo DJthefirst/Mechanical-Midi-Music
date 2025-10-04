@@ -127,161 +127,307 @@ void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
 // Returns the instument ID of the next instrument to be played.
 uint8_t Distributor::nextInstrument()
 {
-    switch (m_distributionMethod) {
-    case(DistributionMethod::RoundRobinBalance):
-        return nextInstrumentRoundRobinBalance();
-    case(DistributionMethod::RoundRobin):
-        return nextInstrumentRoundRobin();
-    case(DistributionMethod::Ascending):
-        return nextInstrumentAscending();
-    case(DistributionMethod::Descending):
-        return nextInstrumentDescending();
+    bool validInsturment = false;
+    uint8_t insturmentLeastActive = NONE;
+    uint8_t leastActiveNotes = 255;
+
+    switch(m_distributionMethod){
+
+    // Return the Instument ID matching the current Messages Channel ID
     case(DistributionMethod::StraightThrough):
-        return nextInstrumentStraightThrough();
+        
+        // m_currentInstrument = m_currentChannel;
+        // if(!distributorHasInstrument(m_currentInstrument)) return m_currentInstrument;
+        // return NONE;
+
+        for(int i = 0; i < NUM_INSTRUMENTS; i++){
+            // Increment current Instrument
+            m_currentInstrument++;
+
+            // Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            // Check if valid instrument
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+
+            // If there are no active notes this must be the least active Instrument return
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+            if(activeNotes == 0) return m_currentInstrument;
+
+            // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
+            if(insturmentLeastActive == NONE){
+                insturmentLeastActive = m_currentInstrument;
+                continue;
+            }
+
+            // Update the Least Active Instrument if needed.
+            if(activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
+                insturmentLeastActive = m_currentInstrument;
+            }
+        }
+        return insturmentLeastActive;
+
+    // Return the next instrument in the instrument pool
+    case(DistributionMethod::RoundRobin):
+
+        for(int i = 0; i < NUM_INSTRUMENTS; i++){
+            m_currentInstrument++;
+
+            //Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            //Check if valid instrument
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+            return m_currentInstrument;
+        }
+        return NONE;
+        
+    // Iterate through every instrument in the instrument pool starting at the current instrument
+    // Return the first instument that has the lowest number of active notes.
+    case(DistributionMethod::RoundRobinBalance):
+
+        for(int i = 0; i < NUM_INSTRUMENTS; i++){
+            // Increment current Instrument
+            m_currentInstrument++;
+
+            // Loop to first instrument if end is reached
+            m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+
+            // Check if valid instrument
+            if(!distributorHasInstrument(m_currentInstrument)) continue;
+
+            // If there are no active notes this must be the least active Instrument return
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+            if(activeNotes == 0) return m_currentInstrument;
+
+            // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
+            if(insturmentLeastActive == NONE){
+                insturmentLeastActive = m_currentInstrument;
+                continue;
+            }
+
+            // Update the Least Active Instrument if needed.
+            if(activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)){
+                insturmentLeastActive = m_currentInstrument;
+            }
+        }
+        return insturmentLeastActive;
+
+    // Return the least active instrument starting at the instrument 0
+    case(DistributionMethod::Ascending):
+
+        for(int i = 0; (i < NUM_INSTRUMENTS); i++){
+
+            // Check if valid instrument
+            if(!distributorHasInstrument(i)) continue;
+            validInsturment = true;
+
+            // Check if instrument has the least active notes 
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
+
+            // If there are no active notes this must be the least active instrument return
+            if(activeNotes == 0) return i;
+
+            // Update least active instrument
+            if(activeNotes < leastActiveNotes)
+            {
+                leastActiveNotes = activeNotes;
+                insturmentLeastActive = i;
+            }
+        }
+        return validInsturment ? m_currentInstrument : NONE;
+
+    // Return the least active instrument starting at the last instrument iterating in reverse.
+    case(DistributionMethod::Descending):
+
+        for(int i = (NUM_INSTRUMENTS - 1); (i >= 0); i--){
+        
+            // Check if valid instrument
+            if(!distributorHasInstrument(i)) continue;
+            validInsturment = true;
+            
+            // Check if instrument has the least active notes 
+            uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
+
+            // If there are no active notes this must be the least active Instrument return
+            if(activeNotes == 0) return i;
+
+            // Update least active instrument
+            if(activeNotes < leastActiveNotes)
+            {
+                leastActiveNotes = activeNotes;
+                insturmentLeastActive = i;
+            }
+        
+        }
+        return validInsturment ? m_currentInstrument : NONE;
+
     default:
-        // TODO Handle Error
+        //TODO Handle Error
         return NONE;
     }
 }
 
-// Helper: StraightThrough (original StraightThrough case)
-uint8_t Distributor::nextInstrumentStraightThrough()
-{
-    uint8_t insturmentLeastActive = NONE;
+// // Returns the instument ID of the next instrument to be played.
+// uint8_t Distributor::nextInstrument()
+// {
+//     switch (m_distributionMethod) {
+//     case(DistributionMethod::RoundRobinBalance):
+//         return nextInstrumentRoundRobinBalance();
+//     case(DistributionMethod::RoundRobin):
+//         return nextInstrumentRoundRobin();
+//     case(DistributionMethod::Ascending):
+//         return nextInstrumentAscending();
+//     case(DistributionMethod::Descending):
+//         return nextInstrumentDescending();
+//     case(DistributionMethod::StraightThrough):
+//         return nextInstrumentStraightThrough();
+//     default:
+//         // TODO Handle Error
+//         return NONE;
+//     }
+// }
 
-    for (int i = 0; i < NUM_INSTRUMENTS; i++) {
-        // Increment current Instrument
-        m_currentInstrument++;
+// // Helper: StraightThrough (original StraightThrough case)
+// uint8_t Distributor::nextInstrumentStraightThrough()
+// {
+//     uint8_t insturmentLeastActive = NONE;
 
-        // Loop to first instrument if end is reached
-        m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+//     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+//         // Increment current Instrument
+//         m_currentInstrument++;
 
-        // Check if valid instrument
-        if (!distributorHasInstrument(m_currentInstrument)) continue;
+//         // Loop to first instrument if end is reached
+//         m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
-        // If there are no active notes this must be the least active Instrument return
-        uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
-        if (activeNotes == 0) return m_currentInstrument;
+//         // Check if valid instrument
+//         if (!distributorHasInstrument(m_currentInstrument)) continue;
 
-        // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
-        if (insturmentLeastActive == NONE) {
-            insturmentLeastActive = m_currentInstrument;
-            continue;
-        }
+//         // If there are no active notes this must be the least active Instrument return
+//         uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+//         if (activeNotes == 0) return m_currentInstrument;
 
-        // Update the Least Active Instrument if needed.
-        if (activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)) {
-            insturmentLeastActive = m_currentInstrument;
-        }
-    }
-    return insturmentLeastActive;
-}
+//         // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
+//         if (insturmentLeastActive == NONE) {
+//             insturmentLeastActive = m_currentInstrument;
+//             continue;
+//         }
 
-// Helper: RoundRobin (original RoundRobin case)
-uint8_t Distributor::nextInstrumentRoundRobin()
-{
-    for (int i = 0; i < NUM_INSTRUMENTS; i++) {
-        m_currentInstrument++;
+//         // Update the Least Active Instrument if needed.
+//         if (activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)) {
+//             insturmentLeastActive = m_currentInstrument;
+//         }
+//     }
+//     return insturmentLeastActive;
+// }
 
-        // Loop to first instrument if end is reached
-        m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+// // Helper: RoundRobin (original RoundRobin case)
+// uint8_t Distributor::nextInstrumentRoundRobin()
+// {
+//     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+//         m_currentInstrument++;
 
-        // Check if valid instrument
-        if (!distributorHasInstrument(m_currentInstrument)) continue;
-        return m_currentInstrument;
-    }
-    return NONE;
-}
+//         // Loop to first instrument if end is reached
+//         m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
 
-// Helper: RoundRobinBalance (original RoundRobinBalance case)
-uint8_t Distributor::nextInstrumentRoundRobinBalance()
-{
-    uint8_t insturmentLeastActive = NONE;
+//         // Check if valid instrument
+//         if (!distributorHasInstrument(m_currentInstrument)) continue;
+//         return m_currentInstrument;
+//     }
+//     return NONE;
+// }
 
-    for (int i = 0; i < NUM_INSTRUMENTS; i++) {
-        // Increment current Instrument
-        m_currentInstrument++;
+// // Helper: RoundRobinBalance (optimized version)
+// uint8_t Distributor::nextInstrumentRoundRobinBalance()
+// {
+//     uint8_t insturmentLeastActive = NONE;
+//     uint8_t leastActiveNotes = 255;
+//     uint8_t startInstrument = m_currentInstrument;
+    
+//     // First pass: look for any free instrument starting from current position
+//     for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+//         // Increment current Instrument
+//         m_currentInstrument++;
+//         // Loop to first instrument if end is reached
+//         m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+        
+//         // Check if valid instrument
+//         if (!distributorHasInstrument(m_currentInstrument)) continue;
 
-        // Loop to first instrument if end is reached
-        m_currentInstrument = (m_currentInstrument >= NUM_INSTRUMENTS) ? 0 : m_currentInstrument;
+//         // Quick check: if this instrument has no active notes, use it immediately
+//         uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
+//         if (activeNotes == 0) {
+//             return m_currentInstrument;
+//         }
+        
+//         // Track the least active for fallback
+//         if (activeNotes < leastActiveNotes) {
+//             leastActiveNotes = activeNotes;
+//             insturmentLeastActive = m_currentInstrument;
+//         }
+//     }
+    
+//     // Return the least active instrument found
+//     m_currentInstrument = insturmentLeastActive;
+//     return insturmentLeastActive;
+// }
 
-        // Check if valid instrument
-        if (!distributorHasInstrument(m_currentInstrument)) continue;
+// // Helper: Ascending (original Ascending case)
+// uint8_t Distributor::nextInstrumentAscending()
+// {
+//     bool validInsturment = false;
+//     uint8_t insturmentLeastActive = NONE;
+//     uint8_t leastActiveNotes = 255;
 
-        // If there are no active notes this must be the least active Instrument return
-        uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(m_currentInstrument);
-        if (activeNotes == 0) return m_currentInstrument;
+//     for (int i = 0; (i < NUM_INSTRUMENTS); i++) {
 
-        // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
-        if (insturmentLeastActive == NONE) {
-            insturmentLeastActive = m_currentInstrument;
-            continue;
-        }
+//         // Check if valid instrument
+//         if (!distributorHasInstrument(i)) continue;
+//         validInsturment = true;
 
-        // Update the Least Active Instrument if needed.
-        if (activeNotes < (*m_ptrInstrumentController).getNumActiveNotes(insturmentLeastActive)) {
-            insturmentLeastActive = m_currentInstrument;
-        }
-    }
-    return insturmentLeastActive;
-}
+//         // Check if instrument has the least active notes
+//         uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
-// Helper: Ascending (original Ascending case)
-uint8_t Distributor::nextInstrumentAscending()
-{
-    bool validInsturment = false;
-    uint8_t insturmentLeastActive = NONE;
-    uint8_t leastActiveNotes = 255;
+//         // If there are no active notes this must be the least active instrument return
+//         if (activeNotes == 0) return i;
 
-    for (int i = 0; (i < NUM_INSTRUMENTS); i++) {
+//         // Update least active instrument
+//         if (activeNotes < leastActiveNotes) {
+//             leastActiveNotes = activeNotes;
+//             insturmentLeastActive = i;
+//         }
+//     }
+//     return validInsturment ? m_currentInstrument : NONE;
+// }
 
-        // Check if valid instrument
-        if (!distributorHasInstrument(i)) continue;
-        validInsturment = true;
+// // Helper: Descending (original Descending case)
+// uint8_t Distributor::nextInstrumentDescending()
+// {
+//     bool validInsturment = false;
+//     uint8_t insturmentLeastActive = NONE;
+//     uint8_t leastActiveNotes = 255;
 
-        // Check if instrument has the least active notes
-        uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
+//     for (int i = (NUM_INSTRUMENTS - 1); (i >= 0); i--) {
 
-        // If there are no active notes this must be the least active instrument return
-        if (activeNotes == 0) return i;
+//         // Check if valid instrument
+//         if (!distributorHasInstrument(i)) continue;
+//         validInsturment = true;
 
-        // Update least active instrument
-        if (activeNotes < leastActiveNotes) {
-            leastActiveNotes = activeNotes;
-            insturmentLeastActive = i;
-        }
-    }
-    return validInsturment ? m_currentInstrument : NONE;
-}
+//         // Check if instrument has the least active notes
+//         uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
 
-// Helper: Descending (original Descending case)
-uint8_t Distributor::nextInstrumentDescending()
-{
-    bool validInsturment = false;
-    uint8_t insturmentLeastActive = NONE;
-    uint8_t leastActiveNotes = 255;
+//         // If there are no active notes this must be the least active Instrument return
+//         if (activeNotes == 0) return i;
 
-    for (int i = (NUM_INSTRUMENTS - 1); (i >= 0); i--) {
+//         // Update least active instrument
+//         if (activeNotes < leastActiveNotes) {
+//             leastActiveNotes = activeNotes;
+//             insturmentLeastActive = i;
+//         }
 
-        // Check if valid instrument
-        if (!distributorHasInstrument(i)) continue;
-        validInsturment = true;
-
-        // Check if instrument has the least active notes
-        uint8_t activeNotes = (*m_ptrInstrumentController).getNumActiveNotes(i);
-
-        // If there are no active notes this must be the least active Instrument return
-        if (activeNotes == 0) return i;
-
-        // Update least active instrument
-        if (activeNotes < leastActiveNotes) {
-            leastActiveNotes = activeNotes;
-            insturmentLeastActive = i;
-        }
-
-    }
-    return validInsturment ? m_currentInstrument : NONE;
-}
+//     }
+//     return validInsturment ? m_currentInstrument : NONE;
+// }
 
 //Returns the instument which the first note is played or NONE.
 //*Note this function is optimised for nonpolyphonic playback and the Distribution method.

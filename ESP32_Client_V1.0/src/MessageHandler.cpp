@@ -251,10 +251,14 @@ void MessageHandler::processCC(MidiMessage& message)
 //Send messgae to all distributors which accept the designated message's channel.
 void MessageHandler::distributeMessage(MidiMessage& message)
 {  
+    // Pre-calculate channel mask to avoid repeated bit operations
+    const uint16_t channelMask = (1 << message.channel());
+    
     for(uint8_t i=0; i < m_distributors.size(); i++)
     {   
-        if((m_distributors[i].getChannels() & (1 << message.channel())) != (0))
+        if((m_distributors[i].getChannels() & channelMask) != 0) {
             m_distributors[i].processMessage(message);
+        }
     }
 }
 

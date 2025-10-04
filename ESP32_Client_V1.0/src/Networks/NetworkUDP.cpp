@@ -127,17 +127,21 @@ void NetworkUDP::readMessage() {
             (*m_ptrMessageHandler).processMessage(message);
         }
         else{
+            #ifdef DEBUG_UDP_VERBOSE
             Serial.println("PacketSize Out of Scope");
             Serial.println(message.buffer[0]);
             Serial.println(messageLength);
+            #endif
         }
 
-        //DEBUG
+        #ifdef DEBUG_UDP_VERBOSE
+        // DEBUG - only compile in debug builds
         // for(int i = 0; i < messageLength; i++){
         //     Serial.printf("%02x", (messageBuffer[i]));
         //     Serial.print(" ");
         // }
         Serial.println("");
+        #endif
 
         MulticastUDP.flush(); // Just incase we got a really long packet
     }
