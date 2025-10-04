@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Constants.h"
 #include "Instruments/InstrumentController.h"
-
 #include <cstdint>
 #include <array>
-using std::int8_t;
 
-/* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin using LedC */
-class ESP32_PwmTimer : public InstrumentController{
+/**
+ * ESP32-specific PWM implementation using LedC peripheral
+ * Provides PWM functionality for ESP32 microcontrollers
+ */
+class ESP32_PwmBase : public InstrumentController {
 public:
     static constexpr Instrument Type = Instrument::PWM;
 private:
@@ -29,8 +29,7 @@ private:
     static constexpr uint16_t DUTY_CYCLE_50_PERCENT = (1 << (LEDC_RESOLUTION - 1)); // 50% duty cycle
 
 public: 
-    ESP32_PwmTimer();
-
+    ESP32_PwmBase();
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
@@ -42,10 +41,5 @@ public:
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
 
-private:
-    //LEDs
-    void setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
-    void setInstumentLedOff(uint8_t instrument);
-    void resetLEDs();
-    void setupLEDs();
+
 };

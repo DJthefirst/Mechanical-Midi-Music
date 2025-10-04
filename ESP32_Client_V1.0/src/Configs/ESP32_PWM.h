@@ -39,8 +39,8 @@
     //#define MMM_NETWORK_DIN
  
 //---------- Uncomment Your Selected Instrument Type ----------
-    #include "Instruments/ESP32/ESP32_PwmTimer.h"
-    using InstrumentType = ESP32_PwmTimer;
+    #include "Instruments/Utility/PWM/PwmBase.h"
+    using InstrumentType = PwmBase;
  
 //---------- Uncomment Your Desired Extras ----------
  

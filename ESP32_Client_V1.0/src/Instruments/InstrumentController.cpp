@@ -4,12 +4,12 @@
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
-    return 0;
-}
-bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
-    return false;
-}
+// uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
+//     return 0;
+// }
+// bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
+//     return false;
+// }
 void InstrumentController::setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity){
     //Not Yet Implemented
 }

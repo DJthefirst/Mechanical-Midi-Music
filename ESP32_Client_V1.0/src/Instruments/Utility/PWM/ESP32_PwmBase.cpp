@@ -1,9 +1,7 @@
-#include "Extras/AddrLED.h"
-#include "Instruments/ESP32/ESP32_PwmTimer.h"
-#include "Device.h"
-#include "Instruments/InterruptTimer.h"
+#include "Instruments/Utility/PWM/ESP32_PwmBase.h"
 #include "Arduino.h"
-#include "Instruments/NoteTable.h"
+#include "Device.h"
+#include "Instruments/Utility/NoteTable.h"
 #include <cmath>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
@@ -19,7 +17,7 @@ static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
 static std::array<uint8_t, Config::MAX_NUM_INSTRUMENTS> m_ledcChannels;
 static std::array<bool, Config::MAX_NUM_INSTRUMENTS> m_channelActive;
 
-ESP32_PwmTimer::ESP32_PwmTimer()
+ESP32_PwmBase::ESP32_PwmBase()
 {
     // Initialize LedC channels for each instrument
     for(uint8_t i = 0; i < Config::PINS.size() && i < Config::MAX_NUM_INSTRUMENTS; i++){
@@ -28,9 +26,6 @@ ESP32_PwmTimer::ESP32_PwmTimer()
         initializeLedcChannel(i, Config::PINS[i]);
     }
 
-    //Setup FAST LED
-    setupLEDs();
-
     delay(500); // Wait a half second for safety
 
     //Initialize Default values
@@ -38,7 +33,7 @@ ESP32_PwmTimer::ESP32_PwmTimer()
     m_noteCh.fill(255); // 255 indicates no channel assigned
 }
 
-void ESP32_PwmTimer::initializeLedcChannel(uint8_t instrument, uint8_t pin)
+void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
 {
     // Configure LedC channel
     ledcSetup(m_ledcChannels[instrument], 1000, LEDC_RESOLUTION); // Start with 1kHz, will be changed when notes play
@@ -46,12 +41,12 @@ void ESP32_PwmTimer::initializeLedcChannel(uint8_t instrument, uint8_t pin)
     ledcWrite(m_ledcChannels[instrument], 0); // Start with output off
 }
 
-void ESP32_PwmTimer::setFrequency(uint8_t instrument, double frequency)
+void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
-    // Clamp frequency to valid range (50Hz - 20kHz)
-    if (frequency < 50.0) frequency = 50.0;
+    // Clamp frequency to valid range (10Hz - 20kHz)
+    if (frequency < 50.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
     // Set up the channel with new frequency and 50% duty cycle
@@ -60,7 +55,7 @@ void ESP32_PwmTimer::setFrequency(uint8_t instrument, double frequency)
     m_channelActive[instrument] = true;
 }
 
-void ESP32_PwmTimer::stopChannel(uint8_t instrument)
+void ESP32_PwmBase::stopChannel(uint8_t instrument)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
@@ -69,17 +64,17 @@ void ESP32_PwmTimer::stopChannel(uint8_t instrument)
     m_channelActive[instrument] = false;
 }
 
-void ESP32_PwmTimer::reset(uint8_t instrument)
+void ESP32_PwmBase::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ESP32_PwmTimer::resetAll()
+void ESP32_PwmBase::resetAll()
 {
     stopAll();
 }
 
-void ESP32_PwmTimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS || note >= 128) return;
 
@@ -95,11 +90,9 @@ void ESP32_PwmTimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     
     // Set the frequency using LedC
     setFrequency(instrument, m_activeFrequency[instrument]);
-    
-    setInstumentLedOn(instrument, channel, note, velocity);
 }
 
-void ESP32_PwmTimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
     
@@ -114,11 +107,10 @@ void ESP32_PwmTimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity
         
         m_noteCh[instrument] = 255; // 255 indicates no channel
         m_numActiveNotes--;
-        setInstumentLedOff(instrument);
     }
 }
 
-void ESP32_PwmTimer::stopAll(){
+void ESP32_PwmBase::stopAll(){
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel
     m_numActiveNotes = 0;
@@ -130,8 +122,6 @@ void ESP32_PwmTimer::stopAll(){
     for(uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
         stopChannel(i);
     }
-    
-    resetLEDs();
 }
 
 // Tick() and togglePin() functions removed - LedC handles PWM generation in hardware
@@ -140,18 +130,18 @@ void ESP32_PwmTimer::stopAll(){
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ESP32_PwmTimer::getNumActiveNotes(uint8_t instrument)
+uint8_t ESP32_PwmBase::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool ESP32_PwmTimer::isNoteActive(uint8_t instrument, uint8_t note)
+bool ESP32_PwmBase::isNoteActive(uint8_t instrument, uint8_t note)
 {
     //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void ESP32_PwmTimer::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend; 
     
     // Only apply pitch bend if instrument is active and on the correct channel
@@ -163,35 +153,3 @@ void ESP32_PwmTimer::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t cha
     // Update the LedC frequency with the bent frequency
     setFrequency(instrument, m_activeFrequency[instrument]);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//FAST LED Helper Functions
-////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef EXTRA_ADDRESSABLE_LEDS
-
-    void ESP32_PwmTimer::setupLEDs(){
-        AddrLED::get().setup();
-    }
-
-    //Set an Instrument Led to on
-    void ESP32_PwmTimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
-        CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
-        AddrLED::get().turnLedOn(instrument, color);
-    }
-
-    //Set an Instrument Led to off
-    void ESP32_PwmTimer::setInstumentLedOff(uint8_t instrument){
-        AddrLED::get().turnLedOff(instrument);
-    }
-
-    //Reset Leds
-    void ESP32_PwmTimer::resetLEDs(){
-        AddrLED::get().reset();
-    }
-
-#else
-void ESP32_PwmTimer::setupLEDs(){}
-void ESP32_PwmTimer::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void ESP32_PwmTimer::setInstumentLedOff(uint8_t instrument){}
-void ESP32_PwmTimer::resetLEDs(){}
-#endif

@@ -26,6 +26,10 @@ public:
     virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) = 0;
     virtual void stopAll() = 0;
 
+    //Required Getters
+    virtual uint8_t getNumActiveNotes(uint8_t instrument) = 0;
+    virtual bool isNoteActive(uint8_t instrument, uint8_t note) = 0;
+
     //Optional Setters
     virtual void setKeyPressure(uint8_t instrument, uint8_t note, uint8_t velocity);
     virtual void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel);
@@ -37,8 +41,4 @@ public:
     virtual void setExpression(uint8_t value);
     virtual void setEffectCrtl_1(uint8_t value);
     virtual void setEffectCrtl_2(uint8_t value);
-
-    //Optional Getters
-    virtual uint8_t getNumActiveNotes(uint8_t instrument);
-    virtual bool isNoteActive(uint8_t instrument, uint8_t note);
 };
