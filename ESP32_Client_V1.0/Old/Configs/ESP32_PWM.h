@@ -1,18 +1,17 @@
 /*
- * StepperSynth.h
+ * FloppySynth.h
  *
- * This is an instrument with an array of 10 Stepper Motors
- * 
+ * This is an instrument with an array of Floppy Drives
+ * Including 3.5in and 5in Drives. Also HDDs
  * 
  */
 
 #pragma once
-#include <array>
-
+ 
 //---------- Device Configuration ----------
 
     #define DEVICE_NAME "ESP32 PWM"
-    #define DEVICE_ID 0x0003
+    #define DEVICE_ID 0x0042
 
 //=== Optional Settings ===
 
@@ -20,7 +19,7 @@
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
     //Max Number of Instrument groups is 32
-    constexpr uint8_t NUM_INSTRUMENTS = 10; 
+    constexpr uint8_t NUM_INSTRUMENTS = 12; 
     //Multiplies Instrument groups into individual instruments
     constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
 
@@ -30,8 +29,8 @@
     constexpr uint8_t MAX_MIDI_NOTE = 127;
 
 //=== Hardware Configuration ===
-    constexpr std::array<uint8_t,10> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4,16,13};
-
+    constexpr std::array<uint8_t,12> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 32, 33, 25, 26, 27 };
+ 
 //---------- Uncomment Your Selected COM Types ----------
  
     #define MMM_NETWORK_SERIAL
@@ -40,11 +39,11 @@
     //#define MMM_NETWORK_DIN
  
 //---------- Uncomment Your Selected Instrument Type ----------
-    #include "Instruments/DJthefirst/StepperSynth.h"
-    using InstrumentType = StepperSynth;
-
+    #include "Instruments/Utility/PWM/PwmBase.h"
+    using InstrumentType = PwmBase;
+ 
 //---------- Uncomment Your Desired Extras ----------
-
+ 
     //Save Configuration On PowerOff
     #define EXTRA_LOCAL_STORAGE
 
@@ -54,9 +53,9 @@
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
         #define LED_PIN     18
-        #define NUM_LEDS    50
+        #define NUM_LEDS    64
         #define BRIGHTNESS  255
         #define LED_TYPE    WS2811
         #define COLOR_ORDER GRB
-        #define UPDATES_PER_SECOND 100
+        #define UPDATES_PER_SECOND 10
     #endif

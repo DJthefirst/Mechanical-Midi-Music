@@ -9,6 +9,8 @@ static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes for tracking active notes
+
+static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> lastFrequency; //Active Note (MSB is set if note is active)
 static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base Note Frequency
 static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_activeFrequency;//Note Played with bend
 static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
@@ -103,9 +105,12 @@ void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,
     if (!m_channelActive[instrument]) {
         m_numActiveNotes++;
     }
-    
-    // Set the frequency using optimized LedC call
+
     setFrequency(instrument, m_activeFrequency[instrument]);
+    lastFrequency[instrument] = m_activeFrequency[instrument];
+
+
+
 }
 
 void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
@@ -169,8 +174,12 @@ void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t chan
     
     // Calculate and apply pitch bend effect in one operation
     const double bentFreq = NoteTables::applyPitchBend(m_noteFrequency[instrument], bend);
-    m_activeFrequency[instrument] = bentFreq;
     
     // Direct frequency update using optimized LedC call
-    setFrequency(instrument, bentFreq);
+    if (abs(lastFrequency[instrument] - bentFreq) > 0.75) {
+        m_activeFrequency[instrument] = bentFreq;
+        setFrequency(instrument, m_activeFrequency[instrument]);
+        lastFrequency[instrument] = bentFreq;
+    }
+
 }

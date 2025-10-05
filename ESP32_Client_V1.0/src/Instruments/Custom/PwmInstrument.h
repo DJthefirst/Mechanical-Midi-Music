@@ -4,7 +4,6 @@
 #include "Instruments/Utility/PWM/PwmBase.h"
 
 #include <cstdint>
-#include <array>
 using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin using LedC */
