@@ -1,7 +1,7 @@
 #include "Instruments/Utility/PWM/ESP32_PwmBase.h"
+#include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
 #include "Device.h"
-#include "Instruments/Utility/NoteTable.h"
 #include <cmath>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 

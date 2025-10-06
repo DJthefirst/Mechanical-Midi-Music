@@ -78,7 +78,6 @@ namespace NoteTables {
         return baseFrequency * std::pow(2.0f, bendSemitones / 12.0f);
     }
 
-    // Returns adjusted period ticks given a base period in ticks and a pitch bend value
     constexpr uint32_t applyPitchBendToPeriod(uint32_t basePeriodTicks, uint16_t pitchBend) {
         // Convert base period to frequency, apply pitch bend multiplier, then back to period
         // Use floating point in constexpr for clarity; cast back to integer ticks
@@ -88,6 +87,17 @@ namespace NoteTables {
         // Convert microsecond period to ticks using Config::TIMER_RESOLUTION
         uint32_t ticks = static_cast<uint32_t>(bentPeriodMicros / static_cast<float>(Config::TIMER_RESOLUTION));
         return ticks > 0 ? ticks : 1;
+    }
+
+    // Returns adjusted period ticks given a base period in ticks and a pitch bend value
+    constexpr uint32_t applyPitchBendToNote(uint32_t baseNote, uint16_t pitchBend) {
+        uint32_t basePeriodTicks = NOTE_TICKS[baseNote];
+        return applyPitchBendToPeriod(basePeriodTicks, pitchBend);
+    }
+        // Returns adjusted period ticks given a base period in ticks and a pitch bend value
+    constexpr uint32_t applyPitchBendToNoteDouble(uint32_t baseNote, uint16_t pitchBend) {
+        uint32_t basePeriodTicks = NOTE_TICKS_DOUBLE[baseNote];
+        return applyPitchBendToPeriod(basePeriodTicks, pitchBend);
     }
     
     // Note validation
