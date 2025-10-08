@@ -37,6 +37,12 @@
     //#define MMM_NETWORK_UDP
     //#define MMM_NETWORK_USB
     //#define MMM_NETWORK_DIN
+
+    #ifdef MMM_NETWORK_UDP
+        #define MMM_NETWORK_UDP_IP 192,168,1,100
+        #define MMM_NETWORK_UDP_PORT 5004
+    #endif
+
  
 //---------- Uncomment Your Selected Instrument Type ----------
     #include "Instruments/Utility/PWM/PwmBase.h"

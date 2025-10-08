@@ -23,7 +23,7 @@ SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributor
 std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(MidiMessage& message)
 {
     // Check MIDI ID
-    if (message.sysExID() != SYSEX_ID) return {};
+    if (message.sysExID() != SysEx::ID) return {};
     // Check Device ID or Global ID 0x00;
     if (!isValidDestination(message)) return {};
     
@@ -31,122 +31,122 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(MidiMessage& mes
 
     switch (message.sysExCommand()) {
         
-        case (SYSEX_DeviceReady):
+        case (SysEx::DeviceReady):
             return sysExDeviceReady(message);
 
-        case (SYSEX_ResetDeviceConfig):
+        case (SysEx::ResetDeviceConfig):
             sysExResetDeviceConfig(message); 
             return {};
             
-        case (SYSEX_DiscoverDevices):
+        case (SysEx::DiscoverDevices):
             return {sysExDiscoverDevices(message)};
 
-        case (SYSEX_GetDeviceConstructWithDistributors):
+        case (SysEx::GetDeviceConstructWithDistributors):
             return sysExGetDeviceConstructWithDistributors(message);
 
-        case (SYSEX_GetDeviceConstruct):
+        case (SysEx::GetDeviceConstruct):
             return sysExGetDeviceConstruct(message);
 
-        case (SYSEX_GetDeviceName):
+        case (SysEx::GetDeviceName):
             return sysExGetDeviceName(message);
 
-        case (SYSEX_GetDeviceBoolean):
+        case (SysEx::GetDeviceBoolean):
             return sysExGetDeviceBoolean(message);
 
-        case (SYSEX_GetDeviceID):
+        case (SysEx::GetDeviceID):
             return sysExGetDeviceID(message);
 
-        case (SYSEX_SetDeviceConstructWithDistributors):
+        case (SysEx::SetDeviceConstructWithDistributors):
             sysExSetDeviceConstructWithDistributors(message);
             return {};
 
-        case (SYSEX_SetDeviceConstruct):
+        case (SysEx::SetDeviceConstruct):
             sysExSetDeviceConstruct(message); 
             return {};
 
-        case (SYSEX_SetDeviceID):
+        case (SysEx::SetDeviceID):
             sysExSetDeviceID(message);
             return {};
 
-        case (SYSEX_SetDeviceName):
+        case (SysEx::SetDeviceName):
             sysExSetDeviceName(message); 
             return {};
             
-        case (SYSEX_SetDeviceBoolean):
+        case (SysEx::SetDeviceBoolean):
             sysExSetDeviceBoolean(message);
             return {};
 
-        case (SYSEX_RemoveDistributor):
+        case (SysEx::RemoveDistributor):
             if (m_distributorManager) {
                 m_distributorManager->removeDistributor(message.sysExDistributorID());
             }
             return {};
             
-        case (SYSEX_RemoveAllDistributors):
+        case (SysEx::RemoveAllDistributors):
             if (m_distributorManager) {
                 m_distributorManager->removeAllDistributors();
             }
             return {};
             
-        case (SYSEX_GetNumOfDistributors):
+        case (SysEx::GetNumOfDistributors):
             return sysExGetNumOfDistributors(message);
 
-        case (SYSEX_GetAllDistributors):
+        case (SysEx::GetAllDistributors):
             return sysExGetAllDistributors(message);
 
-        case (SYSEX_AddDistributor):
+        case (SysEx::AddDistributor):
             sysExSetDistributor(message);
             return {};
             
-        case (SYSEX_ToggleMuteDistributor):
+        case (SysEx::ToggleMuteDistributor):
             return sysExToggleMuteDistributor(message);
 
-        case (SYSEX_GetDistributorConstruct):
+        case (SysEx::GetDistributorConstruct):
             return sysExGetDistributorConstruct(message);
 
-        case (SYSEX_GetDistributorChannels):
+        case (SysEx::GetDistributorChannels):
             return sysExGetDistributorChannels(message);
 
-        case (SYSEX_GetDistributorInstruments):
+        case (SysEx::GetDistributorInstruments):
             return sysExGetDistributorInstruments(message);
 
-        case (SYSEX_GetDistributorMethod):
+        case (SysEx::GetDistributorMethod):
             return sysExGetDistributorMethod(message);
 
-        case (SYSEX_GetDistributorBoolValues):
+        case (SysEx::GetDistributorBoolValues):
             return sysExGetDistributorBoolValues(message);
 
-        case (SYSEX_GetDistributorMinMaxNotes):
+        case (SysEx::GetDistributorMinMaxNotes):
             return sysExGetDistributorMinMaxNotes(message);
 
-        case (SYSEX_GetDistributorNumPolyphonicNotes):
+        case (SysEx::GetDistributorNumPolyphonicNotes):
             return sysExGetDistributorNumPolyphonicNotes(message);
 
-        case (SYSEX_SetDistributor):
+        case (SysEx::SetDistributor):
             sysExSetDistributor(message); 
             return {};
             
-        case (SYSEX_SetDistributorChannels):
+        case (SysEx::SetDistributorChannels):
             sysExSetDistributorChannels(message); 
             return {};
             
-        case (SYSEX_SetDistributorInstruments):
+        case (SysEx::SetDistributorInstruments):
             sysExSetDistributorInstruments(message); 
             return {};
             
-        case (SYSEX_SetDistributorMethod):
+        case (SysEx::SetDistributorMethod):
             sysExSetDistributorMethod(message); 
             return {};
             
-        case (SYSEX_SetDistributorBoolValues):
+        case (SysEx::SetDistributorBoolValues):
             sysExSetDistributorBoolValues(message);
             return {};
             
-        case (SYSEX_SetDistributorMinMaxNotes):
+        case (SysEx::SetDistributorMinMaxNotes):
             sysExSetDistributorMinMaxNotes(message); 
             return {};
             
-        case (SYSEX_SetDistributorNumPolyphonicNotes):
+        case (SysEx::SetDistributorNumPolyphonicNotes):
             sysExSetDistributorNumPolyphonicNotes(message); 
             return {};
             
@@ -168,7 +168,7 @@ void SysExMsgHandler::setDeviceChangedCallback(std::function<void()> callback)
 // Respond with device ready
 MidiMessage SysExMsgHandler::sysExDeviceReady(MidiMessage& message)
 {
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &SYSEX_DeviceReady, (uint8_t)true);
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &SysEx::DeviceReady, (uint8_t)true);
 }
 
 // Reset Distributors, LocalStorage and Set Device name to "New Device"

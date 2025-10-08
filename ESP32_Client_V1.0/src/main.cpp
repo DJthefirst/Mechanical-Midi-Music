@@ -80,7 +80,7 @@ void setup() {
   instrumentController.resetAll();
 
   //Send Device Ready to Connect
-  MidiMessage ready(Device::GetDeviceID(), SYSEX_Server, SYSEX_DeviceReady, nullptr, 0);
+  MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);
   network->sendMessage(ready);
 }
 

@@ -56,7 +56,7 @@ void MessageRouter::broadcastDeviceChanged(INetwork* sourceNetwork)
 {
     if (!m_networkManager) return;
 
-    MidiMessage deviceChangedMsg(Device::GetDeviceID(), SYSEX_Server, SYSEX_DeviceChanged, nullptr, 0);
+    MidiMessage deviceChangedMsg(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceChanged, nullptr, 0);
     
     if (sourceNetwork) {
         // Send to all networks except the one that originated the change

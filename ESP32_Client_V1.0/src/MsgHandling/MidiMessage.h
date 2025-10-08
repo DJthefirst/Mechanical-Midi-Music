@@ -29,7 +29,7 @@ struct MidiMessage
     MidiMessage(uint16_t src, uint16_t dest, uint8_t msgId, const uint8_t payload[], uint8_t payloadLength) {
         
         //Midi Message Header SysExStart, MidiID, DeviceID_1, DeviceID_0.
-        const std::array<uint8_t, 2> header = {0xF0, SYSEX_ID};
+        const std::array<uint8_t, 2> header = {0xF0, SysEx::ID};
         std::copy(header.data(), header.data()+header.size(), buffer.begin());
 
         //SYSEX Src and Dest addresses
