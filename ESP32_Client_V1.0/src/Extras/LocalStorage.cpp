@@ -7,7 +7,7 @@
 #include <string>
 #include "LocalStorage.h"
 #include "Distributor.h"
-//#include "MessageHandler.h"
+#include "DistributorManager.h"
 
 
 esp_err_t err;
@@ -229,30 +229,30 @@ std::string LocalStorage::Uint16ToKey(uint16_t value){
     return(key);
 }
 
-// bool LocalStorage::InitializeDeviceConfiguration(MessageHandler& messageHandler){
-//     // Ensure NVS is properly initialized
-//     if (!EnsureNVSInitialized()) {
-//         return false; // NVS initialization failed, use defaults
-//     }
+bool LocalStorage::InitializeDeviceConfiguration(DistributorManager& distributorManager){
+    // Ensure NVS is properly initialized
+    if (!EnsureNVSInitialized()) {
+        return false; // NVS initialization failed, use defaults
+    }
 
-//     // Device Config - only load if NVS is working
-//     Device::Name = GetDeviceName();
-//     // Load runtime device ID (if stored) and update Device runtime value
-//     Device::SetDeviceID(GetDeviceID());
-//     // Normalize the stored blob to ensure consistent 20-byte space-padded format
-//     SetDeviceName(Device::Name);
-//     // Persist runtime device ID back (ensures formatting/consistency)
-//     SetDeviceID(Device::GetDeviceID());
+    // Device Config - only load if NVS is working
+    Device::Name = GetDeviceName();
+    // Load runtime device ID (if stored) and update Device runtime value
+    Device::SetDeviceID(GetDeviceID());
+    // Normalize the stored blob to ensure consistent 20-byte space-padded format
+    SetDeviceName(Device::Name);
+    // Persist runtime device ID back (ensures formatting/consistency)
+    SetDeviceID(Device::GetDeviceID());
     
-//     // Distributor Config
-//     uint8_t numDistributors = GetNumOfDistributors();
-//     for(uint8_t i = 0; i < numDistributors; i++){
-//         uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-//         GetDistributorConstruct(i, distributorData);
-//         messageHandler.addDistributor(distributorData);
-//     }
+    // Distributor Config
+    uint8_t numDistributors = GetNumOfDistributors();
+    for(uint8_t i = 0; i < numDistributors; i++){
+        uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
+        GetDistributorConstruct(i, distributorData);
+        distributorManager.addDistributor(distributorData);
+    }
     
-//     return true; // Successfully loaded configuration
-// }
+    return true; // Successfully loaded configuration
+}
 
 #endif

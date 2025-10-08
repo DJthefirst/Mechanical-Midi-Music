@@ -507,7 +507,7 @@ bool Distributor::channelEnabled(uint8_t channel){
 //Returns Distributor construct without ID
 std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
-    std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj;
+    std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj = {}; // Initialize all bytes to 0
 
     uint8_t distributorBoolByte = 0;
     if(this->m_muted)         distributorBoolByte |= DISTRIBUTOR_BOOL_MUTED;
@@ -528,11 +528,11 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     distributorObj[7] = static_cast<uint8_t>((m_instruments >> 14) & 0x7F);
     distributorObj[8] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
     distributorObj[9] = static_cast<uint8_t>((m_instruments >> 0) & 0x7F);
-    distributorObj[10] = static_cast<uint8_t>(m_distributionMethod);
-    distributorObj[11] = distributorBoolByte;
-    distributorObj[12] = m_minNote;
-    distributorObj[13] = m_maxNote;
-    distributorObj[14] = m_numPolyphonicNotes;
+    distributorObj[10] = static_cast<uint8_t>(m_distributionMethod) & 0x7F;
+    distributorObj[11] = distributorBoolByte & 0x7F;
+    distributorObj[12] = m_minNote & 0x7F;
+    distributorObj[13] = m_maxNote & 0x7F;
+    distributorObj[14] = m_numPolyphonicNotes & 0x7F;
     distributorObj[15] = 0; //Reserved
 
     return distributorObj;

@@ -23,7 +23,7 @@ public:
     void Test();
     bool EnsureNVSInitialized();
     void ResetDeviceConfig();
-    // bool InitializeDeviceConfiguration(class MessageHandler& messageHandler);
+    bool InitializeDeviceConfiguration(class DistributorManager& distributorManager);
     void GetDeviceConstruct();
     void SetDeviceConstruct();
     std::string GetDeviceName();
