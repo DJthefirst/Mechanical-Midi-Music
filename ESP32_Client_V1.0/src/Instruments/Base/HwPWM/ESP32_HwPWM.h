@@ -8,7 +8,7 @@
  * ESP32-specific PWM implementation using LedC peripheral
  * Provides PWM functionality for ESP32 microcontrollers
  */
-class ESP32_PwmBase : public InstrumentController {
+class ESP32_HwPWM : public InstrumentController {
 public:
     static constexpr Instrument Type = Instrument::PWM;
 private:
@@ -29,7 +29,7 @@ private:
     static constexpr uint16_t DUTY_CYCLE_50_PERCENT = (1 << (LEDC_RESOLUTION - 1)); // 50% duty cycle
 
 public: 
-    ESP32_PwmBase();
+    ESP32_HwPWM();
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;

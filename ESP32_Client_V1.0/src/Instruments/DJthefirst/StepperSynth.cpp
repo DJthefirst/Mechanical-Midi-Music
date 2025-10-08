@@ -14,7 +14,7 @@ enum PIN_Connnections{
 
 static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
 
-StepperSynth::StepperSynth() : SwPwmBase()
+StepperSynth::StepperSynth() : SwPWM()
 {
     //Setup pins
     pinMode(PIN_SHIFTREG_Data, OUTPUT);
@@ -32,7 +32,7 @@ void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, 
 {
     m_outputenabled[instrument] = true;
     updateShiftRegister();
-    SwPwmBase::playNote(instrument, note, velocity, channel);
+    SwPWM::playNote(instrument, note, velocity, channel);
     setInstrumentLedOn(instrument, channel, note, velocity);
     return;
 }
@@ -40,7 +40,7 @@ void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, 
 void StepperSynth::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if(isNoteActive(instrument, note)){
-        SwPwmBase::stopNote(instrument, note, velocity);
+        SwPWM::stopNote(instrument, note, velocity);
         
         m_outputenabled[instrument] = false;
         updateShiftRegister();
@@ -49,7 +49,7 @@ void StepperSynth::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 }
 
 void StepperSynth::reset(uint8_t instrument){
-    SwPwmBase::reset(instrument);
+    SwPWM::reset(instrument);
     m_outputenabled[instrument] = false;
     updateShiftRegister();
     setInstrumentLedOff(instrument);
@@ -60,7 +60,7 @@ void StepperSynth::resetAll(){
 }
 
 void StepperSynth::stopAll(){
-    SwPwmBase::stopAll();
+    SwPWM::stopAll();
     m_outputenabled = {};
     updateShiftRegister();
     resetLEDs();

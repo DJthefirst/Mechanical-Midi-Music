@@ -1,4 +1,4 @@
-#include "Instruments/Utility/PWM/ESP32_PwmBase.h"
+#include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
 #include "Device.h"
@@ -22,7 +22,7 @@ static std::array<uint32_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteStartTime
 static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_ledcChannels;
 static std::array<bool, HardwareConfig::MAX_NUM_INSTRUMENTS> m_channelActive;
 
-ESP32_PwmBase::ESP32_PwmBase()
+ESP32_HwPWM::ESP32_HwPWM()
 {
     // Initialize LedC channels for each instrument
     const auto& pins = HardwareConfig::PINS;
@@ -41,7 +41,7 @@ ESP32_PwmBase::ESP32_PwmBase()
     m_noteStartTime.fill(0); // No notes started initially
 }
 
-void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
+void ESP32_HwPWM::initializeLedcChannel(uint8_t instrument, uint8_t pin)
 {
     // Configure LedC channel - only do full setup once during initialization
     ledcSetup(m_ledcChannels[instrument], 1000, LEDC_RESOLUTION); // Start with 1kHz, will be changed when notes play
@@ -49,7 +49,7 @@ void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
     ledcWrite(m_ledcChannels[instrument], 0); // Start with output off
 }
 
-void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
+void ESP32_HwPWM::setFrequency(uint8_t instrument, double frequency)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
@@ -72,7 +72,7 @@ void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
     m_channelActive[instrument] = true;
 }
 
-void ESP32_PwmBase::stopChannel(uint8_t instrument)
+void ESP32_HwPWM::stopChannel(uint8_t instrument)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
@@ -81,17 +81,17 @@ void ESP32_PwmBase::stopChannel(uint8_t instrument)
     m_channelActive[instrument] = false;
 }
 
-void ESP32_PwmBase::reset(uint8_t instrument)
+void ESP32_HwPWM::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ESP32_PwmBase::resetAll()
+void ESP32_HwPWM::resetAll()
 {
     stopAll();
 }
 
-void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void ESP32_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Early bounds checking for performance
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note >= 128) return;
@@ -120,7 +120,7 @@ void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,
 
 }
 
-void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ESP32_HwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
@@ -144,7 +144,7 @@ void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
     }
 }
 
-void ESP32_PwmBase::stopAll(){
+void ESP32_HwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel
     m_numActiveNotes = 0;
@@ -166,18 +166,18 @@ void ESP32_PwmBase::stopAll(){
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ESP32_PwmBase::getNumActiveNotes(uint8_t instrument)
+uint8_t ESP32_HwPWM::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool ESP32_PwmBase::isNoteActive(uint8_t instrument, uint8_t note)
+bool ESP32_HwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
     //Mask lower 7bits and return true if the instrument is playing the respective note.
     return ((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0);
 }
 
-void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+void ESP32_HwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend; 
     
     // Early exit optimizations - check most likely fail conditions first
@@ -198,20 +198,20 @@ void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t chan
 //Distributor Tracking Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ESP32_PwmBase::setLastDistributor(uint8_t instrument, void* distributor) {
+void ESP32_HwPWM::setLastDistributor(uint8_t instrument, void* distributor) {
     if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
         m_lastDistributor[instrument] = distributor;
     }
 }
 
-void* ESP32_PwmBase::getLastDistributor(uint8_t instrument) {
+void* ESP32_HwPWM::getLastDistributor(uint8_t instrument) {
     if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
         return m_lastDistributor[instrument];
     }
     return nullptr;
 }
 
-void ESP32_PwmBase::clearDistributorFromInstrument(void* distributor) {
+void ESP32_HwPWM::clearDistributorFromInstrument(void* distributor) {
     // When a distributor is destroyed, clear it from all instruments
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         if (m_lastDistributor[i] == distributor) {
@@ -224,7 +224,7 @@ void ESP32_PwmBase::clearDistributorFromInstrument(void* distributor) {
     }
 }
 
-void ESP32_PwmBase::checkInstrumentTimeouts() {
+void ESP32_HwPWM::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
     if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
     

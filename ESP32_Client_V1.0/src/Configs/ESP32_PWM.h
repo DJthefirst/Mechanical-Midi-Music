@@ -45,8 +45,8 @@ constexpr std::array<uint8_t, 12> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 3
 #endif
 
 // Instrument Type Configuration
-#include "Instruments/Utility/PWM/PwmBase.h"
-using InstrumentType = PwmBase;
+#include "Instruments/Base/HwPWM/HwPWM.h"
+using InstrumentType = HwPWM;
 
 // Optional Features - Uncomment desired extras
 // Save configuration on power off

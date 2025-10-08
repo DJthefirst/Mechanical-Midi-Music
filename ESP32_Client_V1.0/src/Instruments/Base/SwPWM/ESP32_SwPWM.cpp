@@ -1,4 +1,4 @@
-#include "Instruments/Utility/SwPWM/ESP32_SwPwmBase.h"
+#include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
 #include "Instruments/Utility/InterruptTimer.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
@@ -15,7 +15,7 @@ static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentTick; /
 static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
 static std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
-ESP32_SwPwmBase::ESP32_SwPwmBase()
+ESP32_SwPWM::ESP32_SwPWM()
 {
     //Setup pins
     for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
@@ -31,17 +31,17 @@ ESP32_SwPwmBase::ESP32_SwPwmBase()
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
 }
 
-void ESP32_SwPwmBase::reset(uint8_t instrument)
+void ESP32_SwPWM::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ESP32_SwPwmBase::resetAll()
+void ESP32_SwPWM::resetAll()
 {
     stopAll();
 }
 
-void ESP32_SwPwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
 
     //Use MSB in note to indicate if a note is active.
@@ -58,7 +58,7 @@ void ESP32_SwPwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocit
     //}
 }
 
-void ESP32_SwPwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
     if((m_activeNotes[instrument] & (~MSB_BITMASK)) == note){
         m_activeNotes[instrument] = 0;
@@ -71,7 +71,7 @@ void ESP32_SwPwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocit
     }
 }
 
-void ESP32_SwPwmBase::stopAll(){
+void ESP32_SwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
@@ -99,9 +99,9 @@ Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but m
 // #pragma GCC push_options (Legacy)
 // #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ESP32_SwPwmBase::Tick()
+void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
 #else
-void ESP32_SwPwmBase::tick()
+void ESP32_SwPWM::tick()
 #endif
 {
     // Go through every Instrument
@@ -123,9 +123,9 @@ void ESP32_SwPwmBase::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ESP32_SwPwmBase::togglePin(uint8_t instrument)
+void ICACHE_RAM_ATTR ESP32_SwPWM::togglePin(uint8_t instrument)
 #else
-void ESP32_SwPwmBase::togglePin(uint8_t instrument)
+void ESP32_SwPWM::togglePin(uint8_t instrument)
 #endif
 {
     //Pulse the control pin
@@ -139,18 +139,18 @@ void ESP32_SwPwmBase::togglePin(uint8_t instrument)
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ESP32_SwPwmBase::getNumActiveNotes(uint8_t instrument)
+uint8_t ESP32_SwPWM::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool ESP32_SwPwmBase::isNoteActive(uint8_t instrument, uint8_t note)
+bool ESP32_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
     //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void ESP32_SwPwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
+void ESP32_SwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
     m_pitchBend[channel] = bend; 
     if(m_notePeriod[instrument] == 0) return;
     if(m_noteCh[instrument] != channel) return;

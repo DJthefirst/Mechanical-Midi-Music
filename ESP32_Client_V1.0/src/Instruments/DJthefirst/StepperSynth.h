@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Constants.h"
-#include "Instruments/Utility/SwPWM/SwPwmBase.h"
+#include "Instruments/Base/SwPWM/SwPWM.h"
 
 #include <cstdint>
 using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
-class StepperSynth : public SwPwmBase{
+class StepperSynth : public SwPWM{
 public:
 
 private:

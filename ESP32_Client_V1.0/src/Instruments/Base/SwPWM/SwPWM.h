@@ -2,15 +2,16 @@
 
 // Platform-specific includes
 #if defined(ESP32)
-    #include "Instruments/Utility/PWM/ESP32_PwmBase.h"
-    using PlatformPwmBase = ESP32_PwmBase;
+    #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
+    using PlatformSwPWM = ESP32_SwPWM;
 #elif defined(ARDUINO) && !defined(ESP8266)
-    #include "Instruments/Utility/PWM/ArduinoMega_PwmBase.h"
-    using PlatformPwmBase = ArduinoMega_PwmBase;
+    #include "Instruments/Base/SwPWM/ArduinoMega_SwPWM.h"
+    using PlatformSwPWM = ArduinoMega_SwPWM;
 #else
     // Default fallback - could be extended for other platforms
-    #include "Instruments/Utility/PWM/ESP32_PwmBase.h"
-    using PlatformPwmBase = ESP32_PwmBase;
+    // Use the regular PWM implementation as the platform-specific base
+    #include "Instruments/Base/PWM/ESP32_PwmBase.h"
+    using PlatformSwPWM = ESP32_PwmBase;
 #endif
 
 /**
@@ -18,17 +19,17 @@
  * Automatically selects the appropriate PWM implementation based on the target platform
  * Custom instrument classes should inherit from this class to get platform-specific PWM functionality
  */
-class PwmBase : public PlatformPwmBase {
+class SwPWM : public PlatformSwPWM {
 public:
     /**
      * Constructor - initializes the platform-specific PWM implementation
      */
-    PwmBase() : PlatformPwmBase() {}
+    SwPWM() : PlatformSwPWM() {}
 
     /**
      * Virtual destructor to ensure proper cleanup
      */
-    virtual ~PwmBase() = default;
+    virtual ~SwPWM() = default;
 
     // All PWM functionality is inherited from the platform-specific implementation
     // Additional common functionality can be added here if needed

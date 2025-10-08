@@ -2,7 +2,7 @@
 // WARNING UNTESTED CODE - WILL NOT COMPILE! - EXAMPLE ONLY //
 //////////////////////////////////////////////////////////////
 
-#include "Instruments/Utility/PWM/ArduinoMega_PwmBase.h"
+#include "Instruments/Base/HwPWM/ArduinoMega_HwPWM.h"
 
 // Only compile for Arduino platforms
 #if defined(ARDUINO) && !defined(ESP32) && !defined(ESP8266)
