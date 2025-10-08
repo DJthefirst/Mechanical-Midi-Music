@@ -16,7 +16,9 @@
 #include "Device.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
-#include "MessageHandler.h"
+#include "DistributorManager.h"
+#include "SysExMsgHandler.h"
+#include "MidiMsgHandler.h"
 
 // Optional features
 #ifdef EXTRA_LOCAL_STORAGE
@@ -26,11 +28,38 @@
 std::unique_ptr<NetworkManager> network = CreateNetwork();
 InstrumentType instrumentController; 
 
-MessageHandler messageHandler(&instrumentController);
+// Create the specialized handlers
+std::shared_ptr<DistributorManager> distributorManager;
+std::shared_ptr<SysExMsgHandler> sysExHandler;
+std::shared_ptr<MidiMsgHandler> midiHandler;
+
+// Current network context for device changed notifications
+thread_local INetwork* currentSourceNetwork = nullptr;
+
+// Device changed callback to broadcast notifications to all other networks
+void broadcastDeviceChanged() {
+    MidiMessage deviceChangedMsg(Device::GetDeviceID(), SYSEX_Broadcast, SYSEX_DeviceChanged, nullptr, 0);
+    if (currentSourceNetwork) {
+        // Send to all networks except the one that originated the change
+        network->sendMessageToOthers(deviceChangedMsg, currentSourceNetwork);
+    } else {
+        // Send to all networks if no source network (e.g., internal change)
+        network->sendMessage(deviceChangedMsg);
+    }
+}
 
 void setup() {
 
   //Device::validateConfiguration();
+
+  // Initialize the specialized handlers
+  distributorManager = std::make_shared<DistributorManager>(&instrumentController);
+  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
+  midiHandler = std::make_shared<MidiMsgHandler>(&instrumentController, distributorManager, sysExHandler);
+  
+  // Set device changed callbacks for both handlers
+  sysExHandler->setDeviceChangedCallback(broadcastDeviceChanged);
+  distributorManager->setDeviceChangedCallback(broadcastDeviceChanged);
 
   //Begin Network Commmunication
   network->begin();  
@@ -61,7 +90,7 @@ void setup() {
       for(uint8_t i = 0; i < numDistributors; i++){
         uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
         LocalStorage::get().GetDistributorConstruct(i,distributorData);
-        messageHandler.addDistributor(distributorData);
+        distributorManager->addDistributor(distributorData);
       }
     }
   }
@@ -83,20 +112,6 @@ void setup() {
   // distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
   // messageHandler.addDistributor(distributor2);
 
-  // //Distributor 3
-  // Distributor distributor3(&instrumentController);
-  // distributor3.setChannels(0x0004); // 3
-  // distributor3.setInstruments(0x000000FF); // 1-8
-  // distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
-  // messageHandler.addDistributor(distributor3);
-
-  // //Distributor 4
-  // Distributor distributor4(&instrumentController);
-  // distributor4.setChannels(0x0008); // 4
-  // distributor4.setInstruments(0x000000FF); // 1-8
-  // distributor4.setDistributionMethod(DistributionMethod::Ascending);
-  // messageHandler.addDistributor(distributor4);
-
   //Reset All pins to default
   instrumentController.resetAll();
 
@@ -107,12 +122,36 @@ void setup() {
 
 //Periodicaly Read Incoming Messages
 void loop() {
-  std::optional<MidiMessage> message = network->readMessage();
+  // Loop through each network individually
+  for (size_t i = 0; i < network->numberOfNetworks(); i++) {
+    INetwork* currentNetwork = network->getNetwork(i);
+    if (!currentNetwork) continue;
 
-  //If the network returns a new message process it.
-  if (!message) return;
-  message = messageHandler.processMessage(*message);
-  
-  //If there is a response send message.
-  if (message) network->sendMessage(*message);
+    // Read message from this specific network
+    std::optional<MidiMessage> message = currentNetwork->readMessage();
+    if (!message) continue;
+
+    // Set the current source network for device changed notifications
+    currentSourceNetwork = currentNetwork;
+
+    // Process message based on type
+    if (message->type() == MIDI_SysCommon && message->sysCommonType() == MIDI_SysEX) {
+      // Handle SysEx messages with SysExMsgHandler
+      if (sysExHandler) {
+        std::optional<MidiMessage> response = sysExHandler->processSysExMessage(*message);
+        // Send response back to the originating network only
+        if (response) {
+          currentNetwork->sendMessage(*response);
+        }
+      }
+    } else {
+      // Handle other MIDI messages with MidiMsgHandler
+      if (midiHandler) {
+        midiHandler->processMessage(*message);
+      }
+    }
+
+    // Clear the source network context
+    currentSourceNetwork = nullptr;
+  }
 }

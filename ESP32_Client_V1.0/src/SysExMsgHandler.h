@@ -100,7 +100,7 @@ private:
     
     // Helper methods
     void broadcastDeviceChanged();
-    bool isValidDestination(const MidiMessage& message) const;
+    bool isValidDestination(MidiMessage& message) const;
     
     // Local Storage helpers
     #ifdef EXTRA_LOCAL_STORAGE

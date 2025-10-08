@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Constants.h"
 #include <cstdint>
 #include <array>
 using std::int8_t;

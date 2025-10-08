@@ -38,8 +38,33 @@ public:
         return m_networks.size();
     }
 
+    // Get individual network for direct access
+    INetwork* getNetwork(size_t index) {
+        if (index < m_networks.size()) {
+            return m_networks[index].get();
+        }
+        return nullptr;
+    }
+
+    // Send message to all networks
     void sendMessage(MidiMessage message) override {
         for (auto& net : m_networks) if (net) net->sendMessage(message);
+    }
+
+    // Send message to all networks except the specified one
+    void sendMessageToOthers(MidiMessage message, INetwork* excludeNetwork) {
+        for (auto& net : m_networks) {
+            if (net && net.get() != excludeNetwork) {
+                net->sendMessage(message);
+            }
+        }
+    }
+
+    // Send message to a specific network
+    void sendMessageToNetwork(MidiMessage message, INetwork* targetNetwork) {
+        if (targetNetwork) {
+            targetNetwork->sendMessage(message);
+        }
     }
 
     void sendString(String message) override {
