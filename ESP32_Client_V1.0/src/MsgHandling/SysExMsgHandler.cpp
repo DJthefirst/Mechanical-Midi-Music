@@ -6,7 +6,7 @@
  */
 
 #include "SysExMsgHandler.h"
-#include "DistributorManager.h"
+#include "Distributors/DistributorManager.h"
 #include <Arduino.h>
 #include <cstring>  // For memcpy and strncpy
 #include <algorithm> // For std::min

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "Networks/NetworkManager.h"
-#include "DistributorManager.h"
+#include "Distributors/DistributorManager.h"
 #include "SysExMsgHandler.h"
 #include "MidiMsgHandler.h"
 #include "MidiMessage.h"

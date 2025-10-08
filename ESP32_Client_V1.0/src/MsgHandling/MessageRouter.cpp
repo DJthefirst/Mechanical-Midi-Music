@@ -38,6 +38,11 @@ void MessageRouter::processMessages()
         // Process the message
         processMessage(*message, currentNetwork);
     }
+    
+    // Check for instrument timeouts (only when configured)
+    if (m_distributorManager) {
+        m_distributorManager->checkInstrumentTimeouts();
+    }
 }
 
 // Set callback for device changed notifications

@@ -40,4 +40,10 @@ public:
 
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
+    
+    //Distributor tracking functions
+    void setLastDistributor(uint8_t instrument, void* distributor) override;
+    void* getLastDistributor(uint8_t instrument) override;
+    void clearDistributorFromInstrument(void* distributor) override;
+    void checkInstrumentTimeouts() override;
 };

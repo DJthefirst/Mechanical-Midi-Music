@@ -86,6 +86,12 @@ namespace Config {
         constexpr uint8_t MAX_NOTE = 127;
     #endif
 
+    #ifdef INSTRUMENT_TIMEOUT_MS_VALUE
+        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = INSTRUMENT_TIMEOUT_MS_VALUE;
+    #else
+        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = 0;  // Default 0 = infinite timeout (no timeout)
+    #endif
+
     #ifdef NUM_INSTRUMENTS_VALUE
     constexpr uint8_t NUM_INSTRUMENTS = NUM_INSTRUMENTS_VALUE;
     #else

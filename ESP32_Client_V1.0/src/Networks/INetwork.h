@@ -11,9 +11,7 @@
 #include <stdint.h>
 #include <optional>
 #include "Constants.h"
-#include "MidiMessage.h"
-
-class MessageHandler;
+#include "MsgHandling/MidiMessage.h"
 
 class INetwork{
     

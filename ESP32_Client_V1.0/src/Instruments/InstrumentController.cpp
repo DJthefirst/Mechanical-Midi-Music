@@ -40,3 +40,24 @@ void InstrumentController::setEffectCrtl_1(uint8_t value){
 void InstrumentController::setEffectCrtl_2(uint8_t value){
     //Not Yet Implemented
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Distributor Tracking Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void InstrumentController::setLastDistributor(uint8_t instrument, void* distributor){
+    //Default implementation does nothing - derived classes should override if needed
+}
+
+void* InstrumentController::getLastDistributor(uint8_t instrument){
+    //Default implementation returns nullptr - derived classes should override if needed
+    return nullptr;
+}
+
+void InstrumentController::clearDistributorFromInstrument(void* distributor){
+    //Default implementation does nothing - derived classes should override if needed
+}
+
+void InstrumentController::checkInstrumentTimeouts(){
+    //Default implementation does nothing - derived classes should override if needed
+}

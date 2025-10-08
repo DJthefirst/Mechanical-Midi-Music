@@ -15,6 +15,10 @@ static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base N
 static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_activeFrequency;//Note Played with bend
 static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
 
+//Distributor tracking and timeout management
+static std::array<void*,Config::MAX_NUM_INSTRUMENTS> m_lastDistributor; //Last distributor that sent a note
+static std::array<uint32_t,Config::MAX_NUM_INSTRUMENTS> m_noteStartTime; //When the note started (for timeout)
+
 // LedC channel management (moved from header due to Config dependency)
 static std::array<uint8_t, Config::MAX_NUM_INSTRUMENTS> m_ledcChannels;
 static std::array<bool, Config::MAX_NUM_INSTRUMENTS> m_channelActive;
@@ -33,6 +37,8 @@ ESP32_PwmBase::ESP32_PwmBase()
     //Initialize Default values
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel assigned
+    m_lastDistributor.fill(nullptr); // No distributor assigned initially
+    m_noteStartTime.fill(0); // No notes started initially
 }
 
 void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
@@ -97,6 +103,7 @@ void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_noteFrequency[instrument] = baseFreq;
     m_noteCh[instrument] = channel;
+    m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
     
     // Calculate final frequency with pitch bend applied
     m_activeFrequency[instrument] = NoteTables::applyPitchBend(baseFreq, m_pitchBend[channel]);
@@ -124,6 +131,8 @@ void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
         m_noteFrequency[instrument] = 0;
         m_activeFrequency[instrument] = 0;
         m_noteCh[instrument] = 255; // 255 indicates no channel
+        m_lastDistributor[instrument] = nullptr; // Clear distributor tracking
+        m_noteStartTime[instrument] = 0;
         
         // Decrement active note count only if channel was actually active
         if (m_channelActive[instrument]) {
@@ -142,6 +151,8 @@ void ESP32_PwmBase::stopAll(){
     m_activeNotes = {};
     m_noteFrequency = {};
     m_activeFrequency = {};
+    m_lastDistributor.fill(nullptr); // Clear all distributor tracking
+    m_noteStartTime.fill(0); // Clear all start times
 
     // Stop all LedC channels
     for(uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
@@ -181,5 +192,49 @@ void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t chan
         setFrequency(instrument, m_activeFrequency[instrument]);
         lastFrequency[instrument] = bentFreq;
     }
+}
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//Distributor Tracking Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ESP32_PwmBase::setLastDistributor(uint8_t instrument, void* distributor) {
+    if (instrument < Config::MAX_NUM_INSTRUMENTS) {
+        m_lastDistributor[instrument] = distributor;
+    }
+}
+
+void* ESP32_PwmBase::getLastDistributor(uint8_t instrument) {
+    if (instrument < Config::MAX_NUM_INSTRUMENTS) {
+        return m_lastDistributor[instrument];
+    }
+    return nullptr;
+}
+
+void ESP32_PwmBase::clearDistributorFromInstrument(void* distributor) {
+    // When a distributor is destroyed, clear it from all instruments
+    for (uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+        if (m_lastDistributor[i] == distributor) {
+            // If this distributor was the last to send a note, stop the note to prevent hanging
+            if (m_activeNotes[i] != 0) {
+                stopNote(i, m_activeNotes[i] & 0x7F, 0);
+            }
+            m_lastDistributor[i] = nullptr;
+        }
+    }
+}
+
+void ESP32_PwmBase::checkInstrumentTimeouts() {
+    // Only check timeouts if a timeout is configured
+    if (Config::INSTRUMENT_TIMEOUT_MS == 0) return;
+    
+    uint32_t currentTime = millis();
+    for (uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+        // Check if instrument is active and has timed out
+        if (m_activeNotes[i] != 0 && 
+            (currentTime - m_noteStartTime[i]) > Config::INSTRUMENT_TIMEOUT_MS) {
+            // Stop the note due to timeout
+            stopNote(i, m_activeNotes[i] & 0x7F, 0);
+        }
+    }
 }

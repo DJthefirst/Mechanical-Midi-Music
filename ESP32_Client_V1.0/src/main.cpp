@@ -16,7 +16,7 @@
 #include "Device.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
-#include "MessageRouter.h"
+#include "MsgHandling/MessageRouter.h"
 
 // Optional features
 #ifdef EXTRA_LOCAL_STORAGE

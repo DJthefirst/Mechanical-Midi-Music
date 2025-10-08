@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 #include "LocalStorage.h"
-#include "Distributor.h"
-#include "DistributorManager.h"
+#include "Distributors/Distributor.h"
+#include "Distributors/DistributorManager.h"
 
 
 esp_err_t err;

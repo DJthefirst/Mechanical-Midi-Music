@@ -9,7 +9,6 @@
 using networkType = NetworkUDP;
 
 #include "NetworkUDP.h"
-#include "MessageHandler.h"
 
 #if !defined ARDUINO_ARCH_ESP8266 && !defined ARDUINO_ARCH_ESP32
 #else
@@ -95,7 +94,7 @@ void NetworkUDP::startOTA() {
 }
 
 
-void NetworkUDP::readMessage() {
+std::optional<MidiMessage> NetworkUDP::readMessage() {
     // Handle OTA
     ArduinoOTA.handle();
 
@@ -124,7 +123,8 @@ void NetworkUDP::readMessage() {
 
         if (messageLength > 1 && messageLength <= 8){
             message.length = messageLength;
-            (*m_ptrMessageHandler).processMessage(message);
+            MulticastUDP.flush(); // Just incase we got a really long packet
+            return std::optional<MidiMessage>(message);
         }
         else{
             #ifdef DEBUG_UDP_VERBOSE
@@ -145,6 +145,7 @@ void NetworkUDP::readMessage() {
 
         MulticastUDP.flush(); // Just incase we got a really long packet
     }
+    return std::nullopt;
 }
     //Old Code
     //String msg = "";

@@ -6,7 +6,7 @@
  */
 
 #include "MidiMsgHandler.h"
-#include "DistributorManager.h"
+#include "Distributors/DistributorManager.h"
 #include "SysExMsgHandler.h"
 #include <Arduino.h>
 
