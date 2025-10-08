@@ -45,29 +45,29 @@ void Distributor::processMessage(MidiMessage message){
 
     switch(message.type()){
 
-    case(MIDI_NoteOff):
+    case(Midi::NoteOff):
         noteOffEvent(message.buffer[1],message.buffer[2]);
         break; 
-    case(MIDI_NoteOn):
+    case(Midi::NoteOn):
         noteOnEvent(message.buffer[1],message.buffer[2],message.channel());
         break;
-    case(MIDI_KeyPressure):
+    case(Midi::KeyPressure):
         keyPressureEvent(message.buffer[1],message.buffer[2]);
         break;
-    case(MIDI_ControlChange):
+    case(Midi::ControlChange):
         // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
         break;
-    case(MIDI_ProgramChange):
+    case(Midi::ProgramChange):
         
         programChangeEvent(message.buffer[1]);
         break;
-    case(MIDI_ChannelPressure):
+    case(Midi::ChannelPressure):
         channelPressureEvent(message.buffer[1]);
         break;
-    case(MIDI_PitchBend):
+    case(Midi::PitchBend):
         pitchBendEvent((static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]), m_currentChannel);
         break;
-    case(MIDI_SysCommon):
+    case(Midi::SysCommon):
         break;
     }
 }

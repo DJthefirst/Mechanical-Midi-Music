@@ -18,7 +18,7 @@ private:
     //Local MIDI Device Atributes
     uint8_t m_program = 0;
     uint8_t m_channelPressure = 0;
-    uint16_t m_pitchBend[NUM_MIDI_CH];
+    uint16_t m_pitchBend[Midi::NUM_CH];
 
 
 public: 

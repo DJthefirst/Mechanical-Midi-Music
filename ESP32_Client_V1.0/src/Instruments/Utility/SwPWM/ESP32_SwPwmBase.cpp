@@ -28,7 +28,7 @@ ESP32_SwPwmBase::ESP32_SwPwmBase()
     InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
-    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
 }
 
 void ESP32_SwPwmBase::reset(uint8_t instrument)
@@ -72,7 +72,7 @@ void ESP32_SwPwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocit
 }
 
 void ESP32_SwPwmBase::stopAll(){
-    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_noteCh.fill(-1); // -1 indicates no channel
     m_numActiveNotes = 0;
     m_activeNotes = {};

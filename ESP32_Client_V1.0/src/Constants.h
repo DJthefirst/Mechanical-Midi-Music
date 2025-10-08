@@ -21,21 +21,28 @@ constexpr uint8_t NONE = -1;
 // MIDI Constants
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// MIDI message types
-constexpr uint8_t MIDI_NoteOff            = 0x80;
-constexpr uint8_t MIDI_NoteOn             = 0x90;
-constexpr uint8_t MIDI_KeyPressure        = 0xA0;
-constexpr uint8_t MIDI_ControlChange      = 0xB0;
-constexpr uint8_t MIDI_ProgramChange      = 0xC0;
-constexpr uint8_t MIDI_ChannelPressure    = 0xD0;
-constexpr uint8_t MIDI_PitchBend          = 0xE0;
-constexpr uint8_t MIDI_SysCommon          = 0xF0;
+namespace Midi {
 
-// System Common MIDI message types
-constexpr uint8_t MIDI_SysEX    = 0x0;
-constexpr uint8_t MIDI_SysEXEnd = 0x7;
-constexpr uint8_t MIDI_SysStop  = 0xA;
-constexpr uint8_t MIDI_SysReset = 0xF;
+    // MIDI message types
+    constexpr uint8_t NoteOff            = 0x80;
+    constexpr uint8_t NoteOn             = 0x90;
+    constexpr uint8_t KeyPressure        = 0xA0;
+    constexpr uint8_t ControlChange      = 0xB0;
+    constexpr uint8_t ProgramChange      = 0xC0;
+    constexpr uint8_t ChannelPressure    = 0xD0;
+    constexpr uint8_t PitchBend          = 0xE0;
+    constexpr uint8_t SysCommon          = 0xF0;
+
+    // System Common MIDI message types
+    constexpr uint8_t SysEx    = 0x0;
+    constexpr uint8_t SysExEnd = 0x7;
+    constexpr uint8_t SysStop  = 0xA;
+    constexpr uint8_t SysReset = 0xF;
+
+    //MIDI Constants
+    constexpr uint16_t CTRL_CENTER = 0x2000;
+    constexpr uint8_t NUM_CH = 16;
+}
 
 // Control Change controller types (handled across all active channels)
 namespace MidiCC {
@@ -67,7 +74,6 @@ namespace MidiCC {
 };
 
 // SysEx custom protocol
-
 namespace SysEx {
     constexpr uint8_t ID = 0x7D; //Educational MIDI ID
     constexpr uint16_t Broadcast = 0x0000;
@@ -114,10 +120,6 @@ namespace SysEx {
     constexpr uint8_t SetDistributorMinMaxNotes = 0x55;
     constexpr uint8_t SetDistributorNumPolyphonicNotes = 0x56;
 };
-
-//MIDI Constants
-constexpr uint16_t MIDI_CTRL_CENTER = 0x2000;
-constexpr uint8_t NUM_MIDI_CH = 16;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enums

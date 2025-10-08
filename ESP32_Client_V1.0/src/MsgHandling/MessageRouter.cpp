@@ -80,7 +80,7 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
 
     // Process message based on type - optimize for most common case first
     const uint8_t msgType = message.type();
-    if (msgType == MIDI_SysCommon && message.sysCommonType() == MIDI_SysEX) {
+    if (msgType == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
         // Handle SysEx messages with SysExMsgHandler
         if (m_sysExHandler) {
             if (auto response = m_sysExHandler->processSysExMessage(message); response.has_value() && sourceNetwork) {

@@ -35,7 +35,7 @@ ESP32_PwmBase::ESP32_PwmBase()
     delay(500); // Wait a half second for safety
 
     // Initialize default values
-    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel assigned
     m_lastDistributor.fill(nullptr); // No distributor assigned initially
     m_noteStartTime.fill(0); // No notes started initially
@@ -145,7 +145,7 @@ void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 }
 
 void ESP32_PwmBase::stopAll(){
-    std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
+    std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel
     m_numActiveNotes = 0;
     m_activeNotes = {};

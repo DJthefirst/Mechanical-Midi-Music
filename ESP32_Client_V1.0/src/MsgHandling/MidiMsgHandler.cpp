@@ -31,10 +31,10 @@ std::optional<MidiMessage> MidiMsgHandler::processMessage(MidiMessage& message)
     // Handle messages based on type - optimize for most common cases first
     const uint8_t msgType = message.type();
     
-    if (msgType == MIDI_ControlChange) {
+    if (msgType == Midi::ControlChange) {
         // Handle Control Change Messages
         processCC(message);
-    } else if (msgType == MIDI_SysCommon) {
+    } else if (msgType == Midi::SysCommon) {
         // Handle System Common Messages
         return processSystemMessage(message);
     } else {
@@ -69,19 +69,19 @@ std::optional<MidiMessage> MidiMsgHandler::processSystemMessage(MidiMessage& mes
 {
     switch (message.sysCommonType()) {
 
-        case(MIDI_SysEX):
+        case(Midi::SysEx):
             if (m_sysExHandler) {
                 return m_sysExHandler->processSysExMessage(message);
             }
             break;
 
-        case(MIDI_SysStop):
+        case(Midi::SysStop):
             if (m_ptrInstrumentController) {
                 m_ptrInstrumentController->stopAll();
             }
             break;
 
-        case(MIDI_SysReset):
+        case(Midi::SysReset):
             if (m_ptrInstrumentController) {
                 m_ptrInstrumentController->resetAll();
             }
