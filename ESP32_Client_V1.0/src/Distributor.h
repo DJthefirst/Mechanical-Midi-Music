@@ -64,9 +64,13 @@ public:
     /* Returns a Byte array representing this Distributor */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
-    bool getMuted();
-    uint16_t getChannels();
-    uint32_t getInstruments();
+    bool getMuted() const;
+    uint16_t getChannels() const;
+    uint32_t getInstruments() const;
+    DistributionMethod getDistributionMethod() const;
+    
+    // Add routing method for messages
+    void distributeMessage(MidiMessage& message);
 
     void setDistributor(uint8_t profile[]);
     void setDistributionMethod(DistributionMethod);

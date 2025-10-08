@@ -13,18 +13,18 @@
 #include "Networks/NetworkDIN.h"
 #endif
 
-#include "Network.h"
+#include "INetwork.h"
 #include <vector>
 #include <memory>
 
 // Dynamic MultiNetwork backed by a vector. The factory can push_back compiled-in
 // networks without needing combinatorial preprocessor defines.
-class MultiNetwork : public Network {
+class NetworkManager : public INetwork {
 private:
-    std::vector<std::unique_ptr<Network>> m_networks;
+    std::vector<std::unique_ptr<INetwork>> m_networks;
 
 public:
-    MultiNetwork() = default;
+    NetworkManager() = default;
 
     template<typename NetT, typename... Args>
     void addNetwork(Args&&... args) {
@@ -57,8 +57,8 @@ public:
 };
 
 // Factory: create a MultiNetwork and push compiled-in network instances into it.
-inline std::unique_ptr<MultiNetwork> CreateNetwork(){
-    auto net = std::make_unique<MultiNetwork>();
+inline std::unique_ptr<NetworkManager> CreateNetwork(){
+    auto net = std::make_unique<NetworkManager>();
 
 #ifdef MMM_NETWORK_SERIAL
     net->addNetwork<NetworkSerial>();

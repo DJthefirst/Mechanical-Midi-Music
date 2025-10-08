@@ -538,18 +538,28 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     return distributorObj;
 }
 
-bool Distributor::getMuted(){
+bool Distributor::getMuted() const {
     return m_muted;
 }
 
 //Returns Distributor Channels
-uint16_t Distributor::getChannels(){
+uint16_t Distributor::getChannels() const {
     return m_channels;
 }
 
 //Returns Distributor Channels
-uint32_t Distributor::getInstruments(){
+uint32_t Distributor::getInstruments() const {
     return m_instruments;
+}
+
+//Returns Distribution Method
+DistributionMethod Distributor::getDistributionMethod() const {
+    return m_distributionMethod;
+}
+
+//Distribute message to instruments
+void Distributor::distributeMessage(MidiMessage& message) {
+    processMessage(message);
 }
 
 //Configures Distributor from construct
