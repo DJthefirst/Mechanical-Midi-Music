@@ -10,19 +10,20 @@
 
 #include <Arduino.h>
 
+#define DEVICE_CONFIG "Configs/ESP32_PWM.h"
+// #define DEVICE_CONFIG "Configs/StepperSynth.h"
+
 #include "Device.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MessageHandler.h"
 
-#include "Extras/LocalStorage.h"
-
 // Optional features
-#ifdef ENABLE_LOCAL_STORAGE
-    // #include "extras/LocalStorage.h"
+#ifdef EXTRA_LOCAL_STORAGE
+    #include "Extras/LocalStorage.h"
 #endif
 
-std::unique_ptr<MultiNetwork> network = CreateNetwork();
+std::unique_ptr<NetworkManager> network = CreateNetwork();
 InstrumentType instrumentController; 
 
 MessageHandler messageHandler(&instrumentController);
@@ -37,6 +38,8 @@ void setup() {
 
   //TODO move into local Storage?
   #ifdef EXTRA_LOCAL_STORAGE
+
+  //LocalStorage::get().InitializeDeviceConfiguration(messageHandler);
   {
     // Ensure NVS is properly initialized
     if (!LocalStorage::get().EnsureNVSInitialized()) {

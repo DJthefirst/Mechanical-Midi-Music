@@ -10,7 +10,7 @@
 #include "Device.h"
 #include "Extras/LocalStorage.h"
 #include "Instruments/InstrumentController.h"
-#include "Networks/Network.h"
+#include "Networks/INetwork.h"
 #include "Distributor.h"
 #include "MidiMessage.h"
 #include "Constants.h"

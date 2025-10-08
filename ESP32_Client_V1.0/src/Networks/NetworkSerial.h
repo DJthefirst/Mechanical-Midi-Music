@@ -8,10 +8,10 @@
 #pragma once
 
 #include "Arduino.h"
-#include "Network.h"
+#include "INetwork.h"
 #include <cstdint>
 
-class NetworkSerial : public Network{
+class NetworkSerial : public INetwork{
 public:
     NetworkSerial() = default;
     void begin() override;

@@ -73,6 +73,7 @@ constexpr uint8_t SYSEX_DeviceReady = 0x00;
 constexpr uint8_t SYSEX_ResetDeviceConfig = 0x01;
 constexpr uint8_t SYSEX_DiscoverDevices = 0x02;
 constexpr uint8_t SYSEX_Message = 0x03;
+constexpr uint8_t SYSEX_DeviceChanged = 0x04;
 
 constexpr uint8_t SYSEX_GetDeviceConstructWithDistributors = 0x10;
 constexpr uint8_t SYSEX_GetDeviceConstruct = 0x11;

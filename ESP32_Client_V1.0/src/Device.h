@@ -13,22 +13,24 @@
 using std::int8_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Set Device Config
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// Device Config Include
+////////////////////////////////////////////////////////////////////////////////////////////////////d
+  
+    #ifndef DEVICE_CONFIG
+        // Default device config used when no selection is provided by the application
+        #define DEVICE_CONFIG "Configs/ESP32_PWM.h"
+    #endif
 
-//---------- Uncomment Your Selected Device Config ----------
-  //#include "Configs/FloppySynth.h"
-  //#include "Configs/AirCompressor.h"
-  //#include "Configs/Dulcimer.h"
-  //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  #include "Configs/StepperSynth.h"
-  //#include "Configs/ExampleConfig.h"
-  //#include "Configs/ESP32_PWM.h"
+    // Include the selected config header
+    // Note: using an indirection macro to include a macro-defined string
+    #define STRINGIFY(x) #x
+    #define INCLUDE_FILE(x) STRINGIFY(x)
+    // The macro DEVICE_CONFIG must be a quoted string literal (e.g. "Configs/StepperSynth.h")
+    #include DEVICE_CONFIG
 
-  //#include "Configs/AD9833.h"
-
-  //#include "Configs/Test_ESP32_S3.h"
+    // Cleanup helper macros
+    #undef STRINGIFY
+    #undef INCLUDE_FILE
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform Detection
@@ -166,4 +168,12 @@ namespace Device{
     // Accessors for the device ID so it can be changed at runtime and persisted
     static uint16_t GetDeviceID(){ return ID; }
     static void SetDeviceID(uint16_t id){ ID = id; }
+    
+    // // Additional accessors for SysEx responses
+    // static const char* GetDeviceName(){ return Name.c_str(); }
+    // static void SetDeviceName(const std::string& name){ Name = name; }
+    // static uint16_t GetFirmwareVersion(){ return Config::FIRMWARE_VERSION; }
+    // static uint8_t GetNumInstruments(){ return Config::NUM_INSTRUMENTS; }
+    // static uint8_t GetMinNote(){ return Config::MIN_NOTE; }
+    // static uint8_t GetMaxNote(){ return Config::MAX_NOTE; }
 };
