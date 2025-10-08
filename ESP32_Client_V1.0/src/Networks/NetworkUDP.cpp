@@ -18,10 +18,10 @@ WiFiUDP UnicastUDP;
 
 
 void NetworkUDP::begin() {
-    Serial.begin(115200); // For debugging
+    Serial.begin(115200); // Magic! - Standard MIDI baud rate for debugging
 
     // Setup and connect to WiFi
-    AsyncWebServer server(80);
+    AsyncWebServer server(MMM_NETWORK_UDP_AsyncWebServer_PORT); // Magic! - HTTP port for WiFi manager
     DNSServer dns;
     AsyncWiFiManager wifiManager(&server, &dns);
     wifiManager.autoConnect("FloppyDrives", "m0ppydrives");
@@ -30,7 +30,7 @@ void NetworkUDP::begin() {
 }
 
 
-// connect to UDP – returns true if successful or false if not
+// Connect to UDP – returns true if successful or false if not
 bool NetworkUDP::startUDP() {
     bool connected = false;
 
@@ -39,11 +39,11 @@ bool NetworkUDP::startUDP() {
 
 #ifdef ARDUINO_ARCH_ESP8266
     if (UnicastUDP.begin(UNICASTPORT) && 
-    MulticastUDP.beginMulticast(WiFi.localIP(), IPAddress(224, 5, 6, 7), MOPPY_UDP_PORT) == 1) {
+    MulticastUDP.beginMulticast(WiFi.localIP(), IPAddress(MMM_NETWORK_UDP_ADDRESS), MOPPY_UDP_PORT) == 1) { //Multicast IP and port
 #elif ARDUINO_ARCH_ESP32
 
     if (UnicastUDP.begin(UNICASTPORT) && 
-        MulticastUDP.beginMulticast(IPAddress(224, 5, 6, 7), MULTICASTPORT) == 1)
+        MulticastUDP.beginMulticast(IPAddress(MMM_NETWORK_UDP_ADDRESS), MULTICASTPORT) == 1)
     {
 #endif
         Serial.println("Connection successful");
@@ -56,7 +56,7 @@ bool NetworkUDP::startUDP() {
 }
 
 void NetworkUDP::startOTA() {
-    ArduinoOTA.setPort(8377);
+    ArduinoOTA.setPort(MMM_NETWORK_UDP_OTA_PORT);
     ArduinoOTA.setPassword("flashdrive");
 
     ArduinoOTA.onStart([]() {

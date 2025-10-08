@@ -12,7 +12,7 @@ enum PIN_Connnections{
 };
 
 
-static std::array<bool,Config::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
+static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
 
 StepperSynth::StepperSynth() : SwPwmBase()
 {
@@ -69,8 +69,8 @@ void StepperSynth::stopAll(){
 void StepperSynth::updateShiftRegister() {
 
     // Write and Shift Data
-    for(uint8_t i=1; i <= Config::NUM_INSTRUMENTS; i++ ){
-        digitalWrite(PIN_SHIFTREG_Data, !m_outputenabled[Config::NUM_INSTRUMENTS - i]); //Serial Data (active high)
+    for(uint8_t i=1; i <= HardwareConfig::NUM_INSTRUMENTS; i++ ){
+        digitalWrite(PIN_SHIFTREG_Data, !m_outputenabled[HardwareConfig::NUM_INSTRUMENTS - i]); //Serial Data (active high)
         digitalWrite(PIN_SHIFTREG_Clock, HIGH); //Serial Clock
         delayMicroseconds(1); //Stabilize 
         digitalWrite(PIN_SHIFTREG_Clock,  LOW); //Serial Clock

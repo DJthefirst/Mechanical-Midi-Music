@@ -1,27 +1,35 @@
 /*
- * Minimal NetworkUDP stub
- * Provided so the build can use MultiNetwork<NetworkUDP,...> even if full UDP
- * implementation is not available yet. Implementations are no-ops and should
- * be replaced with the real network code for UDP later.
+ * NetworkUDP.h
+ *
+ * Network implementation for MIDI over UDP with WiFi manager and OTA support
  */
 
 #pragma once
 
-#include "Network.h"
+#ifdef MMM_NETWORK_UDP
 
-class NetworkUDP : public Network {
+#include "INetwork.h"
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+#include <ESPAsyncWebServer.h>
+#include <DNSServer.h>
+#include <ESPAsyncWiFiManager.h>
+
+class NetworkUDP : public INetwork {
 public:
-	NetworkUDP() = default;
-	void begin() override {
-		// no-op stub
-	}
-	void sendMessage(MidiMessage message) override {
-		// no-op stub
-	}
-	void sendString(String message) override {
-		// no-op stub
-	}
-	std::optional<MidiMessage> readMessage() override {
-		return std::nullopt;
-	}
+    NetworkUDP() = default;
+    void begin() override;
+    void sendMessage(const MidiMessage& message) override;
+    void sendString(const String& message) override;
+    std::optional<MidiMessage> readMessage() override;
+
+private:
+    bool startUDP();
+    void startOTA();
+    
+    // Legacy method - needs refactoring
+    void sendMessage(uint8_t message[], uint8_t length);
 };
+
+#endif

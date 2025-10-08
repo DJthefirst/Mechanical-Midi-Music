@@ -47,12 +47,12 @@ public:
     }
 
     // Send message to all networks
-    void sendMessage(MidiMessage message) override {
+    void sendMessage(const MidiMessage& message) override {
         for (auto& net : m_networks) if (net) net->sendMessage(message);
     }
 
     // Send message to all networks except the specified one
-    void sendMessageToOthers(MidiMessage message, INetwork* excludeNetwork) {
+    void sendMessageToOthers(const MidiMessage& message, INetwork* excludeNetwork) {
         for (auto& net : m_networks) {
             if (net && net.get() != excludeNetwork) {
                 net->sendMessage(message);
@@ -61,13 +61,13 @@ public:
     }
 
     // Send message to a specific network
-    void sendMessageToNetwork(MidiMessage message, INetwork* targetNetwork) {
+    void sendMessageToNetwork(const MidiMessage& message, INetwork* targetNetwork) {
         if (targetNetwork) {
             targetNetwork->sendMessage(message);
         }
     }
 
-    void sendString(String message) override {
+    void sendString(const String& message) override {
         for (auto& net : m_networks) if (net) net->sendString(message);
     }
 

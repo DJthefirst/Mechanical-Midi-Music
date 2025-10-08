@@ -1,6 +1,6 @@
 /*
  * Device.h
- * A Struct Representing this devices configuration
+ * Device configuration structure and platform-specific definitions
  */
 
 #pragma once
@@ -14,7 +14,7 @@ using std::int8_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Device Config Include
-////////////////////////////////////////////////////////////////////////////////////////////////////d
+////////////////////////////////////////////////////////////////////////////////////////////////////
   
     #ifndef DEVICE_CONFIG
         // Default device config used when no selection is provided by the application
@@ -57,33 +57,16 @@ using std::int8_t;
 // Configuration Processing 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace Config {
+namespace HardwareConfig {
 
     // INSTRUMENT_PINS is derived from the configuration.
     constexpr auto PINS = INSTRUMENT_PINS;
-
-    // Device identity
-    constexpr const char* DEVICE_NAME_STR = DEVICE_NAME;
-    constexpr uint16_t DEVICE_ID_VAL = DEVICE_ID;
-    constexpr uint16_t FIRMWARE_VERSION = 2;
 
     // Optional settings with defaults
     #ifdef TIMER_RESOLUTION
         constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_VALUE;
     #else
         constexpr uint32_t TIMER_RESOLUTION = 40;  // Default 40 microseconds
-    #endif
-
-    #ifdef MIN_NOTE_VALUE
-        constexpr uint8_t MIN_NOTE = MIN_NOTE_VALUE;
-    #else
-        constexpr uint8_t MIN_NOTE = 0;
-    #endif
-
-    #ifdef MAX_NOTE_VALUE
-        constexpr uint8_t MAX_NOTE = MAX_NOTE_VALUE;
-    #else
-        constexpr uint8_t MAX_NOTE = 127;
     #endif
 
     #ifdef INSTRUMENT_TIMEOUT_MS_VALUE
@@ -121,20 +104,39 @@ namespace Config {
     #endif
 }
 
+namespace DeviceConfig {
+     // Device identity
+    constexpr const char* DEVICE_NAME_STR = DEVICE_NAME;
+    constexpr uint16_t DEVICE_ID_VAL = DEVICE_ID;
+    constexpr uint16_t FIRMWARE_VERSION = 2;
+
+    #ifdef MIN_NOTE_VALUE
+        constexpr uint8_t MIN_NOTE = MIN_NOTE_VALUE;
+    #else
+        constexpr uint8_t MIN_NOTE = 0;
+    #endif
+
+    #ifdef MAX_NOTE_VALUE
+        constexpr uint8_t MAX_NOTE = MAX_NOTE_VALUE;
+    #else
+        constexpr uint8_t MAX_NOTE = 127;
+    #endif
+
+}
     // (no global pins alias — code should reference Config::INSTRUMENT_PINS or provide its own `pins`)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Device Defaults
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Device Construct Constants
+// Device Construct constants
 constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
 constexpr uint8_t DEVICE_NAME_OFFSET= 20;
 constexpr uint8_t DEVICE_NUM_CFG_BYTES = 40;
 constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
 
 namespace Device{
-    // Golbal Device Default Attribues
+    // Global device default attributes
     inline uint16_t ID = DEVICE_ID;
     inline std::string Name = "New Device";
     inline bool OmniMode = false;
@@ -142,7 +144,7 @@ namespace Device{
     // Device information functions
     static uint8_t GetDeviceBoolean(){
         uint8_t deviceBoolByte = 0;
-        if(Device::OmniMode) deviceBoolByte |= (1 << 0); //bit 0
+        if(Device::OmniMode) deviceBoolByte |= (1 << 0); // Set bit 0 for omni mode
         return deviceBoolByte;
     }
 
@@ -151,17 +153,17 @@ namespace Device{
 
         // Use runtime device ID so it can be changed at runtime via SysEx / LocalStorage
         uint16_t runtimeId = ID;
-        deviceObj[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); //Device ID MSB
-        deviceObj[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); //Device ID LSB
+        deviceObj[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); // Device ID MSB
+        deviceObj[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); // Device ID LSB
         deviceObj[2] = GetDeviceBoolean();
-        deviceObj[3] = Config::NUM_INSTRUMENTS;;
-        deviceObj[4] = Config::NUM_SUBINSTRUMENTS;
+        deviceObj[3] = HardwareConfig::NUM_INSTRUMENTS;
+        deviceObj[4] = HardwareConfig::NUM_SUBINSTRUMENTS;
         deviceObj[5] = static_cast<uint8_t>(InstrumentType::Type);
         deviceObj[6] = static_cast<uint8_t>(PLATFORM_TYPE);
-        deviceObj[7] = Config::MIN_NOTE;
-        deviceObj[8] = Config::MAX_NOTE;
-        deviceObj[9] = static_cast<uint8_t>((Config::FIRMWARE_VERSION >> 7) & 0x7F);
-        deviceObj[10] = static_cast<uint8_t>((Config::FIRMWARE_VERSION >> 0) & 0x7F);
+        deviceObj[7] = DeviceConfig::MIN_NOTE;
+        deviceObj[8] = DeviceConfig::MAX_NOTE;
+        deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 7) & 0x7F);
+        deviceObj[10] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
 
         for(uint8_t i = 0; i < DEVICE_NUM_NAME_BYTES; i++){
             if (Device::Name.size() >  i) deviceObj[DEVICE_NAME_OFFSET+i] = Device::Name[i];
@@ -172,8 +174,8 @@ namespace Device{
     }
 
     // Accessors for the device ID so it can be changed at runtime and persisted
-    static uint16_t GetDeviceID(){ return ID; }
-    static void SetDeviceID(uint16_t id){ ID = id; }
+    static uint16_t GetDeviceID() noexcept { return ID; }
+    static void SetDeviceID(uint16_t id) noexcept { ID = id; }
     
     // // Additional accessors for SysEx responses
     // static const char* GetDeviceName(){ return Name.c_str(); }

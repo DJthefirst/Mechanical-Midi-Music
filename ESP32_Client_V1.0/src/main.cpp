@@ -2,16 +2,20 @@
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
  *  Version: V2.0
  *  Author: DJthefirst
- *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
+ *  Description: This program implements advanced MIDI control over a microcontroller-based instrument
  *----------------------------------------------------------------------------------------------------
  */
 
-//See Device.h and the Configs folder for Device Setup.
+// See Device.h and the Configs folder for device setup.
 
 #include <Arduino.h>
 
+//=== Select One Configuration ===
+
 #define DEVICE_CONFIG "Configs/ESP32_PWM.h"
 // #define DEVICE_CONFIG "Configs/StepperSynth.h"
+
+//================================
 
 #include "Device.h"
 #include "Networks/NetworkManager.h"
@@ -30,12 +34,12 @@ InstrumentType instrumentController;
 
 void setup() {
 
-  //Device::validateConfiguration();
+  // Device::validateConfiguration();
 
   // Initialize network
   network = CreateNetwork();
 
-  // Initialize the specialized handlers
+  // Initialize handlers
   auto distributorManager = std::make_shared<DistributorManager>(&instrumentController);
   auto sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
   auto midiHandler = std::make_shared<MidiMsgHandler>(&instrumentController, distributorManager, sysExHandler);
@@ -51,16 +55,16 @@ void setup() {
     if (messageRouter) messageRouter->broadcastDeviceChanged();
   });
 
-  //Begin Network Commmunication
+  // Begin network communication
   network->begin();  
   delay(100);
 
-  //Initialize Device Configuration from Local Storage
+  // Initialize device configuration from local storage
   #ifdef EXTRA_LOCAL_STORAGE
     LocalStorage::get().InitializeDeviceConfiguration(*distributorManager);
   #endif
 
-  //----Testing Demo Setup Config----//
+//=== Distributor Configuration For Startup ===
 
   // //Distributor 1
   // Distributor distributor1(&instrumentController);
@@ -75,6 +79,8 @@ void setup() {
   // distributor2.setInstruments(0x000000FF); // 1-8
   // distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
   // messageHandler.addDistributor(distributor2);
+
+  //===========================================
 
   //Reset All pins to default
   instrumentController.resetAll();

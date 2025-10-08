@@ -5,27 +5,27 @@
 #include <bitset>
 
 //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
-static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_activeNotes;
+static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
 
 //Instrument Attributes
-static std::array<uint16_t,Config::MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
-static std::array<uint16_t,Config::MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
-static std::array<uint16_t,Config::MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
-static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
-static std::bitset<Config::MAX_NUM_INSTRUMENTS> m_currentState; //IO
+static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
+static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_activePeriod;//Note Played
+static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
+static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
+static std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
 ESP32_SwPwmBase::ESP32_SwPwmBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < Config::PINS.size(); i++){
-        pinMode(Config::PINS[i], OUTPUT);
+    for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
+        pinMode(HardwareConfig::PINS[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
-    InterruptTimer::initialize(Config::TIMER_RESOLUTION, Tick);
+    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, Tick);
 
     //Initalize Default values
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
@@ -64,7 +64,7 @@ void ESP32_SwPwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocit
         m_activeNotes[instrument] = 0;
         m_notePeriod[instrument] = 0;
         m_activePeriod[instrument] = 0;
-        digitalWrite(Config::PINS[instrument], 0);
+        digitalWrite(HardwareConfig::PINS[instrument], 0);
         m_noteCh[instrument] = -1; // -1 indicates no channel
         m_numActiveNotes--;
         return;
@@ -81,8 +81,8 @@ void ESP32_SwPwmBase::stopAll(){
     m_currentTick = {};
     m_currentState.reset();
 
-    for(uint8_t i = 0; i < Config::PINS.size(); i++){
-        digitalWrite(Config::PINS[i], LOW);
+    for(uint8_t i = 0; i < HardwareConfig::PINS.size(); i++){
+        digitalWrite(HardwareConfig::PINS[i], LOW);
     }
 }
 
@@ -105,7 +105,7 @@ void ESP32_SwPwmBase::tick()
 #endif
 {
     // Go through every Instrument
-    for (int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         if(m_numActiveNotes == 0)return;
 
         //If note active increase tick until period reset and toggle pin
@@ -130,7 +130,7 @@ void ESP32_SwPwmBase::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
-    digitalWrite(Config::PINS[instrument], m_currentState[instrument]);
+    digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
         
 }
 // #pragma GCC pop_options (Legacy)

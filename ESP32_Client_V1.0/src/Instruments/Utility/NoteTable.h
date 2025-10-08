@@ -63,12 +63,12 @@ namespace NoteTables {
         return noteDoubleTicks;
     }
 
-    constexpr auto NOTE_TICKS = compute_divided_ticks(Config::TIMER_RESOLUTION);
+    constexpr auto NOTE_TICKS = compute_divided_ticks(HardwareConfig::TIMER_RESOLUTION);
 
     // In some cases a pulse will only happen every-other tick (e.g. if the tick is
     // toggling a pin on and off and pulses happen on rising signal) so to simplify
     // the math multiply the RESOLUTION by 2 here.
-    constexpr auto NOTE_TICKS_DOUBLE = compute_divided_ticks(Config::TIMER_RESOLUTION*2);
+    constexpr auto NOTE_TICKS_DOUBLE = compute_divided_ticks(HardwareConfig::TIMER_RESOLUTION*2);
     
     // Apply pitch bend to frequency
     constexpr float applyPitchBend(float baseFrequency, uint16_t pitchBend) {
@@ -81,11 +81,11 @@ namespace NoteTables {
     constexpr uint32_t applyPitchBendToPeriod(uint32_t basePeriodTicks, uint16_t pitchBend) {
         // Convert base period to frequency, apply pitch bend multiplier, then back to period
         // Use floating point in constexpr for clarity; cast back to integer ticks
-        float baseFreq = 1000000.0f / static_cast<float>(basePeriodTicks * Config::TIMER_RESOLUTION);
+        float baseFreq = 1000000.0f / static_cast<float>(basePeriodTicks * HardwareConfig::TIMER_RESOLUTION);
         float bentFreq = applyPitchBend(baseFreq, pitchBend);
         float bentPeriodMicros = 1000000.0f / bentFreq;
-        // Convert microsecond period to ticks using Config::TIMER_RESOLUTION
-        uint32_t ticks = static_cast<uint32_t>(bentPeriodMicros / static_cast<float>(Config::TIMER_RESOLUTION));
+        // Convert microsecond period to ticks using HardwareConfig::TIMER_RESOLUTION
+        uint32_t ticks = static_cast<uint32_t>(bentPeriodMicros / static_cast<float>(HardwareConfig::TIMER_RESOLUTION));
         return ticks > 0 ? ticks : 1;
     }
 

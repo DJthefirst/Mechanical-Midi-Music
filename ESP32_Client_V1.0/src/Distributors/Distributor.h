@@ -123,6 +123,6 @@ private:
     //-------- Helper Functions --------//
 
     /* Returns True if a Distributor Handles the given Instrument. */
-    bool distributorHasInstrument(int instrumentId);
+    constexpr bool distributorHasInstrument(int instrumentId) const noexcept;
     bool channelEnabled(uint8_t channel);
 };

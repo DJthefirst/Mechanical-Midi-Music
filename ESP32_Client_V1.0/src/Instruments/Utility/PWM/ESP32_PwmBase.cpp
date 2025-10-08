@@ -4,37 +4,37 @@
 #include "Device.h"
 #include <cmath>
 
-//[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
-static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_activeNotes;
+// [Instrument][ActiveNote] MSB is set if note is active, the 7 LSBs are the note value 
+static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeNotes;
 static uint8_t m_numActiveNotes;
 
-//Instrument Attributes for tracking active notes
+// Instrument attributes for tracking active notes
+static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency; // Active note (MSB is set if note is active)
+static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteFrequency;  // Base note frequency
+static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeFrequency; // Note played with bend
+static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteCh; // MIDI channel
 
-static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> lastFrequency; //Active Note (MSB is set if note is active)
-static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_noteFrequency;  //Base Note Frequency
-static std::array<double,Config::MAX_NUM_INSTRUMENTS> m_activeFrequency;//Note Played with bend
-static std::array<uint8_t,Config::MAX_NUM_INSTRUMENTS> m_noteCh; //Midi Channel
-
-//Distributor tracking and timeout management
-static std::array<void*,Config::MAX_NUM_INSTRUMENTS> m_lastDistributor; //Last distributor that sent a note
-static std::array<uint32_t,Config::MAX_NUM_INSTRUMENTS> m_noteStartTime; //When the note started (for timeout)
+// Distributor tracking and timeout management
+static std::array<void*, HardwareConfig::MAX_NUM_INSTRUMENTS> m_lastDistributor; // Last distributor that sent a note
+static std::array<uint32_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteStartTime; // When the note started (for timeout)
 
 // LedC channel management (moved from header due to Config dependency)
-static std::array<uint8_t, Config::MAX_NUM_INSTRUMENTS> m_ledcChannels;
-static std::array<bool, Config::MAX_NUM_INSTRUMENTS> m_channelActive;
+static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_ledcChannels;
+static std::array<bool, HardwareConfig::MAX_NUM_INSTRUMENTS> m_channelActive;
 
 ESP32_PwmBase::ESP32_PwmBase()
 {
     // Initialize LedC channels for each instrument
-    for(uint8_t i = 0; i < Config::PINS.size() && i < Config::MAX_NUM_INSTRUMENTS; i++){
+    const auto& pins = HardwareConfig::PINS;
+    for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         m_ledcChannels[i] = i; // Use channel number equal to instrument number
         m_channelActive[i] = false;
-        initializeLedcChannel(i, Config::PINS[i]);
+        initializeLedcChannel(i, pins[i]);
     }
 
     delay(500); // Wait a half second for safety
 
-    //Initialize Default values
+    // Initialize default values
     std::fill_n(m_pitchBend, NUM_MIDI_CH, MIDI_CTRL_CENTER);
     m_noteCh.fill(255); // 255 indicates no channel assigned
     m_lastDistributor.fill(nullptr); // No distributor assigned initially
@@ -51,14 +51,14 @@ void ESP32_PwmBase::initializeLedcChannel(uint8_t instrument, uint8_t pin)
 
 void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
 {
-    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
     // Clamp frequency to valid range (10Hz - 20kHz)
     if (frequency < 10.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
     // Cache last frequency per instrument to avoid unnecessary updates
-    static std::array<double, Config::MAX_NUM_INSTRUMENTS> lastFrequency = {};
+    static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency = {};
     
     // Only update if frequency changed significantly (>0.5Hz difference for better precision)
     if (abs(lastFrequency[instrument] - frequency) > 0.5) {
@@ -74,7 +74,7 @@ void ESP32_PwmBase::setFrequency(uint8_t instrument, double frequency)
 
 void ESP32_PwmBase::stopChannel(uint8_t instrument)
 {
-    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
     // Set duty cycle to 0 to stop PWM output - this is very fast
     ledcWrite(m_ledcChannels[instrument], 0);
@@ -94,7 +94,7 @@ void ESP32_PwmBase::resetAll()
 void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Early bounds checking for performance
-    if (instrument >= Config::MAX_NUM_INSTRUMENTS || note >= 128) return;
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note >= 128) return;
 
     // Cache the base frequency to avoid repeated lookups
     const double baseFreq = NoteTables::noteFrequency[note];
@@ -122,7 +122,7 @@ void ESP32_PwmBase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,
 
 void ESP32_PwmBase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
 {
-    if (instrument >= Config::MAX_NUM_INSTRUMENTS) return;
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
     // Check if this instrument is playing the specified note (optimized bit operation)
     if((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0){
@@ -155,7 +155,7 @@ void ESP32_PwmBase::stopAll(){
     m_noteStartTime.fill(0); // Clear all start times
 
     // Stop all LedC channels
-    for(uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
+    for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
         stopChannel(i);
     }
 }
@@ -199,13 +199,13 @@ void ESP32_PwmBase::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t chan
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ESP32_PwmBase::setLastDistributor(uint8_t instrument, void* distributor) {
-    if (instrument < Config::MAX_NUM_INSTRUMENTS) {
+    if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
         m_lastDistributor[instrument] = distributor;
     }
 }
 
 void* ESP32_PwmBase::getLastDistributor(uint8_t instrument) {
-    if (instrument < Config::MAX_NUM_INSTRUMENTS) {
+    if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
         return m_lastDistributor[instrument];
     }
     return nullptr;
@@ -213,7 +213,7 @@ void* ESP32_PwmBase::getLastDistributor(uint8_t instrument) {
 
 void ESP32_PwmBase::clearDistributorFromInstrument(void* distributor) {
     // When a distributor is destroyed, clear it from all instruments
-    for (uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         if (m_lastDistributor[i] == distributor) {
             // If this distributor was the last to send a note, stop the note to prevent hanging
             if (m_activeNotes[i] != 0) {
@@ -226,13 +226,13 @@ void ESP32_PwmBase::clearDistributorFromInstrument(void* distributor) {
 
 void ESP32_PwmBase::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (Config::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
-    for (uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > Config::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
             // Stop the note due to timeout
             stopNote(i, m_activeNotes[i] & 0x7F, 0);
         }

@@ -16,12 +16,12 @@ uint8_t RoundRobinBalanceStrategy::getNextInstrument(
 ) {
     uint8_t instrumentLeastActive = NONE;
     
-    for (int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Increment current Instrument
         currentInstrument++;
         
         // Loop to first instrument if end is reached
-        currentInstrument = (currentInstrument >= Config::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
+        currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
         
         // Check if valid instrument
         if (!distributorHasInstrument(currentInstrument, instruments)) continue;
@@ -50,11 +50,11 @@ uint8_t RoundRobinStrategy::getNextInstrument(
     uint8_t& currentInstrument,
     uint32_t instruments
 ) {
-    for (int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         currentInstrument++;
         
         // Loop to first instrument if end is reached
-        currentInstrument = (currentInstrument >= Config::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
+        currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
         
         // Check if valid instrument
         if (!distributorHasInstrument(currentInstrument, instruments)) continue;
@@ -73,7 +73,7 @@ uint8_t AscendingStrategy::getNextInstrument(
     uint8_t instrumentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
     
-    for (int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if valid instrument
         if (!distributorHasInstrument(i, instruments)) continue;
         validInstrument = true;
@@ -103,7 +103,7 @@ uint8_t DescendingStrategy::getNextInstrument(
     uint8_t instrumentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
     
-    for (int i = (Config::MAX_NUM_INSTRUMENTS - 1); i >= 0; i--) {
+    for (int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; i--) {
         // Check if valid instrument
         if (!distributorHasInstrument(i, instruments)) continue;
         validInstrument = true;
@@ -131,12 +131,12 @@ uint8_t StraightThroughStrategy::getNextInstrument(
 ) {
     uint8_t instrumentLeastActive = NONE;
     
-    for (int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Increment current Instrument
         currentInstrument++;
         
         // Loop to first instrument if end is reached
-        currentInstrument = (currentInstrument >= Config::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
+        currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
         
         // Check if valid instrument
         if (!distributorHasInstrument(currentInstrument, instruments)) continue;

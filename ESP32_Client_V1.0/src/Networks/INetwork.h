@@ -21,7 +21,7 @@ protected:
 public:
     virtual ~INetwork() = default;
     virtual void begin() = 0;
-    virtual void sendMessage(MidiMessage message) = 0;
-    virtual void sendString(String message) = 0;
+    virtual void sendMessage(const MidiMessage& message) = 0;
+    virtual void sendString(const String& message) = 0;
     virtual std::optional<MidiMessage> readMessage() = 0;
 };

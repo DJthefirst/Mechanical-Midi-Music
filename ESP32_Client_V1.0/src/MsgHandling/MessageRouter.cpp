@@ -27,16 +27,15 @@ void MessageRouter::processMessages()
     if (!m_networkManager) return;
 
     // Loop through each network individually
-    for (size_t i = 0; i < m_networkManager->numberOfNetworks(); i++) {
-        INetwork* currentNetwork = m_networkManager->getNetwork(i);
+    const size_t numNetworks = m_networkManager->numberOfNetworks();
+    for (size_t i = 0; i < numNetworks; ++i) {
+        INetwork* const currentNetwork = m_networkManager->getNetwork(i);
         if (!currentNetwork) continue;
 
         // Read message from this specific network
-        std::optional<MidiMessage> message = currentNetwork->readMessage();
-        if (!message) continue;
-
-        // Process the message
-        processMessage(*message, currentNetwork);
+        if (auto message = currentNetwork->readMessage(); message.has_value()) {
+            processMessage(*message, currentNetwork);
+        }
     }
     
     // Check for instrument timeouts (only when configured)
@@ -79,13 +78,12 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
     static thread_local INetwork* currentSourceNetwork = nullptr;
     currentSourceNetwork = sourceNetwork;
 
-    // Process message based on type
-    if (message.type() == MIDI_SysCommon && message.sysCommonType() == MIDI_SysEX) {
+    // Process message based on type - optimize for most common case first
+    const uint8_t msgType = message.type();
+    if (msgType == MIDI_SysCommon && message.sysCommonType() == MIDI_SysEX) {
         // Handle SysEx messages with SysExMsgHandler
         if (m_sysExHandler) {
-            std::optional<MidiMessage> response = m_sysExHandler->processSysExMessage(message);
-            // Send response back to the originating network only
-            if (response && sourceNetwork) {
+            if (auto response = m_sysExHandler->processSysExMessage(message); response.has_value() && sourceNetwork) {
                 sourceNetwork->sendMessage(*response);
             }
         }

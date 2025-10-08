@@ -27,20 +27,21 @@ MidiMsgHandler::MidiMsgHandler(
 
 // Process a MIDI message and return optional response
 std::optional<MidiMessage> MidiMsgHandler::processMessage(MidiMessage& message)
-{   
-    // Handle System Common Messages
-    if (message.type() == MIDI_SysCommon) {
-        return processSystemMessage(message);
-    }
-    // Handle Control Change Messages
-    else if (message.type() == MIDI_ControlChange) {
+{
+    // Handle messages based on type - optimize for most common cases first
+    const uint8_t msgType = message.type();
+    
+    if (msgType == MIDI_ControlChange) {
+        // Handle Control Change Messages
         processCC(message);
-    }
-    // Handle other MIDI messages (route to distributors)
-    else {
+    } else if (msgType == MIDI_SysCommon) {
+        // Handle System Common Messages
+        return processSystemMessage(message);
+    } else {
+        // Handle other MIDI messages (route to distributors)
         distributeMessage(message);
     }
-    return {};
+    return std::nullopt;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

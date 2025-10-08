@@ -1,6 +1,6 @@
 /*
  * Constants.h
- *
+ * Global constants for MIDI protocol, system configuration, and enumerations
  */
 
 #pragma once
@@ -10,18 +10,18 @@ using std::int8_t;
 using std::int16_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//General Constants
+// General Constants
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Bit Masks
+// Bit masks
 constexpr uint8_t MSB_BITMASK = 0x80;
 constexpr uint8_t NONE = -1;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//MIDI Constants
+// MIDI Constants
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Midi Msg Types
+// MIDI message types
 constexpr uint8_t MIDI_NoteOff            = 0x80;
 constexpr uint8_t MIDI_NoteOn             = 0x90;
 constexpr uint8_t MIDI_KeyPressure        = 0xA0;
@@ -31,13 +31,13 @@ constexpr uint8_t MIDI_ChannelPressure    = 0xD0;
 constexpr uint8_t MIDI_PitchBend          = 0xE0;
 constexpr uint8_t MIDI_SysCommon          = 0xF0;
 
-//SysCommon Midi Msg Types
+// System Common MIDI message types
 constexpr uint8_t MIDI_SysEX    = 0x0;
 constexpr uint8_t MIDI_SysEXEnd = 0x7;
 constexpr uint8_t MIDI_SysStop  = 0xA;
 constexpr uint8_t MIDI_SysReset = 0xF;
 
-//CC Controller Types (Handled across all active channels)
+// Control Change controller types (handled across all active channels)
 namespace MidiCC {
     constexpr uint8_t BankSelect = 0;
     constexpr uint8_t ModulationWheel = 1;
@@ -56,7 +56,7 @@ namespace MidiCC {
     constexpr uint8_t Legato = 68;
     constexpr uint8_t Hold2 = 69;
 
-    //CC Channel Mode Messages(Handled across all active channels)
+    // Channel Mode messages (handled across all active channels)
     constexpr uint8_t Mute = 120;
     constexpr uint8_t Reset = 121;
     constexpr uint8_t AllNotesOff = 123;
@@ -66,7 +66,7 @@ namespace MidiCC {
     constexpr uint8_t Polyphonic = 127;
 };
 
-//SYSEX Custom Protocal
+// SysEx custom protocol
 
 namespace SysEx {
     constexpr uint8_t ID = 0x7D; //Educational MIDI ID
@@ -120,7 +120,7 @@ constexpr uint16_t MIDI_CTRL_CENTER = 0x2000;
 constexpr uint8_t NUM_MIDI_CH = 16;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Enums
+// Enums
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class Instrument
@@ -143,13 +143,13 @@ enum class Platform
     _ArduinoNano
 };
 
-//Algorythmic Methods to Distribute Notes Amoungst Instruments.
+// Algorithmic methods to distribute notes amongst instruments
 enum class DistributionMethod
 { 
-    StraightThrough = 0,    //Each Channel goes to the Instrument with a matching ID ex. Ch 10 -> Instrument 10
-    RoundRobin,             //Distributes Notes in a circular manner.
-    RoundRobinBalance,      //Distributes Notes in a circular manner (Balances Notes across Instruments).
-    Ascending,              //Plays Note on lowest available Instrument (Balances Notes across Instruments).
-    Descending,             //Plays Note on highest available Instrument (Balances Notes across Instruments).
-    Stack                   //TODO Play Notes Polyphonicaly on lowest available Instrument until full.
+    StraightThrough = 0,    // Each channel goes to the instrument with matching ID (e.g., Ch 10 -> Instrument 10)
+    RoundRobin,             // Distributes notes in a circular manner
+    RoundRobinBalance,      // Distributes notes in a circular manner (balances notes across instruments)
+    Ascending,              // Plays note on lowest available instrument (balances notes across instruments)
+    Descending,             // Plays note on highest available instrument (balances notes across instruments)
+    Stack                   // TODO: Play notes polyphonically on lowest available instrument until full
 };

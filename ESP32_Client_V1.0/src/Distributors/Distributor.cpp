@@ -76,59 +76,62 @@ void Distributor::processMessage(MidiMessage message){
 //Event Handlers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Find the first Instrument playing the given Note and stop it.
+// Find the first instrument playing the given note and stop it
 void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = checkForNote(Note);
+    const uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
-        (*m_ptrInstrumentController).stopNote(instrument, Note, Velocity);
+        m_ptrInstrumentController->stopNote(instrument, Note, Velocity);
     }
 }
 
-//Get Next Instument Based on Distribution Method and Play Note
+// Get next instrument based on distribution method and play note
 void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
 {
-    //Check if note has 0 velocity representing a note off event
-    if((Velocity == 0)){
+    // Check if note has 0 velocity representing a note off event
+    if(Velocity == 0){
         noteOffEvent(Note, Velocity);
         return;
     }
 
-    //Get next instrument based on distribution method and play note
-    uint8_t instrument = nextInstrument();
+    // Get next instrument based on distribution method and play note
+    const uint8_t instrument = nextInstrument();
     if(instrument != NONE){ 
         // Use the new overloaded method that tracks the distributor
-        (*m_ptrInstrumentController).playNote(instrument, Note, Velocity, channel, this);
+        m_ptrInstrumentController->playNote(instrument, Note, Velocity, channel, this);
     }
 }
 
-//Find the first active instrument playing said note and update its velocity
+// Find the first active instrument playing said note and update its velocity
 void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
-    uint8_t instrument = checkForNote(Note);
+    const uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
-        (*m_ptrInstrumentController).setKeyPressure(instrument, Note, Velocity);
+        m_ptrInstrumentController->setKeyPressure(instrument, Note, Velocity);
     }
 }
 
 void Distributor::programChangeEvent(uint8_t Program)
 {
-    //Not Yet Implemented
-    (*m_ptrInstrumentController).resetAll();
+    // Not yet implemented
+    m_ptrInstrumentController->resetAll();
 }
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
 {
-    //Not Yet Implemented 
+    // Not yet implemented 
 }
 
-//Update Each Instruments Pitch Bend Value
+// Update each instrument's pitch bend value
 void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
 {
-    for(uint8_t i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
-        if((m_instruments & (1 << i)) != 0){
-            (*m_ptrInstrumentController).setPitchBend(i, pitchBend, channel);
+    // Optimize: use bit manipulation to iterate only over set bits
+    uint32_t instrumentMask = m_instruments;
+    for(uint8_t i = 0; instrumentMask != 0 && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        if(instrumentMask & 1){
+            m_ptrInstrumentController->setPitchBend(i, pitchBend, channel);
         }
+        instrumentMask >>= 1;
     }
 }
 
@@ -167,40 +170,43 @@ uint8_t Distributor::checkForNote(uint8_t note)
     // Check for note being played on the instrument iterating backwards through all instruments
     case(DistributionMethod::RoundRobin):
     case(DistributionMethod::RoundRobinBalance):
-        //Iterate through each instrument in reverse
-        for(int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
-            //Decrement Instrument with Underflow Protection
-            if(instrument == 0) instrument = Config::MAX_NUM_INSTRUMENTS;
-            instrument--;
+        // Iterate through each instrument in reverse
+        for(int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+            // Decrement instrument with underflow protection
+            if(instrument == 0) instrument = HardwareConfig::MAX_NUM_INSTRUMENTS;
+            --instrument;
 
-            //Check if valid instrument
+            // Check if valid instrument
             if(!distributorHasInstrument(instrument)) continue;
-            if((*m_ptrInstrumentController).isNoteActive(instrument, note)) return instrument;
+            if(m_ptrInstrumentController->isNoteActive(instrument, note)) return instrument;
         }
         break;
 
     // Check for note being played on the instrument starting at instrument 0
     case(DistributionMethod::Ascending):
-        for(int i = 0; i < Config::MAX_NUM_INSTRUMENTS; i++){
-
-            //Check if valid instrument
-            if(!distributorHasInstrument(i)) continue;
-            if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
+        // Optimize: iterate only over instruments in our mask
+        {
+            uint32_t instrumentMask = m_instruments;
+            for(uint8_t i = 0; instrumentMask != 0 && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+                if((instrumentMask & 1) && m_ptrInstrumentController->isNoteActive(i, note)){
+                    return i;
+                }
+                instrumentMask >>= 1;
+            }
         }
         break;
 
-    // Check for note being played on the instrument starting at the last instrument iterating in reverse.
+    // Check for note being played on the instrument starting at the last instrument iterating in reverse
     case(DistributionMethod::Descending):
-        for(int i = (Config::MAX_NUM_INSTRUMENTS - 1); i >= 0; i--){
-
-            //Check if valid instrument
+        for(int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; --i){
+            // Check if valid instrument
             if(!distributorHasInstrument(i)) continue;
-            if((*m_ptrInstrumentController).isNoteActive(i, note)) return i;
+            if(m_ptrInstrumentController->isNoteActive(i, note)) return i;
         }
         break;
 
     default:
-        //TODO Handle Error
+        // TODO: Handle error
         break;
     }
     return NONE;
@@ -210,9 +216,9 @@ uint8_t Distributor::checkForNote(uint8_t note)
 // Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Returns true if a distributor contains the designated instument in its pool.
-bool Distributor::distributorHasInstrument(int instrumentId){
-    return ((m_instruments & (1 << instrumentId)) != 0);
+// Returns true if a distributor contains the designated instrument in its pool
+constexpr bool Distributor::distributorHasInstrument(int instrumentId) const noexcept {
+    return (instrumentId >= 0 && instrumentId < 32) && ((m_instruments & (1U << instrumentId)) != 0);
 }
 
 bool Distributor::channelEnabled(uint8_t channel){

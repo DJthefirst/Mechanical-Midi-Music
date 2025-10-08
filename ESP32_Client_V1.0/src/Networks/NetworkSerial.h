@@ -1,8 +1,7 @@
 /*
  * NetworkSerial.h
  *
- * Network that supports Serial Communication.
- * 
+ * Network implementation that supports serial communication
  */
 
 #pragma once
@@ -15,8 +14,8 @@ class NetworkSerial : public INetwork{
 public:
     NetworkSerial() = default;
     void begin() override;
-    void sendMessage(MidiMessage message) override;
-    void sendString(String message) override;
+    void sendMessage(const MidiMessage& message) override;
+    void sendString(const String& message) override;
     std::optional<MidiMessage> readMessage() override;
 
 private:
