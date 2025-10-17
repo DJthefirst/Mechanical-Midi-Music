@@ -26,8 +26,8 @@ public:
         HwPWM::playNote(instrument, note, velocity, channel);
         setInstrumentLedOn(instrument, channel, note, velocity);
     }
-    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override{
-        HwPWM::stopNote(instrument, note, velocity);
+    void stopNote(uint8_t instrument, uint8_t velocity) override{
+        HwPWM::stopNote(instrument, velocity);
         setInstrumentLedOff(instrument);
     }
     void stopAll() override{

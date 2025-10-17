@@ -9,7 +9,6 @@
 
 #include "MidiMessage.h"
 #include "Constants.h"
-#include "Instruments/InstrumentController.h"
 
 #include <cstdint>
 #include <optional>
@@ -19,6 +18,7 @@
 // Forward declarations
 class DistributorManager;
 class SysExMsgHandler;
+class InstrumentControllerBase;
 
 /**
  * Handles core MIDI message processing and routing.
@@ -26,22 +26,20 @@ class SysExMsgHandler;
  */
 class MidiMsgHandler {
 private:
-    std::shared_ptr<DistributorManager> m_distributorManager;
-    std::shared_ptr<SysExMsgHandler> m_sysExHandler;
-    InstrumentController* m_ptrInstrumentController;
+    std::shared_ptr<DistributorManager> distributorManager;
+    std::shared_ptr<SysExMsgHandler> sysExHandler;
+    std::shared_ptr<InstrumentControllerBase> instrumentController;
 
 public:
     /**
      * Constructor with dependency injection
-     * @param ptrInstrumentController Pointer to instrument controller
-     * @param distributorManager Shared pointer to distributor manager
-     * @param sysExHandler Shared pointer to SysEx message handler
+     * @param distributorManager Shared pointer to DistributorManager
+     * @param sysExHandler Shared pointer to SysExMsgHandler
+     * @param instrumentController Shared pointer to InstrumentControllerBase
      */
-    explicit MidiMsgHandler(
-        InstrumentController* ptrInstrumentController,
-        std::shared_ptr<DistributorManager> distributorManager = nullptr,
-        std::shared_ptr<SysExMsgHandler> sysExHandler = nullptr
-    );
+    MidiMsgHandler(std::shared_ptr<DistributorManager> distributorManager,
+                   std::shared_ptr<SysExMsgHandler> sysExHandler,
+                   std::shared_ptr<InstrumentControllerBase> instrumentController);
 
     /**
      * Process a MIDI message and return optional response

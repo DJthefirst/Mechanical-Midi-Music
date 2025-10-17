@@ -8,7 +8,7 @@
 using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
-class ESP32_SwPWM : public InstrumentController{
+class ESP32_SwPWM : public InstrumentControllerBase{
 public:
     static constexpr Instrument Type = Instrument::PWM;
 private:
@@ -26,7 +26,7 @@ public:
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void stopNote(uint8_t instrument, uint8_t velocity) override;
     void stopAll() override;
 
     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;

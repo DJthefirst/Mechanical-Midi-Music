@@ -1,4 +1,5 @@
 #include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
+#include "Instruments/InstrumentController.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
 #include "Device.h"
@@ -12,23 +13,19 @@ static uint8_t m_numActiveNotes;
 static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency; // Active note (MSB is set if note is active)
 static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteFrequency;  // Base note frequency
 static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeFrequency; // Note played with bend
-static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteCh; // MIDI channel
 
 // Distributor tracking and timeout management
-static std::array<void*, HardwareConfig::MAX_NUM_INSTRUMENTS> m_lastDistributor; // Last distributor that sent a note
 static std::array<uint32_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteStartTime; // When the note started (for timeout)
 
 // LedC channel management (moved from header due to Config dependency)
 static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_ledcChannels;
-static std::array<bool, HardwareConfig::MAX_NUM_INSTRUMENTS> m_channelActive;
 
-ESP32_HwPWM::ESP32_HwPWM()
+ESP32_HwPWM::ESP32_HwPWM() : InstrumentControllerBase()
 {
     // Initialize LedC channels for each instrument
     const auto& pins = HardwareConfig::PINS;
     for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         m_ledcChannels[i] = i; // Use channel number equal to instrument number
-        m_channelActive[i] = false;
         initializeLedcChannel(i, pins[i]);
     }
 
@@ -36,8 +33,6 @@ ESP32_HwPWM::ESP32_HwPWM()
 
     // Initialize default values
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
-    m_noteCh.fill(255); // 255 indicates no channel assigned
-    m_lastDistributor.fill(nullptr); // No distributor assigned initially
     m_noteStartTime.fill(0); // No notes started initially
 }
 
@@ -69,7 +64,7 @@ void ESP32_HwPWM::setFrequency(uint8_t instrument, double frequency)
     
     // Set duty cycle - this is fast and always needs to be done to ensure output is active
     ledcWrite(m_ledcChannels[instrument], DUTY_CYCLE_50_PERCENT);
-    m_channelActive[instrument] = true;
+    _activeInstruments.set(instrument);
 }
 
 void ESP32_HwPWM::stopChannel(uint8_t instrument)
@@ -78,7 +73,7 @@ void ESP32_HwPWM::stopChannel(uint8_t instrument)
     
     // Set duty cycle to 0 to stop PWM output - this is very fast
     ledcWrite(m_ledcChannels[instrument], 0);
-    m_channelActive[instrument] = false;
+    _activeInstruments.reset(instrument);
 }
 
 void ESP32_HwPWM::reset(uint8_t instrument)
@@ -102,14 +97,13 @@ void ESP32_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     // Store note information
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_noteFrequency[instrument] = baseFreq;
-    m_noteCh[instrument] = channel;
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
     
     // Calculate final frequency with pitch bend applied
     m_activeFrequency[instrument] = NoteTables::applyPitchBend(baseFreq, m_pitchBend[channel]);
     
     // Increment active note count only if this instrument wasn't already active
-    if (!m_channelActive[instrument]) {
+    if (!_activeInstruments.test(instrument)) {
         m_numActiveNotes++;
     }
 
@@ -120,38 +114,34 @@ void ESP32_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
 
 }
 
-void ESP32_HwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void ESP32_HwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
     // Check if this instrument is playing the specified note (optimized bit operation)
-    if((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0){
         // Clear note information
         m_activeNotes[instrument] = 0;
         m_noteFrequency[instrument] = 0;
         m_activeFrequency[instrument] = 0;
-        m_noteCh[instrument] = 255; // 255 indicates no channel
-        m_lastDistributor[instrument] = nullptr; // Clear distributor tracking
+        _lastDistributor[instrument] = nullptr; // Clear distributor tracking
         m_noteStartTime[instrument] = 0;
         
         // Decrement active note count only if channel was actually active
-        if (m_channelActive[instrument]) {
+        if (_activeInstruments.test(instrument)) {
             m_numActiveNotes--;
         }
         
         // Stop the LedC channel (fast duty cycle set to 0)
         stopChannel(instrument);
-    }
 }
 
 void ESP32_HwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
-    m_noteCh.fill(255); // 255 indicates no channel
     m_numActiveNotes = 0;
     m_activeNotes = {};
     m_noteFrequency = {};
     m_activeFrequency = {};
-    m_lastDistributor.fill(nullptr); // Clear all distributor tracking
+    _lastDistributor.fill(nullptr); // Clear all distributor tracking
     m_noteStartTime.fill(0); // Clear all start times
 
     // Stop all LedC channels
@@ -163,7 +153,7 @@ void ESP32_HwPWM::stopAll(){
 // Tick() and togglePin() functions removed - LedC handles PWM generation in hardware
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Getters and Setters
+// Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uint8_t ESP32_HwPWM::getNumActiveNotes(uint8_t instrument)
@@ -181,7 +171,7 @@ void ESP32_HwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channe
     m_pitchBend[channel] = bend; 
     
     // Early exit optimizations - check most likely fail conditions first
-    if(m_noteFrequency[instrument] == 0 || m_noteCh[instrument] != channel) return;
+    if(m_noteFrequency[instrument] == 0) return;
     
     // Calculate and apply pitch bend effect in one operation
     const double bentFreq = NoteTables::applyPitchBend(m_noteFrequency[instrument], bend);
@@ -195,34 +185,8 @@ void ESP32_HwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channe
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Distributor Tracking Functions
+// Timeout Tracking Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ESP32_HwPWM::setLastDistributor(uint8_t instrument, void* distributor) {
-    if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
-        m_lastDistributor[instrument] = distributor;
-    }
-}
-
-void* ESP32_HwPWM::getLastDistributor(uint8_t instrument) {
-    if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
-        return m_lastDistributor[instrument];
-    }
-    return nullptr;
-}
-
-void ESP32_HwPWM::clearDistributorFromInstrument(void* distributor) {
-    // When a distributor is destroyed, clear it from all instruments
-    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
-        if (m_lastDistributor[i] == distributor) {
-            // If this distributor was the last to send a note, stop the note to prevent hanging
-            if (m_activeNotes[i] != 0) {
-                stopNote(i, m_activeNotes[i] & 0x7F, 0);
-            }
-            m_lastDistributor[i] = nullptr;
-        }
-    }
-}
 
 void ESP32_HwPWM::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
@@ -234,7 +198,7 @@ void ESP32_HwPWM::checkInstrumentTimeouts() {
         if (m_activeNotes[i] != 0 && 
             (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
             // Stop the note due to timeout
-            stopNote(i, m_activeNotes[i] & 0x7F, 0);
+            stopNote(i, 0);
         }
     }
 }

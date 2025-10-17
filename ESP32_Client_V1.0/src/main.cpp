@@ -1,6 +1,6 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V2.0
+ *  Version: V3.0
  *  Author: DJthefirst
  *  Description: This program implements advanced MIDI control over a microcontroller-based instrument
  *----------------------------------------------------------------------------------------------------
@@ -21,6 +21,9 @@
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MsgHandling/MessageRouter.h"
+#include "Distributors/DistributorManager.h"
+#include "MsgHandling/SysExMsgHandler.h"
+#include "MsgHandling/MidiMsgHandler.h"
 
 // Optional features
 #ifdef EXTRA_LOCAL_STORAGE
@@ -30,22 +33,24 @@
 // Global components
 std::shared_ptr<NetworkManager> network;
 std::shared_ptr<MessageRouter> messageRouter;
-InstrumentType instrumentController;
+std::shared_ptr<InstrumentControllerBase> instrumentController;
+std::shared_ptr<DistributorManager> distributorManager;
+std::shared_ptr<SysExMsgHandler> sysExHandler;
+std::shared_ptr<MidiMsgHandler> midiMsgHandler;
+
 
 void setup() {
-
   // Device::validateConfiguration();
 
-  // Initialize network
-  network = CreateNetwork();
+  // Initialize core components with proper dependency injection
+  instrumentController = InstrumentController<InstrumentType>::getInstance();
+  distributorManager = DistributorManager::getInstance(); 
+  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
+  midiMsgHandler = std::make_shared<MidiMsgHandler>(distributorManager, sysExHandler, instrumentController);
 
-  // Initialize handlers
-  auto distributorManager = std::make_shared<DistributorManager>(&instrumentController);
-  auto sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
-  auto midiHandler = std::make_shared<MidiMsgHandler>(&instrumentController, distributorManager, sysExHandler);
-  
-  // Create message router
-  messageRouter = std::make_shared<MessageRouter>(network, distributorManager, sysExHandler, midiHandler);
+  // Initialize network and message router
+  network = CreateNetwork();
+  messageRouter = std::make_shared<MessageRouter>(network, midiMsgHandler, sysExHandler);
   
   // Set device changed callbacks to use the router's broadcast function
   sysExHandler->setDeviceChangedCallback([]() {
@@ -83,7 +88,7 @@ void setup() {
   //===========================================
 
   //Reset All pins to default
-  instrumentController.resetAll();
+  instrumentController->resetAll();
 
   //Send Device Ready to Connect
   MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);

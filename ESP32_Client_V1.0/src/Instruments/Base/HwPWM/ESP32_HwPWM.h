@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Instruments/InstrumentController.h"
+#include "Instruments/InstrumentControllerBase.h"
 #include <cstdint>
 #include <array>
 
@@ -8,7 +8,7 @@
  * ESP32-specific PWM implementation using LedC peripheral
  * Provides PWM functionality for ESP32 microcontrollers
  */
-class ESP32_HwPWM : public InstrumentController {
+class ESP32_HwPWM : public InstrumentControllerBase {
 public:
     static constexpr Instrument Type = Instrument::PWM;
 private:
@@ -33,7 +33,7 @@ public:
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void stopNote(uint8_t instrument, uint8_t velocity) override;
     void stopAll() override;
 
     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;
@@ -41,9 +41,6 @@ public:
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
     
-    //Distributor tracking functions
-    void setLastDistributor(uint8_t instrument, void* distributor) override;
-    void* getLastDistributor(uint8_t instrument) override;
-    void clearDistributorFromInstrument(void* distributor) override;
+    //Timeout tracking functions
     void checkInstrumentTimeouts() override;
 };

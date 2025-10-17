@@ -22,9 +22,8 @@
 class MessageRouter {
 private:
     std::shared_ptr<NetworkManager> m_networkManager;
-    std::shared_ptr<DistributorManager> m_distributorManager;
-    std::shared_ptr<SysExMsgHandler> m_sysExHandler;
-    std::shared_ptr<MidiMsgHandler> m_midiHandler;
+    std::shared_ptr<MidiMsgHandler> m_midiMsgHandler;
+    std::shared_ptr<SysExMsgHandler> m_sysExMsgHandler;
     
     std::function<void(const MidiMessage&, INetwork*)> m_deviceChangedCallback;
 
@@ -32,16 +31,12 @@ public:
     /**
      * Constructor
      * @param networkManager Shared pointer to network manager
-     * @param distributorManager Shared pointer to distributor manager  
-     * @param sysExHandler Shared pointer to SysEx message handler
-     * @param midiHandler Shared pointer to MIDI message handler
+     * @param midiMsgHandler Shared pointer to MIDI message handler
+     * @param sysExMsgHandler Shared pointer to SysEx message handler
      */
-    MessageRouter(
-        std::shared_ptr<NetworkManager> networkManager,
-        std::shared_ptr<DistributorManager> distributorManager,
-        std::shared_ptr<SysExMsgHandler> sysExHandler,
-        std::shared_ptr<MidiMsgHandler> midiHandler
-    );
+    MessageRouter(std::shared_ptr<NetworkManager> networkManager,
+                  std::shared_ptr<MidiMsgHandler> midiMsgHandler,
+                  std::shared_ptr<SysExMsgHandler> sysExMsgHandler);
 
     /**
      * Process messages from all networks.

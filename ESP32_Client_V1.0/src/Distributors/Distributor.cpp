@@ -13,10 +13,12 @@
 
 #include "Distributor.h"
 #include "DistributionStrategies.h"
+#include "../Instruments/InstrumentController.h"
+#include "../Utility/Utility.h"
 
-Distributor::Distributor(InstrumentController* ptrInstrumentController)
+Distributor::Distributor()
 {
-    m_ptrInstrumentController = ptrInstrumentController;
+    m_ptrInstrumentController = InstrumentController<InstrumentType>::getInstance();
     // Initialize with default strategy
     updateDistributionStrategy();
 }
@@ -25,7 +27,7 @@ Distributor::~Distributor()
 {
     // Clear this distributor from all instruments to prevent hanging notes
     if (m_ptrInstrumentController) {
-        m_ptrInstrumentController->clearDistributorFromInstrument(this);
+        //m_ptrInstrumentController->clearDistributorFromInstrument(this);
     }
 }
 
@@ -81,7 +83,7 @@ void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
 {
     const uint8_t instrument = checkForNote(Note);
     if(instrument != NONE){
-        m_ptrInstrumentController->stopNote(instrument, Note, Velocity);
+        m_ptrInstrumentController->stopNote(instrument, Velocity);
     }
 }
 
@@ -105,10 +107,11 @@ void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
 // Find the first active instrument playing said note and update its velocity
 void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 {
-    const uint8_t instrument = checkForNote(Note);
-    if(instrument != NONE){
-        m_ptrInstrumentController->setKeyPressure(instrument, Note, Velocity);
-    }
+    //TODO: Re-implement distributor tracking
+    // const uint8_t instrument = checkForNote(Note);
+    // if(instrument != NONE){
+    //     m_ptrInstrumentController->setKeyPressure(instrument, Note, Velocity);
+    // }
 }
 
 void Distributor::programChangeEvent(uint8_t Program)
@@ -125,13 +128,11 @@ void Distributor::channelPressureEvent(uint8_t Velocity)
 // Update each instrument's pitch bend value
 void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
 {
-    // Optimize: use bit manipulation to iterate only over set bits
-    uint32_t instrumentMask = m_instruments;
-    for(uint8_t i = 0; instrumentMask != 0 && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-        if(instrumentMask & 1){
+    // Iterate over enabled instruments
+    for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        if(m_instruments[i]){
             m_ptrInstrumentController->setPitchBend(i, pitchBend, channel);
         }
-        instrumentMask >>= 1;
     }
 }
 
@@ -143,11 +144,7 @@ void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
 uint8_t Distributor::nextInstrument()
 {
     if (m_distributionStrategy) {
-        return m_distributionStrategy->getNextInstrument(
-            m_ptrInstrumentController, 
-            m_currentInstrument, 
-            m_instruments
-        );
+        return m_distributionStrategy->getNextInstrument();
     }
     return NONE;
 }
@@ -156,60 +153,12 @@ uint8_t Distributor::nextInstrument()
 //*Note this function is optimised for nonpolyphonic playback and the Distribution method.
 uint8_t Distributor::checkForNote(uint8_t note)
 {
-    uint8_t instrument = m_currentInstrument;
-
-    switch(m_distributionMethod){
-
-    // Check for note being played on the instrument in the current channel position
-    case(DistributionMethod::StraightThrough):
-        if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
-            return m_currentChannel;
-        }
-        break;
-
-    // Check for note being played on the instrument iterating backwards through all instruments
-    case(DistributionMethod::RoundRobin):
-    case(DistributionMethod::RoundRobinBalance):
-        // Iterate through each instrument in reverse
-        for(int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-            // Decrement instrument with underflow protection
-            if(instrument == 0) instrument = HardwareConfig::MAX_NUM_INSTRUMENTS;
-            --instrument;
-
-            // Check if valid instrument
-            if(!distributorHasInstrument(instrument)) continue;
-            if(m_ptrInstrumentController->isNoteActive(instrument, note)) return instrument;
-        }
-        break;
-
-    // Check for note being played on the instrument starting at instrument 0
-    case(DistributionMethod::Ascending):
-        // Optimize: iterate only over instruments in our mask
-        {
-            uint32_t instrumentMask = m_instruments;
-            for(uint8_t i = 0; instrumentMask != 0 && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-                if((instrumentMask & 1) && m_ptrInstrumentController->isNoteActive(i, note)){
-                    return i;
-                }
-                instrumentMask >>= 1;
-            }
-        }
-        break;
-
-    // Check for note being played on the instrument starting at the last instrument iterating in reverse
-    case(DistributionMethod::Descending):
-        for(int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; --i){
-            // Check if valid instrument
-            if(!distributorHasInstrument(i)) continue;
-            if(m_ptrInstrumentController->isNoteActive(i, note)) return i;
-        }
-        break;
-
-    default:
-        // TODO: Handle error
-        break;
+    if (!m_distributionStrategy) {
+        return NONE;
     }
-    return NONE;
+    
+    auto result = m_distributionStrategy->checkForNote();
+    return result ? result.value() : NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,13 +166,11 @@ uint8_t Distributor::checkForNote(uint8_t note)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Returns true if a distributor contains the designated instrument in its pool
-constexpr bool Distributor::distributorHasInstrument(int instrumentId) const noexcept {
-    return (instrumentId >= 0 && instrumentId < 32) && ((m_instruments & (1U << instrumentId)) != 0);
-}
+// (Implementation moved to end of file)
 
 bool Distributor::channelEnabled(uint8_t channel){
     if (channel >= 16) return false;
-    return (m_channels & (1 << channel)) != 0;
+    return m_channels[channel];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,14 +193,14 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
     distributorObj[0] = 0; //Distributor ID MSB Generated in MsgHandler
     distributorObj[1] = 0; //Distributor ID LSB Generated in MsgHandler
-    distributorObj[2] = static_cast<uint8_t>((m_channels >> 14) & 0x03);
-    distributorObj[3] = static_cast<uint8_t>((m_channels >> 7) & 0x7F);
-    distributorObj[4] = static_cast<uint8_t>((m_channels >> 0) & 0x7F);
-    distributorObj[5] = static_cast<uint8_t>((m_instruments >> 28) & 0x0F);
-    distributorObj[6] = static_cast<uint8_t>((m_instruments >> 21) & 0x7F);
-    distributorObj[7] = static_cast<uint8_t>((m_instruments >> 14) & 0x7F);
-    distributorObj[8] = static_cast<uint8_t>((m_instruments >> 7) & 0x7F);
-    distributorObj[9] = static_cast<uint8_t>((m_instruments >> 0) & 0x7F);
+    distributorObj[2] = (Utility::bitsetToBytes(m_channels)[2] & 0x03);
+    distributorObj[3] = (Utility::bitsetToBytes(m_channels)[1] & 0x7F);
+    distributorObj[4] = (Utility::bitsetToBytes(m_channels)[0] & 0x7F);
+    distributorObj[5] = (Utility::bitsetToBytes(m_instruments)[4] & 0x0F);
+    distributorObj[6] = (Utility::bitsetToBytes(m_instruments)[3] & 0x7F);
+    distributorObj[7] = (Utility::bitsetToBytes(m_instruments)[2] & 0x7F);
+    distributorObj[8] = (Utility::bitsetToBytes(m_instruments)[1] & 0x7F);
+    distributorObj[9] = (Utility::bitsetToBytes(m_instruments)[0] & 0x7F);
     distributorObj[10] = static_cast<uint8_t>(m_distributionMethod) & 0x7F;
     distributorObj[11] = distributorBoolByte & 0x7F;
     distributorObj[12] = m_minNote & 0x7F;
@@ -269,12 +216,12 @@ bool Distributor::getMuted() const {
 }
 
 //Returns Distributor Channels
-uint16_t Distributor::getChannels() const {
+std::bitset<NUM_Channels> Distributor::getChannels() const {
     return m_channels;
 }
 
 //Returns Distributor Channels
-uint32_t Distributor::getInstruments() const {
+std::bitset<NUM_Instruments> Distributor::getInstruments() const {
     return m_instruments;
 }
 
@@ -303,8 +250,8 @@ void Distributor::setDistributor(uint8_t data[]){
         | (data[9] << 0);
     DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
 
-    m_channels = channels; // 1
-    m_instruments = instruments; // 1,2
+    m_channels = std::bitset<NUM_Channels>(channels);
+    m_instruments = std::bitset<NUM_Instruments>(instruments);
     m_distributionMethod = distribMethod;
     m_muted = (data[11] & DISTRIBUTOR_BOOL_MUTED) != 0;
     m_damperPedal = (data[11] & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0;
@@ -358,12 +305,12 @@ void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
 }
 
 //Configures Distributor accepted MIDI channels
-void Distributor::setChannels(uint16_t channels){
+void Distributor::setChannels(std::bitset<NUM_Channels> channels){
     m_channels = channels;
 }
     
 //Configures Distributor Instrument Pool
-void Distributor::setInstruments(uint32_t instruments){
+void Distributor::setInstruments(std::bitset<NUM_Instruments> instruments){
     m_instruments = instruments;
 }
 
@@ -371,23 +318,31 @@ void Distributor::setInstruments(uint32_t instruments){
 void Distributor::updateDistributionStrategy(){
     switch(m_distributionMethod) {
         case DistributionMethod::RoundRobinBalance:
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>();
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
             break;
         case DistributionMethod::RoundRobin:
-            m_distributionStrategy = std::make_unique<RoundRobinStrategy>();
+            m_distributionStrategy = std::make_unique<RoundRobinStrategy>(this);
             break;
         case DistributionMethod::Ascending:
-            m_distributionStrategy = std::make_unique<AscendingStrategy>();
+            m_distributionStrategy = std::make_unique<AscendingStrategy>(this);
             break;
         case DistributionMethod::Descending:
-            m_distributionStrategy = std::make_unique<DescendingStrategy>();
+            m_distributionStrategy = std::make_unique<DescendingStrategy>(this);
             break;
         case DistributionMethod::StraightThrough:
-            m_distributionStrategy = std::make_unique<StraightThroughStrategy>();
+            m_distributionStrategy = std::make_unique<StraightThroughStrategy>(this);
             break;
         default:
             // Fallback to RoundRobinBalance as default
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>();
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
             break;
     }
+}
+
+// Helper function to check if distributor handles the given instrument
+bool Distributor::distributorHasInstrument(int instrumentId) const noexcept {
+    if (instrumentId < 0 || instrumentId >= NUM_Instruments) {
+        return false;
+    }
+    return m_instruments.test(instrumentId);
 }

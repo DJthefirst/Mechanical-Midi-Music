@@ -7,7 +7,9 @@
 #pragma once
 
 #include "DistributionStrategy.h"
-#include "../Instruments/InstrumentController.h"
+
+// Forward declaration
+class InstrumentControllerBase;
 
 /**
  * Round Robin with Load Balancing Strategy
@@ -15,11 +17,9 @@
  */
 class RoundRobinBalanceStrategy : public DistributionStrategy {
 public:
-    uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) override;
+    RoundRobinBalanceStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
+    uint8_t getNextInstrument() override;
+    std::optional<uint8_t> checkForNote() override;
     
     DistributionMethod getMethodType() const override {
         return DistributionMethod::RoundRobinBalance;
@@ -30,13 +30,12 @@ public:
  * Simple Round Robin Strategy
  * Distributes notes in a circular manner without load balancing
  */
+
 class RoundRobinStrategy : public DistributionStrategy {
 public:
-    uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) override;
+    RoundRobinStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
+    uint8_t getNextInstrument() override;
+    std::optional<uint8_t> checkForNote() override;
     
     DistributionMethod getMethodType() const override {
         return DistributionMethod::RoundRobin;
@@ -49,11 +48,9 @@ public:
  */
 class AscendingStrategy : public DistributionStrategy {
 public:
-    uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) override;
+    AscendingStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
+    uint8_t getNextInstrument() override;
+    std::optional<uint8_t> checkForNote() override;
     
     DistributionMethod getMethodType() const override {
         return DistributionMethod::Ascending;
@@ -65,12 +62,12 @@ public:
  * Always chooses the highest-numbered available instrument with the fewest active notes
  */
 class DescendingStrategy : public DistributionStrategy {
+private:
+    uint8_t m_currentInstrument = 0;
 public:
-    uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) override;
+    DescendingStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
+    uint8_t getNextInstrument() override;
+    std::optional<uint8_t> checkForNote() override;
     
     DistributionMethod getMethodType() const override {
         return DistributionMethod::Descending;
@@ -83,13 +80,11 @@ public:
  */
 class StraightThroughStrategy : public DistributionStrategy {
 public:
-    uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) override;
+    StraightThroughStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
+    uint8_t getNextInstrument() override;
+    std::optional<uint8_t> checkForNote() override;
     
     DistributionMethod getMethodType() const override {
         return DistributionMethod::StraightThrough;
     }
-};
+}; 

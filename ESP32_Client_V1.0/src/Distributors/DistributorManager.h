@@ -10,7 +10,6 @@
 #include "Distributor.h"
 #include "../MsgHandling/MidiMessage.h"
 #include "../Constants.h"
-#include "../Instruments/InstrumentController.h"
 
 #ifdef EXTRA_LOCAL_STORAGE
     #include "../Extras/LocalStorage.h"
@@ -21,6 +20,9 @@
 #include <cstdint>
 #include <functional>
 
+// Forward declaration
+class InstrumentControllerBase;
+
 /**
  * Manages a collection of distributors and provides operations for
  * adding, removing, configuring, and accessing distributors.
@@ -28,15 +30,20 @@
 class DistributorManager {
 private:
     std::vector<Distributor> m_distributors;
-    InstrumentController* m_ptrInstrumentController;
+    std::shared_ptr<InstrumentControllerBase> m_ptrInstrumentController;
     std::function<void()> m_deviceChangedCallback;
+
+    /**
+     * Private constructor for singleton pattern
+     */
+    DistributorManager();
 
 public:
     /**
-     * Constructor
-     * @param ptrInstrumentController Pointer to the instrument controller
+     * Get singleton instance
+     * @return Shared pointer to the singleton instance
      */
-    explicit DistributorManager(InstrumentController* ptrInstrumentController);
+    static std::shared_ptr<DistributorManager> getInstance();
     
     // Distributor management
     void addDistributor(); 
@@ -65,8 +72,8 @@ public:
     void checkInstrumentTimeouts();
     
     // Distributor configuration helpers
-    void setDistributorChannels(uint8_t distributorId, uint16_t channels);
-    void setDistributorInstruments(uint8_t distributorId, uint32_t instruments);
+    void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);
+    void setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments);
     void setDistributorMethod(uint8_t distributorId, DistributionMethod method);
     void setDistributorBoolValues(uint8_t distributorId, uint8_t boolValues);
     void setDistributorMinMaxNotes(uint8_t distributorId, uint8_t minNote, uint8_t maxNote);
@@ -74,8 +81,8 @@ public:
     void toggleDistributorMute(uint8_t distributorId);
     
     // Distributor query helpers
-    uint16_t getDistributorChannels(uint8_t distributorId);
-    uint32_t getDistributorInstruments(uint8_t distributorId);
+    std::bitset<NUM_Channels> getDistributorChannels(uint8_t distributorId);
+    std::bitset<NUM_Instruments> getDistributorInstruments(uint8_t distributorId);
     DistributionMethod getDistributorMethod(uint8_t distributorId);
     uint8_t getDistributorBoolValues(uint8_t distributorId);
     uint8_t getDistributorMinNote(uint8_t distributorId);

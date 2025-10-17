@@ -8,16 +8,16 @@
 #include "MidiMsgHandler.h"
 #include "Distributors/DistributorManager.h"
 #include "SysExMsgHandler.h"
+#include "../Instruments/InstrumentController.h"
 #include <Arduino.h>
 
 // Constructor with dependency injection
-MidiMsgHandler::MidiMsgHandler(
-    InstrumentController* ptrInstrumentController,
-    std::shared_ptr<DistributorManager> distributorManager,
-    std::shared_ptr<SysExMsgHandler> sysExHandler
-) : m_ptrInstrumentController(ptrInstrumentController),
-    m_distributorManager(distributorManager),
-    m_sysExHandler(sysExHandler)
+MidiMsgHandler::MidiMsgHandler(std::shared_ptr<DistributorManager> distributorManager,
+                               std::shared_ptr<SysExMsgHandler> sysExHandler,
+                               std::shared_ptr<InstrumentControllerBase> instrumentController)
+    : distributorManager(distributorManager)
+    , sysExHandler(sysExHandler)
+    , instrumentController(instrumentController)
 {
 }
 
@@ -51,16 +51,16 @@ std::optional<MidiMessage> MidiMsgHandler::processMessage(MidiMessage& message)
 // Route message to appropriate distributors based on channel
 void MidiMsgHandler::distributeMessage(MidiMessage& message)
 {
-    if (m_distributorManager) {
-        m_distributorManager->distributeMessage(message);
+    if (distributorManager) {
+        distributorManager->distributeMessage(message);
     }
 }
 
 // Process Control Change messages
 void MidiMsgHandler::processCC(MidiMessage& message)
 {
-    if (m_distributorManager) {
-        m_distributorManager->processCC(message);
+    if (distributorManager) {
+        distributorManager->processCC(message);
     }
 }
 
@@ -70,20 +70,20 @@ std::optional<MidiMessage> MidiMsgHandler::processSystemMessage(MidiMessage& mes
     switch (message.sysCommonType()) {
 
         case(Midi::SysEx):
-            if (m_sysExHandler) {
-                return m_sysExHandler->processSysExMessage(message);
+            if (sysExHandler) {
+                return sysExHandler->processSysExMessage(message);
             }
             break;
 
         case(Midi::SysStop):
-            if (m_ptrInstrumentController) {
-                m_ptrInstrumentController->stopAll();
+            if (instrumentController) {
+                instrumentController->stopAll();
             }
             break;
 
         case(Midi::SysReset):
-            if (m_ptrInstrumentController) {
-                m_ptrInstrumentController->resetAll();
+            if (instrumentController) {
+                instrumentController->resetAll();
             }
             break;
 

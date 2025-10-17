@@ -13,17 +13,18 @@
 #pragma once
 
 #include "../Device.h"
-#include "../Instruments/InstrumentController.h"
 #include "../MsgHandling/MidiMessage.h"
 #include "../Constants.h"
 #include "DistributionStrategy.h"
 
+// Forward declarations
+class InstrumentControllerBase;
+
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <bitset>
 using std::int8_t;
-using std::int16_t;
-using std::int32_t;
 
 //Size of Distributor when convered to Byte array
 static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
@@ -37,15 +38,13 @@ static const uint8_t DISTRIBUTOR_BOOL_NOTEOVERWRITE = 0x08;
 class Distributor{
 private:
 
-    //Local Atributes
     uint8_t m_currentChannel = 0;
-    uint8_t m_currentInstrument = 0;
-    InstrumentController* m_ptrInstrumentController;
+    std::shared_ptr<InstrumentControllerBase> m_ptrInstrumentController;
 
     //Each Bit Represents an Enabled Channel/Instrument (limits max number of instruments to 32)
-    uint16_t m_channels = 0; //Represents Enabled MIDI Channels
-    uint32_t m_instruments = 0; //Represents Enabled Instruments
-    
+    std::bitset<NUM_Channels> m_channels = 0; //Represents Enabled MIDI Channels
+    std::bitset<NUM_Instruments> m_instruments = 0; //Represents Enabled Instruments
+
     //Strategy pattern for distribution methods
     std::unique_ptr<DistributionStrategy> m_distributionStrategy;
 
@@ -61,16 +60,16 @@ private:
 
 public:
 
-   explicit Distributor(InstrumentController* ptrInstrumentController);
+    friend class DistributionStrategy;
+
+   Distributor();
     ~Distributor();
-    
-    // Delete copy constructor and assignment operator
+
+    // Disable copy (unique_ptr is not copyable) and enable move semantics
     Distributor(const Distributor&) = delete;
     Distributor& operator=(const Distributor&) = delete;
-    
-    // Allow move constructor and assignment
-    Distributor(Distributor&&) = default;
-    Distributor& operator=(Distributor&&) = default;
+    Distributor(Distributor&&) noexcept = default;
+    Distributor& operator=(Distributor&&) noexcept = default;
 
     /* Determines which instruments the message is for */
     void processMessage(MidiMessage message);
@@ -79,8 +78,8 @@ public:
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
     bool getMuted() const;
-    uint16_t getChannels() const;
-    uint32_t getInstruments() const;
+    std::bitset<NUM_Channels> getChannels() const;
+    std::bitset<NUM_Instruments> getInstruments() const;
     DistributionMethod getDistributionMethod() const;
     
     // Add routing method for messages
@@ -94,8 +93,8 @@ public:
     void setNoteOverwrite(bool noteOverwrite);
     void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
     void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
-    void setChannels(uint16_t channels);
-    void setInstruments(uint32_t instruments);
+    void setChannels(std::bitset<NUM_Channels> channels);
+    void setInstruments(std::bitset<NUM_Instruments> instruments);
 
     void toggleMuted();
 
@@ -123,6 +122,6 @@ private:
     //-------- Helper Functions --------//
 
     /* Returns True if a Distributor Handles the given Instrument. */
-    constexpr bool distributorHasInstrument(int instrumentId) const noexcept;
+    bool distributorHasInstrument(int instrumentId) const noexcept;
     bool channelEnabled(uint8_t channel);
 };

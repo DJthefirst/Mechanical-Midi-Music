@@ -20,6 +20,9 @@
  */
 class HwPWM : public PlatformHwPWM {
 public:
+    // Expose the platform-specific Type constant
+    static constexpr Instrument Type = PlatformHwPWM::Type;
+
     /**
      * Constructor - initializes the platform-specific PWM implementation
      */

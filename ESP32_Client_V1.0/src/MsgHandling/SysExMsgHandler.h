@@ -30,23 +30,20 @@ class DistributorManager;
  */
 class SysExMsgHandler {
 private:
-    std::shared_ptr<DistributorManager> m_distributorManager;
+    std::shared_ptr<DistributorManager> distributorManager;
+
     uint16_t m_sourceId = Device::GetDeviceID();
     uint16_t m_destinationId = 0;
     
     // Callback for when device configuration changes
     std::function<void()> m_deviceChangedCallback;
-    
+
 public:
     /**
      * Constructor with dependency injection
-     * @param distributorManager Interface to distributor management
+     * @param distributorManager Shared pointer to DistributorManager
      */
-    explicit SysExMsgHandler(
-        std::shared_ptr<DistributorManager> distributorManager = nullptr
-    );
-    
-    /**
+    SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);    /**
      * Process a SysEx message and return optional response
      * @param message The SysEx message to process
      * @return Optional response message

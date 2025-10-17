@@ -37,10 +37,10 @@ void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, 
     return;
 }
 
-void StepperSynth::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity)
+void StepperSynth::stopNote(uint8_t instrument, uint8_t velocity)
 {
-    if(isNoteActive(instrument, note)){
-        SwPWM::stopNote(instrument, note, velocity);
+    if(isNoteActive(instrument, velocity)){
+        SwPWM::stopNote(instrument, velocity);
         
         m_outputenabled[instrument] = false;
         updateShiftRegister();

@@ -12,7 +12,7 @@
  * Arduino Mega-specific PWM implementation using Timer PWM
  * Provides PWM functionality for Arduino Mega microcontrollers
  */
-class ArduinoMega_HwPWM : public InstrumentController {
+class ArduinoMega_HwPWM : public InstrumentControllerBase {
 public:
     static constexpr Instrument Type = Instrument::PWM;
 private:
@@ -37,7 +37,7 @@ public:
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity) override;
+    void stopNote(uint8_t instrument, uint8_t velocity) override;
     void stopAll() override;
 
     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;

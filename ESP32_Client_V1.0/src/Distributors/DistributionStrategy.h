@@ -9,40 +9,59 @@
 #pragma once
 
 #include "../Constants.h"
+#include "Device.h"
+#include "../Instruments/InstrumentController.h"
 #include <cstdint>
+#include <bitset>
+#include <optional>
+#include <memory>
 
-class InstrumentController; // Forward declaration
+// Forward declarations
+class InstrumentControllerBase;
+class Distributor;
 
-/**
- * Abstract base class for distribution strategies
- */
 class DistributionStrategy {
+protected:
+    Distributor* m_distributor;
+    std::shared_ptr<InstrumentControllerBase> instrumentController = InstrumentController<InstrumentType>::getInstance();
+
 public:
+    DistributionStrategy(Distributor* distributor) : m_distributor(distributor) {};
     virtual ~DistributionStrategy() = default;
     
-    /**
-     * Get the next instrument to play a note on
-     * @param instrumentController Pointer to the instrument controller
-     * @param currentInstrument Reference to the current instrument index (may be modified)
-     * @param instruments Bitmask of enabled instruments
-     * @return Instrument ID to play on, or NONE if no valid instrument
-     */
-    virtual uint8_t getNextInstrument(
-        InstrumentController* instrumentController,
-        uint8_t& currentInstrument,
-        uint32_t instruments
-    ) = 0;
-    
-    /**
-     * Get the distribution method type for this strategy
-     */
+    virtual uint8_t getNextInstrument() = 0;
+    virtual std::optional<uint8_t> checkForNote() = 0;
+
     virtual DistributionMethod getMethodType() const = 0;
 
 protected:
-    /**
-     * Helper function to check if a distributor has a specific instrument
-     */
-    bool distributorHasInstrument(int instrumentId, uint32_t instruments) {
-        return (instruments & (1 << instrumentId)) != 0;
+    bool distributorHasInstrument(int instrumentId);  // Implementation in .cpp file
+
+
+
+    void setLastDistributor(uint8_t instrument, void* distributor) {
+        // if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
+        //     _lastDistributor[instrument] = distributor;
+        // }
+    }
+
+    void* getLastDistributor(uint8_t instrument) {
+        // if (instrument < HardwareConfig::MAX_NUM_INSTRUMENTS) {
+        //     return _lastDistributor[instrument];
+        // }
+        return nullptr;
+    }
+
+    void clearDistributorFromInstrument(void* distributor) {
+        // When a distributor is destroyed, clear it from all instruments
+        // for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+        //     if (_lastDistributor[i] == distributor) {
+        //         // If this distributor was the last to send a note, stop the note to prevent hanging
+        //         if (m_activeNotes[i] != 0) {
+        //             stopNote(i, 0);
+        //         }
+        //         _lastDistributor[i] = nullptr;
+        //     }
+        // }
     }
 };

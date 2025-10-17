@@ -6,12 +6,23 @@
  */
 
 #include "DistributorManager.h"
+#include "../Instruments/InstrumentController.h"
 #include <Arduino.h>
 #include <algorithm>
 
-// Constructor
-DistributorManager::DistributorManager(InstrumentController* ptrInstrumentController)
-    : m_ptrInstrumentController(ptrInstrumentController) {}
+// Private constructor
+DistributorManager::DistributorManager(){
+    m_ptrInstrumentController = InstrumentController<InstrumentType>::getInstance();
+}
+
+// Singleton instance getter
+std::shared_ptr<DistributorManager> DistributorManager::getInstance() {
+    static std::shared_ptr<DistributorManager> instance = nullptr;
+    if (!instance) {
+        instance = std::shared_ptr<DistributorManager>(new DistributorManager());
+    }
+    return instance;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Distributor Management
@@ -20,7 +31,7 @@ DistributorManager::DistributorManager(InstrumentController* ptrInstrumentContro
 // Create a default Distributor and add it to the Distribution Pool
 void DistributorManager::addDistributor()
 {
-    m_distributors.emplace_back(m_ptrInstrumentController);
+    m_distributors.emplace_back();
     localStorageAddDistributor();
     broadcastDistributorChanged();
 }
@@ -36,7 +47,7 @@ void DistributorManager::addDistributor(Distributor&& distributor)
 // Create a Distributor from a Construct and add it to the Distribution Pool
 void DistributorManager::addDistributor(uint8_t data[])
 {
-    m_distributors.emplace_back(m_ptrInstrumentController);
+    m_distributors.emplace_back();
     m_distributors.back().setDistributor(data);
     localStorageAddDistributor();
     broadcastDistributorChanged();
@@ -82,11 +93,8 @@ void DistributorManager::checkInstrumentTimeouts()
 // Send message to all distributors which accept the designated message's channel.
 void DistributorManager::distributeMessage(MidiMessage& message)
 {
-    // Pre-calculate channel mask to avoid repeated bit operations
-    const uint16_t channelMask = (1 << message.channel());
-    
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
-        if ((m_distributors[i].getChannels() & channelMask) != 0) {
+        if (m_distributors[i].getChannels().test(message.channel())) {
             m_distributors[i].processMessage(message);
         }
     }
@@ -96,7 +104,7 @@ void DistributorManager::distributeMessage(MidiMessage& message)
 void DistributorManager::processCC(MidiMessage& message)
 {
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
-        if ((m_distributors[i].getChannels() & (1 << message.channel())) != (0)) {
+        if (m_distributors[i].getChannels().test(message.channel())) {
             switch (message.CC_Control()) {
                 case(MidiCC::DamperPedal):
                     m_distributors[i].setDamperPedal(message.CC_Value() > 64);
@@ -164,7 +172,7 @@ std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributo
 // Distributor Query Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint16_t DistributorManager::getDistributorChannels(uint8_t distributorId)
+std::bitset<NUM_Channels> DistributorManager::getDistributorChannels(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
         return m_distributors[distributorId].getChannels();
@@ -172,7 +180,7 @@ uint16_t DistributorManager::getDistributorChannels(uint8_t distributorId)
     return 0;
 }
 
-uint32_t DistributorManager::getDistributorInstruments(uint8_t distributorId)
+std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
         return m_distributors[distributorId].getInstruments();
@@ -240,7 +248,7 @@ void DistributorManager::localStorageClearDistributors()
 // Distributor Configuration Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DistributorManager::setDistributorChannels(uint8_t distributorId, uint16_t channels)
+void DistributorManager::setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels)
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setChannels(channels);
@@ -248,7 +256,7 @@ void DistributorManager::setDistributorChannels(uint8_t distributorId, uint16_t 
     }
 }
 
-void DistributorManager::setDistributorInstruments(uint8_t distributorId, uint32_t instruments)
+void DistributorManager::setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments)
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setInstruments(instruments);

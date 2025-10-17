@@ -11,15 +11,11 @@
 // Constructor
 MessageRouter::MessageRouter(
     std::shared_ptr<NetworkManager> networkManager,
-    std::shared_ptr<DistributorManager> distributorManager,
-    std::shared_ptr<SysExMsgHandler> sysExHandler,
-    std::shared_ptr<MidiMsgHandler> midiHandler
-) : m_networkManager(networkManager),
-    m_distributorManager(distributorManager),
-    m_sysExHandler(sysExHandler),
-    m_midiHandler(midiHandler)
-{
-}
+    std::shared_ptr<MidiMsgHandler> midiMsgHandler,
+    std::shared_ptr<SysExMsgHandler> sysExMsgHandler) 
+    : m_networkManager(networkManager)
+    , m_midiMsgHandler(midiMsgHandler)
+    , m_sysExMsgHandler(sysExMsgHandler) {}
 
 // Process messages from all networks
 void MessageRouter::processMessages()
@@ -39,9 +35,8 @@ void MessageRouter::processMessages()
     }
     
     // Check for instrument timeouts (only when configured)
-    if (m_distributorManager) {
-        m_distributorManager->checkInstrumentTimeouts();
-    }
+    DistributorManager::getInstance()->checkInstrumentTimeouts();
+    
 }
 
 // Set callback for device changed notifications
@@ -80,18 +75,16 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
 
     // Process message based on type - optimize for most common case first
     const uint8_t msgType = message.type();
-    if (msgType == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
-        // Handle SysEx messages with SysExMsgHandler
-        if (m_sysExHandler) {
-            if (auto response = m_sysExHandler->processSysExMessage(message); response.has_value() && sourceNetwork) {
-                sourceNetwork->sendMessage(*response);
-            }
+    if (message.type() == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
+        // Handle SysEx messages
+        auto response = m_sysExMsgHandler->processSysExMessage(message);
+        if ( response.has_value() && sourceNetwork) {
+            sourceNetwork->sendMessage(*response);
         }
+        
     } else {
         // Handle other MIDI messages with MidiMsgHandler
-        if (m_midiHandler) {
-            m_midiHandler->processMessage(message);
-        }
+        m_midiMsgHandler->processMessage(message);
     }
 
     // Clear the source network context
