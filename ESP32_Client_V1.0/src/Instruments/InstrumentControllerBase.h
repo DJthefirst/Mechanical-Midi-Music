@@ -18,6 +18,7 @@ public:
 protected:
     //Distributor Tracking Attributes
     std::array<void*, NUM_Instruments> _lastDistributor = {nullptr};
+    std::array<uint8_t, NUM_Instruments> _lastChannel = {NONE};
     std::bitset<NUM_Instruments> _activeInstruments = 0;
 
     //Local CC Effect Atributes
@@ -39,6 +40,7 @@ public:
         playNote(instrument, note, velocity, channel);
         // Set the distributor that sent this note
         _lastDistributor[instrument] = distributor;
+        _lastChannel[instrument] = channel;
     }
     virtual void stopNote(uint8_t instrument, uint8_t velocity) = 0;
     virtual void stopAll() = 0;
@@ -61,4 +63,27 @@ public:
     virtual void setExpression(uint8_t value);
     virtual void setEffectCrtl_1(uint8_t value);
     virtual void setEffectCrtl_2(uint8_t value);
+
+    // Return the last distributor (as a void* value) that sent a note to the
+    // given instrument. Use setLastDistributor to update/clear this value.
+    void* getLastDistributor(uint8_t instrument) {
+        if (instrument < NUM_Instruments) {
+            return _lastDistributor[instrument];
+        }
+        return nullptr;
+    }
+
+    uint8_t getLastChannel(uint8_t instrument) {
+        if (instrument < NUM_Instruments) {
+            return _lastChannel[instrument];
+        }
+        return NONE;
+    }
+
+    void setLastDistributor(uint8_t instrument, void* distributor, uint8_t channel) {
+        if (instrument < NUM_Instruments) {
+            _lastDistributor[instrument] = distributor;
+            _lastChannel[instrument] = channel;
+        }
+    }
 };

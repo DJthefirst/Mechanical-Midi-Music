@@ -2,7 +2,7 @@
 #include "Instruments/InstrumentController.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
-#include "Device.h"
+#include "Config.h"
 #include <cmath>
 
 // [Instrument][ActiveNote] MSB is set if note is active, the 7 LSBs are the note value 
@@ -124,6 +124,7 @@ void ESP32_HwPWM::stopNote(uint8_t instrument, uint8_t velocity)
         m_noteFrequency[instrument] = 0;
         m_activeFrequency[instrument] = 0;
         _lastDistributor[instrument] = nullptr; // Clear distributor tracking
+        _lastChannel[instrument] = NONE; // Clear channel tracking
         m_noteStartTime[instrument] = 0;
         
         // Decrement active note count only if channel was actually active
@@ -142,6 +143,7 @@ void ESP32_HwPWM::stopAll(){
     m_noteFrequency = {};
     m_activeFrequency = {};
     _lastDistributor.fill(nullptr); // Clear all distributor tracking
+    _lastChannel.fill(NONE); // Clear all channel tracking
     m_noteStartTime.fill(0); // Clear all start times
 
     // Stop all LedC channels

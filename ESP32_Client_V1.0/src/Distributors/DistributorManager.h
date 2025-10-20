@@ -68,9 +68,6 @@ public:
     void distributeMessage(MidiMessage& message);
     void processCC(MidiMessage& message);
     
-    // Timeout management
-    void checkInstrumentTimeouts();
-    
     // Distributor configuration helpers
     void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);
     void setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments);

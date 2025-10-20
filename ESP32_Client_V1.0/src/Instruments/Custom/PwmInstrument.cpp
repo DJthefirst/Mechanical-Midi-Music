@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include "Extras/AddrLED.h"
 #include "Instruments/Custom/PwmInstrument.h"
-#include "Device.h"
 #include "Instruments/Utility/NoteTable.h"
 #include <cmath>
 

@@ -1,0 +1,127 @@
+/*
+ * Config.h
+ * Hardware and device configuration structure and platform-specific definitions
+ * Split from Device.h to separate configuration from device functionality
+ */
+
+#pragma once
+
+#include "Arduino.h"
+#include "Constants.h"
+#include <array>
+#include <stdint.h>
+#include <cstdint>
+using std::int8_t;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Device Config Include
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+    #ifndef DEVICE_CONFIG
+        // Default device config used when no selection is provided by the application
+        #define DEVICE_CONFIG "Configs/ESP32_PWM.h"
+    #endif
+
+    // Include the selected config header
+    // Note: using an indirection macro to include a macro-defined string
+    #define STRINGIFY(x) #x
+    #define INCLUDE_FILE(x) STRINGIFY(x)
+    // The macro DEVICE_CONFIG must be a quoted string literal (e.g. "Configs/StepperSynth.h")
+    #include DEVICE_CONFIG
+
+    // Cleanup helper macros
+    #undef STRINGIFY
+    #undef INCLUDE_FILE
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Platform Detection
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(ARDUINO_ARCH_ESP32)
+    #define PLATFORM_ESP32
+    constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
+    #define HAS_HARDWARE_PWM
+    #define HAS_WIFI
+    #define HAS_BLE
+    #define HAS_NVS
+#elif defined(ARDUINO_AVR_UNO)
+    #define PLATFORM_ARDUINO_UNO  
+    constexpr Platform PLATFORM_TYPE = Platform::ArduinoUno;
+#elif defined(ARDUINO_AVR_MEGA)
+    #define PLATFORM_ARDUINO_MEGA
+    constexpr Platform PLATFORM_TYPE = Platform::ArduinoMega;
+#else
+    #error "Unsupported platform. Add platform detection to Config.h"
+#endif
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Configuration Processing 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+namespace HardwareConfig {
+
+    // INSTRUMENT_PINS is derived from the configuration.
+    constexpr auto PINS = INSTRUMENT_PINS;
+
+    // Optional settings with defaults
+    #ifdef TIMER_RESOLUTION
+        constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_VALUE;
+    #else
+        constexpr uint32_t TIMER_RESOLUTION = 40;  // Default 40 microseconds
+    #endif
+
+    #ifdef INSTRUMENT_TIMEOUT_MS_VALUE
+        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = INSTRUMENT_TIMEOUT_MS_VALUE;
+    #else
+        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = 0;  // Default 0 = infinite timeout (no timeout)
+    #endif
+
+    #ifdef NUM_INSTRUMENTS_VALUE
+    constexpr uint8_t NUM_INSTRUMENTS = NUM_INSTRUMENTS_VALUE;
+    #else
+    constexpr uint8_t NUM_INSTRUMENTS = static_cast<uint8_t>(PINS.size());
+    #endif
+
+    #ifdef NUM_SUBINSTRUMENTS_VALUE
+    constexpr uint8_t NUM_SUBINSTRUMENTS = NUM_SUBINSTRUMENTS_VALUE;
+    #else
+    constexpr uint8_t NUM_SUBINSTRUMENTS = 1;
+    #endif
+
+    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENTS * NUM_SUBINSTRUMENTS;
+
+
+    // Platform capabilities
+    #ifdef PLATFORM_ESP32
+        constexpr bool HAS_HARDWARE_PWM_VAL = true;
+        constexpr bool HAS_WIFI_VAL = true;
+        constexpr bool HAS_BLE_VAL = true;
+        constexpr bool HAS_NVS_VAL = true;
+    #else
+        constexpr bool HAS_HARDWARE_PWM_VAL = false;
+        constexpr bool HAS_WIFI_VAL = false;
+        constexpr bool HAS_BLE_VAL = false;
+        constexpr bool HAS_NVS_VAL = false;
+    #endif
+}
+
+namespace DeviceConfig {
+     // Device identity
+    constexpr const char* DEVICE_NAME_STR = DEVICE_NAME;
+    constexpr uint16_t DEVICE_ID_VAL = DEVICE_ID;
+    constexpr uint16_t FIRMWARE_VERSION = 2;
+
+    #ifdef MIN_NOTE_VALUE
+        constexpr uint8_t MIN_NOTE = MIN_NOTE_VALUE;
+    #else
+        constexpr uint8_t MIN_NOTE = 0;
+    #endif
+
+    #ifdef MAX_NOTE_VALUE
+        constexpr uint8_t MAX_NOTE = MAX_NOTE_VALUE;
+    #else
+        constexpr uint8_t MAX_NOTE = 127;
+    #endif
+
+}
+    // (no global pins alias — code should reference Config::INSTRUMENT_PINS or provide its own `pins`)

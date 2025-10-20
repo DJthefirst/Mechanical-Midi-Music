@@ -1,6 +1,7 @@
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
 #include "Instruments/Utility/InterruptTimer.h"
 #include "Instruments/Utility/NoteTable.h"
+#include "Config.h"
 #include "Arduino.h"
 #include <bitset>
 
@@ -61,6 +62,7 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 {
     _activeInstruments.reset(instrument);
     _lastDistributor[instrument] = nullptr;
+    _lastChannel[instrument] = NONE;
     m_activeNotes[instrument] = 0;
     m_notePeriod[instrument] = 0;
     m_activePeriod[instrument] = 0;
@@ -73,6 +75,7 @@ void ESP32_SwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     _lastDistributor.fill(nullptr);
+    _lastChannel.fill(NONE);
     m_activeNotes = {};
     m_notePeriod = {};
     m_activePeriod = {};

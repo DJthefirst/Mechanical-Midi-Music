@@ -18,17 +18,13 @@
 
 Distributor::Distributor()
 {
-    m_ptrInstrumentController = InstrumentController<InstrumentType>::getInstance();
+    m_instrumentController = InstrumentController<InstrumentType>::getInstance();
     // Initialize with default strategy
     updateDistributionStrategy();
 }
 
-Distributor::~Distributor()
-{
-    // Clear this distributor from all instruments to prevent hanging notes
-    if (m_ptrInstrumentController) {
-        //m_ptrInstrumentController->clearDistributorFromInstrument(this);
-    }
+Distributor::~Distributor(){
+    stopActiveNotes();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,10 +33,10 @@ Distributor::~Distributor()
 
 //Determine Type of MIDI Msg and Call Associated Event
 void Distributor::processMessage(MidiMessage message){
-    m_currentChannel = message.channel();
+    uint8_t currentChannel = message.channel();
 
     // Check if this distributor handles this channel
-    if (!channelEnabled(m_currentChannel)) return;
+    if (!channelEnabled(currentChannel)) return;
 
     // Check if muted
     if(m_muted)return;
@@ -48,7 +44,7 @@ void Distributor::processMessage(MidiMessage message){
     switch(message.type()){
 
     case(Midi::NoteOff):
-        noteOffEvent(message.buffer[1],message.buffer[2]);
+        noteOffEvent(message.buffer[1],message.buffer[2],message.channel());
         break; 
     case(Midi::NoteOn):
         noteOnEvent(message.buffer[1],message.buffer[2],message.channel());
@@ -67,7 +63,7 @@ void Distributor::processMessage(MidiMessage message){
         channelPressureEvent(message.buffer[1]);
         break;
     case(Midi::PitchBend):
-        pitchBendEvent((static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]), m_currentChannel);
+        pitchBendEvent((static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]), currentChannel);
         break;
     case(Midi::SysCommon):
         break;
@@ -79,28 +75,19 @@ void Distributor::processMessage(MidiMessage message){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Find the first instrument playing the given note and stop it
-void Distributor::noteOffEvent(uint8_t Note, uint8_t Velocity)
+void Distributor::noteOffEvent(uint8_t note, uint8_t velocity, uint8_t channel)
 {
-    const uint8_t instrument = checkForNote(Note);
-    if(instrument != NONE){
-        m_ptrInstrumentController->stopNote(instrument, Velocity);
-    }
+    m_distributionStrategy->stopActiveInstrument(note, velocity, channel);
 }
 
 // Get next instrument based on distribution method and play note
-void Distributor::noteOnEvent(uint8_t Note, uint8_t Velocity, uint8_t channel)
+void Distributor::noteOnEvent(uint8_t note, uint8_t velocity, uint8_t channel)
 {
     // Check if note has 0 velocity representing a note off event
-    if(Velocity == 0){
-        noteOffEvent(Note, Velocity);
-        return;
-    }
-
-    // Get next instrument based on distribution method and play note
-    const uint8_t instrument = nextInstrument();
-    if(instrument != NONE){ 
-        // Use the new overloaded method that tracks the distributor
-        m_ptrInstrumentController->playNote(instrument, Note, Velocity, channel, this);
+    if(velocity == 0){
+        noteOffEvent(note, velocity, channel);
+    }else{
+        noteOnEvent(note, velocity, channel);
     }
 }
 
@@ -117,7 +104,7 @@ void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
 void Distributor::programChangeEvent(uint8_t Program)
 {
     // Not yet implemented
-    m_ptrInstrumentController->resetAll();
+    m_instrumentController->resetAll();
 }
 
 void Distributor::channelPressureEvent(uint8_t Velocity)
@@ -131,34 +118,9 @@ void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
     // Iterate over enabled instruments
     for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         if(m_instruments[i]){
-            m_ptrInstrumentController->setPitchBend(i, pitchBend, channel);
+            m_instrumentController->setPitchBend(i, pitchBend, channel);
         }
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Routing Logic
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Returns the instument ID of the next instrument to be played.
-uint8_t Distributor::nextInstrument()
-{
-    if (m_distributionStrategy) {
-        return m_distributionStrategy->getNextInstrument();
-    }
-    return NONE;
-}
-
-//Returns the instument which the first note is played or NONE.
-//*Note this function is optimised for nonpolyphonic playback and the Distribution method.
-uint8_t Distributor::checkForNote(uint8_t note)
-{
-    if (!m_distributionStrategy) {
-        return NONE;
-    }
-    
-    auto result = m_distributionStrategy->checkForNote();
-    return result ? result.value() : NONE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +133,34 @@ uint8_t Distributor::checkForNote(uint8_t note)
 bool Distributor::channelEnabled(uint8_t channel){
     if (channel >= 16) return false;
     return m_channels[channel];
+}
+
+// Helper function to check if distributor handles the given instrument
+bool Distributor::instrumentEnabled(int instrumentId) const noexcept {
+    if (instrumentId < 0 || instrumentId >= NUM_Instruments) {
+        return false;
+    }
+    return m_instruments.test(instrumentId);
+}
+
+void Distributor::stopActiveNotes() {
+    // Iterate through all possible instruments and if this distributor
+    // is recorded as the last distributor for that instrument, stop the
+    // note to avoid hanging notes and clear the tracking pointer.
+
+    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i) {
+        void* last = m_instrumentController->getLastDistributor(i);
+        if (last == static_cast<void*>(this)) {
+            // If instrument is active, stop it. Use stopNote which will
+            // also clear the _lastDistributor entry in most implementations.
+            if (m_instrumentController->getNumActiveNotes(i) != 0) {
+                m_instrumentController->stopNote(i, 0);
+            } else {
+                // Ensure the distributor tracking is cleared even if not active
+                m_instrumentController->setLastDistributor(i, nullptr, NONE);
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,17 +254,19 @@ void Distributor::setDistributor(uint8_t data[]){
 
 //Configures Distributor Distribution Method
 void Distributor::setDistributionMethod(DistributionMethod distribution){
+    stopActiveNotes();
     m_distributionMethod = distribution;
     updateDistributionStrategy();
 }
 
 void Distributor::toggleMuted(){
+    stopActiveNotes();
     m_muted = !m_muted;
 }
 
 //Configures Distributor Boolean
 void Distributor::setMuted(bool muted){
-    if(m_muted != muted) (*m_ptrInstrumentController).stopAll();
+    if(m_muted != muted) stopActiveNotes();
     m_muted = muted;
 }
 
@@ -290,32 +282,38 @@ void Distributor::setPolyphonic(bool polyphonic){
 
 //Configures Distributor Note Overwrite
 void Distributor::setNoteOverwrite(bool noteOverwrite){
+    stopActiveNotes();
     m_noteOverwrite = noteOverwrite;
 }
 
 //Configures Distributor Minimum and Maximum Notes
 void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
+    stopActiveNotes();
     m_minNote = minNote;
     m_maxNote = maxNote;
 }
 
 //Configures Distributor maximum number of Polyphonic notes
 void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
+    stopActiveNotes();
     m_numPolyphonicNotes = numPolyphonicNotes;
 }
 
 //Configures Distributor accepted MIDI channels
 void Distributor::setChannels(std::bitset<NUM_Channels> channels){
+    stopActiveNotes();
     m_channels = channels;
 }
     
 //Configures Distributor Instrument Pool
 void Distributor::setInstruments(std::bitset<NUM_Instruments> instruments){
+    stopActiveNotes();
     m_instruments = instruments;
 }
 
 //Updates the distribution strategy based on the current method
 void Distributor::updateDistributionStrategy(){
+    stopActiveNotes();
     switch(m_distributionMethod) {
         case DistributionMethod::RoundRobinBalance:
             m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
@@ -337,12 +335,4 @@ void Distributor::updateDistributionStrategy(){
             m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
             break;
     }
-}
-
-// Helper function to check if distributor handles the given instrument
-bool Distributor::distributorHasInstrument(int instrumentId) const noexcept {
-    if (instrumentId < 0 || instrumentId >= NUM_Instruments) {
-        return false;
-    }
-    return m_instruments.test(instrumentId);
 }

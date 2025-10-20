@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "Device.h"
+#include "Config.h"
 #include <cstdint>
 using std::int8_t;
 

@@ -24,10 +24,6 @@
 // Forward declaration
 class DistributorManager;
 
-/**
- * Handles SysEx messages for device configuration and management.
- * Uses dependency injection to communicate with network and distributor layers.
- */
 class SysExMsgHandler {
 private:
     std::shared_ptr<DistributorManager> distributorManager;
@@ -39,21 +35,11 @@ private:
     std::function<void()> m_deviceChangedCallback;
 
 public:
-    /**
-     * Constructor with dependency injection
-     * @param distributorManager Shared pointer to DistributorManager
-     */
-    SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);    /**
-     * Process a SysEx message and return optional response
-     * @param message The SysEx message to process
-     * @return Optional response message
-     */
+
+    SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);
+
     std::optional<MidiMessage> processSysExMessage(MidiMessage& message);
     
-    /**
-     * Set callback for device configuration changes
-     * @param callback Function to call when device configuration changes
-     */
     void setDeviceChangedCallback(std::function<void()> callback);
 
 private:

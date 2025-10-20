@@ -1,5 +1,5 @@
 #pragma once
-#include "Device.h"
+#include "Config.h"
 
 #ifdef EXTRA_LOCAL_STORAGE
 

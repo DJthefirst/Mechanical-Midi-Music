@@ -10,7 +10,7 @@
 #include "../Instruments/InstrumentController.h"
 
 // Round Robin with Load Balancing Strategy
-uint8_t RoundRobinBalanceStrategy::getNextInstrument() {
+void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
     static uint8_t currentInstrument = 0; // Make currentInstrument static
     uint8_t instrumentLeastActive = NONE;
     
@@ -22,11 +22,12 @@ uint8_t RoundRobinBalanceStrategy::getNextInstrument() {
         currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
         
         // Check if valid instrument
-        if (!distributorHasInstrument(currentInstrument)) continue;
+        if (!m_distributor->getInstruments()[currentInstrument]) continue;
         
         // If there are no active notes this must be the least active Instrument return
         uint8_t activeNotes = instrumentController->getNumActiveNotes(currentInstrument);
-        if (activeNotes == 0) return currentInstrument;
+            instrumentController->playNote(currentInstrument, note, velocity, channel, static_cast<void*>(m_distributor));
+        if (activeNotes == 0) return;
         
         // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
         if (instrumentLeastActive == NONE) {
@@ -39,18 +40,32 @@ uint8_t RoundRobinBalanceStrategy::getNextInstrument() {
             instrumentLeastActive = currentInstrument;
         }
     }
-    return instrumentLeastActive;
+    if(instrumentLeastActive != NONE) {
+        instrumentController->playNote(instrumentLeastActive, note, velocity, channel, static_cast<void*>(m_distributor));
+    }
 }
 
-std::optional<uint8_t> RoundRobinBalanceStrategy::checkForNote() {
-    // For now, return empty optional as this method needs to check for specific note tracking
-    // This method should be implemented to check if a specific note is being played
-    return std::nullopt;
+void RoundRobinBalanceStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+    // Iterate through each instrument in reverse
+    uint8_t instrument = currentInstrument;
+    for(int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        // Decrement instrument with underflow protection
+        if(instrument == 0) instrument = HardwareConfig::MAX_NUM_INSTRUMENTS;
+        --instrument;
+
+        // Check if valid instrument
+        if(m_distributor->getInstruments()[i] 
+            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(i) == channel 
+            && instrumentController->isNoteActive(i, note)) {
+            instrumentController->stopNote(instrument, velocity);
+            return;
+        }
+    }
 }
 
 // Simple Round Robin Strategy
-uint8_t RoundRobinStrategy::getNextInstrument() {
-    static uint8_t currentInstrument = 0; // Make currentInstrument static
+void RoundRobinStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         currentInstrument++;
         
@@ -58,33 +73,51 @@ uint8_t RoundRobinStrategy::getNextInstrument() {
         currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
         
         // Check if valid instrument
-        if (!distributorHasInstrument(currentInstrument)) continue;
-        return currentInstrument;
+        if (!m_distributor->getInstruments()[currentInstrument]) continue;
+            instrumentController->playNote(currentInstrument, note, velocity, channel, static_cast<void*>(m_distributor));
+        return;
     }
-    return NONE;
+    return;
 }
 
-std::optional<uint8_t> RoundRobinStrategy::checkForNote() {
-    // For now, return empty optional as this method needs to check for specific note tracking
-    return std::nullopt;
+void RoundRobinStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+    // Iterate through each instrument in reverse
+    uint8_t instrument = currentInstrument;
+    for(int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        // Decrement instrument with underflow protection
+        if(instrument == 0) instrument = HardwareConfig::MAX_NUM_INSTRUMENTS;
+        --instrument;
+
+        // Check if valid instrument
+        if(m_distributor->getInstruments()[i] 
+            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(i) == channel 
+            && instrumentController->isNoteActive(i, note)) {
+            instrumentController->stopNote(instrument, velocity);
+            return;
+        }
+    }
 }
 
 // Ascending Strategy
-uint8_t AscendingStrategy::getNextInstrument() {
+void AscendingStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
     bool validInstrument = false;
     uint8_t instrumentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
     
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if valid instrument
-        if (!distributorHasInstrument(i)) continue;
+        if (!m_distributor->getInstruments()[i]) continue;
         validInstrument = true;
         
         // Check if instrument has the least active notes
         uint8_t activeNotes = instrumentController->getNumActiveNotes(i);
         
         // If there are no active notes this must be the least active instrument return
-        if (activeNotes == 0) return i;
+        if (activeNotes == 0){
+            instrumentController->playNote(i, note, velocity, channel, static_cast<void*>(m_distributor));
+            return;
+        }
         
         // Update least active instrument
         if (activeNotes < leastActiveNotes) {
@@ -92,30 +125,42 @@ uint8_t AscendingStrategy::getNextInstrument() {
             instrumentLeastActive = i;
         }
     }
-    return validInstrument ? instrumentLeastActive : NONE;
+    if(validInstrument) {
+        instrumentController->playNote(instrumentLeastActive, note, velocity, channel, static_cast<void*>(m_distributor));
+    }
 }
 
-std::optional<uint8_t> AscendingStrategy::checkForNote() {
-    // For now, return empty optional as this method needs to check for specific note tracking
-    return std::nullopt;
+void AscendingStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+    for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        if(m_distributor->getInstruments()[i] 
+            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(i) == channel 
+            && instrumentController->isNoteActive(i, note)) {
+            instrumentController->stopNote(i, velocity);
+            return;
+        }
+    }
 }
 
 // Descending Strategy
-uint8_t DescendingStrategy::getNextInstrument() {
+void DescendingStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
     bool validInstrument = false;
     uint8_t instrumentLeastActive = NONE;
     uint8_t leastActiveNotes = 255;
     
     for (int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; i--) {
         // Check if valid instrument
-        if (!distributorHasInstrument(i)) continue;
+        if (!m_distributor->getInstruments()[i]) continue;
         validInstrument = true;
         
         // Check if instrument has the least active notes
         uint8_t activeNotes = instrumentController->getNumActiveNotes(i);
         
         // If there are no active notes this must be the least active Instrument return
-        if (activeNotes == 0) return i;
+        if (activeNotes == 0){
+            instrumentController->playNote(i, note, velocity, channel, static_cast<void*>(m_distributor));
+            return;
+        }
         
         // Update least active instrument
         if (activeNotes < leastActiveNotes) {
@@ -123,50 +168,41 @@ uint8_t DescendingStrategy::getNextInstrument() {
             instrumentLeastActive = i;
         }
     }
-    return validInstrument ? instrumentLeastActive : NONE;
+    if(validInstrument) {
+        instrumentController->playNote(instrumentLeastActive, note, velocity, channel, static_cast<void*>(m_distributor));
+    }
 }
 
-std::optional<uint8_t> DescendingStrategy::checkForNote() {
-    // For now, return empty optional as this method needs to check for specific note tracking
-    return std::nullopt;
+void DescendingStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+    for(int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; --i){
+        // Check if valid instrument
+        if(m_distributor->getInstruments()[i] 
+            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(i) == channel 
+            && instrumentController->isNoteActive(i, note)) {
+            instrumentController->stopNote(i, velocity);
+            return;
+        }
+    }
 }
 
 // Straight Through Strategy
-uint8_t StraightThroughStrategy::getNextInstrument() {
-    static uint8_t currentInstrument = 0; // Make currentInstrument static
-    uint8_t instrumentLeastActive = NONE;
-    
-    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
-        // Increment current Instrument
-        currentInstrument++;
-        
-        // Loop to first instrument if end is reached
-        currentInstrument = (currentInstrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) ? 0 : currentInstrument;
-        
-        // Check if valid instrument
-        if (!distributorHasInstrument(currentInstrument)) continue;
-        
-        // If there are no active notes this must be the least active Instrument return
-        uint8_t activeNotes = instrumentController->getNumActiveNotes(currentInstrument);
-        if (activeNotes == 0) return currentInstrument;
-        
-        // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
-        if (instrumentLeastActive == NONE) {
-            instrumentLeastActive = currentInstrument;
-            continue;
-        }
-        
-        // Update the Least Active Instrument if needed.
-        if (activeNotes < instrumentController->getNumActiveNotes(instrumentLeastActive)) {
-            instrumentLeastActive = currentInstrument;
-        }
+void StraightThroughStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+   
+    uint8_t instrumentId = channel; // Map channel directly to instrument ID
+    if (instrumentId < HardwareConfig::MAX_NUM_INSTRUMENTS &&
+        m_distributor->getInstruments()[instrumentId]) {
+            instrumentController->playNote(instrumentId, note, velocity, channel, static_cast<void*>(m_distributor));
     }
-    return instrumentLeastActive;
 }
 
-std::optional<uint8_t> StraightThroughStrategy::checkForNote() {
-    // For now, return empty optional as this method needs to check for specific note tracking
-    return std::nullopt;
+void StraightThroughStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
+    if(m_distributor->getInstruments()[channel] 
+            && instrumentController->getLastDistributor(channel) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(channel) == channel
+            && instrumentController->isNoteActive(channel, note)){
+        instrumentController->stopNote(channel, velocity);
+    }
 }
 
 // //Returns the instument which the first note is played or NONE.

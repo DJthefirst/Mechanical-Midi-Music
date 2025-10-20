@@ -38,29 +38,13 @@ public:
                   std::shared_ptr<MidiMsgHandler> midiMsgHandler,
                   std::shared_ptr<SysExMsgHandler> sysExMsgHandler);
 
-    /**
-     * Process messages from all networks.
-     * This method should be called repeatedly in the main loop.
-     */
-    void processMessages();
-
-    /**
-     * Set callback for device changed notifications
-     * @param callback Function to call when device changes occur
-     */
     void setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback);
 
-    /**
-     * Broadcast a device changed message to all networks except the source
-     * @param sourceNetwork The network that originated the change (can be nullptr)
-     */
     void broadcastDeviceChanged(INetwork* sourceNetwork = nullptr);
 
+    void processMessages();
+
 private:
-    /**
-     * Process a single message from a specific network
-     * @param message The MIDI message to process
-     * @param sourceNetwork The network that provided the message
-     */
+
     void processMessage(MidiMessage& message, INetwork* sourceNetwork);
 };

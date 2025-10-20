@@ -5,7 +5,7 @@
  */
 
 #include "NetworkSerial.h"
-#include "Device.h"
+#include "Config.h"
 
 #ifdef MMM_NETWORK_SERIAL
 

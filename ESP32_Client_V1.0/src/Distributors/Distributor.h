@@ -38,8 +38,7 @@ static const uint8_t DISTRIBUTOR_BOOL_NOTEOVERWRITE = 0x08;
 class Distributor{
 private:
 
-    uint8_t m_currentChannel = 0;
-    std::shared_ptr<InstrumentControllerBase> m_ptrInstrumentController;
+    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
 
     //Each Bit Represents an Enabled Channel/Instrument (limits max number of instruments to 32)
     std::bitset<NUM_Channels> m_channels = 0; //Represents Enabled MIDI Channels
@@ -102,18 +101,12 @@ private:
 
     //Midi Message Events
     void noteOnEvent(uint8_t key, uint8_t velocity, uint8_t channel);
-    void noteOffEvent(uint8_t key, uint8_t velocity);
+    void noteOffEvent(uint8_t key, uint8_t velocity, uint8_t channel);
     void keyPressureEvent(uint8_t key, uint8_t velocity);
     // void controlChangeEvent(uint8_t controller, uint8_t value);  --Implemented in MessageHandler--
     void programChangeEvent(uint8_t program);
     void channelPressureEvent( uint8_t velocity);
     void pitchBendEvent(uint16_t pitchBend, uint8_t channel);
-
-    // Returns the instument ID of the next instrument to be played using the current strategy.
-    uint8_t nextInstrument();
-    
-    // Returns the instrument ID that is playing the given note else NONE(-1) if no instrument found.
-    uint8_t checkForNote(uint8_t note);
     
     // Update the distribution strategy when method changes
     void updateDistributionStrategy();
@@ -122,6 +115,7 @@ private:
     //-------- Helper Functions --------//
 
     /* Returns True if a Distributor Handles the given Instrument. */
-    bool distributorHasInstrument(int instrumentId) const noexcept;
+    bool instrumentEnabled(int instrumentId) const noexcept;
     bool channelEnabled(uint8_t channel);
+    void stopActiveNotes();
 };

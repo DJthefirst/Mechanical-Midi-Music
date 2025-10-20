@@ -6,6 +6,7 @@
  */
 
 #include "MessageRouter.h"
+#include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
 // Constructor
@@ -16,28 +17,6 @@ MessageRouter::MessageRouter(
     : m_networkManager(networkManager)
     , m_midiMsgHandler(midiMsgHandler)
     , m_sysExMsgHandler(sysExMsgHandler) {}
-
-// Process messages from all networks
-void MessageRouter::processMessages()
-{
-    if (!m_networkManager) return;
-
-    // Loop through each network individually
-    const size_t numNetworks = m_networkManager->numberOfNetworks();
-    for (size_t i = 0; i < numNetworks; ++i) {
-        INetwork* const currentNetwork = m_networkManager->getNetwork(i);
-        if (!currentNetwork) continue;
-
-        // Read message from this specific network
-        if (auto message = currentNetwork->readMessage(); message.has_value()) {
-            processMessage(*message, currentNetwork);
-        }
-    }
-    
-    // Check for instrument timeouts (only when configured)
-    DistributorManager::getInstance()->checkInstrumentTimeouts();
-    
-}
 
 // Set callback for device changed notifications
 void MessageRouter::setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback)
@@ -66,19 +45,39 @@ void MessageRouter::broadcastDeviceChanged(INetwork* sourceNetwork)
     }
 }
 
+// Process messages from all networks
+void MessageRouter::processMessages()
+{
+    if (!m_networkManager) return;
+
+    // Loop through each network individually
+    const size_t numNetworks = m_networkManager->numberOfNetworks();
+    for (size_t i = 0; i < numNetworks; ++i) {
+        INetwork* const net = m_networkManager->getNetwork(i);
+        if (!net) continue;
+
+        // Read message from this specific network
+        if (auto message = net->readMessage(); message.has_value()) {
+            processMessage(*message, net);
+        }
+    }
+    
+    // Check for instrument timeouts (only when configured)
+    InstrumentController<InstrumentType>::getInstance()->checkInstrumentTimeouts();
+    
+}
+
 // Process a single message from a specific network
 void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork)
 {
-    // Store current source network for device changed notifications (thread-local)
-    static thread_local INetwork* currentSourceNetwork = nullptr;
-    currentSourceNetwork = sourceNetwork;
+    INetwork* currentSourceNetwork = sourceNetwork;
 
     // Process message based on type - optimize for most common case first
     const uint8_t msgType = message.type();
     if (message.type() == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
         // Handle SysEx messages
         auto response = m_sysExMsgHandler->processSysExMessage(message);
-        if ( response.has_value() && sourceNetwork) {
+        if ( response.has_value() && sourceNetwork != nullptr) {
             sourceNetwork->sendMessage(*response);
         }
         
