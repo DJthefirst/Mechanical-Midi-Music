@@ -43,19 +43,12 @@ void ESP32_SwPWM::resetAll()
 
 void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
-
-    //Use MSB in note to indicate if a note is active.
-    //If Note inactive (MSB == 0) Update active notes, notePeriod and activePeriod
-    
-    //Remove this if statement condition for note overwrite
-    //if((m_activeNotes[instrument] & MSB_BITMASK) == 0){
-        _activeInstruments.set(instrument);
-        m_activeNotes[instrument] = (MSB_BITMASK | note);
-        m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
-        m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
-        m_numActiveNotes++;
-        return;
-    //}
+    _activeInstruments.set(instrument);
+    m_activeNotes[instrument] = (MSB_BITMASK | note);
+    m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
+    m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+    m_numActiveNotes++;
+    return;
 }
 
 void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)

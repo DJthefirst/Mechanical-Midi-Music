@@ -377,8 +377,8 @@ MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(MidiMessage& message
 // Respond with the requested Distributor Method Config
 MidiMessage SysExMsgHandler::sysExGetDistributorMethod(MidiMessage& message)
 {
-    // TODO: Implementation needed - need to add getDistributorMethod to DistributorManager
-    uint8_t method = 0;
+
+    uint8_t method = static_cast<uint8_t>(distributorManager->getDistributorMethod(message.sysExDistributorID()));
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &method, 1);
 }
 
@@ -386,7 +386,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMethod(MidiMessage& message)
 MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(MidiMessage& message)
 {
     // TODO: Implementation needed - need to add getDistributorBoolValues to DistributorManager
-    uint8_t boolValues = 0;
+  uint8_t boolValues = static_cast<uint8_t>(distributorManager->getDistributorBoolValues(message.sysExDistributorID()));
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &boolValues, 1);
 }
 
@@ -417,7 +417,7 @@ void SysExMsgHandler::sysExSetDistributor(MidiMessage& message)
 // Configure the designated Distributor's Channels
 void SysExMsgHandler::sysExSetDistributorChannels(MidiMessage& message)
 {
-    if (!distributorManager) return;
+    if (message.length < SYSEX_HeaderSize + 5) return; // or log error
     
     uint16_t channels = ((message.sysExCmdPayload()[2] << 14) 
                        | (message.sysExCmdPayload()[3] << 7) 
@@ -427,22 +427,20 @@ void SysExMsgHandler::sysExSetDistributorChannels(MidiMessage& message)
 
 // Configure the designated Distributor's Instruments
 void SysExMsgHandler::sysExSetDistributorInstruments(MidiMessage& message)
-{
-    if (!distributorManager) return;
+{   
+    if (message.length < SYSEX_HeaderSize + 7) return; // or log error
     
     uint32_t instruments = ((message.sysExCmdPayload()[2] << 28) 
-                          & (message.sysExCmdPayload()[3] << 21) 
-                          & (message.sysExCmdPayload()[4] << 14) 
-                          & (message.sysExCmdPayload()[5] << 7) 
-                          & (message.sysExCmdPayload()[6] << 0));
+                          | (message.sysExCmdPayload()[3] << 21) 
+                          | (message.sysExCmdPayload()[4] << 14) 
+                          | (message.sysExCmdPayload()[5] << 7) 
+                          | (message.sysExCmdPayload()[6] << 0));
     distributorManager->setDistributorInstruments(message.sysExDistributorID(), instruments);
 }
 
 // Configure the designated Distributor's Distribution Method
 void SysExMsgHandler::sysExSetDistributorMethod(MidiMessage& message)
 {
-    if (!distributorManager) return;
-    
     distributorManager->setDistributorMethod(message.sysExDistributorID(), 
                                              DistributionMethod(message.sysExCmdPayload()[2]));
 }
@@ -450,8 +448,6 @@ void SysExMsgHandler::sysExSetDistributorMethod(MidiMessage& message)
 // Configure the designated Distributor's Boolean Values
 void SysExMsgHandler::sysExSetDistributorBoolValues(MidiMessage& message)
 {
-    if (!distributorManager) return;
-    
     uint8_t distributorBoolByte = message.sysExCmdPayload()[2];
     distributorManager->setDistributorBoolValues(message.sysExDistributorID(), distributorBoolByte);
 }
@@ -459,8 +455,6 @@ void SysExMsgHandler::sysExSetDistributorBoolValues(MidiMessage& message)
 // Configure the designated Distributor's Minimum and Maximum Notes
 void SysExMsgHandler::sysExSetDistributorMinMaxNotes(MidiMessage& message)
 {
-    if (!distributorManager) return;
-    
     distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
                                                    message.sysExCmdPayload()[2],
                                                    message.sysExCmdPayload()[3]);
@@ -469,8 +463,6 @@ void SysExMsgHandler::sysExSetDistributorMinMaxNotes(MidiMessage& message)
 // Configure the designated Distributor's Max number of Polyphonic Notes
 void SysExMsgHandler::sysExSetDistributorNumPolyphonicNotes(MidiMessage& message)
 {
-    if (!distributorManager) return;
-    
     distributorManager->setDistributorNumPolyphonicNotes(message.sysExDistributorID(),
                                                           message.sysExCmdPayload()[2]);
 }

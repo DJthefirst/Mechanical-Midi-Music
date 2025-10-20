@@ -57,9 +57,6 @@ void DistributorManager::addDistributor(uint8_t data[])
 // from a construct or adds a new Distributor
 void DistributorManager::setDistributor(uint8_t data[])
 {
-    // Clear active Notes
-    m_ptrInstrumentController->stopAll();
-    
     // Decode distributor ID from the first two bytes
     uint16_t distributorID = (static_cast<uint16_t>(data[0]) << 7) | static_cast<uint16_t>(data[1]);
     
@@ -98,17 +95,15 @@ void DistributorManager::processCC(MidiMessage& message)
                     m_distributors[i].setDamperPedal(message.CC_Value() > 64);
                     break;
                 case(MidiCC::Mute):
-                    m_ptrInstrumentController->stopAll();
+                    m_distributors[i].stopActiveNotes();
                     break;
                 case(MidiCC::AllNotesOff):
                     m_ptrInstrumentController->stopAll();
                     break;
                 case(MidiCC::Monophonic):
                     m_distributors[i].setPolyphonic(false);
-                    m_ptrInstrumentController->stopAll();
                     break;
                 case(MidiCC::Polyphonic):
-                    m_ptrInstrumentController->stopAll();
                     m_distributors[i].setPolyphonic(true);
                     break;
                 default:
@@ -122,7 +117,6 @@ void DistributorManager::processCC(MidiMessage& message)
 // Removes the designated Distributor from the Distribution Pool
 void DistributorManager::removeDistributor(uint8_t id)
 {
-    m_ptrInstrumentController->stopAll(); // Safety Stops all Playing Notes
     if (m_distributors.size() == 0) return;
     if (id >= m_distributors.size()) id = m_distributors.size();
     m_distributors.erase(m_distributors.begin() + id);

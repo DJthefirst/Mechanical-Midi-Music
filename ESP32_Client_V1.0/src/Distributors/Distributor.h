@@ -117,5 +117,6 @@ private:
     /* Returns True if a Distributor Handles the given Instrument. */
     bool instrumentEnabled(int instrumentId) const noexcept;
     bool channelEnabled(uint8_t channel);
+public:
     void stopActiveNotes();
 };

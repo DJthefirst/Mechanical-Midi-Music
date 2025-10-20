@@ -11,7 +11,6 @@
 
 // Round Robin with Load Balancing Strategy
 void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
-    static uint8_t currentInstrument = 0; // Make currentInstrument static
     uint8_t instrumentLeastActive = NONE;
     
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -25,9 +24,12 @@ void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocit
         if (!m_distributor->getInstruments()[currentInstrument]) continue;
         
         // If there are no active notes this must be the least active Instrument return
+
         uint8_t activeNotes = instrumentController->getNumActiveNotes(currentInstrument);
+        if (activeNotes == 0) {
             instrumentController->playNote(currentInstrument, note, velocity, channel, static_cast<void*>(m_distributor));
-        if (activeNotes == 0) return;
+            return;
+        }
         
         // Set this to Least Active Instrument if instrumentLeastActive is not yet set.
         if (instrumentLeastActive == NONE) {
@@ -38,7 +40,7 @@ void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocit
         // Update the Least Active Instrument if needed.
         if (activeNotes < instrumentController->getNumActiveNotes(instrumentLeastActive)) {
             instrumentLeastActive = currentInstrument;
-        }
+        }   
     }
     if(instrumentLeastActive != NONE) {
         instrumentController->playNote(instrumentLeastActive, note, velocity, channel, static_cast<void*>(m_distributor));
@@ -54,10 +56,10 @@ void RoundRobinBalanceStrategy::stopActiveInstrument(uint8_t note, uint8_t veloc
         --instrument;
 
         // Check if valid instrument
-        if(m_distributor->getInstruments()[i] 
-            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
-            && instrumentController->getLastChannel(i) == channel 
-            && instrumentController->isNoteActive(i, note)) {
+        if(m_distributor->getInstruments()[instrument] 
+            && instrumentController->getLastDistributor(instrument) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(instrument) == channel 
+            && instrumentController->isNoteActive(instrument, note)) {
             instrumentController->stopNote(instrument, velocity);
             return;
         }
@@ -89,10 +91,10 @@ void RoundRobinStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, ui
         --instrument;
 
         // Check if valid instrument
-        if(m_distributor->getInstruments()[i] 
-            && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
-            && instrumentController->getLastChannel(i) == channel 
-            && instrumentController->isNoteActive(i, note)) {
+        if(m_distributor->getInstruments()[instrument] 
+            && instrumentController->getLastDistributor(instrument) == static_cast<void*>(m_distributor)
+            && instrumentController->getLastChannel(instrument) == channel 
+            && instrumentController->isNoteActive(instrument, note)) {
             instrumentController->stopNote(instrument, velocity);
             return;
         }
@@ -204,61 +206,3 @@ void StraightThroughStrategy::stopActiveInstrument(uint8_t note, uint8_t velocit
         instrumentController->stopNote(channel, velocity);
     }
 }
-
-// //Returns the instument which the first note is played or NONE.
-// //*Note this function is optimised for nonpolyphonic playback and the Distribution method.
-// uint8_t Distributor::checkForNote(uint8_t note)
-// {
-//     uint8_t instrument = m_currentInstrument;
-
-//     switch(m_distributionMethod){
-
-//     // Check for note being played on the instrument in the current channel position
-//     case(DistributionMethod::StraightThrough):
-//         if((*m_ptrInstrumentController).isNoteActive(m_currentChannel, note)){
-//             return m_currentChannel;
-//         }
-//         break;
-
-//     // Check for note being played on the instrument iterating backwards through all instruments
-//     case(DistributionMethod::RoundRobin):
-//     case(DistributionMethod::RoundRobinBalance):
-//         // Iterate through each instrument in reverse
-//         for(int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-//             // Decrement instrument with underflow protection
-//             if(instrument == 0) instrument = HardwareConfig::MAX_NUM_INSTRUMENTS;
-//             --instrument;
-
-//             // Check if valid instrument
-//             if(!distributorHasInstrument(instrument)) continue;
-//             if(m_ptrinstrumentController->isNoteActive(instrument, note)) return instrument;
-//         }
-//         break;
-
-//     // Check for note being played on the instrument starting at instrument 0
-//     case(DistributionMethod::Ascending):
-//         // Iterate over enabled instruments
-//         {
-//             for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-//                 if(m_instruments[i] && m_ptrinstrumentController->isNoteActive(i, note)){
-//                     return i;
-//                 }
-//             }
-//         }
-//         break;
-
-//     // Check for note being played on the instrument starting at the last instrument iterating in reverse
-//     case(DistributionMethod::Descending):
-//         for(int i = (HardwareConfig::MAX_NUM_INSTRUMENTS - 1); i >= 0; --i){
-//             // Check if valid instrument
-//             if(!distributorHasInstrument(i)) continue;
-//             if(m_ptrinstrumentController->isNoteActive(i, note)) return i;
-//         }
-//         break;
-
-//     default:
-//         // TODO: Handle error
-//         break;
-//     }
-//     return NONE;
-// }

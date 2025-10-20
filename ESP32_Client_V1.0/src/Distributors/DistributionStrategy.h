@@ -30,7 +30,7 @@ protected:
 
 public:
     DistributionStrategy(Distributor* distributor) : m_distributor(distributor) {};
-    virtual ~DistributionStrategy() {};
+    virtual ~DistributionStrategy() = default;
 
     virtual void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     virtual void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) = 0;

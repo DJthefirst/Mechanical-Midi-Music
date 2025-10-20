@@ -62,8 +62,6 @@ public:
  * Always chooses the highest-numbered available instrument with the fewest active notes
  */
 class DescendingStrategy : public DistributionStrategy {
-private:
-    uint8_t m_currentInstrument = 0;
 public:
     DescendingStrategy(Distributor* distributor) : DistributionStrategy(distributor) {}
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;

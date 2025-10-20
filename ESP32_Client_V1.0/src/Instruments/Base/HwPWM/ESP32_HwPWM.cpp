@@ -53,7 +53,7 @@ void ESP32_HwPWM::setFrequency(uint8_t instrument, double frequency)
     if (frequency > 20000.0) frequency = 20000.0;
     
     // Cache last frequency per instrument to avoid unnecessary updates
-    static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency = {};
+    lastFrequency.fill(0);
     
     // Only update if frequency changed significantly (>0.5Hz difference for better precision)
     if (abs(lastFrequency[instrument] - frequency) > 0.5) {
@@ -108,10 +108,6 @@ void ESP32_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     }
 
     setFrequency(instrument, m_activeFrequency[instrument]);
-    lastFrequency[instrument] = m_activeFrequency[instrument];
-
-
-
 }
 
 void ESP32_HwPWM::stopNote(uint8_t instrument, uint8_t velocity)
@@ -181,8 +177,7 @@ void ESP32_HwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channe
     // Direct frequency update using optimized LedC call
     if (abs(lastFrequency[instrument] - bentFreq) > 0.75) {
         m_activeFrequency[instrument] = bentFreq;
-        setFrequency(instrument, m_activeFrequency[instrument]);
-        lastFrequency[instrument] = bentFreq;
+        setFrequency(instrument, bentFreq);
     }
 }
 

@@ -24,7 +24,10 @@ Distributor::Distributor()
 }
 
 Distributor::~Distributor(){
-    stopActiveNotes();
+    // Make sure to stop any active notes when the distributor is destroyed
+    if (m_instrumentController) {
+        stopActiveNotes();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,11 +86,16 @@ void Distributor::noteOffEvent(uint8_t note, uint8_t velocity, uint8_t channel)
 // Get next instrument based on distribution method and play note
 void Distributor::noteOnEvent(uint8_t note, uint8_t velocity, uint8_t channel)
 {
+
+    if (note < m_minNote || note > m_maxNote) {
+        return;
+    }
+
     // Check if note has 0 velocity representing a note off event
     if(velocity == 0){
-        noteOffEvent(note, velocity, channel);
+        m_distributionStrategy->stopActiveInstrument(note, velocity, channel);
     }else{
-        noteOnEvent(note, velocity, channel);
+        m_distributionStrategy->playNextInstrument(note, velocity, channel);
     }
 }
 
@@ -272,11 +280,13 @@ void Distributor::setMuted(bool muted){
 
 //Configures Distributor Damper Pedal
 void Distributor::setDamperPedal(bool damper){
+    stopActiveNotes();
     m_damperPedal = damper;
 }
 
 //Configures Distributor Polphonic Notes
 void Distributor::setPolyphonic(bool polyphonic){
+    stopActiveNotes();
     m_polyphonic = polyphonic;
 }
 
