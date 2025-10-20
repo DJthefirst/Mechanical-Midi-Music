@@ -73,7 +73,7 @@ public:
     /* Determines which instruments the message is for */
     void processMessage(MidiMessage message);
 
-    /* Returns a Byte array representing this Distributor */
+    /* Returns a Byte array representing this Distributor in 7-bit MIDI format */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
     bool getMuted() const;

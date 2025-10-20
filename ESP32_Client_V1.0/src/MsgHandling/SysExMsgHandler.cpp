@@ -337,10 +337,13 @@ MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(MidiMessage& message)
         return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
     }
     
+    // Get distributor in 7-bit MIDI format
     auto distributorBytes = distributorManager->getDistributorSerial(message.sysExDistributorID());
+    
     // Set Return Distributor ID from message
     distributorBytes[0] = message.sysExCmdPayload()[0];
     distributorBytes[1] = message.sysExCmdPayload()[1];
+    
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), distributorBytes.data(), distributorBytes.size());
 }
 
@@ -348,30 +351,26 @@ MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(MidiMessage& message)
 MidiMessage SysExMsgHandler::sysExGetDistributorChannels(MidiMessage& message)
 {
     if (!distributorManager) {
-        const uint8_t bytesToSend[2] = {0, 0};
-        return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 2);
+        const uint8_t bytesToSend[3] = {0, 0, 0};
+        return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 3);
     }
     
-    auto channels = Utility::bitsetToBytes(distributorManager->getDistributorChannels(message.sysExDistributorID()));
-    const uint8_t bytesToSend[2] = {channels[1], 
-                                   channels[0]};
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 2);
+    // Encode 16-bit channels to 3 MIDI 7-bit bytes
+    auto channelsMidi = Utility::encodeTo7Bit(distributorManager->getDistributorChannels(message.sysExDistributorID()));
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), channelsMidi.data(), channelsMidi.size());
 }
 
 // Respond with the requested Distributor Instrument Config
 MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(MidiMessage& message)
 {
     if (!distributorManager) {
-        const uint8_t bytesToSend[4] = {0, 0, 0, 0};
-        return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 4);
+        const uint8_t bytesToSend[5] = {0, 0, 0, 0, 0};
+        return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 5);
     }
     
-    auto instruments = Utility::bitsetToBytes(distributorManager->getDistributorInstruments(message.sysExDistributorID()));
-    const uint8_t bytesToSend[4] = {instruments[3], 
-                                   instruments[2],
-                                   instruments[1],
-                                   instruments[0]};
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 4);
+    // Encode 32-bit instruments to 5 MIDI 7-bit bytes
+    auto instrumentsMidi = Utility::encodeTo7Bit(distributorManager->getDistributorInstruments(message.sysExDistributorID()));
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), instrumentsMidi.data(), instrumentsMidi.size());
 }
 
 // Respond with the requested Distributor Method Config
@@ -410,6 +409,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(MidiMessage& 
 void SysExMsgHandler::sysExSetDistributor(MidiMessage& message)
 {
     if (distributorManager) {
+        // Data is already in 7-bit MIDI format, use directly
         distributorManager->setDistributor(message.sysExCmdPayload());
     }
 }
@@ -419,10 +419,9 @@ void SysExMsgHandler::sysExSetDistributorChannels(MidiMessage& message)
 {
     if (message.length < SYSEX_HeaderSize + 5) return; // or log error
     
-    uint16_t channels = ((message.sysExCmdPayload()[2] << 14) 
-                       | (message.sysExCmdPayload()[3] << 7) 
-                       | (message.sysExCmdPayload()[4] << 0));
-    distributorManager->setDistributorChannels(message.sysExDistributorID(), channels);
+    // Decode from 3 MIDI 7-bit bytes
+    auto channels = Utility::decodeFrom7Bit<NUM_Channels>(&message.sysExCmdPayload()[2]);
+    distributorManager->setDistributorChannels(message.sysExDistributorID(), channels.to_ulong());
 }
 
 // Configure the designated Distributor's Instruments
@@ -430,12 +429,9 @@ void SysExMsgHandler::sysExSetDistributorInstruments(MidiMessage& message)
 {   
     if (message.length < SYSEX_HeaderSize + 7) return; // or log error
     
-    uint32_t instruments = ((message.sysExCmdPayload()[2] << 28) 
-                          | (message.sysExCmdPayload()[3] << 21) 
-                          | (message.sysExCmdPayload()[4] << 14) 
-                          | (message.sysExCmdPayload()[5] << 7) 
-                          | (message.sysExCmdPayload()[6] << 0));
-    distributorManager->setDistributorInstruments(message.sysExDistributorID(), instruments);
+    // Decode from 5 MIDI 7-bit bytes
+    auto instruments = Utility::decodeFrom7Bit<NUM_Instruments>(&message.sysExCmdPayload()[2]);
+    distributorManager->setDistributorInstruments(message.sysExDistributorID(), instruments.to_ulong());
 }
 
 // Configure the designated Distributor's Distribution Method

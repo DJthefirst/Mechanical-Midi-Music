@@ -175,7 +175,7 @@ void Distributor::stopActiveNotes() {
 // Getters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Returns Distributor construct without ID
+//Returns Distributor construct without ID (7-bit MIDI format for all uses)
 std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
     std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj = {}; // Initialize all bytes to 0
@@ -186,19 +186,24 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     if(this->m_polyphonic)    distributorBoolByte |= DISTRIBUTOR_BOOL_POLYPHONIC;
     if(this->m_noteOverwrite) distributorBoolByte |= DISTRIBUTOR_BOOL_NOTEOVERWRITE;
 
-
-    //Cast Distributor Construct to uint8_t Array every MSB = 0 as per the Midi Protocal
-    // (https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing)
+    // Store in 7-bit MIDI format
     distributorObj[0] = 0; //Distributor ID MSB Generated in MsgHandler
     distributorObj[1] = 0; //Distributor ID LSB Generated in MsgHandler
-    distributorObj[2] = (Utility::bitsetToBytes(m_channels)[2] & 0x03);
-    distributorObj[3] = (Utility::bitsetToBytes(m_channels)[1] & 0x7F);
-    distributorObj[4] = (Utility::bitsetToBytes(m_channels)[0] & 0x7F);
-    distributorObj[5] = (Utility::bitsetToBytes(m_instruments)[4] & 0x0F);
-    distributorObj[6] = (Utility::bitsetToBytes(m_instruments)[3] & 0x7F);
-    distributorObj[7] = (Utility::bitsetToBytes(m_instruments)[2] & 0x7F);
-    distributorObj[8] = (Utility::bitsetToBytes(m_instruments)[1] & 0x7F);
-    distributorObj[9] = (Utility::bitsetToBytes(m_instruments)[0] & 0x7F);
+    
+    // Channels: 16 bits encoded in 3 MIDI 7-bit bytes
+    auto channelsMidi = Utility::encodeTo7Bit(m_channels);
+    distributorObj[2] = channelsMidi[0];
+    distributorObj[3] = channelsMidi[1];
+    distributorObj[4] = channelsMidi[2];
+    
+    // Instruments: 32 bits encoded in 5 MIDI 7-bit bytes
+    auto instrumentsMidi = Utility::encodeTo7Bit(m_instruments);
+    distributorObj[5] = instrumentsMidi[0];
+    distributorObj[6] = instrumentsMidi[1];
+    distributorObj[7] = instrumentsMidi[2];
+    distributorObj[8] = instrumentsMidi[3];
+    distributorObj[9] = instrumentsMidi[4];
+    
     distributorObj[10] = static_cast<uint8_t>(m_distributionMethod) & 0x7F;
     distributorObj[11] = distributorBoolByte & 0x7F;
     distributorObj[12] = m_minNote & 0x7F;
@@ -233,31 +238,25 @@ void Distributor::distributeMessage(MidiMessage& message) {
     processMessage(message);
 }
 
-//Configures Distributor from construct
+//Configures Distributor from construct (expects 7-bit MIDI format)
 void Distributor::setDistributor(uint8_t data[]){
-    // Decode Distributor Construct
-    uint16_t channels = 
-          (data[2] << 14)
-        | (data[3] << 7) 
-        | (data[4] << 0);
-    uint32_t instruments = 
-          (data[5] << 28)
-        | (data[6] << 21) 
-        | (data[7] << 14)
-        | (data[8] << 7)
-        | (data[9] << 0);
-    DistributionMethod distribMethod = static_cast<DistributionMethod>(data[10]);
-
-    m_channels = std::bitset<NUM_Channels>(channels);
-    m_instruments = std::bitset<NUM_Instruments>(instruments);
-    m_distributionMethod = distribMethod;
+    // Decode Distributor Construct from 7-bit MIDI format
+    
+    // Channels: Decode from 3 MIDI 7-bit bytes (bytes 2-4)
+    m_channels = Utility::decodeFrom7Bit<NUM_Channels>(&data[2]);
+    
+    // Instruments: Decode from 5 MIDI 7-bit bytes (bytes 5-9)
+    m_instruments = Utility::decodeFrom7Bit<NUM_Instruments>(&data[5]);
+    
+    // Other fields
+    m_distributionMethod = static_cast<DistributionMethod>(data[10]);
     m_muted = (data[11] & DISTRIBUTOR_BOOL_MUTED) != 0;
     m_damperPedal = (data[11] & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0;
     m_polyphonic = (data[11] & DISTRIBUTOR_BOOL_POLYPHONIC) != 0;
     m_noteOverwrite = (data[11] & DISTRIBUTOR_BOOL_NOTEOVERWRITE) != 0;
     m_minNote = data[12];
     m_maxNote = data[13];
-    m_numPolyphonicNotes = (data[14]);
+    m_numPolyphonicNotes = data[14];
 }
 
 //Configures Distributor Distribution Method
