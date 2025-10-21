@@ -24,12 +24,13 @@ class Distributor;
 class DistributionStrategy {
 protected:
     Distributor* m_distributor;
-    std::shared_ptr<InstrumentControllerBase> instrumentController = InstrumentController<InstrumentType>::getInstance();
+    std::shared_ptr<InstrumentControllerBase> instrumentController;
 
     uint8_t currentInstrument = 0;
 
 public:
-    DistributionStrategy(Distributor* distributor) : m_distributor(distributor) {};
+    DistributionStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
+        : m_distributor(distributor), instrumentController(instrController) {};
     virtual ~DistributionStrategy() = default;
 
     virtual void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) = 0;

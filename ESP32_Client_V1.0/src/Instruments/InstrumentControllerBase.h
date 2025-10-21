@@ -50,6 +50,9 @@ public:
     virtual uint8_t getNumActiveNotes(uint8_t instrument) = 0;
     virtual bool isNoteActive(uint8_t instrument, uint8_t note) = 0;
     
+    // Get the instrument type at runtime
+    virtual Instrument getInstrumentType() const { return Type; }
+    
     //Timeout tracking functions
     virtual void checkInstrumentTimeouts();
 

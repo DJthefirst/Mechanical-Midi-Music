@@ -33,6 +33,10 @@ using std::int8_t;
     #undef STRINGIFY
     #undef INCLUDE_FILE
 
+    #ifndef INSTRUMENT_TYPE_VALUE
+        #define INSTRUMENT_TYPE_VALUE "Instruments/Base/SwPWM/SwPWM.h"
+    #endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform Detection
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +110,7 @@ namespace HardwareConfig {
 }
 
 namespace DeviceConfig {
+    
      // Device identity
     constexpr const char* DEVICE_NAME_STR = DEVICE_NAME;
     constexpr uint16_t DEVICE_ID_VAL = DEVICE_ID;

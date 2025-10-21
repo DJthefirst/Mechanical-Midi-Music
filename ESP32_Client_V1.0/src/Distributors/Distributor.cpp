@@ -16,9 +16,9 @@
 #include "../Instruments/InstrumentController.h"
 #include "../Utility/Utility.h"
 
-Distributor::Distributor()
+Distributor::Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController)
+    : m_instrumentController(instrumentController)
 {
-    m_instrumentController = InstrumentController<InstrumentType>::getInstance();
     // Initialize with default strategy
     updateDistributionStrategy();
 }
@@ -331,23 +331,23 @@ void Distributor::updateDistributionStrategy(){
     stopActiveNotes();
     switch(m_distributionMethod) {
         case DistributionMethod::RoundRobinBalance:
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, m_instrumentController);
             break;
         case DistributionMethod::RoundRobin:
-            m_distributionStrategy = std::make_unique<RoundRobinStrategy>(this);
+            m_distributionStrategy = std::make_unique<RoundRobinStrategy>(this, m_instrumentController);
             break;
         case DistributionMethod::Ascending:
-            m_distributionStrategy = std::make_unique<AscendingStrategy>(this);
+            m_distributionStrategy = std::make_unique<AscendingStrategy>(this, m_instrumentController);
             break;
         case DistributionMethod::Descending:
-            m_distributionStrategy = std::make_unique<DescendingStrategy>(this);
+            m_distributionStrategy = std::make_unique<DescendingStrategy>(this, m_instrumentController);
             break;
         case DistributionMethod::StraightThrough:
-            m_distributionStrategy = std::make_unique<StraightThroughStrategy>(this);
+            m_distributionStrategy = std::make_unique<StraightThroughStrategy>(this, m_instrumentController);
             break;
         default:
             // Fallback to RoundRobinBalance as default
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this);
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, m_instrumentController);
             break;
     }
 }

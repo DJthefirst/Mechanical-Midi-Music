@@ -61,7 +61,7 @@ public:
 
     friend class DistributionStrategy;
 
-   Distributor();
+    Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController);
     ~Distributor();
 
     // Disable copy (unique_ptr is not copyable) and enable move semantics

@@ -13,10 +13,12 @@
 MessageRouter::MessageRouter(
     std::shared_ptr<NetworkManager> networkManager,
     std::shared_ptr<MidiMsgHandler> midiMsgHandler,
-    std::shared_ptr<SysExMsgHandler> sysExMsgHandler) 
+    std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
+    std::shared_ptr<InstrumentControllerBase> instrumentController) 
     : m_networkManager(networkManager)
     , m_midiMsgHandler(midiMsgHandler)
-    , m_sysExMsgHandler(sysExMsgHandler) {}
+    , m_sysExMsgHandler(sysExMsgHandler)
+    , m_instrumentController(instrumentController) {}
 
 // Set callback for device changed notifications
 void MessageRouter::setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback)
@@ -63,7 +65,9 @@ void MessageRouter::processMessages()
     }
     
     // Check for instrument timeouts (only when configured)
-    InstrumentController<InstrumentType>::getInstance()->checkInstrumentTimeouts();
+    if (m_instrumentController) {
+        m_instrumentController->checkInstrumentTimeouts();
+    }
     
 }
 

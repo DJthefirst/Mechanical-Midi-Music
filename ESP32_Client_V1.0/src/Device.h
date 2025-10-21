@@ -28,6 +28,7 @@ namespace Device{
     inline uint16_t ID = DeviceConfig::DEVICE_ID_VAL;
     inline std::string Name = "New Device";
     inline bool OmniMode = false;
+    inline Instrument InstrumentType = Instrument::None;  // Runtime instrument type
 
     // Device information functions
     static uint8_t GetDeviceBoolean(){
@@ -46,7 +47,7 @@ namespace Device{
         deviceObj[2] = GetDeviceBoolean();
         deviceObj[3] = HardwareConfig::NUM_INSTRUMENTS;
         deviceObj[4] = HardwareConfig::NUM_SUBINSTRUMENTS;
-        deviceObj[5] = static_cast<uint8_t>(InstrumentType::Type);
+        deviceObj[5] = static_cast<uint8_t>(InstrumentType);
         deviceObj[6] = static_cast<uint8_t>(PLATFORM_TYPE);
         deviceObj[7] = DeviceConfig::MIN_NOTE;
         deviceObj[8] = DeviceConfig::MAX_NOTE;

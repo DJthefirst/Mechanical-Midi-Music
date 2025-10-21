@@ -1,13 +1,11 @@
-#include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
+#include "Instruments/Base/StepSwPWM/ESP32_StepSwPWM.h"
 #include "Instruments/Utility/InterruptTimer.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Config.h"
 #include "Arduino.h"
 #include <bitset>
 
-
-
-ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
+ESP32_StepSwPWM::ESP32_StepSwPWM() : ESP32_SwPWM()
 {
     //Setup pins
     for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
@@ -23,17 +21,17 @@ ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
 }
 
-void ESP32_SwPWM::reset(uint8_t instrument)
+void ESP32_StepSwPWM::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ESP32_SwPWM::resetAll()
+void ESP32_StepSwPWM::resetAll()
 {
     stopAll();
 }
 
-void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void ESP32_StepSwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -50,7 +48,7 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     return;
 }
 
-void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
+void ESP32_StepSwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -70,7 +68,7 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     return;
 }
 
-void ESP32_SwPWM::stopAll(){
+void ESP32_StepSwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     _lastDistributor.fill(nullptr);
@@ -94,15 +92,12 @@ void ESP32_SwPWM::stopAll(){
 /*
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
+*/
 
-Additionally, the ICACHE_RAM_ATTR helps avoid crashes with WiFi libraries, but may increase speed generally anyway
- */
-// #pragma GCC push_options (Legacy)
-// #pragma GCC optimize("Ofast") // Required to unroll this loop, but useful to try to keep this speedy (Legacy)
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
+void ICACHE_RAM_ATTR ESP32_StepSwPWM::Tick()
 #else
-void ESP32_SwPWM::tick()
+void ESP32_StepSwPWM::tick()
 #endif
 {
     // Go through every Instrument
@@ -124,35 +119,13 @@ void ESP32_SwPWM::tick()
 
 
 #ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ESP32_SwPWM::togglePin(uint8_t instrument)
+void ICACHE_RAM_ATTR ESP32_StepSwPWM::togglePin(uint8_t instrument)
 #else
-void ESP32_SwPWM::togglePin(uint8_t instrument)
+void ESP32_StepSwPWM::togglePin(uint8_t instrument)
 #endif
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
     digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
         
-}
-// #pragma GCC pop_options (Legacy)
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Getters and Setters
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-uint8_t ESP32_SwPWM::getNumActiveNotes(uint8_t instrument)
-{
-    return (m_activeNotes[instrument] != 0) ? 1 : 0;
-}
- 
-bool ESP32_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
-{
-    //Mask lower 7bits and return true if the instument is playing the respective note.
-    return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
-}
-
-void ESP32_SwPWM::setPitchBend(uint8_t instrument, uint16_t bend, uint8_t channel){
-    m_pitchBend[channel] = bend; 
-    if(m_notePeriod[instrument] == 0) return;
-    m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(m_activeNotes[instrument], bend);
 }

@@ -11,15 +11,19 @@
 #include <algorithm>
 
 // Private constructor
-DistributorManager::DistributorManager(){
-    m_ptrInstrumentController = InstrumentController<InstrumentType>::getInstance();
+DistributorManager::DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController)
+    : m_ptrInstrumentController(instrumentController) {
 }
 
 // Singleton instance getter
-std::shared_ptr<DistributorManager> DistributorManager::getInstance() {
+std::shared_ptr<DistributorManager> DistributorManager::getInstance(std::shared_ptr<InstrumentControllerBase> instrumentController) {
     static std::shared_ptr<DistributorManager> instance = nullptr;
     if (!instance) {
-        instance = std::shared_ptr<DistributorManager>(new DistributorManager());
+        if (!instrumentController) {
+            // Error: First call must provide instrumentController
+            return nullptr;
+        }
+        instance = std::shared_ptr<DistributorManager>(new DistributorManager(instrumentController));
     }
     return instance;
 }
@@ -31,7 +35,7 @@ std::shared_ptr<DistributorManager> DistributorManager::getInstance() {
 // Create a default Distributor and add it to the Distribution Pool
 void DistributorManager::addDistributor()
 {
-    m_distributors.emplace_back();
+    m_distributors.emplace_back(m_ptrInstrumentController);
     localStorageAddDistributor();
     broadcastDistributorChanged();
 }
@@ -47,7 +51,7 @@ void DistributorManager::addDistributor(Distributor&& distributor)
 // Create a Distributor from a Construct and add it to the Distribution Pool
 void DistributorManager::addDistributor(uint8_t data[])
 {
-    m_distributors.emplace_back();
+    m_distributors.emplace_back(m_ptrInstrumentController);
     m_distributors.back().setDistributor(data);
     localStorageAddDistributor();
     broadcastDistributorChanged();

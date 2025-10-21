@@ -14,7 +14,7 @@
  */
 class ArduinoMega_HwPWM : public InstrumentControllerBase {
 public:
-    static constexpr Instrument Type = Instrument::PWM;
+    static constexpr Instrument Type = Instrument::HW_PWM;
 private:
     // LedC channel management (arrays moved to .cpp file due to Config dependency)
     

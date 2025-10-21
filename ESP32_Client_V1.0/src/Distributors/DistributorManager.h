@@ -36,14 +36,15 @@ private:
     /**
      * Private constructor for singleton pattern
      */
-    DistributorManager();
+    DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController);
 
 public:
     /**
      * Get singleton instance
+     * @param instrumentController Shared pointer to instrument controller (required on first call)
      * @return Shared pointer to the singleton instance
      */
-    static std::shared_ptr<DistributorManager> getInstance();
+    static std::shared_ptr<DistributorManager> getInstance(std::shared_ptr<InstrumentControllerBase> instrumentController = nullptr);
     
     // Distributor management
     void addDistributor(); 

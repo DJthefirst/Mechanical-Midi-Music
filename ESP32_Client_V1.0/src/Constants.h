@@ -131,10 +131,13 @@ namespace SysEx {
 enum class Instrument
 { 
     None = 0,
-    PWM = 1,
+    SW_PWM = 1,
+    HW_PWM = 2,
+    StepHW_PWM,
+    StepSW_PWM,
     ShiftRegister,
-    StepperMotor,
-    FloppyDrive
+    StepperMotor = 0x10,
+    FloppyDrive = 0x11
 };
 
 enum class Platform

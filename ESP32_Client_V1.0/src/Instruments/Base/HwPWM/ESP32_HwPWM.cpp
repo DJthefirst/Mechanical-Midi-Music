@@ -5,17 +5,13 @@
 #include "Config.h"
 #include <cmath>
 
-// [Instrument][ActiveNote] MSB is set if note is active, the 7 LSBs are the note value 
-static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeNotes;
-static uint8_t m_numActiveNotes;
-
-// Instrument attributes for tracking active notes
-static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency; // Active note (MSB is set if note is active)
-static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteFrequency;  // Base note frequency
-static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeFrequency; // Note played with bend
-
-// LedC channel management (moved from header due to Config dependency)
-static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> m_ledcChannels;
+// Static member definitions
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeNotes = {};
+uint8_t ESP32_HwPWM::m_numActiveNotes = 0;
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::lastFrequency = {};
+std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_noteFrequency = {};
+std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeFrequency = {};
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_ledcChannels = {};
 
 ESP32_HwPWM::ESP32_HwPWM() : InstrumentControllerBase()
 {

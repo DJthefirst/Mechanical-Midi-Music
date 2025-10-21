@@ -24,6 +24,7 @@ private:
     std::shared_ptr<NetworkManager> m_networkManager;
     std::shared_ptr<MidiMsgHandler> m_midiMsgHandler;
     std::shared_ptr<SysExMsgHandler> m_sysExMsgHandler;
+    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
     
     std::function<void(const MidiMessage&, INetwork*)> m_deviceChangedCallback;
 
@@ -33,10 +34,12 @@ public:
      * @param networkManager Shared pointer to network manager
      * @param midiMsgHandler Shared pointer to MIDI message handler
      * @param sysExMsgHandler Shared pointer to SysEx message handler
+     * @param instrumentController Shared pointer to instrument controller
      */
     MessageRouter(std::shared_ptr<NetworkManager> networkManager,
                   std::shared_ptr<MidiMsgHandler> midiMsgHandler,
-                  std::shared_ptr<SysExMsgHandler> sysExMsgHandler);
+                  std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
+                  std::shared_ptr<InstrumentControllerBase> instrumentController);
 
     void setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback);
 

@@ -14,8 +14,6 @@
     #define DEVICE_NAME "ESP32 PWM"
     #define DEVICE_ID 0x0003
 
-//=== Optional Settings ===
-
     //Absolute max number of Polyphonic notes is 16
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
@@ -29,8 +27,14 @@
     //Absolute Highest Note Max=127
     constexpr uint8_t MAX_MIDI_NOTE = 127;
 
-//=== Hardware Configuration ===
-    constexpr std::array<uint8_t,10> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4,16,13};
+//---------- Hardware Configuration ----------
+
+    constexpr std::array<uint8_t, 8> INSTRUMENT_PINS = {2, 18, 21, 23, 33, 26, 13}; // ESP32 Enable pins
+    constexpr std::array<uint8_t, 8> STEP_PINS =       {4, 19, 22, 32, 25, 27, 16}; // ESP32 Direction pins
+
+//---------- Uncomment Your Selected Instrument Type ----------
+
+    #define INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/StepperSynth.h"
 
 //---------- Uncomment Your Selected COM Types ----------
  
@@ -43,12 +47,6 @@
         #define MMM_NETWORK_UDP_IP 192,168,1,100
         #define MMM_NETWORK_UDP_PORT 5004
     #endif
-
-
- 
-//---------- Uncomment Your Selected Instrument Type ----------
-    #include "Instruments/DJthefirst/StepperSynth.h"
-    using InstrumentType = StepperSynth;
 
 //---------- Uncomment Your Desired Extras ----------
 

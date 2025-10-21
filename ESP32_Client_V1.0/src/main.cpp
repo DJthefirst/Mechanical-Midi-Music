@@ -9,15 +9,22 @@
 // See Device.h and the Configs folder for device setup.
 // Configuration is selected in platformio.ini build_flags section
 
+
 #include <Arduino.h>
 #include "Config.h"
-#include "Device.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MsgHandling/MessageRouter.h"
 #include "Distributors/DistributorManager.h"
 #include "MsgHandling/SysExMsgHandler.h"
 #include "MsgHandling/MidiMsgHandler.h"
+
+//Include the selected Instrument Type
+#define STRINGIFY(x) #x
+#define INCLUDE_FILE(x) STRINGIFY(x)
+  #include INSTRUMENT_TYPE_VALUE
+#undef STRINGIFY
+#undef INCLUDE_FILE
 
 // Optional features
 #ifdef EXTRA_LOCAL_STORAGE
@@ -37,14 +44,17 @@ void setup() {
   // Device::validateConfiguration();
 
   // Initialize core components with proper dependency injection
-  instrumentController = InstrumentController<InstrumentType>::getInstance();
-  distributorManager = DistributorManager::getInstance(); 
+  instrumentController = InstrumentController<INSTRUMENT_TYPE>::getInstance();
+  Device::InstrumentType = instrumentController->getInstrumentType();
+
+  distributorManager = DistributorManager::getInstance(instrumentController); 
+
   sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
   midiMsgHandler = std::make_shared<MidiMsgHandler>(distributorManager, sysExHandler, instrumentController);
 
   // Initialize network and message router
   network = CreateNetwork();
-  messageRouter = std::make_shared<MessageRouter>(network, midiMsgHandler, sysExHandler);
+  messageRouter = std::make_shared<MessageRouter>(network, midiMsgHandler, sysExHandler, instrumentController);
   
   // Set device changed callbacks to use the router's broadcast function
   sysExHandler->setDeviceChangedCallback([]() {
