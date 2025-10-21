@@ -19,7 +19,7 @@ using std::int8_t;
   
     #ifndef DEVICE_CONFIG
         // Default device config used when no selection is provided by the application
-        #define DEVICE_CONFIG "Configs/ESP32_PWM.h"
+        #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
     #endif
 
     // Include the selected config header
@@ -64,8 +64,8 @@ namespace HardwareConfig {
     constexpr auto PINS = INSTRUMENT_PINS;
 
     // Optional settings with defaults
-    #ifdef TIMER_RESOLUTION
-        constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_VALUE;
+    #ifdef TIMER_RESOLUTION_US_VALUE
+        constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_US_VALUE;
     #else
         constexpr uint32_t TIMER_RESOLUTION = 40;  // Default 40 microseconds
     #endif
@@ -73,7 +73,7 @@ namespace HardwareConfig {
     #ifdef INSTRUMENT_TIMEOUT_MS_VALUE
         constexpr uint32_t INSTRUMENT_TIMEOUT_MS = INSTRUMENT_TIMEOUT_MS_VALUE;
     #else
-        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = 0;  // Default 0 = infinite timeout (no timeout)
+        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = 15000;  // Default 0 = infinite timeout (no timeout)
     #endif
 
     #ifdef NUM_INSTRUMENTS_VALUE

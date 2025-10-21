@@ -20,6 +20,7 @@ protected:
     std::array<void*, NUM_Instruments> _lastDistributor = {nullptr};
     std::array<uint8_t, NUM_Instruments> _lastChannel = {NONE};
     std::bitset<NUM_Instruments> _activeInstruments = 0;
+    std::array<uint32_t, NUM_Instruments> _noteStartTime = {0}; // When each note started (for timeout and longest-playing tracking)
 
     //Local CC Effect Atributes
     uint16_t _ModulationWheel = 0;
@@ -35,7 +36,7 @@ public:
     virtual void resetAll() = 0;
     virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     // Overloaded version with distributor tracking
-    virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, void* distributor) {
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, void* distributor) {
         // Default implementation just calls the base method
         playNote(instrument, note, velocity, channel);
         // Set the distributor that sent this note
@@ -85,5 +86,12 @@ public:
             _lastDistributor[instrument] = distributor;
             _lastChannel[instrument] = channel;
         }
+    }
+
+    uint32_t getNoteStartTime(uint8_t instrument) {
+        if (instrument < NUM_Instruments) {
+            return _noteStartTime[instrument];
+        }
+        return 0;
     }
 };

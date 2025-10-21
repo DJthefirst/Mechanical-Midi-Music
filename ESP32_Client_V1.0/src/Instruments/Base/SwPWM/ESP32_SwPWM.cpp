@@ -43,24 +43,38 @@ void ESP32_SwPWM::resetAll()
 
 void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    // Only increment counter if this instrument wasn't already playing a note
+    bool wasActive = (m_activeNotes[instrument] != 0);
+    
     _activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
     m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
-    m_numActiveNotes++;
+    _noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
+    
+    if (!wasActive) {
+        m_numActiveNotes++;
+    }
     return;
 }
 
 void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 {
+    // Only decrement if there was actually an active note
+    bool wasActive = (m_activeNotes[instrument] != 0);
+    
     _activeInstruments.reset(instrument);
     _lastDistributor[instrument] = nullptr;
     _lastChannel[instrument] = NONE;
+    _noteStartTime[instrument] = 0;
     m_activeNotes[instrument] = 0;
     m_notePeriod[instrument] = 0;
     m_activePeriod[instrument] = 0;
     digitalWrite(HardwareConfig::PINS[instrument], 0);
-    m_numActiveNotes--;
+    
+    if (wasActive && m_numActiveNotes > 0) {
+        m_numActiveNotes--;
+    }
     return;
 }
 
@@ -69,6 +83,7 @@ void ESP32_SwPWM::stopAll(){
     m_numActiveNotes = 0;
     _lastDistributor.fill(nullptr);
     _lastChannel.fill(NONE);
+    _noteStartTime.fill(0);
     m_activeNotes = {};
     m_notePeriod = {};
     m_activePeriod = {};

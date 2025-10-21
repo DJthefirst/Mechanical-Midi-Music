@@ -39,7 +39,8 @@ void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, 
 
 void StepperSynth::stopNote(uint8_t instrument, uint8_t velocity)
 {
-    if(isNoteActive(instrument, velocity)){
+    // Check if instrument has any active note (getNumActiveNotes returns 1 if active, 0 if not)
+    if(getNumActiveNotes(instrument) > 0){
         SwPWM::stopNote(instrument, velocity);
         
         m_outputenabled[instrument] = false;

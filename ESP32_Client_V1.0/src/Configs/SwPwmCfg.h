@@ -8,14 +8,16 @@
 #pragma once
  
 // Device Configuration
-#define DEVICE_NAME "ESP32 PWM"
+#define DEVICE_NAME "ESP32 SW PWM"
 #define DEVICE_ID 0x0042
 
 // Maximum number of polyphonic notes (absolute max is 16)
 constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
 // Maximum number of instrument groups (max is 32)
-constexpr uint8_t NUM_INSTRUMENTS = 12;
+// REDUCED TO 8: ESP32 LEDC has 8 timers, using 8 channels ensures no timer sharing/interference
+// Channel mapping: 0,2,4,6,8,10,12,14 each use different timers
+constexpr uint8_t NUM_INSTRUMENTS = 8;
 // Multiplies instrument groups into individual instruments
 constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
 
@@ -23,8 +25,11 @@ constexpr uint8_t NUM_SUBINSTRUMENTS = 1;
 constexpr uint8_t MIN_MIDI_NOTE = 0; 
 constexpr uint8_t MAX_MIDI_NOTE = 127;
 
-// Hardware Configuration
-constexpr std::array<uint8_t, 12> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 32, 33, 25, 26, 27}; // ESP32 PWM-capable pins
+// Hardware Configuration - Reduced to 8 pins to match 8 independent timers
+constexpr std::array<uint8_t, 8> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 25}; // ESP32 PWM-capable pins
+
+#define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in milliseconds
+#define INSTRUMENT_TIMEOUT_MS_VALUE 10000
  
 // Network Configuration - Uncomment desired communication types
 #define MMM_NETWORK_SERIAL
@@ -45,8 +50,8 @@ constexpr std::array<uint8_t, 12> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 3
 #endif
 
 // Instrument Type Configuration
-#include "Instruments/Base/HwPWM/HwPWM.h"
-using InstrumentType = HwPWM;
+#include "Instruments/Base/SwPWM/SwPWM.h"
+using InstrumentType = SwPWM;
 
 // Optional Features - Uncomment desired extras
 // Save configuration on power off

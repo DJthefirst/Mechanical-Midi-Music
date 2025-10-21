@@ -240,6 +240,9 @@ void Distributor::distributeMessage(MidiMessage& message) {
 
 //Configures Distributor from construct (expects 7-bit MIDI format)
 void Distributor::setDistributor(uint8_t data[]){
+    // Stop any active notes before changing configuration
+    stopActiveNotes();
+    
     // Decode Distributor Construct from 7-bit MIDI format
     
     // Channels: Decode from 3 MIDI 7-bit bytes (bytes 2-4)
@@ -257,6 +260,9 @@ void Distributor::setDistributor(uint8_t data[]){
     m_minNote = data[12];
     m_maxNote = data[13];
     m_numPolyphonicNotes = data[14];
+    
+    // Update strategy if distribution method changed
+    updateDistributionStrategy();
 }
 
 //Configures Distributor Distribution Method

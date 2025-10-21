@@ -169,7 +169,7 @@ void SysExMsgHandler::setDeviceChangedCallback(std::function<void()> callback)
 // Respond with device ready
 MidiMessage SysExMsgHandler::sysExDeviceReady(MidiMessage& message)
 {
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &SysEx::DeviceReady, (uint8_t)true);
+    return MidiMessage(m_sourceId, m_destinationId, SysEx::DeviceReady, nullptr, 0);
 }
 
 // Reset Distributors, LocalStorage and Set Device name to "New Device"

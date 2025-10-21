@@ -7,16 +7,10 @@
  */
 
 // See Device.h and the Configs folder for device setup.
+// Configuration is selected in platformio.ini build_flags section
 
 #include <Arduino.h>
-
-//=== Select One Configuration ===
-
-#define DEVICE_CONFIG "Configs/ESP32_PWM.h"
-// #define DEVICE_CONFIG "Configs/StepperSynth.h"
-
-//================================
-
+#include "Config.h"
 #include "Device.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"

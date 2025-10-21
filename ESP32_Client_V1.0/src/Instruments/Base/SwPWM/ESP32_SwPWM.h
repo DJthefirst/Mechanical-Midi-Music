@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Constants.h"
-#include "Instruments/InstrumentController.h"
+#include "Instruments/InstrumentControllerBase.h"
 
 
 #include <cstdint>
