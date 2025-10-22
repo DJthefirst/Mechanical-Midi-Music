@@ -1,125 +1,58 @@
 /*
  * Device.h
- * A Struct Representing this devices configuration
+ * Device functionality and runtime state management
+ * Configuration definitions moved to Config.h
  */
 
 #pragma once
 
-#include "Arduino.h"
-#include "Constants.h"
+#include "Config.h"
 #include <array>
-#include <stdint.h>
+#include <string>
 #include <cstdint>
+
 using std::int8_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//Device Config
+// Device Defaults
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//---------- Uncomment Your Selected Device Config ----------
-  //#include "Configs/FloppySynth.h"
-  //#include "Configs/AirCompressor.h"
-  //#include "Configs/Dulcimer.h"
-  //#include "Configs/TestInstrument.h"
-  //#include "Configs/FloppyDrives.h"
-  //#include "Configs/StepperSynthStacked.h"
-  //#include "Configs/ExampleConfig.h"
-  #include "Configs/ESP32_PWM.h"
-
-  //#include "Configs/AD9833.h"
-
-  //#include "Configs/Test_ESP32_S3.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Device Defaults
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Device Construct Constants
+// Device Construct constants
 constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
 constexpr uint8_t DEVICE_NAME_OFFSET= 20;
 constexpr uint8_t DEVICE_NUM_CFG_BYTES = 40;
 constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
 
 namespace Device{
-    //Golbal Device Default Attribues
+    // Global device default attributes
+    inline uint16_t ID = DeviceConfig::DEVICE_ID_VAL;
     inline std::string Name = "New Device";
     inline bool OmniMode = false;
+    inline Instrument InstrumentType = Instrument::None;  // Runtime instrument type
 
-    //---------- Default Pinout and Platform ----------
-
-    #ifndef PLATFORM_ESP32
-        //Valid Pins ESP32 |2 4 12 13 16 17 18 19 21 22 23 25 26 27 32 33|
-        //constexpr std::array<uint8_t,16> pins = {2, 4, 12, 13, 16, 17, 18, 19, 21, 22, 23,
-        //                                    25, 26, 27, 32, 33};
-        constexpr Platform platform = Platform::_ESP32;
-
-    #elif PLATFORM_ESP8266
-        //#define ARDUINO_ARCH_ESP32
-        uint8_t pins[] = {};
-
-        const PlatformType platform = PLATFORM_ESP8266;
-
-    #elif PLATFORM_ARDUINO_UNO
-        //#define ARDUINO_ARCH_AVR
-        const uint8_t pins[] = {};
-
-        const char platform[] = "Arduino Uno";
-        const PlatformType platform = PLATFORM_ArduinoUno;
-
-    #elif PLATFORM_ARDUINO_MEGA
-        //#define ARDUINO_ARCH_AVR
-        const uint8_t pins[] = {};
-
-        const char platform[] = "Arduino Mega";
-        const PlatformType platform = PLATFORM_ArduinoMega;
-
-    #elif PLATFORM_ARDUINO_DUE
-        //#define ARDUINO_ARCH_
-        const uint8_t pins[] = {};
-
-        const char platform[] = "Arduino Due";
-        const PlatformType platform = PLATFORM_ArduinoDue;
-
-    #elif PLATFORM_ARDUINO_MICRO
-        //#define ARDUINO_ARCH_AVR
-        const uint8_t pins[] = {};
-
-        const char platform[] = "Arduino Micro";
-        const PlatformType platform = PLATFORM_ArduinoMicro;
-
-    #elif PLATFORM_ARDUINO_NANO
-        //#define ARDUINO_ARCH_AVR
-        const uint8_t pins[] = {};
-
-        const char platform[] = "Arduino Nano";
-        const PlatformType platform = PLATFORM_ArduinoNano;
-
-    #endif
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//Device Functions
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // Device information functions
     static uint8_t GetDeviceBoolean(){
         uint8_t deviceBoolByte = 0;
-        if(Device::OmniMode) deviceBoolByte |= (1 << 0); //bit 0
+        if(Device::OmniMode) deviceBoolByte |= (1 << 0); // Set bit 0 for omni mode
         return deviceBoolByte;
     }
 
     static std::array<std::uint8_t,DEVICE_NUM_CFG_BYTES> GetDeviceConstruct(){
         std::array<std::uint8_t,DEVICE_NUM_CFG_BYTES> deviceObj;
 
-        deviceObj[0] = static_cast<uint8_t>((SYSEX_DEV_ID >> 7) & 0x7F); //Device ID MSB
-        deviceObj[1] = static_cast<uint8_t>((SYSEX_DEV_ID >> 0) & 0x7F); //Device ID LSB
+        // Use runtime device ID so it can be changed at runtime via SysEx / LocalStorage
+        uint16_t runtimeId = ID;
+        deviceObj[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); // Device ID MSB
+        deviceObj[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); // Device ID LSB
         deviceObj[2] = GetDeviceBoolean();
-        deviceObj[3] = NUM_INSTRUMENTS;
-        deviceObj[4] = NUM_SUBINSTRUMENTS;
-        deviceObj[5] = static_cast<uint8_t>(INSTRUMENT_TYPE);
+        deviceObj[3] = HardwareConfig::NUM_INSTRUMENTS;
+        deviceObj[4] = HardwareConfig::NUM_SUBINSTRUMENTS;
+        deviceObj[5] = static_cast<uint8_t>(InstrumentType);
         deviceObj[6] = static_cast<uint8_t>(PLATFORM_TYPE);
-        deviceObj[7] = MIN_MIDI_NOTE;
-        deviceObj[8] = MAX_MIDI_NOTE;
-        deviceObj[9] = static_cast<uint8_t>((FIRMWARE_VERSION >> 7) & 0x7F);
-        deviceObj[10] = static_cast<uint8_t>((FIRMWARE_VERSION >> 0) & 0x7F);
+        deviceObj[7] = DeviceConfig::MIN_NOTE;
+        deviceObj[8] = DeviceConfig::MAX_NOTE;
+        deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 7) & 0x7F);
+        deviceObj[10] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
 
         for(uint8_t i = 0; i < DEVICE_NUM_NAME_BYTES; i++){
             if (Device::Name.size() >  i) deviceObj[DEVICE_NAME_OFFSET+i] = Device::Name[i];
@@ -128,4 +61,16 @@ namespace Device{
 
         return deviceObj;
     }
+
+    // Accessors for the device ID so it can be changed at runtime and persisted
+    static uint16_t GetDeviceID() noexcept { return ID; }
+    static void SetDeviceID(uint16_t id) noexcept { ID = id; }
+    
+    // // Additional accessors for SysEx responses
+    // static const char* GetDeviceName(){ return Name.c_str(); }
+    // static void SetDeviceName(const std::string& name){ Name = name; }
+    // static uint16_t GetFirmwareVersion(){ return Config::FIRMWARE_VERSION; }
+    // static uint8_t GetNumInstruments(){ return Config::NUM_INSTRUMENTS; }
+    // static uint8_t GetMinNote(){ return Config::MIN_NOTE; }
+    // static uint8_t GetMaxNote(){ return Config::MAX_NOTE; }
 };

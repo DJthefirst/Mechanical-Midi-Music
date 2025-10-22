@@ -1,58 +1,78 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V2.0
+ *  Version: V3.0
  *  Author: DJthefirst
- *  Description: This Program implements advanced MIDI control over a microcontroller based instrument
+ *  Description: This program implements advanced MIDI control over a microcontroller-based instrument
  *----------------------------------------------------------------------------------------------------
  */
 
-//See Device.h and the Configs folder for Device Setup.
+// See Device.h and the Configs folder for device setup.
+// Configuration is selected in platformio.ini build_flags section
 
 #include <Arduino.h>
-
-#include "Device.h"
-#include "Networks/Network.h"
+#include "Config.h"
+#include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
-#include "MessageHandler.h"
+#include "MsgHandling/MessageRouter.h"
+#include "Distributors/DistributorManager.h"
+#include "MsgHandling/SysExMsgHandler.h"
+#include "MsgHandling/MidiMsgHandler.h"
 
-#include "Extras/LocalStorage.h"
+//Include the selected Instrument Type
+#define STRINGIFY(x) #x
+#define INCLUDE_FILE(x) STRINGIFY(x)
+  #include INSTRUMENT_TYPE_VALUE
+#undef STRINGIFY
+#undef INCLUDE_FILE
 
-networkType network = networkType();
-instrumentType instrumentController = instrumentType(); 
+// Optional features
+#ifdef EXTRA_LOCAL_STORAGE
+    #include "Extras/LocalStorage.h"
+#endif
 
-MessageHandler messageHandler(&instrumentController);
+// Global components
+std::shared_ptr<NetworkManager> network;
+std::shared_ptr<MessageRouter> messageRouter;
+std::shared_ptr<InstrumentControllerBase> instrumentController;
+std::shared_ptr<DistributorManager> distributorManager;
+std::shared_ptr<SysExMsgHandler> sysExHandler;
+std::shared_ptr<MidiMsgHandler> midiMsgHandler;
+
 
 void setup() {
-  //Begin Network Commmunication
-  network.begin();  
+  // Device::validateConfiguration();
+
+  // Initialize core components with proper dependency injection
+  instrumentController = InstrumentController<INSTRUMENT_TYPE>::getInstance();
+  Device::InstrumentType = instrumentController->getInstrumentType();
+
+  distributorManager = DistributorManager::getInstance(instrumentController); 
+
+  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
+  midiMsgHandler = std::make_shared<MidiMsgHandler>(distributorManager, sysExHandler, instrumentController);
+
+  // Initialize network and message router
+  network = CreateNetwork();
+  messageRouter = std::make_shared<MessageRouter>(network, midiMsgHandler, sysExHandler, instrumentController);
+  
+  // Set device changed callbacks to use the router's broadcast function
+  sysExHandler->setDeviceChangedCallback([]() {
+    if (messageRouter) messageRouter->broadcastDeviceChanged();
+  });
+  distributorManager->setDeviceChangedCallback([]() {
+    if (messageRouter) messageRouter->broadcastDeviceChanged();
+  });
+
+  // Begin network communication
+  network->begin();  
   delay(100);
 
-  //TODO move into local Storage?
+  // Initialize device configuration from local storage
   #ifdef EXTRA_LOCAL_STORAGE
-  {
-    // Ensure NVS is properly initialized
-    if (!LocalStorage::get().EnsureNVSInitialized()) {
-      // Handle NVS initialization failure - could log error or use defaults
-      // For now, continue with default values in Device namespace
-    } else {
-      //Device Config - only load if NVS is working
-      Device::Name = LocalStorage::get().GetDeviceName();
-      // Normalize the stored blob to ensure consistent 20-byte space-padded format
-      LocalStorage::get().SetDeviceName(Device::Name);
-      //Device::OmniMode = (localStorage.GetDeviceBoolean() & BOOL_OMNIMODE) != 0;
-
-      //Distributor Config
-      uint8_t numDistributors = LocalStorage::get().GetNumOfDistributors();
-      for(uint8_t i = 0; i < numDistributors; i++){
-        uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-        LocalStorage::get().GetDistributorConstruct(i,distributorData);
-        messageHandler.addDistributor(distributorData);
-      }
-    }
-  }
+    LocalStorage::get().InitializeDeviceConfiguration(*distributorManager);
   #endif
 
-  //----Testing Demo Setup Config----//
+//=== Distributor Configuration For Startup ===
 
   // //Distributor 1
   // Distributor distributor1(&instrumentController);
@@ -68,35 +88,19 @@ void setup() {
   // distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
   // messageHandler.addDistributor(distributor2);
 
-  // //Distributor 3
-  // Distributor distributor3(&instrumentController);
-  // distributor3.setChannels(0x0004); // 3
-  // distributor3.setInstruments(0x000000FF); // 1-8
-  // distributor3.setDistributionMethod(DistributionMethod::RoundRobin);
-  // messageHandler.addDistributor(distributor3);
-
-  // //Distributor 4
-  // Distributor distributor4(&instrumentController);
-  // distributor4.setChannels(0x0008); // 4
-  // distributor4.setInstruments(0x000000FF); // 1-8
-  // distributor4.setDistributionMethod(DistributionMethod::Ascending);
-  // messageHandler.addDistributor(distributor4);
+  //===========================================
 
   //Reset All pins to default
-  instrumentController.resetAll();
+  instrumentController->resetAll();
 
   //Send Device Ready to Connect
-  network.sendMessage(MidiMessage(SYSEX_DEV_ID, SYSEX_Server, SYSEX_DeviceReady, nullptr, 0));
+  MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);
+  network->sendMessage(ready);
 }
 
-//Periodicaly Read Incoming Messages
+//Periodically Read Incoming Messages
 void loop() {
-  std::optional<MidiMessage> message = network.readMessage();
-
-  //If the network returns a new message process it.
-  if (!message) return;
-  message = messageHandler.processMessage(*message);
-  
-  //If there is a response send message.
-  if (message) network.sendMessage(*message);
+  if (messageRouter) {
+    messageRouter->processMessages();
+  }
 }

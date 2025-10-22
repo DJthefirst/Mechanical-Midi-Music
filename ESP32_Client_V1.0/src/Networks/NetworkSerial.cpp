@@ -1,61 +1,60 @@
 /*
  * NetworkSerial.cpp
  *
- * Network that supports MIDI over Serial Communication.
- * 
+ * Network implementation that supports MIDI over serial communication
  */
 
+#include "NetworkSerial.h"
+#include "Config.h"
 
-#include "Device.h"
 #ifdef MMM_NETWORK_SERIAL
 
 void NetworkSerial::begin() {
-    Serial.begin(115200);
-    startSerial
-();
+    Serial.begin(MMM_NETWORK_SERIAL_BAUD); // Standard MIDI baud rate
+    startSerial();
 }
 
-
-// connect to Serial – returns true if successful or false if not
+// Connect to Serial – returns true if successful or false if not
 bool NetworkSerial::startSerial() {
-    //TODO add automatic connection
+    // TODO: add automatic connection
     return true;
 }
 
-/* Waits for buffer to fill with a new msg (>3 Bytes). */
+// Waits for buffer to fill with a new message (minimum 3 bytes)
 std::optional<MidiMessage> NetworkSerial::readMessage() {
     uint8_t messageLength = 0;
-    MidiMessage message = MidiMessage();
+    MidiMessage message;
 
-    //Wait until full message to begin reading the buffer
-    if (Serial.available() && (Serial.peek() & MSB_BITMASK) != 0){
+    // Wait until full message to begin reading the buffer
+    if (Serial.available() && (Serial.peek() & MSB_BITMASK) != 0) {
         message.buffer[messageLength] = Serial.read();
         messageLength = 1;
     }
 
-    //Fills buffer with one whole Msg. Msg heads are denoted by the MSB == 1
-    while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)){   
+    // Fill buffer with one whole message. Message headers are denoted by MSB == 1
+    while (Serial.available() && ((Serial.peek() & MSB_BITMASK) == 0)) {   
         message.buffer[messageLength] = Serial.read();
-
         messageLength++;
-        if(messageLength == MAX_PACKET_LENGTH){
+        
+        if (messageLength == MAX_PACKET_LENGTH) {
             Serial.println("Bad Message");
-            return {};
+            return std::nullopt;
         }
     }      
     
-    if (messageLength == 0) return {};
+    if (messageLength == 0) return std::nullopt;
+    message.length = messageLength;
     return message;
 }
 
-//Send Byte arrays wrapped in SysEx Messages 
-void NetworkSerial::sendMessage(MidiMessage message) {
-    //Write the message to Serial
+// Send byte arrays wrapped in SysEx messages 
+void NetworkSerial::sendMessage(const MidiMessage& message) {
+    // Write the message to Serial
     Serial.write(message.buffer.data(), message.length);
 }
 
-//Serial print Strings for Debug
-void NetworkSerial::sendMessage(String msg) {
+// Serial print strings for debugging
+void NetworkSerial::sendString(const String& msg) {
     Serial.println(msg);
 }
 

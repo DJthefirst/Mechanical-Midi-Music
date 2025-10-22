@@ -6,7 +6,8 @@
 #include <iostream>
 #include <string>
 #include "LocalStorage.h"
-#include "Distributor.h"
+#include "Distributors/Distributor.h"
+#include "Distributors/DistributorManager.h"
 
 
 esp_err_t err;
@@ -195,6 +196,27 @@ void LocalStorage::SetDistributorConstruct(uint16_t distributorNum, const uint8_
     WriteNvsBlob(ptr_key, construct , DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
+// Persist/Load Device ID as a 2-byte blob (MSB, LSB)
+uint16_t LocalStorage::GetDeviceID(){
+    uint8_t tmp[2];
+    // Default to compile-time SYSEX_DEV_ID if not found
+    tmp[0] = static_cast<uint8_t>((Device::GetDeviceID() >> 7) & 0x7F);
+    tmp[1] = static_cast<uint8_t>((Device::GetDeviceID() >> 0) & 0x7F);
+    esp_err_t r = ReadNvsBlob("Device_id", tmp, 2);
+    if (r == ESP_ERR_NVS_NOT_FOUND) {
+        return Device::GetDeviceID();
+    }
+    uint16_t id = (static_cast<uint16_t>(tmp[0]) << 7) | static_cast<uint16_t>(tmp[1]);
+    return id;
+}
+
+void LocalStorage::SetDeviceID(uint16_t id){
+    uint8_t tmp[2];
+    tmp[0] = static_cast<uint8_t>((id >> 7) & 0x7F);
+    tmp[1] = static_cast<uint8_t>((id >> 0) & 0x7F);
+    WriteNvsBlob("Device_id", tmp, 2);
+}
+
 // Get key from valueHelper
 std::string LocalStorage::Uint16ToKey(uint16_t value){
     const char hex[] = "0123456789abcdef";
@@ -205,6 +227,32 @@ std::string LocalStorage::Uint16ToKey(uint16_t value){
     key.push_back(hex[(value >> 12) & 0x0F]);
 
     return(key);
+}
+
+bool LocalStorage::InitializeDeviceConfiguration(DistributorManager& distributorManager){
+    // Ensure NVS is properly initialized
+    if (!EnsureNVSInitialized()) {
+        return false; // NVS initialization failed, use defaults
+    }
+
+    // Device Config - only load if NVS is working
+    Device::Name = GetDeviceName();
+    // Load runtime device ID (if stored) and update Device runtime value
+    Device::SetDeviceID(GetDeviceID());
+    // Normalize the stored blob to ensure consistent 20-byte space-padded format
+    SetDeviceName(Device::Name);
+    // Persist runtime device ID back (ensures formatting/consistency)
+    SetDeviceID(Device::GetDeviceID());
+    
+    // Distributor Config
+    uint8_t numDistributors = GetNumOfDistributors();
+    for(uint8_t i = 0; i < numDistributors; i++){
+        uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
+        GetDistributorConstruct(i, distributorData);
+        distributorManager.addDistributor(distributorData);
+    }
+    
+    return true; // Successfully loaded configuration
 }
 
 #endif
