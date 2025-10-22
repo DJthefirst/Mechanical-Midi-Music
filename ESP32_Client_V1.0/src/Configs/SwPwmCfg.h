@@ -17,7 +17,7 @@
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
     // Maximum number of instrument groups (max is 32)
-    constexpr uint8_t NUM_INSTRUMENTS = 8;
+    constexpr uint8_t NUM_INSTRUMENTS = 10;
     // Multiplies instrument groups into individual instruments
     constexpr uint8_t NUM_SUBINSTRUMENTS = 1;
 
@@ -31,7 +31,7 @@
 
 //---------- Hardware Configuration ----------
 
-    constexpr std::array<uint8_t,10> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4,16,13};
+    constexpr std::array<uint8_t, 10> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 33, 32, 16}; // ESP32 PWM-capable pins
 
     #define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in milliseconds
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
@@ -64,7 +64,7 @@
     #define EXTRA_LOCAL_STORAGE
 
     // Addressable LED lighting effects
-    #define EXTRA_ADDRESSABLE_LEDS
+    //#define EXTRA_ADDRESSABLE_LEDS
 
     // FastLED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS

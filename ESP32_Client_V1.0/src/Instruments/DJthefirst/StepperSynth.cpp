@@ -110,7 +110,7 @@ void StepperSynth::resetLEDs(){
 
 #else
 void StepperSynth::setupLEDs(){}
-void StepperSynth::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void StepperSynth::setInstumentLedOff(uint8_t instrument){}
+void StepperSynth::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
+void StepperSynth::setInstrumentLedOff(uint8_t instrument){}
 void StepperSynth::resetLEDs(){}
 #endif

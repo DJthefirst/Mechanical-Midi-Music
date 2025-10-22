@@ -61,7 +61,7 @@
     #define EXTRA_LOCAL_STORAGE
 
     // Addressable LED lighting effects
-    #define EXTRA_ADDRESSABLE_LEDS
+    //#define EXTRA_ADDRESSABLE_LEDS
 
     // FastLED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS

@@ -10,8 +10,6 @@ class DistributionStrategy;
 
 class InstrumentControllerBase{
 public:
-    static constexpr Instrument Type = Instrument::None;
-    
     // Friend class for access to private members
     friend class DistributionStrategy;
 
@@ -51,7 +49,7 @@ public:
     virtual bool isNoteActive(uint8_t instrument, uint8_t note) = 0;
     
     // Get the instrument type at runtime
-    virtual Instrument getInstrumentType() const { return Type; }
+    virtual Instrument getInstrumentType() const { return Instrument::None; };
     
     //Timeout tracking functions
     virtual void checkInstrumentTimeouts();

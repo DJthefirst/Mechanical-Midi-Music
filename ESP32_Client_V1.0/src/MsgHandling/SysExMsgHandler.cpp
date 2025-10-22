@@ -28,6 +28,8 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(MidiMessage& mes
     // Check Device ID or Global ID 0x00;
     if (!isValidDestination(message)) return {};
     
+    // Update source ID to current runtime Device ID to ensure responses use correct ID
+    m_sourceId = Device::GetDeviceID();
     m_destinationId = message.SourceID();
 
     switch (message.sysExCommand()) {
@@ -267,8 +269,6 @@ void SysExMsgHandler::sysExSetDeviceID(MidiMessage& message)
     #ifdef EXTRA_LOCAL_STORAGE
     LocalStorage::get().SetDeviceID(newID);
     #endif
-    // update source id used for replies
-    m_sourceId = Device::GetDeviceID();
     broadcastDeviceChanged();
 }
 

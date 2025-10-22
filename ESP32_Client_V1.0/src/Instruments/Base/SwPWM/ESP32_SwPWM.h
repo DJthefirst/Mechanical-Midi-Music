@@ -12,8 +12,6 @@ using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
 class ESP32_SwPWM : public InstrumentControllerBase{
-public:
-    static constexpr Instrument Type = Instrument::SW_PWM;
 protected:
     static void Tick();
     static void togglePin(uint8_t instrument);
@@ -44,6 +42,7 @@ public:
 
     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;
 
+    Instrument getInstrumentType() const override { return Instrument::SW_PWM; }
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;
 

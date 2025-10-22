@@ -5,6 +5,14 @@
 #include "Arduino.h"
 #include <bitset>
 
+// Define static member variables
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSwPWM::m_activeNotes = {};
+uint8_t ESP32_StepSwPWM::m_numActiveNotes = 0;
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSwPWM::m_notePeriod = {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSwPWM::m_activePeriod = {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSwPWM::m_currentTick = {};
+std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSwPWM::m_currentState = 0;
+
 ESP32_StepSwPWM::ESP32_StepSwPWM() : ESP32_SwPWM()
 {
     //Setup pins

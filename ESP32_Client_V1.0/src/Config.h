@@ -19,17 +19,13 @@ using std::int8_t;
   
     #ifndef DEVICE_CONFIG
         // Default device config used when no selection is provided by the application
-        #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
+        #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
     #endif
 
     // Include the selected config header
-    // Note: using an indirection macro to include a macro-defined string
     #define STRINGIFY(x) #x
     #define INCLUDE_FILE(x) STRINGIFY(x)
-    // The macro DEVICE_CONFIG must be a quoted string literal (e.g. "Configs/StepperSynth.h")
-    #include DEVICE_CONFIG
-
-    // Cleanup helper macros
+        #include DEVICE_CONFIG
     #undef STRINGIFY
     #undef INCLUDE_FILE
 
@@ -41,22 +37,22 @@ using std::int8_t;
 // Platform Detection
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(ARDUINO_ARCH_ESP32)
-    #define PLATFORM_ESP32
-    constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
-    #define HAS_HARDWARE_PWM
-    #define HAS_WIFI
-    #define HAS_BLE
-    #define HAS_NVS
-#elif defined(ARDUINO_AVR_UNO)
-    #define PLATFORM_ARDUINO_UNO  
-    constexpr Platform PLATFORM_TYPE = Platform::ArduinoUno;
-#elif defined(ARDUINO_AVR_MEGA)
-    #define PLATFORM_ARDUINO_MEGA
-    constexpr Platform PLATFORM_TYPE = Platform::ArduinoMega;
-#else
-    #error "Unsupported platform. Add platform detection to Config.h"
-#endif
+    #if defined(ARDUINO_ARCH_ESP32)
+        #define PLATFORM_ESP32
+        constexpr Platform PLATFORM_TYPE = Platform::_ESP32;
+        #define HAS_HARDWARE_PWM
+        #define HAS_WIFI
+        #define HAS_BLE
+        #define HAS_NVS
+    #elif defined(ARDUINO_AVR_UNO)
+        #define PLATFORM_ARDUINO_UNO  
+        constexpr Platform PLATFORM_TYPE = Platform::ArduinoUno;
+    #elif defined(ARDUINO_AVR_MEGA)
+        #define PLATFORM_ARDUINO_MEGA
+        constexpr Platform PLATFORM_TYPE = Platform::ArduinoMega;
+    #else
+        #error "Unsupported platform. Add platform detection to Config.h"
+    #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration Processing 

@@ -1,5 +1,10 @@
 #pragma once
 
+// Must be at topp of file
+#ifndef INSTRUMENT_TYPE
+    #define INSTRUMENT_TYPE StepperSynth
+#endif
+
 #include "Constants.h"
 #include "Instruments/Base/SwPWM/SwPWM.h"
 

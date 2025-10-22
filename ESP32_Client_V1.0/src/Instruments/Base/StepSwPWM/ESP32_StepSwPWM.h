@@ -38,4 +38,6 @@ public:
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
     void stopNote(uint8_t instrument, uint8_t velocity) override;
     void stopAll() override;
+
+    Instrument getInstrumentType() const override { return Instrument::StepSW_PWM; }
 };

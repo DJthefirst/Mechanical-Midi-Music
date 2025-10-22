@@ -5,7 +5,13 @@
 #include "Arduino.h"
 #include <bitset>
 
-
+// Define static member variables
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activeNotes = {};
+uint8_t ESP32_SwPWM::m_numActiveNotes = 0;
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_notePeriod = {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activePeriod = {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_currentTick = {};
+std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_currentState = 0;
 
 ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
 {

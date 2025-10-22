@@ -9,7 +9,6 @@
 // See Device.h and the Configs folder for device setup.
 // Configuration is selected in platformio.ini build_flags section
 
-
 #include <Arduino.h>
 #include "Config.h"
 #include "Networks/NetworkManager.h"

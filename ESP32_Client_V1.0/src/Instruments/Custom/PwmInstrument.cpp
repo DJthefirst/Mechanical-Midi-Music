@@ -31,7 +31,7 @@
 
 #else
 void PwmInstrument::setupLEDs(){}
-void PwmInstrument::setInstumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void PwmInstrument::setInstumentLedOff(uint8_t instrument){}
+void PwmInstrument::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
+void PwmInstrument::setInstrumentLedOff(uint8_t instrument){}
 void PwmInstrument::resetLEDs(){}
 #endif
