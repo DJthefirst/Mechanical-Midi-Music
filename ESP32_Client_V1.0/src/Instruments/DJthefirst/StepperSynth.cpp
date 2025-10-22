@@ -4,6 +4,8 @@
 
 #include "Device.h"
 
+std::array<bool,HardwareConfig::NUM_INSTRUMENTS> StepperSynth::m_outputenabled = {};
+
 enum PIN_Connnections{
     PIN_SHIFTREG_Data = 25,
     PIN_SHIFTREG_Clock = 27,
@@ -11,10 +13,7 @@ enum PIN_Connnections{
     PIN_LED_Data = 18
 };
 
-
-static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
-
-StepperSynth::StepperSynth() : SwPWM()
+StepperSynth::StepperSynth() : HwPWM()
 {
     //Setup pins
     pinMode(PIN_SHIFTREG_Data, OUTPUT);
@@ -32,25 +31,21 @@ void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, 
 {
     m_outputenabled[instrument] = true;
     updateShiftRegister();
-    SwPWM::playNote(instrument, note, velocity, channel);
+    HwPWM::playNote(instrument, note, velocity, channel);
     setInstrumentLedOn(instrument, channel, note, velocity);
     return;
 }
 
 void StepperSynth::stopNote(uint8_t instrument, uint8_t velocity)
 {
-    // Check if instrument has any active note (getNumActiveNotes returns 1 if active, 0 if not)
-    if(getNumActiveNotes(instrument) > 0){
-        SwPWM::stopNote(instrument, velocity);
-        
-        m_outputenabled[instrument] = false;
-        updateShiftRegister();
-        setInstrumentLedOff(instrument);
-    }
+   HwPWM::stopNote(instrument, velocity);
+    m_outputenabled[instrument] = false;
+    updateShiftRegister();
+    setInstrumentLedOff(instrument);
 }
 
 void StepperSynth::reset(uint8_t instrument){
-    SwPWM::reset(instrument);
+    HwPWM::reset(instrument);
     m_outputenabled[instrument] = false;
     updateShiftRegister();
     setInstrumentLedOff(instrument);
@@ -61,7 +56,7 @@ void StepperSynth::resetAll(){
 }
 
 void StepperSynth::stopAll(){
-    SwPWM::stopAll();
+    HwPWM::stopAll();
     m_outputenabled = {};
     updateShiftRegister();
     resetLEDs();
@@ -70,17 +65,21 @@ void StepperSynth::stopAll(){
 void StepperSynth::updateShiftRegister() {
 
     // Write and Shift Data
-    for(uint8_t i=1; i <= HardwareConfig::NUM_INSTRUMENTS; i++ ){
-        digitalWrite(PIN_SHIFTREG_Data, !m_outputenabled[HardwareConfig::NUM_INSTRUMENTS - i]); //Serial Data (active high)
+    // For 74HC595-style shift registers: last bit shifted in appears at Q7
+    // Shift MSB first (instrument 9) so it ends up at Q7, LSB last (instrument 0) ends up at Q0
+    for(int8_t i = HardwareConfig::NUM_INSTRUMENTS - 1; i >= 0; i-- ){
+        // Note: Using ! for active-low enable logic (LOW = enabled)
+        // If your drivers are active-high, change to: m_outputenabled[i]
+        digitalWrite(PIN_SHIFTREG_Data, !m_outputenabled[i]);
         digitalWrite(PIN_SHIFTREG_Clock, HIGH); //Serial Clock
         delayMicroseconds(1); //Stabilize 
         digitalWrite(PIN_SHIFTREG_Clock,  LOW); //Serial Clock
     }
-    // Toggle Load
+    // Toggle Load to transfer shift register to output latches
     digitalWrite(PIN_SHIFTREG_Load, HIGH); //Register Load
     delayMicroseconds(1); //Stabilize 
     digitalWrite(PIN_SHIFTREG_Load, LOW); //Register Load
-    digitalWrite(PIN_SHIFTREG_Data, HIGH); //Serial Data    
+    digitalWrite(PIN_SHIFTREG_Data, LOW); //Leave data line low when idle
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

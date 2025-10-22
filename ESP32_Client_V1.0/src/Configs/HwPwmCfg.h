@@ -33,6 +33,11 @@
     constexpr std::array<uint8_t, 8> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 25}; // ESP32 PWM-capable pins
 
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
+
+
+//---------- Uncomment Your Selected Instrument Type ----------
+
+    #define INSTRUMENT_TYPE_VALUE "Instruments/Base/HwPWM/HwPWM.h"
  
 //---------- Uncomment Your Selected COM Types ----------
 
@@ -50,10 +55,6 @@
         #define MMM_NETWORK_UDP_ADDRESS 224, 5, 6, 7 // Default local network IP
         #define MMM_NETWORK_UDP_OTA_PORT 8337 // Default UDP port for MIDI
     #endif
-
-//---------- Uncomment Your Selected Instrument Type ----------
-
-    #define INSTRUMENT_TYPE_VALUE "Instruments/Base/HwPWM/HwPWM.h"
 
 //---------- Uncomment Your Desired Extras ----------
 

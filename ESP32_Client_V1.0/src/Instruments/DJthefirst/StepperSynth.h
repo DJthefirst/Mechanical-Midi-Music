@@ -6,16 +6,17 @@
 #endif
 
 #include "Constants.h"
-#include "Instruments/Base/SwPWM/SwPWM.h"
+#include "Instruments/Base/HwPWM/HwPWM.h"
 
 #include <cstdint>
 using std::int8_t;
 
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
-class StepperSynth : public SwPWM{
+class StepperSynth : public HwPWM{
 public:
 
 private:
+    static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
     static void togglePin(uint8_t instrument);
 
 public: 

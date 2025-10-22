@@ -17,9 +17,11 @@ using std::int8_t;
 // Device Config Include
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   
+    // Default device config used when no selection is provided by the application
     #ifndef DEVICE_CONFIG
-        // Default device config used when no selection is provided by the application
-        #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        //#define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        //#define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        #define DEVICE_CONFIG "Configs/StepperSynthCfg.h"
     #endif
 
     // Include the selected config header

@@ -18,7 +18,7 @@
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
     //Max Number of Instrument groups is 32
-    constexpr uint8_t NUM_INSTRUMENTS = 10; 
+    constexpr uint8_t NUM_INSTRUMENTS = 8; 
     //Multiplies Instrument groups into individual instruments
     constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
 
@@ -29,8 +29,10 @@
 
 //---------- Hardware Configuration ----------
 
-    constexpr std::array<uint8_t, 8> INSTRUMENT_PINS = {2, 18, 21, 23, 33, 26, 13}; // ESP32 Enable pins
-    constexpr std::array<uint8_t, 8> STEP_PINS =       {4, 19, 22, 32, 25, 27, 16}; // ESP32 Direction pins
+    constexpr std::array<uint8_t,8> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4};//,16,13};
+
+    #define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in microseconds
+    #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
@@ -43,9 +45,14 @@
     //#define MMM_NETWORK_USB
     //#define MMM_NETWORK_DIN
 
+    #ifdef MMM_NETWORK_SERIAL
+        #define MMM_NETWORK_SERIAL_BAUD 115200 // Standard MIDI baud rate
+    #endif
+
     #ifdef MMM_NETWORK_UDP
-        #define MMM_NETWORK_UDP_IP 192,168,1,100
-        #define MMM_NETWORK_UDP_PORT 5004
+        #define MMM_NETWORK_UDP_AsyncWebServer_PORT 80 // Default AsyncWebServer port
+        #define MMM_NETWORK_UDP_ADDRESS 224, 5, 6, 7 // Default local network IP
+        #define MMM_NETWORK_UDP_OTA_PORT 8337 // Default UDP port for MIDI
     #endif
 
 //---------- Uncomment Your Desired Extras ----------
