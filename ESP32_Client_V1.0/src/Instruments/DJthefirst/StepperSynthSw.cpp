@@ -1,10 +1,10 @@
 #include "Extras/AddrLED.h"
-#include "Instruments/DJthefirst/StepperSynth.h"
+#include "Instruments/DJthefirst/StepperSynthSw.h"
 #include "Arduino.h"
 
 #include "Device.h"
 
-std::array<bool,HardwareConfig::NUM_INSTRUMENTS> StepperSynth::m_outputenabled = {};
+std::array<bool,HardwareConfig::NUM_INSTRUMENTS> StepperSynthSw::m_outputenabled = {};
 
 enum PIN_Connnections{
     PIN_SHIFTREG_Data = 25,
@@ -13,7 +13,7 @@ enum PIN_Connnections{
     PIN_LED_Data = 18
 };
 
-StepperSynth::StepperSynth() : HwPWM()
+StepperSynthSw::StepperSynthSw() : SwPWM()
 {
     //Setup pins
     pinMode(PIN_SHIFTREG_Data, OUTPUT);
@@ -27,42 +27,42 @@ StepperSynth::StepperSynth() : HwPWM()
     delay(500); // Wait a half second for safety
 }
 
-void StepperSynth::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void StepperSynthSw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     m_outputenabled[instrument] = true;
     updateShiftRegister();
-    HwPWM::playNote(instrument, note, velocity, channel);
+    SwPWM::playNote(instrument, note, velocity, channel);
     setInstrumentLedOn(instrument, channel, note, velocity);
     return;
 }
 
-void StepperSynth::stopNote(uint8_t instrument, uint8_t velocity)
+void StepperSynthSw::stopNote(uint8_t instrument, uint8_t velocity)
 {
-   HwPWM::stopNote(instrument, velocity);
+   SwPWM::stopNote(instrument, velocity);
     m_outputenabled[instrument] = false;
     updateShiftRegister();
     setInstrumentLedOff(instrument);
 }
 
-void StepperSynth::reset(uint8_t instrument){
-    HwPWM::reset(instrument);
+void StepperSynthSw::reset(uint8_t instrument){
+    SwPWM::reset(instrument);
     m_outputenabled[instrument] = false;
     updateShiftRegister();
     setInstrumentLedOff(instrument);
 }
 
-void StepperSynth::resetAll(){
+void StepperSynthSw::resetAll(){
     stopAll();
 }
 
-void StepperSynth::stopAll(){
-    HwPWM::stopAll();
+void StepperSynthSw::stopAll(){
+    SwPWM::stopAll();
     m_outputenabled = {};
     updateShiftRegister();
     resetLEDs();
 }
 
-void StepperSynth::updateShiftRegister() {
+void StepperSynthSw::updateShiftRegister() {
 
     // Write and Shift Data
     // For 74HC595-style shift registers: last bit shifted in appears at Q7
@@ -87,29 +87,29 @@ void StepperSynth::updateShiftRegister() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef EXTRA_ADDRESSABLE_LEDS
 
-void StepperSynth::setupLEDs(){
+void StepperSynthSw::setupLEDs(){
     AddrLED::get().setup();
 }
 
 //Set an Instrument Led to on
-void StepperSynth::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
+void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
     CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
     AddrLED::get().turnLedsOn(instrument*5, instrument*5+4, color);
 }
 
 //Set an Instrument Led to off
-void StepperSynth::setInstrumentLedOff(uint8_t instrument){
+void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){
     AddrLED::get().turnLedsOn(instrument*5, instrument*5+4, CHSV(0,0,0));
 }
 
 //Reset Leds
-void StepperSynth::resetLEDs(){
+void StepperSynthSw::resetLEDs(){
     AddrLED::get().reset();
 }
 
 #else
-void StepperSynth::setupLEDs(){}
-void StepperSynth::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
-void StepperSynth::setInstrumentLedOff(uint8_t instrument){}
-void StepperSynth::resetLEDs(){}
+void StepperSynthSw::setupLEDs(){}
+void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
+void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){}
+void StepperSynthSw::resetLEDs(){}
 #endif

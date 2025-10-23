@@ -36,7 +36,7 @@
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-    #define INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/StepperSynth.h"
+    #define INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/StepperSynthSw.h"
 
 //---------- Uncomment Your Selected COM Types ----------
  
