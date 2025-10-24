@@ -26,6 +26,11 @@ protected:
     static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentTick; //Timeing
     static std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> m_currentState; //IO
 
+    //Vibrato Attributes
+    static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_vibratoPhase; //Vibrato phase counter
+    static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_vibratoDepth;   //Vibrato depth (controlled by modulation wheel)
+    static uint8_t m_vibratoRate;    //Vibrato rate (speed of oscillation)
+
     //Local MIDI Device Atributes
     uint8_t m_program = 0;
     uint8_t m_channelPressure = 0;
@@ -41,6 +46,7 @@ public:
     void stopAll() override;
 
     void setPitchBend(uint8_t instrument, uint16_t value, uint8_t channel) override;
+    void setModulationWheel(uint8_t value) override;
 
     Instrument getInstrumentType() const override { return Instrument::SW_PWM; }
     uint8_t getNumActiveNotes(uint8_t instrument) override;

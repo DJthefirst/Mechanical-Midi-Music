@@ -95,6 +95,9 @@ void DistributorManager::processCC(MidiMessage& message)
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
         if (m_distributors[i].getChannels().test(message.channel())) {
             switch (message.CC_Control()) {
+                case(MidiCC::ModulationWheel):
+                    m_ptrInstrumentController->setModulationWheel(message.CC_Value());
+                    break;
                 case(MidiCC::DamperPedal):
                     m_distributors[i].setDamperPedal(message.CC_Value() > 64);
                     break;
@@ -258,13 +261,10 @@ void DistributorManager::setDistributorMethod(uint8_t distributorId, Distributio
     }
 }
 
-void DistributorManager::setDistributorBoolValues(uint8_t distributorId, uint8_t boolValues)
+void DistributorManager::setDistributorBoolValues(uint8_t distributorId, uint16_t boolValues)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setMuted((boolValues & DISTRIBUTOR_BOOL_MUTED) != 0);
-        m_distributors[distributorId].setDamperPedal((boolValues & DISTRIBUTOR_BOOL_DAMPERPEDAL) != 0);
-        m_distributors[distributorId].setPolyphonic((boolValues & DISTRIBUTOR_BOOL_POLYPHONIC) != 0);
-        m_distributors[distributorId].setNoteOverwrite((boolValues & DISTRIBUTOR_BOOL_NOTEOVERWRITE) != 0);
+        m_distributors[distributorId].setDistributorBoolValues(boolValues);
         broadcastDistributorChanged();
     }
 }
@@ -306,12 +306,10 @@ DistributionMethod DistributorManager::getDistributorMethod(uint8_t distributorI
     return DistributionMethod::RoundRobinBalance; // Default fallback
 }
 
-uint8_t DistributorManager::getDistributorBoolValues(uint8_t distributorId)
+uint16_t DistributorManager::getDistributorBoolValues(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        // Reconstruct bool values byte from distributor state
-        auto distributorSerial = m_distributors[distributorId].toSerial();
-        return distributorSerial[11]; // Boolean values are stored in byte 11
+        return m_distributors[distributorId].getDistributorBoolValues();
     }
     return 0;
 }

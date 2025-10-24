@@ -10,6 +10,7 @@
 #include <array>
 #include <string>
 #include <cstdint>
+#include <bitset>
 
 using std::int8_t;
 
@@ -21,19 +22,26 @@ using std::int8_t;
 constexpr uint8_t DEVICE_NUM_NAME_BYTES = 20;
 constexpr uint8_t DEVICE_NAME_OFFSET= 20;
 constexpr uint8_t DEVICE_NUM_CFG_BYTES = 40;
-constexpr uint8_t DEVICE_BOOL_OMNIMODE = 0x01;
+
+// Device Boolean bit masks (matching protocol specification)
+namespace DEVICE_BOOL_MASK{
+    const uint16_t MUTED = 1 << 0;
+    const uint16_t OMNIMODE = 1 << 1;
+};
 
 namespace Device{
     // Global device default attributes
     inline uint16_t ID = DeviceConfig::DEVICE_ID_VAL;
     inline std::string Name = "New Device";
+    inline bool Muted = false;
     inline bool OmniMode = false;
     inline Instrument InstrumentType = Instrument::None;  // Runtime instrument type
 
     // Device information functions
-    static uint8_t GetDeviceBoolean(){
-        uint8_t deviceBoolByte = 0;
-        if(Device::OmniMode) deviceBoolByte |= (1 << 0); // Set bit 0 for omni mode
+    static uint16_t GetDeviceBoolean(){
+        uint16_t deviceBoolByte = 0;
+        if(Device::Muted) deviceBoolByte |= DEVICE_BOOL_MASK::MUTED;     // Set bit 0 for muted
+        if(Device::OmniMode) deviceBoolByte |= DEVICE_BOOL_MASK::OMNIMODE;  // Set bit 1 for omni mode
         return deviceBoolByte;
     }
 
@@ -44,15 +52,16 @@ namespace Device{
         uint16_t runtimeId = ID;
         deviceObj[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); // Device ID MSB
         deviceObj[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); // Device ID LSB
-        deviceObj[2] = GetDeviceBoolean();
-        deviceObj[3] = HardwareConfig::NUM_INSTRUMENTS;
-        deviceObj[4] = HardwareConfig::NUM_SUBINSTRUMENTS;
-        deviceObj[5] = static_cast<uint8_t>(InstrumentType);
-        deviceObj[6] = static_cast<uint8_t>(PLATFORM_TYPE);
-        deviceObj[7] = DeviceConfig::MIN_NOTE;
-        deviceObj[8] = DeviceConfig::MAX_NOTE;
-        deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 7) & 0x7F);
-        deviceObj[10] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
+        deviceObj[2] = HardwareConfig::NUM_INSTRUMENTS;
+        deviceObj[3] = HardwareConfig::NUM_SUBINSTRUMENTS;
+        deviceObj[4] = static_cast<uint8_t>(InstrumentType);
+        deviceObj[5] = static_cast<uint8_t>(PLATFORM_TYPE);
+        deviceObj[6] = DeviceConfig::MIN_NOTE;
+        deviceObj[7] = DeviceConfig::MAX_NOTE;
+        deviceObj[8] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 7) & 0x7F);
+        deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
+        deviceObj[10] = (GetDeviceBoolean() >> 7) & 0x7F;
+        deviceObj[11] = (GetDeviceBoolean() >> 0) & 0x7F;
 
         for(uint8_t i = 0; i < DEVICE_NUM_NAME_BYTES; i++){
             if (Device::Name.size() >  i) deviceObj[DEVICE_NAME_OFFSET+i] = Device::Name[i];

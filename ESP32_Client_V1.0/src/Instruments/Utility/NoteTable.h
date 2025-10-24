@@ -111,4 +111,61 @@ namespace NoteTables {
         if (note > maxNote) return maxNote;
         return note;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Vibrato Utility Functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // Update vibrato phase counter (call periodically during tick)
+    // Returns new phase value after increment and wrap-around
+    inline uint16_t updateVibratoPhase(uint16_t currentPhase, uint8_t rate) {
+        currentPhase += rate;
+        if (currentPhase >= 36000) {
+            currentPhase -= 36000;
+        }
+        return currentPhase;
+    }
+    
+    // Calculate vibrato offset using optimized triangle wave
+    // phase: 0-35999 (full cycle)
+    // depth: 0-127 (modulation wheel value)
+    // Returns: offset value to apply to period
+    inline int16_t calculateVibratoOffset(uint16_t phase, uint8_t depth) {
+        if (depth == 0) return 0;
+        
+        int16_t vibratoOffset;
+        
+        // Optimized triangle wave using bit shifts where possible
+        if (phase < 18000) {
+            // Rising from -127 to +127
+            vibratoOffset = ((int32_t)phase * 254 / 18000) - 127;
+        } else {
+            // Falling from +127 to -127  
+            vibratoOffset = 127 - ((int32_t)(phase - 18000) * 254 / 18000);
+        }
+        
+        // Apply depth scaling using bit shift (>> 7 is divide by 128)
+        vibratoOffset = (vibratoOffset * depth) >> 7;
+        
+        return vibratoOffset;
+    }
+    
+    // Apply vibrato to a period value
+    // activePeriod: base period in ticks
+    // vibratoOffset: offset value from calculateVibratoOffset
+    // Returns: adjusted period with vibrato applied, clamped to safe range
+    inline uint16_t applyVibratoToPeriod(uint16_t activePeriod, int16_t vibratoOffset) {
+        // Apply vibrato offset - use bit shift for division
+        int32_t periodAdjustment = ((int32_t)activePeriod * vibratoOffset) >> 10;  // >> 10 is divide by 1024
+        uint16_t targetPeriod = activePeriod - periodAdjustment;
+        
+        // Clamp period with single comparison when possible
+        if (targetPeriod < 10) {
+            targetPeriod = 10;
+        } else if (targetPeriod > 65000) {
+            targetPeriod = 65000;
+        }
+        
+        return targetPeriod;
+    }
 }

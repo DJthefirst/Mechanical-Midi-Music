@@ -18,7 +18,7 @@
     constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
 
     //Max Number of Instrument groups is 32
-    constexpr uint8_t NUM_INSTRUMENTS = 8; 
+    constexpr uint8_t NUM_INSTRUMENTS = 10; 
     //Multiplies Instrument groups into individual instruments
     constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
 
@@ -27,9 +27,11 @@
     //Absolute Highest Note Max=127
     constexpr uint8_t MAX_MIDI_NOTE = 127;
 
+    #define VIBRATO_ENABLED
+
 //---------- Hardware Configuration ----------
 
-    constexpr std::array<uint8_t,8> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4};//,16,13};
+    constexpr std::array<uint8_t,10> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4,16,13};
 
     #define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in microseconds
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000

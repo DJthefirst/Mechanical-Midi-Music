@@ -229,8 +229,11 @@ MidiMessage SysExMsgHandler::sysExGetDeviceName(MidiMessage& message)
 // Respond with Device Boolean
 MidiMessage SysExMsgHandler::sysExGetDeviceBoolean(MidiMessage& message)
 {
-    static uint8_t deviceBoolean = Device::GetDeviceBoolean();
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &deviceBoolean, 1);
+    std::array<std::uint8_t, 2> deviceBooleanBytes;
+    uint16_t deviceBoolean = Device::GetDeviceBoolean();
+    deviceBooleanBytes[0] = static_cast<uint8_t>((deviceBoolean >> 7) & 0x7F);
+    deviceBooleanBytes[1] = static_cast<uint8_t>((deviceBoolean >> 0) & 0x7F);
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), deviceBooleanBytes.data(), 2);
 }
 
 // Respond with Device ID (14-bit split into two 7-bit bytes)
@@ -299,7 +302,16 @@ void SysExMsgHandler::sysExSetDeviceName(MidiMessage& message)
 // Configure Device Boolean
 void SysExMsgHandler::sysExSetDeviceBoolean(MidiMessage& message)
 {
-    Device::OmniMode = ((message.sysExCmdPayload()[0] & DEVICE_BOOL_OMNIMODE) != 0);
+    // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
+    uint16_t deviceBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[0]) << 7) | 
+                                static_cast<uint16_t>(message.sysExCmdPayload()[1]);
+    Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);        // Bit 0
+    Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);  // Bit 1
+    
+    #ifdef EXTRA_LOCAL_STORAGE
+        LocalStorage::get().SetDeviceBoolean(deviceBoolValue);
+    #endif
+    
     broadcastDeviceChanged();
 }
 
@@ -384,9 +396,13 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMethod(MidiMessage& message)
 // Respond with the requested Distributor Bool Values Config
 MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(MidiMessage& message)
 {
-    // TODO: Implementation needed - need to add getDistributorBoolValues to DistributorManager
-  uint8_t boolValues = static_cast<uint8_t>(distributorManager->getDistributorBoolValues(message.sysExDistributorID()));
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &boolValues, 1);
+    uint16_t boolValues = distributorManager->getDistributorBoolValues(message.sysExDistributorID());
+    // Split into 2 MIDI 7-bit bytes
+    uint8_t bytesToSend[2];
+    bytesToSend[0] = (boolValues >> 7) & 0x7F;
+    bytesToSend[1] = (boolValues >> 0) & 0x7F;
+
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 2);
 }
 
 // Respond with the requested Distributor Min/Max Notes Config
@@ -444,8 +460,10 @@ void SysExMsgHandler::sysExSetDistributorMethod(MidiMessage& message)
 // Configure the designated Distributor's Boolean Values
 void SysExMsgHandler::sysExSetDistributorBoolValues(MidiMessage& message)
 {
-    uint8_t distributorBoolByte = message.sysExCmdPayload()[2];
-    distributorManager->setDistributorBoolValues(message.sysExDistributorID(), distributorBoolByte);
+    // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
+    uint16_t distributorBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[2]) << 7) | 
+                                     static_cast<uint16_t>(message.sysExCmdPayload()[3]);
+    distributorManager->setDistributorBoolValues(message.sysExDistributorID(), distributorBoolValue);
 }
 
 // Configure the designated Distributor's Minimum and Maximum Notes

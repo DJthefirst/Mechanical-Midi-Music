@@ -167,12 +167,24 @@ void LocalStorage::SetDeviceName(std::string name){
     WriteNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
 }
 
-uint8_t LocalStorage::GetDeviceBoolean(){
-    return ReadNvsU8("Device_bool", 0);
+uint16_t LocalStorage::GetDeviceBoolean(){
+    uint8_t tmp[2];
+    // Default to 0 (no flags set) if not found
+    tmp[0] = 0;
+    tmp[1] = 0;
+    esp_err_t r = ReadNvsBlob("Device_bool", tmp, 2);
+    if (r == ESP_ERR_NVS_NOT_FOUND) {
+        return 0;
+    }
+    uint16_t boolValue = (static_cast<uint16_t>(tmp[0]) << 7) | static_cast<uint16_t>(tmp[1]);
+    return boolValue;
 }
 
-void LocalStorage::SetDeviceBoolean(uint8_t deviceBoolean){
-    WriteNvsU8("Device_bool", deviceBoolean);
+void LocalStorage::SetDeviceBoolean(uint16_t deviceBoolean){
+    uint8_t tmp[2];
+    tmp[0] = static_cast<uint8_t>((deviceBoolean >> 7) & 0x7F);
+    tmp[1] = static_cast<uint8_t>((deviceBoolean >> 0) & 0x7F);
+    WriteNvsBlob("Device_bool", tmp, 2);
 }
 
 uint8_t LocalStorage::GetNumOfDistributors(){
@@ -239,6 +251,10 @@ bool LocalStorage::InitializeDeviceConfiguration(DistributorManager& distributor
     Device::Name = GetDeviceName();
     // Load runtime device ID (if stored) and update Device runtime value
     Device::SetDeviceID(GetDeviceID());
+    // Load device boolean flags (Muted, OmniMode)
+    uint16_t deviceBoolValue = GetDeviceBoolean();
+    Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);
+    Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);
     // Normalize the stored blob to ensure consistent 20-byte space-padded format
     SetDeviceName(Device::Name);
     // Persist runtime device ID back (ensures formatting/consistency)

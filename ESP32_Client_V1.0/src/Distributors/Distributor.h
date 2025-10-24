@@ -29,10 +29,14 @@ using std::int8_t;
 //Size of Distributor when convered to Byte array
 static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
 
-static const uint8_t DISTRIBUTOR_BOOL_MUTED         = 0x01;
-static const uint8_t DISTRIBUTOR_BOOL_DAMPERPEDAL   = 0x02;
-static const uint8_t DISTRIBUTOR_BOOL_POLYPHONIC    = 0x04;
-static const uint8_t DISTRIBUTOR_BOOL_NOTEOVERWRITE = 0x08;
+//Distributor Bool Value Bit Indexes
+namespace DISTRIBUTOR_BOOL_MASK {
+    const uint16_t MUTED         = 1 << 0;
+    const uint16_t POLYPHONIC    = 1 << 1;
+    const uint16_t NOTEOVERWRITE = 1 << 2;
+    const uint16_t DAMPERPEDAL   = 1 << 3;
+    const uint16_t VIBRATO       = 1 << 4;
+};
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
 class Distributor{
@@ -48,10 +52,7 @@ private:
     std::unique_ptr<DistributionStrategy> m_distributionStrategy;
 
     //Settings
-    bool m_muted = false;
-    bool m_damperPedal = false;
-    bool m_polyphonic = true;
-    bool m_noteOverwrite = false;
+    uint16_t m_deviceBools = 0; // Initialize with all features disabled
     uint8_t m_minNote = 0;
     uint8_t m_maxNote = 127;
     uint8_t m_numPolyphonicNotes = 1;
@@ -76,7 +77,12 @@ public:
     /* Returns a Byte array representing this Distributor in 7-bit MIDI format */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
+    uint16_t getDistributorBoolValues() const;
     bool getMuted() const;
+    bool getPolyphonic() const;
+    bool getNoteOverwrite() const;
+    bool getDamperPedal() const;
+    bool getVibratoEnabled() const;
     std::bitset<NUM_Channels> getChannels() const;
     std::bitset<NUM_Instruments> getInstruments() const;
     DistributionMethod getDistributionMethod() const;
@@ -87,9 +93,13 @@ public:
     void setDistributor(uint8_t profile[]);
     void setDistributionMethod(DistributionMethod);
     void setMuted(bool muted);
-    void setDamperPedal(bool enable);
+
+    void setDistributorBoolValues(uint16_t boolValues);
     void setPolyphonic(bool enable);
     void setNoteOverwrite(bool noteOverwrite);
+    void setDamperPedal(bool enable);
+    void setVibratoEnabled(bool enable);
+
     void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
     void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
     void setChannels(std::bitset<NUM_Channels> channels);

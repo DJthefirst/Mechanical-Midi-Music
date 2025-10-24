@@ -12,7 +12,7 @@
 // Round Robin with Load Balancing Strategy
 void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) {
     uint8_t instrumentLeastActive = NONE;
-    
+    Serial.println("RoundRobinBalanceStrategy: Selecting instrument for note " + String(note));
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Increment current Instrument
         currentInstrument++;
@@ -22,6 +22,8 @@ void RoundRobinBalanceStrategy::playNextInstrument(uint8_t note, uint8_t velocit
         
         // Check if valid instrument
         if (!m_distributor->getInstruments()[currentInstrument]) continue;
+
+        Serial.println("  Considering instrument " + String(currentInstrument));
         
         // If there are no active notes this must be the least active Instrument return
 
