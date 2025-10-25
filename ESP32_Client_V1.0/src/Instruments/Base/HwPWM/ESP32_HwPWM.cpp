@@ -8,7 +8,7 @@
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeNotes = {};
 uint8_t ESP32_HwPWM::m_numActiveNotes = 0;
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::lastFrequency = {};
+std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::lastFrequency = {};
 std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_noteFrequency = {};
 std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeFrequency = {};
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_ledcChannels = {};
@@ -47,9 +47,6 @@ void ESP32_HwPWM::setFrequency(uint8_t instrument, double frequency)
     if (frequency < 10.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
-    // Cache last frequency per instrument to avoid unnecessary updates
-    lastFrequency.fill(0);
-    
     // Only update if frequency changed significantly (>0.5Hz difference for better precision)
     if (abs(lastFrequency[instrument] - frequency) > 0.5) {
         // Use ledcChangeFrequency for much faster frequency updates (no full reconfiguration)
@@ -86,7 +83,6 @@ void ESP32_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     // Early bounds checking for performance
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note >= 128) return;
 
-    // Cache the base frequency to avoid repeated lookups
     const double baseFreq = NoteTables::noteFrequency[note];
     
     // Store note information
@@ -168,7 +164,9 @@ void ESP32_HwPWM::setPitchBend(uint8_t channel, uint16_t bend){
             if(m_activeNotes[i] == 0) continue; // Skip if no active note
             // Mask off the MSB flag bit to get the actual note value (0-127)
             uint8_t note = m_activeNotes[i] & (~MSB_BITMASK);
+
             m_noteFrequency[i] = NoteTables::noteFrequency[note];
+
             uint16_t newFrequency = NoteTables::applyPitchBend(m_noteFrequency[i], bend);
             if (abs(m_activeFrequency[i] - newFrequency) > 0.75) {
                 m_activeFrequency[i] = newFrequency;

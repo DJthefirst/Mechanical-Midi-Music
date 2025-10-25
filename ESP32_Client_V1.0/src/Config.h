@@ -21,8 +21,8 @@ using std::int8_t;
     #ifndef DEVICE_CONFIG
         // #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
-         #define DEVICE_CONFIG "Configs/StepperSynthHwCfg.h"
+         #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
+        // #define DEVICE_CONFIG "Configs/StepperSynthHwCfg.h"
     #endif
 
     // Include the selected config header

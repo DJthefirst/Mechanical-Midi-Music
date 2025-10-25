@@ -25,7 +25,7 @@ private:
     static uint8_t m_numActiveNotes;
 
     // Instrument attributes for tracking active notes
-    static std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency; // Active note (MSB is set if note is active)
+    static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> lastFrequency; // Last set frequency for caching
     static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_noteFrequency;  // Base note frequency
     static std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeFrequency; // Note played with bend
 
