@@ -53,20 +53,20 @@ void Distributor::processMessage(MidiMessage message){
         noteOnEvent(message.buffer[1],message.buffer[2],message.channel());
         break;
     case(Midi::KeyPressure):
-        keyPressureEvent(message.buffer[1],message.buffer[2]);
+        m_instrumentController->setKeyPressure(message.channel(), message.buffer[1], message.buffer[2]);
         break;
     case(Midi::ControlChange):
         // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
         break;
     case(Midi::ProgramChange):
-        
-        programChangeEvent(message.buffer[1]);
+
+        m_instrumentController->setProgramChange(message.channel(), message.buffer[1]);
         break;
     case(Midi::ChannelPressure):
-        channelPressureEvent(message.buffer[1]);
+        m_instrumentController->setChannelPressure(message.channel(), message.buffer[1]);
         break;
     case(Midi::PitchBend):
-        pitchBendEvent((static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]), currentChannel);
+        m_instrumentController->setPitchBend(message.channel(), (static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]));
         break;
     case(Midi::SysCommon):
         break;
@@ -96,38 +96,6 @@ void Distributor::noteOnEvent(uint8_t note, uint8_t velocity, uint8_t channel)
         m_distributionStrategy->stopActiveInstrument(note, velocity, channel);
     }else{
         m_distributionStrategy->playNextInstrument(note, velocity, channel);
-    }
-}
-
-// Find the first active instrument playing said note and update its velocity
-void Distributor::keyPressureEvent(uint8_t Note, uint8_t Velocity)
-{
-    //TODO: Re-implement distributor tracking
-    // const uint8_t instrument = checkForNote(Note);
-    // if(instrument != NONE){
-    //     m_ptrInstrumentController->setKeyPressure(instrument, Note, Velocity);
-    // }
-}
-
-void Distributor::programChangeEvent(uint8_t Program)
-{
-    // Not yet implemented
-    m_instrumentController->resetAll();
-}
-
-void Distributor::channelPressureEvent(uint8_t Velocity)
-{
-    // Not yet implemented 
-}
-
-// Update each instrument's pitch bend value
-void Distributor::pitchBendEvent(uint16_t pitchBend, uint8_t channel)
-{
-    // Iterate over enabled instruments
-    for(uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-        if(m_instruments[i]){
-            m_instrumentController->setPitchBend(i, pitchBend, channel);
-        }
     }
 }
 

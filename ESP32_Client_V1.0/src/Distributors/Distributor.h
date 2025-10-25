@@ -86,7 +86,9 @@ public:
     std::bitset<NUM_Channels> getChannels() const;
     std::bitset<NUM_Instruments> getInstruments() const;
     DistributionMethod getDistributionMethod() const;
-    
+    uint8_t getMinNote() const;
+    uint8_t getMaxNote() const;
+
     // Add routing method for messages
     void distributeMessage(MidiMessage& message);
 
@@ -112,11 +114,6 @@ private:
     //Midi Message Events
     void noteOnEvent(uint8_t key, uint8_t velocity, uint8_t channel);
     void noteOffEvent(uint8_t key, uint8_t velocity, uint8_t channel);
-    void keyPressureEvent(uint8_t key, uint8_t velocity);
-    // void controlChangeEvent(uint8_t controller, uint8_t value);  --Implemented in MessageHandler--
-    void programChangeEvent(uint8_t program);
-    void channelPressureEvent( uint8_t velocity);
-    void pitchBendEvent(uint16_t pitchBend, uint8_t channel);
     
     // Update the distribution strategy when method changes
     void updateDistributionStrategy();

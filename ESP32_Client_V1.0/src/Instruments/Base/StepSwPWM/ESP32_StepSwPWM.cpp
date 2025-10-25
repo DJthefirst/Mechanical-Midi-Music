@@ -44,11 +44,11 @@ void ESP32_StepSwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocit
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
-    _activeInstruments.set(instrument);
+    m_activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
     m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
-    _noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
+    m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
     
     if (!wasActive) {
         m_numActiveNotes++;
@@ -61,10 +61,10 @@ void ESP32_StepSwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
-    _activeInstruments.reset(instrument);
-    _lastDistributor[instrument] = nullptr;
-    _lastChannel[instrument] = NONE;
-    _noteStartTime[instrument] = 0;
+    m_activeInstruments.reset(instrument);
+    m_lastDistributor[instrument] = nullptr;
+    m_lastChannel[instrument] = NONE;
+    m_noteStartTime[instrument] = 0;
     m_activeNotes[instrument] = 0;
     m_notePeriod[instrument] = 0;
     m_activePeriod[instrument] = 0;
@@ -79,9 +79,9 @@ void ESP32_StepSwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 void ESP32_StepSwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
-    _lastDistributor.fill(nullptr);
-    _lastChannel.fill(NONE);
-    _noteStartTime.fill(0);
+    m_lastDistributor.fill(nullptr);
+    m_lastChannel.fill(NONE);
+    m_noteStartTime.fill(0);
     m_activeNotes = {};
     m_notePeriod = {};
     m_activePeriod = {};

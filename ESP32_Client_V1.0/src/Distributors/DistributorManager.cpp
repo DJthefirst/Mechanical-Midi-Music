@@ -96,7 +96,7 @@ void DistributorManager::processCC(MidiMessage& message)
         if (m_distributors[i].getChannels().test(message.channel())) {
             switch (message.CC_Control()) {
                 case(MidiCC::ModulationWheel):
-                    m_ptrInstrumentController->setModulationWheel(message.CC_Value());
+                    m_ptrInstrumentController->setModulationWheel(message.channel(), message.CC_Value());
                     break;
                 case(MidiCC::DamperPedal):
                     m_distributors[i].setDamperPedal(message.CC_Value() > 64);
