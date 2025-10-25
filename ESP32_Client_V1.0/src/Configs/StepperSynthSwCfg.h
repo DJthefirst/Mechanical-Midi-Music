@@ -33,6 +33,7 @@
 
     constexpr std::array<uint8_t,10> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4,16,13};
 
+    #define PWM_NOTES_DOUBLE
     #define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in microseconds
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 

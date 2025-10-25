@@ -40,6 +40,8 @@ public:
     void stopNote(uint8_t instrument, uint8_t velocity) override;
     void stopAll() override;
 
+    void setPitchBend(uint8_t channel, uint16_t value) override;
+
     Instrument getInstrumentType() const override { return Instrument::HW_PWM; }
     uint8_t getNumActiveNotes(uint8_t instrument) override;
     bool isNoteActive(uint8_t instrument, uint8_t note) override;

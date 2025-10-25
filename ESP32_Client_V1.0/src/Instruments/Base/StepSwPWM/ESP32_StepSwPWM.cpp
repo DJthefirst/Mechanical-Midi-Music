@@ -47,7 +47,13 @@ void ESP32_StepSwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocit
     m_activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
-    m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+
+    #ifdef PWM_NOTES_DOUBLE
+        m_activePeriod[instrument] = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
+    #else
+        m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+    #endif
+
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
     
     if (!wasActive) {

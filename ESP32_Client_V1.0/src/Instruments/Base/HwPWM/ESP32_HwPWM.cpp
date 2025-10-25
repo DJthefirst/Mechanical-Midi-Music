@@ -8,6 +8,7 @@
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeNotes = {};
 uint8_t ESP32_HwPWM::m_numActiveNotes = 0;
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::lastFrequency = {};
 std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_noteFrequency = {};
 std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeFrequency = {};
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_ledcChannels = {};

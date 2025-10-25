@@ -30,6 +30,7 @@
 //---------- Hardware Configuration ----------
 
     constexpr std::array<uint8_t,8> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4};//,16,13};
+
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 
 //---------- Uncomment Your Selected Instrument Type ----------

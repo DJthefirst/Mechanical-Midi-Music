@@ -51,7 +51,13 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     m_activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
-    m_activePeriod[instrument] = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
+
+    #ifdef PWM_NOTES_DOUBLE
+        m_activePeriod[instrument] = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
+    #else
+        m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+    #endif
+
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
     if(m_lastDistributor[instrument] != nullptr){
@@ -189,7 +195,12 @@ void ESP32_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
             if(m_notePeriod[i] == 0) continue;
             // Mask off the MSB flag bit to get the actual note value (0-127)
             uint8_t note = m_activeNotes[i] & (~MSB_BITMASK);
-            m_activePeriod[i] = NoteTables::applyPitchBendToNoteDouble(note, bend);
+            
+            #ifdef PWM_NOTES_DOUBLE
+                m_activePeriod[i] = NoteTables::applyPitchBendToNoteDouble(note, bend);
+            #else
+                m_activePeriod[i] = NoteTables::applyPitchBendToNote(note, bend);
+            #endif
         }
     }
 }
