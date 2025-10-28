@@ -209,28 +209,6 @@ void DistributorManager::localStorageClearDistributors()
     LocalStorage::get().SetNumOfDistributors(m_distributors.size());
 }
 
-#else
-
-void DistributorManager::localStorageAddDistributor()
-{
-    // No-op when local storage is disabled
-}
-
-void DistributorManager::localStorageRemoveDistributor(uint8_t id)
-{
-    // No-op when local storage is disabled  
-}
-
-void DistributorManager::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data)
-{
-    // No-op when local storage is disabled
-}
-
-void DistributorManager::localStorageClearDistributors()
-{
-    // No-op when local storage is disabled
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

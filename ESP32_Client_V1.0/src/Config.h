@@ -20,8 +20,8 @@ using std::int8_t;
     // Default device config used when no selection is provided by the application
     #ifndef DEVICE_CONFIG
         // #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
-         #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
+        #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
         // #define DEVICE_CONFIG "Configs/StepperSynthHwCfg.h"
     #endif
 

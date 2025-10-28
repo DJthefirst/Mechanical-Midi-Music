@@ -87,11 +87,18 @@ private:
     
     // Local Storage helpers
     #ifdef EXTRA_LOCAL_STORAGE
-    void localStorageSetDeviceName(char* name);
-    void localStorageAddDistributor();
-    void localStorageRemoveDistributor(uint8_t id);
-    void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data);
-    void localStorageClearDistributors();
-    void localStorageReset();
+        void localStorageSetDeviceName(char* name);
+        void localStorageAddDistributor();
+        void localStorageRemoveDistributor(uint8_t id);
+        void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data);
+        void localStorageClearDistributors();
+        void localStorageReset();
+    #else
+        void localStorageSetDeviceName(char* name) {}
+        void localStorageAddDistributor() {}
+        void localStorageRemoveDistributor(uint8_t id) {}
+        void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data) {}
+        void localStorageClearDistributors() {}
+        void localStorageReset() {}
     #endif
 };

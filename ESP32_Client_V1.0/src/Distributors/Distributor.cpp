@@ -42,7 +42,7 @@ void Distributor::processMessage(MidiMessage message){
     if (!channelEnabled(currentChannel)) return;
 
     // Check if muted
-    if(m_deviceBools & DISTRIBUTOR_BOOL_MASK::MUTED) return;
+    if(getMuted()) return;
 
     switch(message.type()){
 
