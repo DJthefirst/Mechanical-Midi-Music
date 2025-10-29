@@ -1,7 +1,9 @@
+#include "Config.h"
+#ifdef ARDUINO_ARCH_ESP32
+
 #include "Instruments/Base/StepHwPWM/ESP32_StepHwPWM.h"
 #include "Instruments/Utility/InterruptTimer.h"
 #include "Instruments/Utility/NoteTable.h"
-#include "Config.h"
 #include "Arduino.h"
 #include <bitset>
 
@@ -102,11 +104,7 @@ Called by the timer interrupt at the specified resolution.  Because this is call
 it's crucial that any computations here be kept to a minimum!
 */
 
-#ifdef ARDUINO_ARCH_ESP32
 void ICACHE_RAM_ATTR ESP32_StepHwPWM::Tick()
-#else
-void ESP32_StepHwPWM::tick()
-#endif
 {
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -137,3 +135,5 @@ void ESP32_StepHwPWM::togglePin(uint8_t instrument)
     digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
         
 }
+
+#endif //ARDUINO_ARCH_ESP32

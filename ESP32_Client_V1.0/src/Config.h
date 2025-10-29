@@ -20,7 +20,9 @@ using std::int8_t;
     // Default device config used when no selection is provided by the application
     #ifndef DEVICE_CONFIG
         // #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
-        #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
+        #define DEVICE_CONFIG "Configs/Teensy41HwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/Teensy41HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
         // #define DEVICE_CONFIG "Configs/StepperSynthHwCfg.h"
     #endif
@@ -47,6 +49,11 @@ using std::int8_t;
         #define HAS_WIFI
         #define HAS_BLE
         #define HAS_NVS
+    #elif defined(ARDUINO_TEENSY41) || defined(__IMXRT1062__)
+        #define PLATFORM_TEENSY41
+        constexpr Platform PLATFORM_TYPE = Platform::_Teensy41;
+        #define HAS_HARDWARE_PWM
+        #define HAS_USB_MIDI
     #elif defined(ARDUINO_AVR_UNO)
         #define PLATFORM_ARDUINO_UNO  
         constexpr Platform PLATFORM_TYPE = Platform::ArduinoUno;
@@ -100,6 +107,11 @@ namespace HardwareConfig {
         constexpr bool HAS_WIFI_VAL = true;
         constexpr bool HAS_BLE_VAL = true;
         constexpr bool HAS_NVS_VAL = true;
+    #elif defined(PLATFORM_TEENSY41)
+        constexpr bool HAS_HARDWARE_PWM_VAL = true;
+        constexpr bool HAS_WIFI_VAL = false;
+        constexpr bool HAS_BLE_VAL = false;
+        constexpr bool HAS_NVS_VAL = false;
     #else
         constexpr bool HAS_HARDWARE_PWM_VAL = false;
         constexpr bool HAS_WIFI_VAL = false;

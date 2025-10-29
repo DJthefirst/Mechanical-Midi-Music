@@ -1,26 +1,30 @@
 #include "Config.h"
+#ifdef PLATFORM_TEENSY41
 
-#ifdef ARDUINO_ARCH_ESP32
-
-#include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
-#include "Instruments/Utility/InterruptTimer.h"
+#include "Instruments/Base/SwPWM/Teensy41_SwPWM.h"
 #include "Instruments/Utility/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>
 
-// Define static member variables
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activeNotes = {};
-uint8_t ESP32_SwPWM::m_numActiveNotes = 0;
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_notePeriod = {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activePeriod =  {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_currentTick = {};
-std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_currentState = 0;
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_vibratoPhase = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_vibratoDepth = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_vibratoRate = {}; //slow default rate
+#include <IntervalTimer.h>
 
-ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
+
+// Teensy 4.1 IntervalTimer for software PWM
+IntervalTimer swPwmTimer;
+
+// Define static member variables
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activeNotes = {};
+uint8_t Teensy41_SwPWM::m_numActiveNotes = 0;
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_notePeriod = {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activePeriod =  {};
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_currentTick = {};
+std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_currentState = 0;
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoPhase = {};
+std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoDepth = {};
+std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoRate = {}; //slow default rate
+
+Teensy41_SwPWM::Teensy41_SwPWM() : InstrumentControllerBase()
 {
     //Setup pins
     for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
@@ -30,23 +34,25 @@ ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
     delay(500); // Wait a half second for safety
 
     // Setup timer to handle interrupts for driving the instrument
-    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, Tick);
+    // Teensy IntervalTimer uses microseconds
+    swPwmTimer.begin(Tick, HardwareConfig::TIMER_RESOLUTION);
 
-    //Initalize Default values
+
+    //Initialize Default values
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
 }
 
-void ESP32_SwPWM::reset(uint8_t instrument)
+void Teensy41_SwPWM::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void ESP32_SwPWM::resetAll()
+void Teensy41_SwPWM::resetAll()
 {
     stopAll();
 }
 
-void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -75,7 +81,7 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     return;
 }
 
-void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
+void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -99,7 +105,7 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     return;
 }
 
-void ESP32_SwPWM::stopAll(){
+void Teensy41_SwPWM::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     m_lastDistributor.fill(nullptr);
@@ -126,7 +132,7 @@ void ESP32_SwPWM::stopAll(){
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
 */
-void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
+void Teensy41_SwPWM::Tick()
 {
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -162,36 +168,29 @@ void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
     }
 }
 
-
-#ifdef ARDUINO_ARCH_ESP32
-void ICACHE_RAM_ATTR ESP32_SwPWM::togglePin(uint8_t instrument)
-#else
-void ESP32_SwPWM::togglePin(uint8_t instrument)
-#endif
+void Teensy41_SwPWM::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
     digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
-        
 }
-// #pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t ESP32_SwPWM::getNumActiveNotes(uint8_t instrument)
+uint8_t Teensy41_SwPWM::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool ESP32_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
+bool Teensy41_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    //Mask lower 7bits and return true if the instument is playing the respective note.
+    //Mask lower 7bits and return true if the instrument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void ESP32_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
+void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
@@ -208,7 +207,7 @@ void ESP32_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
     }
 }
 
-void ESP32_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
+void Teensy41_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
 {
     #ifdef VIBRATO_ENABLED
         // Map modulation wheel (0-127) to vibrato depth (0-127)
@@ -229,4 +228,4 @@ void ESP32_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
     #endif
 }
 
-#endif // ARDUINO_ARCH_ESP32
+#endif //PLATFORM_TEENSY41

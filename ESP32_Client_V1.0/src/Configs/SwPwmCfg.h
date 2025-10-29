@@ -33,7 +33,7 @@
 
     constexpr std::array<uint8_t, 10> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 33, 32, 16}; // ESP32 PWM-capable pins
 
-    #define TIMER_RESOLUTION_US_VALUE 8 // Timer resolution in milliseconds
+    #define TIMER_RESOLUTION_US_VALUE 1 // Timer resolution in milliseconds
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 
 //---------- Uncomment Your Selected Instrument Type ----------
@@ -61,7 +61,7 @@
 //---------- Uncomment Your Desired Extras ----------
 
     // Save configuration on power off
-    #define EXTRA_LOCAL_STORAGE
+    //#define EXTRA_LOCAL_STORAGE
 
     // Addressable LED lighting effects
     //#define EXTRA_ADDRESSABLE_LEDS

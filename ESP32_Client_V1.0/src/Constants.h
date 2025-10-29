@@ -144,6 +144,7 @@ enum class Platform
 { 
     _ESP32 = 1,
     _ESP8266,
+    _Teensy41,
     _ArduinoUno,
     _ArduinoMega,
     _ArduinoDue,
