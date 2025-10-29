@@ -55,6 +55,9 @@ void Teensy41_HwPWM::setFrequency(uint8_t instrument, double frequency)
     //     lastFrequency[instrument] = frequency;
     // }
     
+    // Set the PWM frequency for this pin
+    analogWriteFrequency(pins[instrument], frequency);
+    
     // Set duty cycle - 50% for square wave audio output
     analogWrite(pins[instrument], DUTY_CYCLE_50_PERCENT);
     m_activeInstruments.set(instrument);

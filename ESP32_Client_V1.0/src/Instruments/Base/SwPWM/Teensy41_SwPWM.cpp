@@ -97,7 +97,7 @@ void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     m_vibratoPhase[instrument] = 0;  // Reset vibrato phase to prevent carryover
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
     m_currentState.reset(instrument);  // Reset pin state bit
-    digitalWrite(HardwareConfig::PINS[instrument], 0);
+    digitalWriteFast(HardwareConfig::PINS[instrument], 0);
     
     if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
@@ -120,7 +120,7 @@ void Teensy41_SwPWM::stopAll(){
     m_vibratoDepth = {};
 
     for(uint8_t i = 0; i < HardwareConfig::PINS.size(); i++){
-        digitalWrite(HardwareConfig::PINS[i], LOW);
+        digitalWriteFast(HardwareConfig::PINS[i], LOW);
     }
 }
 
@@ -172,7 +172,7 @@ void Teensy41_SwPWM::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
-    digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
+    digitalWriteFast(HardwareConfig::PINS[instrument], m_currentState[instrument]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

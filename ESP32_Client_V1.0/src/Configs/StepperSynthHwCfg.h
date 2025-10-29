@@ -8,6 +8,7 @@
 
 #pragma once
 #include <array>
+#include <cstdint>
 
 //---------- Device Configuration ----------
 
@@ -31,11 +32,18 @@
 
     constexpr std::array<uint8_t,8> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4};//,16,13};
 
+    #define SHIFTREG_TYPE_74HC595
+    #define SHIFTREG_HOLDTIME_NS 25
+    #define PIN_SHIFTREG_Data 25
+    #define PIN_SHIFTREG_Clock 27
+    #define PIN_SHIFTREG_Load 26
+    #define PIN_LED_Data 18
+
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
-    #define INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/StepperSynthHw.h"
+    #define INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/StepperSynthSw.h"
 
 //---------- Uncomment Your Selected COM Types ----------
  
