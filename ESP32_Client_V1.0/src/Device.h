@@ -46,7 +46,7 @@ namespace Device{
     }
 
     static std::array<std::uint8_t,DEVICE_NUM_CFG_BYTES> GetDeviceConstruct(){
-        std::array<std::uint8_t,DEVICE_NUM_CFG_BYTES> deviceObj;
+        std::array<std::uint8_t,DEVICE_NUM_CFG_BYTES> deviceObj = {};  // Zero-initialize all bytes
 
         // Use runtime device ID so it can be changed at runtime via SysEx / LocalStorage
         uint16_t runtimeId = ID;
@@ -62,6 +62,8 @@ namespace Device{
         deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
         deviceObj[10] = (GetDeviceBoolean() >> 7) & 0x7F;
         deviceObj[11] = (GetDeviceBoolean() >> 0) & 0x7F;
+        
+        // Bytes 12-19 are reserved and remain 0x00 (initialized above)
 
         for(uint8_t i = 0; i < DEVICE_NUM_NAME_BYTES; i++){
             if (Device::Name.size() >  i) deviceObj[DEVICE_NAME_OFFSET+i] = Device::Name[i];
