@@ -18,15 +18,27 @@ nvs_handle_t handle;
 LocalStorage::LocalStorage(){
     // Initialize NVS
     err = nvs_flash_init();
-    //if (err != ESP_OK) Serial.printf("Error (%s) Init NVS!\n", esp_err_to_name(err));
+    //Serial.printf("[NVS] Init result: %s\n", esp_err_to_name(err));
+    
+    // Only erase if absolutely necessary (version mismatch or no free pages)
+    // This will cause data loss but is required for NVS to function
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        // NVS partition was truncated and needs to be erased
-        // Retry nvs_flash_init
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-        //if (err != ESP_OK) Serial.printf("Error (%s) Init NVS!\n", esp_err_to_name(err));
+        // WARNING: This will erase all stored configuration
+        //Serial.printf("[NVS] Erasing flash due to: %s\n", esp_err_to_name(err));
+        err = nvs_flash_erase();
+        if (err == ESP_OK) {
+            err = nvs_flash_init();
+            //Serial.printf("[NVS] Re-init after erase: %s\n", esp_err_to_name(err));
+        }
     }
-    ESP_ERROR_CHECK( err );
+    
+    // If initialization still fails, we can't use NVS but shouldn't crash
+    // Device will run with default configuration
+    if (err != ESP_OK) {
+        //Serial.printf("[NVS] Init FAILED: %s - using defaults\n", esp_err_to_name(err));
+    } else {
+        //Serial.printf("[NVS] Init SUCCESS\n");
+    }
 }
 
 bool LocalStorage::OpenNvs(){
@@ -104,15 +116,15 @@ void LocalStorage::WriteNvsU8(const char *key, uint8_t value){
 bool LocalStorage::EnsureNVSInitialized(){
     // Check if NVS is properly initialized by attempting a simple operation
     nvs_handle_t testHandle;
-    esp_err_t err = nvs_open("test", NVS_READONLY, &testHandle);
+    esp_err_t err = nvs_open("storage", NVS_READONLY, &testHandle);
     
     if (err == ESP_ERR_NVS_NOT_INITIALIZED) {
-        // NVS is not initialized, initialize it
+        // NVS is not initialized, try to initialize it
         err = nvs_flash_init();
         if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-            // NVS partition was truncated and needs to be erased
-            ESP_ERROR_CHECK(nvs_flash_erase());
-            err = nvs_flash_init();
+            // This would require erasing, but that means losing data
+            // Return false to use defaults instead
+            return false;
         }
         if (err != ESP_OK) {
             return false;
@@ -121,19 +133,30 @@ bool LocalStorage::EnsureNVSInitialized(){
         // NVS is working, close the test handle
         nvs_close(testHandle);
     }
-    // If err is ESP_ERR_NVS_NOT_FOUND, that's normal - the "test" namespace doesn't exist
+    // If err is ESP_ERR_NVS_NOT_FOUND, that's normal - the "storage" namespace doesn't exist yet
     
     return true;
 }
 
 void LocalStorage::ResetDeviceConfig(){
-    nvs_flash_erase();
-    // Reinitialize NVS after erasing
-    err = nvs_flash_init();
-    if (err != ESP_OK) {
-        // Handle any initialization errors
-        ESP_ERROR_CHECK(err);
+    // Clear device configuration by removing specific keys rather than erasing entire flash
+    OpenNvs();
+    
+    // Erase device-specific keys
+    nvs_erase_key(handle, "Device_name");
+    nvs_erase_key(handle, "Device_id");
+    nvs_erase_key(handle, "Device_bool");
+    nvs_erase_key(handle, "Distributor_num");
+    
+    // Erase all distributor constructs (support up to 256 distributors)
+    for (uint16_t i = 0; i < 256; i++) {
+        std::string key = Uint16ToKey(i);
+        nvs_erase_key(handle, key.c_str());
     }
+    
+    // Commit changes
+    nvs_commit(handle);
+    nvs_close(handle);
 }
 
 //TODO Use Smart Pointer?
@@ -143,17 +166,26 @@ std::string LocalStorage::GetDeviceName(){
     // Initialize with null bytes to ensure trailing bytes are padded if stored blob is shorter
     memset(tmp, 0x00, DEVICE_NUM_NAME_BYTES);
     err = ReadNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
+    //Serial.printf("[NVS] GetDeviceName: %s\n", esp_err_to_name(err));
 
-    if (err == ESP_ERR_NVS_NOT_FOUND){
+    // If not found or any error occurred, return default
+    if (err != ESP_OK){
+        //Serial.printf("[NVS] Using default name: '%s'\n", Device::Name.c_str());
         return Device::Name;
     }
 
-    // Convert to std::string and trim trailing spaces
+    // Convert to std::string and trim trailing spaces and null bytes
     std::string name(reinterpret_cast<char*>(tmp), DEVICE_NUM_NAME_BYTES);
-    size_t end = name.find_last_not_of(' ');
-    if (end != std::string::npos) name.erase(end + 1);
-    else name.clear();
+    size_t end = name.find_last_not_of(" \0");
+    if (end != std::string::npos) {
+        name.erase(end + 1);
+    } else {
+        // If name is all spaces/nulls, return default instead of empty string
+        //Serial.printf("[NVS] Stored name empty, using default: '%s'\n", Device::Name.c_str());
+        return Device::Name;
+    }
 
+    //Serial.printf("[NVS] Loaded name: '%s'\n", name.c_str());
     return name;
 }
 
@@ -164,7 +196,8 @@ void LocalStorage::SetDeviceName(std::string name){
 
     size_t copyLen = std::min(name.length(), static_cast<size_t>(DEVICE_NUM_NAME_BYTES));
     memcpy(tmp, name.c_str(), copyLen);
-    WriteNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
+    err = WriteNvsBlob("Device_name", tmp, DEVICE_NUM_NAME_BYTES);
+    //Serial.printf("[NVS] SetDeviceName '%s': %s\n", name.c_str(), esp_err_to_name(err));
 }
 
 uint16_t LocalStorage::GetDeviceBoolean(){
@@ -188,11 +221,14 @@ void LocalStorage::SetDeviceBoolean(uint16_t deviceBoolean){
 }
 
 uint8_t LocalStorage::GetNumOfDistributors(){
-    return ReadNvsU8("Distributor_num", 0);
+    uint8_t num = ReadNvsU8("Distributor_num", 0);
+    //Serial.printf("[NVS] GetNumOfDistributors: %d\n", num);
+    return num;
 }
 
 void LocalStorage::SetNumOfDistributors(uint8_t numOfDistributors){
     WriteNvsU8("Distributor_num", numOfDistributors);
+    //Serial.printf("[NVS] SetNumOfDistributors: %d\n", numOfDistributors);
 }
 
 void LocalStorage::GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct){
@@ -255,10 +291,6 @@ bool LocalStorage::InitializeDeviceConfiguration(DistributorManager& distributor
     uint16_t deviceBoolValue = GetDeviceBoolean();
     Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);
-    // Normalize the stored blob to ensure consistent 20-byte space-padded format
-    SetDeviceName(Device::Name);
-    // Persist runtime device ID back (ensures formatting/consistency)
-    SetDeviceID(Device::GetDeviceID());
     
     // Distributor Config
     uint8_t numDistributors = GetNumOfDistributors();
