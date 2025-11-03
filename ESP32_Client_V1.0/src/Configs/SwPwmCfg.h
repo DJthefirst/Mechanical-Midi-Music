@@ -64,7 +64,7 @@
 //---------- Uncomment Your Desired Extras ----------
 
     // Save configuration on power off
-    // #define EXTRA_LOCAL_STORAGE
+    #define EXTRA_LOCAL_STORAGE
 
     // Addressable LED lighting effects
     //#define EXTRA_ADDRESSABLE_LEDS

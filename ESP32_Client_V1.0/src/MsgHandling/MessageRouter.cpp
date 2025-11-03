@@ -63,12 +63,6 @@ void MessageRouter::processMessages()
             processMessage(*message, net);
         }
     }
-    
-    // Check for instrument timeouts (only when configured)
-    if (m_instrumentController) {
-        m_instrumentController->checkInstrumentTimeouts();
-    }
-    
 }
 
 // Process a single message from a specific network

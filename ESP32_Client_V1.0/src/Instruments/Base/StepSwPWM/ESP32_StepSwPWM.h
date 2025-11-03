@@ -40,4 +40,7 @@ public:
     void stopAll() override;
 
     Instrument getInstrumentType() const override { return Instrument::StepSW_PWM; }
+    
+    //Timeout tracking functions
+    void checkInstrumentTimeouts() override;
 };

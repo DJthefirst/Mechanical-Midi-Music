@@ -229,4 +229,23 @@ void ESP32_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
     #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Timeout Tracking Functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ESP32_SwPWM::checkInstrumentTimeouts() {
+    // Only check timeouts if a timeout is configured
+    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    
+    uint32_t currentTime = millis();
+    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+        // Check if instrument is active and has timed out
+        if (m_activeNotes[i] != 0 && 
+            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            // Stop the note due to timeout
+            stopNote(i, 0);
+        }
+    }
+}
+
 #endif // ARDUINO_ARCH_ESP32
