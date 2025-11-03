@@ -1,103 +1,179 @@
 import type { Device } from '../Devices/Device';
 import { deviceListStore } from '$lib/store/stores';
 import * as CONST from './Constants';
-import {} from './helpers';
 import type { Distributor } from '../Distributors/Distributor';
+import { MMM_Msg } from './MMM_Msg';
 
-let i = 1;
 let deviceList: Device[];
 
 deviceListStore.subscribe((prev_value: any) => (deviceList = prev_value));
 
 export interface Connection {
-	open: (baudRate: number) => void;
-	close: () => void;
-	sendHexString: (msg: string) => void;
-	sendHexByteArray: (msg: Uint8Array) => void;
-	receive: () => any;
+	open: (baudRate: number) => Promise<number>;
+	close: () => Promise<void>;
+	sendHexString: (msg: string) => Promise<void>;
+	sendHexByteArray: (msg: Uint8Array | number[]) => Promise<void>;
+	sendMessage: (msg: MMM_Msg) => Promise<void>;
 	getPort: () => any;
+	setMessageHandler: (device: Device) => void;
 }
 
-// Hanlde Serial Communications
-export default class SerialManager {
-	public sendMidiToDevices(msg: any) {
-		for (let device of deviceList) {
+/**
+ * ComManager - Manages communication with devices
+ * Provides high-level methods for device configuration and synchronization
+ */
+export default class ComManager {
+	/**
+	 * Send MIDI data to all connected devices
+	 */
+	public sendMidiToDevices(msg: Uint8Array): void {
+		for (const device of deviceList) {
 			device.getConnection().sendHexByteArray(msg);
 		}
 	}
 
 	////////////////////////////////////////////////
-	// SYSEX Commands
+	// Device Configuration Commands
 	////////////////////////////////////////////////
 
-	public async saveDevice(device: Device) {
-		let asciiName = device.name.toAsciiString();
-		while (asciiName.length < 40) asciiName += '00';
-		let deviceBoolean = device.isOnmiMode ? 0x01 : 0x00;
+	/**
+	 * Save device configuration (name and boolean settings)
+	 */
+	public async saveDevice(device: Device): Promise<void> {
+		console.log('Saving device configuration for device:', device.id);
 
-		sysExCmd(device, CONST.SYSEX_SetDeviceName, asciiName);
-		sysExCmd(device, CONST.SYSEX_SetDeviceBoolean, deviceBoolean);
-		this.syncDevice(device);
-	}
-
-	public async saveDistributor(device: Device, distributor: Distributor) {
-		sysExCmd(device, CONST.SYSEX_SetDistributor, distributor.getConstruct());
-		await this.syncDevice(device);
-	}
-
-	public async saveDistributorBool(device: Device, distributor: Distributor) {
-		sysExCmd(device, CONST.SYSEX_SetDistributorID_Boolean, distributor.getIdStr() + distributor.getBoolean());
-		await this.syncDevice(device);
-	}
-
-	public async syncDevice(device: Device) {
-		sysExCmd(device, CONST.SYSEX_GetDeviceConstructOnly, '');
-		let deviceConstruct = await device.getConnection().receive();
-		if (deviceConstruct === null) return;
-		device.update(deviceConstruct);
-		await this.syncDistributors(device);
-	}
-
-	public async resetDevice(device: Device) {
-		sysExCmd(device, CONST.SYSEX_ResetDeviceCfg, '');
-		this.syncDevice(device);
-	}
-
-	public async syncDistributors(device: Device) {
-		sysExCmd(device, CONST.SYSEX_GetNumDistributors, '');
-		let numDistributors = await device.getConnection().receive();
-		for (let i = 0; i < numDistributors[0]; i++) {
-			sysExCmd(device, CONST.SYSEX_GetDistributorID, to14BitStr(i));
-			let distributorConstruct = await device.getConnection().receive();
-			device.updateDistributor(distributorConstruct);
+				// Prepare device name (20 bytes ASCII)
+		const nameBytes = new Uint8Array(20);
+		for (let i = 0; i < Math.min(device.name.length, 20); i++) {
+			nameBytes[i] = device.name.charCodeAt(i);
 		}
-	}
+				// Convert to hex string for sendCommand
+		const nameHex = Array.from(nameBytes)
+			.map(b => b.toString(16).padStart(2, '0'))
+			.join('');
+		
+		// Prepare device boolean flags
+		const deviceBoolean = 
+			(device.muted ? CONST.DEVICE_BOOL_MASK.MUTED : 0) |
+			(device.isOnmiMode ? CONST.DEVICE_BOOL_MASK.OMNIMODE : 0);
 
-	public async removeDistributor(device: Device, distributor: Distributor) {
-		sysExCmd(device, CONST.SYSEX_RemoveDistributorID, to14BitStr(distributor.getId()));
+		// Send commands
+		await this.sendCommand(device, CONST.SYSEX_SetDeviceName, nameHex);
+		await this.sendCommand(device, CONST.SYSEX_SetDeviceBoolean, this.to14BitStr(deviceBoolean));
+		
+		// Sync to get updated configuration
 		await this.syncDevice(device);
 	}
 
-	public async clearDistributors(device: Device) {
-		sysExCmd(device, CONST.SYSEX_RemoveAllDistributors, '');
+	/**
+	 * Reset device to default configuration
+	 */
+	public async resetDevice(device: Device): Promise<void> {
+		console.log('Resetting device:', device.id);
+		await this.sendCommand(device, CONST.SYSEX_ResetDeviceCfg, '');
 		await this.syncDevice(device);
 	}
-}
 
-////////////////////////////////////////////////
-// Helper Functions
-////////////////////////////////////////////////
+	/**
+	 * Synchronize device configuration from hardware
+	 */
+	public async syncDevice(device: Device): Promise<void> {
+		console.log('Syncing device:', device.id);
+		
+		// Request device construct (without distributors)
+		await this.sendCommand(device, CONST.SYSEX_GetDeviceConstructOnly, '');
+		
+		// Note: The response will be handled by MessageHandler
+		// which will trigger device.update() and then request distributors
+	}
 
-function sysExCmd(device: Device, cmd: string, payload?: any) {
-	if (payload == 'undefined') payload = '';
-	device
-		.getConnection()
-		.sendHexString(CONST.SYSEX_START + "7F7F" + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END);
-	console.log(CONST.SYSEX_START + to14BitStr(device.id) + cmd + payload + CONST.SYSEX_END);
-}
+	/**
+	 * Synchronize all distributors from device
+	 */
+	public async syncDistributors(device: Device): Promise<void> {
+		console.log('Syncing distributors for device:', device.id);
+		
+		// Request number of distributors
+		await this.sendCommand(device, CONST.SYSEX_GetNumDistributors, '');
+		
+		// Note: MessageHandler will handle the response and request each distributor
+	}
 
-function to14BitStr(num: number) {
-	let result = (num & 0b01111111).toHexString();
-	let result2 = ((num >> 7) & 0b01111111).toHexString();
-	return result2 + result;
+	////////////////////////////////////////////////
+	// Distributor Configuration Commands
+	////////////////////////////////////////////////
+
+	/**
+	 * Save a distributor configuration to the device
+	 */
+	public async saveDistributor(device: Device, distributor: Distributor): Promise<void> {
+		console.log('Saving distributor for device:', device.id);
+		await this.sendCommand(device, CONST.SYSEX_SetDistributor, distributor.getConstruct());
+		await this.syncDevice(device);
+	}
+
+	/**
+	 * Save distributor boolean settings
+	 */
+	public async saveDistributorBool(device: Device, distributor: Distributor): Promise<void> {
+		console.log('Saving distributor boolean for device:', device.id);
+		await this.sendCommand(
+			device,
+			CONST.SYSEX_SetDistributorID_Boolean,
+			distributor.getIdStr() + distributor.getBoolean()
+		);
+		await this.syncDevice(device);
+	}
+
+	/**
+	 * Remove a specific distributor from the device
+	 */
+	public async removeDistributor(device: Device, distributor: Distributor): Promise<void> {
+		console.log('Removing distributor:', distributor.getId(), 'from device:', device.id);
+		await this.sendCommand(device, CONST.SYSEX_RemoveDistributorID, this.to14BitStr(distributor.getId()));
+		await this.syncDevice(device);
+	}
+
+	/**
+	 * Clear all distributors from the device
+	 */
+	public async clearDistributors(device: Device): Promise<void> {
+		console.log('Clearing all distributors from device:', device.id);
+		await this.sendCommand(device, CONST.SYSEX_RemoveAllDistributors, '');
+		await this.syncDevice(device);
+	}
+
+	////////////////////////////////////////////////
+	// Helper Methods
+	////////////////////////////////////////////////
+
+	/**
+	 * Send a SysEx command to a device
+	 * @param device - Target device
+	 * @param cmd - Command type (hex string)
+	 * @param payload - Payload data (hex string or empty)
+	 */
+	private async sendCommand(device: Device, cmd: string, payload: string = ''): Promise<void> {
+		const message = 
+			CONST.SYSEX_START + 
+			CONST.SYSEX_ServerID + 
+			this.to14BitStr(device.id) + 
+			cmd + 
+			payload + 
+			CONST.SYSEX_END;
+		
+		console.log('Sending command:', cmd, 'to device:', device.id);
+		await device.getConnection().sendHexString(message);
+	}
+
+	/**
+	 * Convert a number to 14-bit hex string (2 7-bit bytes)
+	 * @param num - Number to convert
+	 * @returns Hex string with MSB and LSB
+	 */
+	private to14BitStr(num: number): string {
+		const lsb = (num & 0x7F).toString(16).padStart(2, '0').toUpperCase();
+		const msb = ((num >> 7) & 0x7F).toString(16).padStart(2, '0').toUpperCase();
+		return msb + lsb;
+	}
 }

@@ -3,12 +3,16 @@
 
 	$: formDeviceID = 0x0001;
 	$: formDeviceName = '';
+	$: formMuted = false;
 	$: formOmniModeEnable = false;
 
 	function saveDevice() {
-		if ($selectedDeviceStore.id === 0) return;
+		if (!$selectedDeviceStore || $selectedDeviceStore.id === 0) {
+			console.log('Cannot save: no device selected or ID is 0');
+			return;
+		}
 
-		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formOmniModeEnable);
+		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formMuted, formOmniModeEnable);
 	}
 
 	function resetDevice() {
@@ -38,6 +42,7 @@
 	function updateForm() {
 		formDeviceID = $selectedDeviceStore.id;
 		formDeviceName = $selectedDeviceStore.name;
+		formMuted = $selectedDeviceStore.muted;
 		formOmniModeEnable = $selectedDeviceStore.isOnmiMode;
 	}
 </script>
@@ -67,8 +72,12 @@
 		</div>
 	</div>
 	<div class="flex justify-start">
-		<label for="deviceName" class="font-semibold m-2 ml-4">Omni Mode Enable</label>
-		<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
+		<label for="deviceMuted" class="font-semibold m-2 ml-4">Muted</label>
+		<input bind:checked={formMuted} type="checkbox" id="deviceMuted" class="bg-gray-dark" />
+	</div>
+	<div class="flex justify-start">
+		<label for="deviceOmniMode" class="font-semibold m-2 ml-4">Omni Mode Enable</label>
+		<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceOmniMode" class="bg-gray-dark" />
 	</div>
 	<div class="flex justify-center m-2">
 		<button on:click={() => saveDevice()} class="button-player-green mx-2">Update Device</button>
