@@ -48,7 +48,9 @@
 
 //---------- Uncomment Your Desired Extras ----------
 
-    // Note: Local storage removed as per requirements
+    // Local storage for device configuration persistence
+    #define EXTRA_LOCAL_STORAGE
+    
     // Addressable LED lighting effects
     //#define EXTRA_ADDRESSABLE_LEDS
 

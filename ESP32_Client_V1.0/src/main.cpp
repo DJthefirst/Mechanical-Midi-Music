@@ -27,7 +27,7 @@
 
 // Optional features
 #ifdef EXTRA_LOCAL_STORAGE
-    #include "Extras/LocalStorage.h"
+  #include "Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
 // Global components
@@ -69,7 +69,7 @@ void setup() {
 
   // Initialize device configuration from local storage
   #ifdef EXTRA_LOCAL_STORAGE
-    LocalStorage::get().InitializeDeviceConfiguration(*distributorManager);
+    LocalStorageFactory::getInstance().initializeDeviceConfiguration(*distributorManager);
   #endif
 
 //=== Distributor Configuration For Startup ===

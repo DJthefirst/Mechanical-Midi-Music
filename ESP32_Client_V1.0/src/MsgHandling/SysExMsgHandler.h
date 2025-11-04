@@ -12,7 +12,7 @@
 #include "Constants.h"
 
 #ifdef EXTRA_LOCAL_STORAGE
-    #include "Extras/LocalStorage.h"
+    #include "Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
 #include <array>
