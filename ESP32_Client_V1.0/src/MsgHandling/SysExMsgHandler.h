@@ -38,7 +38,7 @@ public:
 
     explicit SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);
 
-    std::optional<MidiMessage> processSysExMessage(MidiMessage& message);
+    std::optional<MidiMessage> processSysExMessage(const MidiMessage& message);
     
     void setDeviceChangedCallback(const std::function<void()>& callback);
 

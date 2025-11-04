@@ -20,7 +20,7 @@ SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributor
 }
 
 // Process a SysEx message and return optional response
-std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(MidiMessage& message)
+std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessage& message)
 {
     // Check MIDI ID
     if (message.sysExID() != SysEx::ID) return {};
