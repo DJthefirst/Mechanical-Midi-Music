@@ -125,8 +125,8 @@ void Distributor::stopActiveNotes() {
     // note to avoid hanging notes and clear the tracking pointer.
 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i) {
-        void* last = m_instrumentController->getLastDistributor(i);
-        if (last == static_cast<void*>(this)) {
+        const void* last = m_instrumentController->getLastDistributor(i);
+        if (last == static_cast<const void*>(this)) {
             // If instrument is active, stop it. Use stopNote which will
             // also clear the _lastDistributor entry in most implementations.
             if (m_instrumentController->getNumActiveNotes(i) != 0) {
@@ -218,7 +218,7 @@ DistributionMethod Distributor::getDistributionMethod() const {
 }
 
 //Distribute message to instruments
-void Distributor::distributeMessage(MidiMessage& message) {
+void Distributor::distributeMessage(const MidiMessage& message) {
     processMessage(message);
 }
 

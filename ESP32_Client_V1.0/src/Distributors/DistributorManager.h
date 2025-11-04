@@ -36,7 +36,7 @@ private:
     /**
      * Private constructor for singleton pattern
      */
-    DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController);
+    explicit DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController);
 
 public:
     /**
@@ -63,11 +63,11 @@ public:
      * Set callback for distributor changes
      * @param callback Function to call when distributors are modified
      */
-    void setDeviceChangedCallback(std::function<void()> callback) { m_deviceChangedCallback = callback; }
+    void setDeviceChangedCallback(const std::function<void()>& callback) { m_deviceChangedCallback = callback; }
     
     // Message processing
-    void distributeMessage(MidiMessage& message);
-    void processCC(MidiMessage& message);
+    void distributeMessage(const MidiMessage& message);
+    void processCC(const MidiMessage& message);
     
     // Distributor configuration helpers
     void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);

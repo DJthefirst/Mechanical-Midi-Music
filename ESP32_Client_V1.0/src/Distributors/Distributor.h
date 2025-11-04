@@ -62,7 +62,7 @@ public:
 
     friend class DistributionStrategy;
 
-    Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController);
+    explicit Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController);
     ~Distributor();
 
     // Disable copy (unique_ptr is not copyable) and enable move semantics
@@ -90,7 +90,7 @@ public:
     uint8_t getMaxNote() const;
 
     // Add routing method for messages
-    void distributeMessage(MidiMessage& message);
+    void distributeMessage(const MidiMessage& message);
 
     void setDistributor(uint8_t profile[]);
     void setDistributionMethod(DistributionMethod);

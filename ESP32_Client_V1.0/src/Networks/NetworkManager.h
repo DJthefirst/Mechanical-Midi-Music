@@ -52,7 +52,7 @@ public:
     }
 
     // Send message to all networks except the specified one
-    void sendMessageToOthers(const MidiMessage& message, INetwork* excludeNetwork) {
+    void sendMessageToOthers(const MidiMessage& message, const INetwork* excludeNetwork) {
         for (auto& net : m_networks) {
             if (net && net.get() != excludeNetwork) {
                 net->sendMessage(message);

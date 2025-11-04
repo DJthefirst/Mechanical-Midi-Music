@@ -25,7 +25,6 @@ private:
     //Local MIDI Device Atributes
     uint8_t m_program = 0;
     uint8_t m_channelPressure = 0;
-    uint16_t m_pitchBend[Midi::NUM_CH];
 
     // LedC configuration constants
     static constexpr uint8_t LEDC_RESOLUTION = 12; // 12-bit resolution (0-4095)

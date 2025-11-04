@@ -41,7 +41,7 @@ public:
                   std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
                   std::shared_ptr<InstrumentControllerBase> instrumentController);
 
-    void setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback);
+    void setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback);
 
     void broadcastDeviceChanged(INetwork* sourceNetwork = nullptr);
 

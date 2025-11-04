@@ -70,7 +70,7 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
     if(m_lastDistributor[instrument] != nullptr){
-        Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[instrument]);
+        const Distributor* distributor = static_cast<const Distributor*>(m_lastDistributor[instrument]);
             m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
             m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
     }

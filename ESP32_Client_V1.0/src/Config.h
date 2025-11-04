@@ -19,13 +19,13 @@ using std::int8_t;
   
     // Default device config used when no selection is provided by the application
     #ifndef DEVICE_CONFIG
-        // #define DEVICE_CONFIG "Configs/HwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/SwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/Teensy41HwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/Teensy41SwPwmCfg.h"
-        #define DEVICE_CONFIG "Configs/StepperSynthTeensyCfg.h"
-        // #define DEVICE_CONFIG "Configs/StepperSynthSwCfg.h"
-        // #define DEVICE_CONFIG "Configs/StepperSynthHwCfg.h"
+        // #define DEVICE_CONFIG "Configs/Example/HwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/Example/SwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41HwPwmCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41SwPwmCfg.h"
+        #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthTeensyCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthSwCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthHwCfg.h"
     #endif
 
     // Include the selected config header

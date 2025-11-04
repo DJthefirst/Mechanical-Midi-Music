@@ -72,7 +72,7 @@ void setup() {
     LocalStorageFactory::getInstance().initializeDeviceConfiguration(*distributorManager);
   #endif
 
-//=== Distributor Configuration For Startup ===
+//=== Hardcode Distributor Configuration For Startup ===
 
   // //Distributor 1
   // Distributor distributor1(&instrumentController);

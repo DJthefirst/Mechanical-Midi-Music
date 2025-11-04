@@ -80,7 +80,7 @@ void DistributorManager::setDistributor(uint8_t data[])
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Send message to all distributors which accept the designated message's channel.
-void DistributorManager::distributeMessage(MidiMessage& message)
+void DistributorManager::distributeMessage(const MidiMessage& message)
 {
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
         if (m_distributors[i].getChannels().test(message.channel())) {
@@ -90,7 +90,7 @@ void DistributorManager::distributeMessage(MidiMessage& message)
 }
 
 // Process CC MIDI Messages by type
-void DistributorManager::processCC(MidiMessage& message)
+void DistributorManager::processCC(const MidiMessage& message)
 {
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
         if (m_distributors[i].getChannels().test(message.channel())) {
@@ -185,8 +185,8 @@ std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8
 
 void DistributorManager::localStorageAddDistributor()
 {
-    uint8_t index = m_distributors.size() - 1;
-    LocalStorageFactory::getInstance().setDistributorConstruct(index, getDistributorSerial(index).data());
+    uint8_t distIndex = m_distributors.size() - 1;
+    LocalStorageFactory::getInstance().setDistributorConstruct(distIndex, getDistributorSerial(distIndex).data());
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 }
 
@@ -194,7 +194,7 @@ void DistributorManager::localStorageRemoveDistributor(uint8_t id)
 {
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 
-    for (int i = id; i < m_distributors.size(); i++) {
+    for (size_t i = id; i < m_distributors.size(); i++) {
         LocalStorageFactory::getInstance().setDistributorConstruct(i, getDistributorSerial(i).data());
     }
 }

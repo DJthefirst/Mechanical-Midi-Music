@@ -15,9 +15,8 @@
 // Constructor with dependency injection
 SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager)
     : distributorManager(distributorManager)
+    , m_sourceId(Device::GetDeviceID())
 {
-    // Ensure source ID matches current runtime device ID
-    m_sourceId = Device::GetDeviceID();
 }
 
 // Process a SysEx message and return optional response
@@ -159,7 +158,7 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(MidiMessage& mes
 }
 
 // Set callback for device configuration changes
-void SysExMsgHandler::setDeviceChangedCallback(std::function<void()> callback)
+void SysExMsgHandler::setDeviceChangedCallback(const std::function<void()>& callback)
 {
     m_deviceChangedCallback = callback;
 }
@@ -169,13 +168,13 @@ void SysExMsgHandler::setDeviceChangedCallback(std::function<void()> callback)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Respond with device ready
-MidiMessage SysExMsgHandler::sysExDeviceReady(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExDeviceReady(const MidiMessage& message)
 {
     return MidiMessage(m_sourceId, m_destinationId, SysEx::DeviceReady, nullptr, 0);
 }
 
 // Reset Distributors, LocalStorage and Set Device name to "New Device"
-void SysExMsgHandler::sysExResetDeviceConfig(MidiMessage& message)
+void SysExMsgHandler::sysExResetDeviceConfig(const MidiMessage& message)
 {
     if (distributorManager) {
         distributorManager->removeAllDistributors();
@@ -188,7 +187,7 @@ void SysExMsgHandler::sysExResetDeviceConfig(MidiMessage& message)
 }
 
 // Respond with device ready
-MidiMessage SysExMsgHandler::sysExDiscoverDevices(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExDiscoverDevices(const MidiMessage& message)
 {
     std::array<std::uint8_t, 2> deviceID;
     uint16_t runtimeId = Device::GetDeviceID();
@@ -198,20 +197,20 @@ MidiMessage SysExMsgHandler::sysExDiscoverDevices(MidiMessage& message)
 }
 
 // Respond with Device Construct With Distributors
-MidiMessage SysExMsgHandler::sysExGetDeviceConstructWithDistributors(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDeviceConstructWithDistributors(const MidiMessage& message)
 {
     // TODO: Implementation needed
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
 }
 
 // Respond with Device Construct
-MidiMessage SysExMsgHandler::sysExGetDeviceConstruct(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDeviceConstruct(const MidiMessage& message)
 {
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), Device::GetDeviceConstruct().data(), DEVICE_NUM_CFG_BYTES);
 }
 
 // Respond with Device Name
-MidiMessage SysExMsgHandler::sysExGetDeviceName(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDeviceName(const MidiMessage& message)
 {
     // Create a properly formatted buffer with null padding
     uint8_t nameBuffer[DEVICE_NUM_NAME_BYTES];
@@ -227,7 +226,7 @@ MidiMessage SysExMsgHandler::sysExGetDeviceName(MidiMessage& message)
 }
 
 // Respond with Device Boolean
-MidiMessage SysExMsgHandler::sysExGetDeviceBoolean(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDeviceBoolean(const MidiMessage& message)
 {
     std::array<std::uint8_t, 2> deviceBooleanBytes;
     uint16_t deviceBoolean = Device::GetDeviceBoolean();
@@ -237,7 +236,7 @@ MidiMessage SysExMsgHandler::sysExGetDeviceBoolean(MidiMessage& message)
 }
 
 // Respond with Device ID (14-bit split into two 7-bit bytes)
-MidiMessage SysExMsgHandler::sysExGetDeviceID(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDeviceID(const MidiMessage& message)
 {
     std::array<std::uint8_t, 2> deviceID;
     uint16_t runtimeId = Device::GetDeviceID();
@@ -247,21 +246,21 @@ MidiMessage SysExMsgHandler::sysExGetDeviceID(MidiMessage& message)
 }
 
 // Set Device Construct With Distributors
-void SysExMsgHandler::sysExSetDeviceConstructWithDistributors(MidiMessage& message)
+void SysExMsgHandler::sysExSetDeviceConstructWithDistributors(const MidiMessage& message)
 {
     // TODO: Implementation needed
     broadcastDeviceChanged();
 }
 
 // Configure Device Construct
-void SysExMsgHandler::sysExSetDeviceConstruct(MidiMessage& message)
+void SysExMsgHandler::sysExSetDeviceConstruct(const MidiMessage& message)
 {
     // TODO: Implementation needed
     broadcastDeviceChanged();
 }
 
 // Set Device ID from incoming payload (expecting at least 2 bytes MSB,LSB)
-void SysExMsgHandler::sysExSetDeviceID(MidiMessage& message)
+void SysExMsgHandler::sysExSetDeviceID(const MidiMessage& message)
 {
     if (message.length < SYSEX_HeaderSize + 2) return; // not enough data
     uint8_t msb = message.sysExCmdPayload()[0];
@@ -276,7 +275,7 @@ void SysExMsgHandler::sysExSetDeviceID(MidiMessage& message)
 }
 
 // Configure Device Name
-void SysExMsgHandler::sysExSetDeviceName(MidiMessage& message)
+void SysExMsgHandler::sysExSetDeviceName(const MidiMessage& message)
 {
     // Calculate payload length (total message length - SysEx header - end byte)
     uint8_t payloadLength = message.length - SYSEX_HeaderSize - 1;
@@ -300,7 +299,7 @@ void SysExMsgHandler::sysExSetDeviceName(MidiMessage& message)
 }
 
 // Configure Device Boolean
-void SysExMsgHandler::sysExSetDeviceBoolean(MidiMessage& message)
+void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
 {
     // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
     uint16_t deviceBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[0]) << 7) | 
@@ -320,21 +319,21 @@ void SysExMsgHandler::sysExSetDeviceBoolean(MidiMessage& message)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Respond with the Number of Distributors
-MidiMessage SysExMsgHandler::sysExGetNumOfDistributors(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetNumOfDistributors(const MidiMessage& message)
 {
     uint8_t sizeByte = distributorManager ? distributorManager->getDistributorCount() : 0;
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &sizeByte, 1);
 }
 
 // Respond with All Distributors
-MidiMessage SysExMsgHandler::sysExGetAllDistributors(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetAllDistributors(const MidiMessage& message)
 {
     // TODO: Return Multiple Messages - needs different implementation approach
     return sysExGetNumOfDistributors(message);
 }
 
 // Toggle Distributor Mute
-MidiMessage SysExMsgHandler::sysExToggleMuteDistributor(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExToggleMuteDistributor(const MidiMessage& message)
 {
     if (distributorManager) {
         distributorManager->toggleDistributorMute(message.sysExDistributorID());
@@ -343,7 +342,7 @@ MidiMessage SysExMsgHandler::sysExToggleMuteDistributor(MidiMessage& message)
 }
 
 // Respond with the requested Distributor Construct
-MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(const MidiMessage& message)
 {
     if (!distributorManager) {
         return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
@@ -360,7 +359,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(MidiMessage& message)
 }
 
 // Respond with the requested Distributor Channel Config
-MidiMessage SysExMsgHandler::sysExGetDistributorChannels(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorChannels(const MidiMessage& message)
 {
     if (!distributorManager) {
         const uint8_t bytesToSend[3] = {0, 0, 0};
@@ -373,7 +372,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorChannels(MidiMessage& message)
 }
 
 // Respond with the requested Distributor Instrument Config
-MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(const MidiMessage& message)
 {
     if (!distributorManager) {
         const uint8_t bytesToSend[5] = {0, 0, 0, 0, 0};
@@ -386,7 +385,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(MidiMessage& message
 }
 
 // Respond with the requested Distributor Method Config
-MidiMessage SysExMsgHandler::sysExGetDistributorMethod(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorMethod(const MidiMessage& message)
 {
 
     uint8_t method = static_cast<uint8_t>(distributorManager->getDistributorMethod(message.sysExDistributorID()));
@@ -394,7 +393,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMethod(MidiMessage& message)
 }
 
 // Respond with the requested Distributor Bool Values Config
-MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(const MidiMessage& message)
 {
     uint16_t boolValues = distributorManager->getDistributorBoolValues(message.sysExDistributorID());
     // Split into 2 MIDI 7-bit bytes
@@ -406,7 +405,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(MidiMessage& message)
 }
 
 // Respond with the requested Distributor Min/Max Notes Config
-MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(const MidiMessage& message)
 {
     // TODO: Implementation needed - need to add getDistributorMinMaxNotes to DistributorManager
     const uint8_t bytesToSend[2] = {0, 127};
@@ -414,7 +413,7 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(MidiMessage& message
 }
 
 // Respond with the requested Distributor Num Polyphonic Notes Config
-MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(MidiMessage& message)
+MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(const MidiMessage& message)
 {
     // TODO: Implementation needed - need to add getDistributorNumPolyphonicNotes to DistributorManager
     uint8_t numNotes = 1;
@@ -422,16 +421,16 @@ MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(MidiMessage& 
 }
 
 // Set Distributor
-void SysExMsgHandler::sysExSetDistributor(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributor(const MidiMessage& message)
 {
     if (distributorManager) {
         // Data is already in 7-bit MIDI format, use directly
-        distributorManager->setDistributor(message.sysExCmdPayload());
+        distributorManager->setDistributor(const_cast<uint8_t*>(message.sysExCmdPayload()));
     }
 }
 
 // Configure the designated Distributor's Channels
-void SysExMsgHandler::sysExSetDistributorChannels(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorChannels(const MidiMessage& message)
 {
     if (message.length < SYSEX_HeaderSize + 5) return; // or log error
     
@@ -441,7 +440,7 @@ void SysExMsgHandler::sysExSetDistributorChannels(MidiMessage& message)
 }
 
 // Configure the designated Distributor's Instruments
-void SysExMsgHandler::sysExSetDistributorInstruments(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorInstruments(const MidiMessage& message)
 {   
     if (message.length < SYSEX_HeaderSize + 7) return; // or log error
     
@@ -451,14 +450,14 @@ void SysExMsgHandler::sysExSetDistributorInstruments(MidiMessage& message)
 }
 
 // Configure the designated Distributor's Distribution Method
-void SysExMsgHandler::sysExSetDistributorMethod(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorMethod(const MidiMessage& message)
 {
     distributorManager->setDistributorMethod(message.sysExDistributorID(), 
                                              DistributionMethod(message.sysExCmdPayload()[2]));
 }
 
 // Configure the designated Distributor's Boolean Values
-void SysExMsgHandler::sysExSetDistributorBoolValues(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorBoolValues(const MidiMessage& message)
 {
     // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
     uint16_t distributorBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[2]) << 7) | 
@@ -467,7 +466,7 @@ void SysExMsgHandler::sysExSetDistributorBoolValues(MidiMessage& message)
 }
 
 // Configure the designated Distributor's Minimum and Maximum Notes
-void SysExMsgHandler::sysExSetDistributorMinMaxNotes(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorMinMaxNotes(const MidiMessage& message)
 {
     distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
                                                    message.sysExCmdPayload()[2],
@@ -475,7 +474,7 @@ void SysExMsgHandler::sysExSetDistributorMinMaxNotes(MidiMessage& message)
 }
 
 // Configure the designated Distributor's Max number of Polyphonic Notes
-void SysExMsgHandler::sysExSetDistributorNumPolyphonicNotes(MidiMessage& message)
+void SysExMsgHandler::sysExSetDistributorNumPolyphonicNotes(const MidiMessage& message)
 {
     distributorManager->setDistributorNumPolyphonicNotes(message.sysExDistributorID(),
                                                           message.sysExCmdPayload()[2]);
@@ -494,7 +493,7 @@ void SysExMsgHandler::broadcastDeviceChanged()
 }
 
 // Check if message destination is valid
-bool SysExMsgHandler::isValidDestination(MidiMessage& message) const
+bool SysExMsgHandler::isValidDestination(const MidiMessage& message) const
 {
     return (message.DestinationID() == Device::GetDeviceID() || message.DestinationID() == 0x00);
 }

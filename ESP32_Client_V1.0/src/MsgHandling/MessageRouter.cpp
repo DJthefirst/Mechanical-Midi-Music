@@ -21,7 +21,7 @@ MessageRouter::MessageRouter(
     , m_instrumentController(instrumentController) {}
 
 // Set callback for device changed notifications
-void MessageRouter::setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback)
+void MessageRouter::setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback)
 {
     m_deviceChangedCallback = callback;
 }
@@ -68,10 +68,9 @@ void MessageRouter::processMessages()
 // Process a single message from a specific network
 void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork)
 {
-    INetwork* currentSourceNetwork = sourceNetwork;
+    //INetwork* currentSourceNetwork = sourceNetwork;
 
     // Process message based on type - optimize for most common case first
-    const uint8_t msgType = message.type();
     if (message.type() == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
         // Handle SysEx messages
         auto response = m_sysExMsgHandler->processSysExMessage(message);
@@ -85,5 +84,5 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
     }
 
     // Clear the source network context
-    currentSourceNetwork = nullptr;
+    //currentSourceNetwork = nullptr;
 }

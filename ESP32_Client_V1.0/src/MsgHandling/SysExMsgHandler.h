@@ -36,54 +36,54 @@ private:
 
 public:
 
-    SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);
+    explicit SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);
 
     std::optional<MidiMessage> processSysExMessage(MidiMessage& message);
     
-    void setDeviceChangedCallback(std::function<void()> callback);
+    void setDeviceChangedCallback(const std::function<void()>& callback);
 
 private:
     // Device configuration commands
-    MidiMessage sysExDeviceReady(MidiMessage& message);
-    void sysExResetDeviceConfig(MidiMessage& message);
-    MidiMessage sysExDiscoverDevices(MidiMessage& message);
+    MidiMessage sysExDeviceReady(const MidiMessage& message);
+    void sysExResetDeviceConfig(const MidiMessage& message);
+    MidiMessage sysExDiscoverDevices(const MidiMessage& message);
     
-    MidiMessage sysExGetDeviceConstructWithDistributors(MidiMessage& message);
-    MidiMessage sysExGetDeviceConstruct(MidiMessage& message);
-    MidiMessage sysExGetDeviceID(MidiMessage& message);
-    MidiMessage sysExGetDeviceName(MidiMessage& message);
-    MidiMessage sysExGetDeviceBoolean(MidiMessage& message);
+    MidiMessage sysExGetDeviceConstructWithDistributors(const MidiMessage& message);
+    MidiMessage sysExGetDeviceConstruct(const MidiMessage& message);
+    MidiMessage sysExGetDeviceID(const MidiMessage& message);
+    MidiMessage sysExGetDeviceName(const MidiMessage& message);
+    MidiMessage sysExGetDeviceBoolean(const MidiMessage& message);
     
-    void sysExSetDeviceConstructWithDistributors(MidiMessage& message);
-    void sysExSetDeviceConstruct(MidiMessage& message);
-    void sysExSetDeviceID(MidiMessage& message);
-    void sysExSetDeviceName(MidiMessage& message);
-    void sysExSetDeviceBoolean(MidiMessage& message);
+    void sysExSetDeviceConstructWithDistributors(const MidiMessage& message);
+    void sysExSetDeviceConstruct(const MidiMessage& message);
+    void sysExSetDeviceID(const MidiMessage& message);
+    void sysExSetDeviceName(const MidiMessage& message);
+    void sysExSetDeviceBoolean(const MidiMessage& message);
     
     // Distributor management commands (delegates to DistributorManager)
-    MidiMessage sysExGetNumOfDistributors(MidiMessage& message);
-    MidiMessage sysExGetAllDistributors(MidiMessage& message);
-    MidiMessage sysExToggleMuteDistributor(MidiMessage& message);
+    MidiMessage sysExGetNumOfDistributors(const MidiMessage& message);
+    MidiMessage sysExGetAllDistributors(const MidiMessage& message);
+    MidiMessage sysExToggleMuteDistributor(const MidiMessage& message);
     
-    MidiMessage sysExGetDistributorConstruct(MidiMessage& message);
-    MidiMessage sysExGetDistributorChannels(MidiMessage& message);
-    MidiMessage sysExGetDistributorInstruments(MidiMessage& message);
-    MidiMessage sysExGetDistributorMethod(MidiMessage& message);
-    MidiMessage sysExGetDistributorBoolValues(MidiMessage& message);
-    MidiMessage sysExGetDistributorMinMaxNotes(MidiMessage& message);
-    MidiMessage sysExGetDistributorNumPolyphonicNotes(MidiMessage& message);
+    MidiMessage sysExGetDistributorConstruct(const MidiMessage& message);
+    MidiMessage sysExGetDistributorChannels(const MidiMessage& message);
+    MidiMessage sysExGetDistributorInstruments(const MidiMessage& message);
+    MidiMessage sysExGetDistributorMethod(const MidiMessage& message);
+    MidiMessage sysExGetDistributorBoolValues(const MidiMessage& message);
+    MidiMessage sysExGetDistributorMinMaxNotes(const MidiMessage& message);
+    MidiMessage sysExGetDistributorNumPolyphonicNotes(const MidiMessage& message);
     
-    void sysExSetDistributor(MidiMessage& message);
-    void sysExSetDistributorChannels(MidiMessage& message);
-    void sysExSetDistributorInstruments(MidiMessage& message);
-    void sysExSetDistributorMethod(MidiMessage& message);
-    void sysExSetDistributorBoolValues(MidiMessage& message);
-    void sysExSetDistributorMinMaxNotes(MidiMessage& message);
-    void sysExSetDistributorNumPolyphonicNotes(MidiMessage& message);
+    void sysExSetDistributor(const MidiMessage& message);
+    void sysExSetDistributorChannels(const MidiMessage& message);
+    void sysExSetDistributorInstruments(const MidiMessage& message);
+    void sysExSetDistributorMethod(const MidiMessage& message);
+    void sysExSetDistributorBoolValues(const MidiMessage& message);
+    void sysExSetDistributorMinMaxNotes(const MidiMessage& message);
+    void sysExSetDistributorNumPolyphonicNotes(const MidiMessage& message);
     
     // Helper methods
     void broadcastDeviceChanged();
-    bool isValidDestination(MidiMessage& message) const;
+    bool isValidDestination(const MidiMessage& message) const;
     
     // Local Storage helpers
     #ifdef EXTRA_LOCAL_STORAGE

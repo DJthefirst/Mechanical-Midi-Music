@@ -34,7 +34,7 @@ void StepperSynthHw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
 
 void StepperSynthHw::stopNote(uint8_t instrument, uint8_t velocity)
 {
-   HwPWM::stopNote(instrument, velocity);
+    HwPWM::stopNote(instrument, velocity);
     m_outputenabled[instrument] = false;
     updateShiftRegister();
     setInstrumentLedOff(instrument);
