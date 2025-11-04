@@ -270,7 +270,7 @@ void SysExMsgHandler::sysExSetDeviceID(MidiMessage& message)
     Device::SetDeviceID(newID);
     // persist
     #ifdef EXTRA_LOCAL_STORAGE
-    LocalStorage::get().SetDeviceID(newID);
+    LocalStorageFactory::getInstance().setDeviceID(newID);
     #endif
     broadcastDeviceChanged();
 }
@@ -309,7 +309,7 @@ void SysExMsgHandler::sysExSetDeviceBoolean(MidiMessage& message)
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);  // Bit 1
     
     #ifdef EXTRA_LOCAL_STORAGE
-        LocalStorage::get().SetDeviceBoolean(deviceBoolValue);
+        LocalStorageFactory::getInstance().setDeviceBoolean(deviceBoolValue);
     #endif
     
     broadcastDeviceChanged();
@@ -507,8 +507,8 @@ bool SysExMsgHandler::isValidDestination(MidiMessage& message) const
 
 void SysExMsgHandler::localStorageSetDeviceName(char* name)
 {
-    LocalStorage::get().SetDeviceName(name);
-    Device::Name = LocalStorage::get().GetDeviceName();
+    LocalStorageFactory::getInstance().setDeviceName(name);
+    Device::Name = LocalStorageFactory::getInstance().getDeviceName();
 }
 
 void SysExMsgHandler::localStorageAddDistributor()
@@ -523,7 +523,7 @@ void SysExMsgHandler::localStorageRemoveDistributor(uint8_t id)
 
 void SysExMsgHandler::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data)
 {
-    LocalStorage::get().SetDistributorConstruct(distributorID, data);
+    LocalStorageFactory::getInstance().setDistributorConstruct(distributorID, data);
 }
 
 void SysExMsgHandler::localStorageClearDistributors()
@@ -533,7 +533,7 @@ void SysExMsgHandler::localStorageClearDistributors()
 
 void SysExMsgHandler::localStorageReset()
 {
-    LocalStorage::get().ResetDeviceConfig();
+    LocalStorageFactory::getInstance().resetDeviceConfig();
 }
 
 #endif

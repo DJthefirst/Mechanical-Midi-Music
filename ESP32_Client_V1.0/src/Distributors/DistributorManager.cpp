@@ -186,27 +186,27 @@ std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8
 void DistributorManager::localStorageAddDistributor()
 {
     uint8_t index = m_distributors.size() - 1;
-    LocalStorage::get().SetDistributorConstruct(index, getDistributorSerial(index).data());
-    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
+    LocalStorageFactory::getInstance().setDistributorConstruct(index, getDistributorSerial(index).data());
+    LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 }
 
 void DistributorManager::localStorageRemoveDistributor(uint8_t id)
 {
-    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
+    LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 
     for (int i = id; i < m_distributors.size(); i++) {
-        LocalStorage::get().SetDistributorConstruct(i, getDistributorSerial(i).data());
+        LocalStorageFactory::getInstance().setDistributorConstruct(i, getDistributorSerial(i).data());
     }
 }
 
 void DistributorManager::localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data)
 {
-    LocalStorage::get().SetDistributorConstruct(distributorID, data);
+    LocalStorageFactory::getInstance().setDistributorConstruct(distributorID, data);
 }
 
 void DistributorManager::localStorageClearDistributors()
 {
-    LocalStorage::get().SetNumOfDistributors(m_distributors.size());
+    LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 }
 
 #endif

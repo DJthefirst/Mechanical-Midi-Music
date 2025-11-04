@@ -7,6 +7,7 @@
 
 #pragma once
 #include <array>
+#include <cstdint>
  
 //---------- Device Configuration ----------
 
@@ -47,13 +48,15 @@
 
 //---------- Uncomment Your Desired Extras ----------
 
-    // Note: Local storage removed as per requirements
+    // Local storage for device configuration persistence
+    #define EXTRA_LOCAL_STORAGE
+    
     // Addressable LED lighting effects
-    //#define EXTRA_ADDRESSABLE_LEDS
+    // #define EXTRA_ADDRESSABLE_LEDS
 
     // FastLED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-        #define LED_PIN     14 // Teensy pin for WS2811 data
+        #define LED_PIN     13 // Teensy pin for WS2811 data
         #define NUM_LEDS    64 // Number of LEDs in strip
         #define BRIGHTNESS  255 // Maximum brightness (0-255)
         #define LED_TYPE    WS2811
