@@ -19,6 +19,7 @@
 	$: formDamperEnable = false;
 	$: formPolyphonicEnable = false;
 	$: formNoteOverwrite = false;
+	$: formVibratoEnable = false;
 	$: formNoteMin = 0;
 	$: formNoteMax = 127;
 	$: formNumPolyphonicNotes = 1;
@@ -37,7 +38,8 @@
 			addDistributor ? false : $selectedDistributorStore.getMuted(), //Muted
 			formDamperEnable,
 			formPolyphonicEnable,
-			formNoteOverwrite
+			formNoteOverwrite,
+			formVibratoEnable
 		);
 
 		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
@@ -138,6 +140,7 @@
 		formDamperEnable = $selectedDistributorStore.damper;
 		formPolyphonicEnable = $selectedDistributorStore.polyphonic;
 		formNoteOverwrite = $selectedDistributorStore.noteOverwrite;
+		formVibratoEnable = $selectedDistributorStore.vibrato;
 	}
 </script>
 
@@ -175,24 +178,33 @@
 	</div>
 	<div class="flex justify-start flex-wrap">
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Damper Enable</label>
-			<input bind:checked={formDamperEnable} type="checkbox" id="deviceName" class="bg-gray-dark" />
+			<label for="damperEnable" class="font-semibold my-2 ml-4">Damper Enable</label>
+			<input bind:checked={formDamperEnable} type="checkbox" id="damperEnable" class="bg-gray-dark" />
 		</div>
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
+			<label for="polyphonicEnable" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
 			<input
 				bind:checked={formPolyphonicEnable}
 				type="checkbox"
-				id="deviceName"
+				id="polyphonicEnable"
 				class="bg-gray-dark"
 			/>
 		</div>
 		<div>
-			<label for="deviceName" class="font-semibold my-2 ml-4">Note Overwrite</label>
+			<label for="noteOverwrite" class="font-semibold my-2 ml-4">Note Overwrite</label>
 			<input
 				bind:checked={formNoteOverwrite}
 				type="checkbox"
-				id="deviceName"
+				id="noteOverwrite"
+				class="bg-gray-dark"
+			/>
+		</div>
+		<div>
+			<label for="vibratoEnable" class="font-semibold my-2 ml-4">Vibrato Enable</label>
+			<input
+				bind:checked={formVibratoEnable}
+				type="checkbox"
+				id="vibratoEnable"
 				class="bg-gray-dark"
 			/>
 		</div>

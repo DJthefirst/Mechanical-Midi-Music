@@ -1,4 +1,5 @@
 import {} from '../Utility/helpers';
+import * as CONST from '../Utility/Constants';
 
 export class Distributor {
 
@@ -13,6 +14,7 @@ export class Distributor {
 	public damper: boolean;
 	public polyphonic: boolean;
 	public noteOverwrite: boolean;
+	public vibrato: boolean;
 
 	constructor(
 		channels: number,
@@ -24,7 +26,8 @@ export class Distributor {
 		muted: boolean,
 		damper: boolean,
 		polyphonic: boolean,
-		noteOverwrite: boolean
+		noteOverwrite: boolean,
+		vibrato: boolean
 	) {
 		this.id = 0;
 		this.channels = channels;
@@ -37,6 +40,7 @@ export class Distributor {
 		this.damper = damper;
 		this.polyphonic = polyphonic;
 		this.noteOverwrite = noteOverwrite;
+		this.vibrato = vibrato;
 	}
 
 	public getId() {
@@ -57,21 +61,34 @@ export class Distributor {
 
 	public getBoolean() {
 		let booleanValues =
-		(this.muted ? 0x01 : 0) |(this.damper ? 0x02 : 0) | (this.polyphonic ? 0x04 : 0) | (this.noteOverwrite ? 0x08 : 0);
-		return booleanValues.toHexString();
+			(this.muted ? CONST.DISTRIBUTOR_BOOL_MASK.MUTED : 0) |
+			(this.polyphonic ? CONST.DISTRIBUTOR_BOOL_MASK.POLYPHONIC : 0) |
+			(this.noteOverwrite ? CONST.DISTRIBUTOR_BOOL_MASK.NOTEOVERWRITE : 0) |
+			(this.damper ? CONST.DISTRIBUTOR_BOOL_MASK.DAMPERPEDAL : 0) |
+			(this.vibrato ? CONST.DISTRIBUTOR_BOOL_MASK.VIBRATO : 0);
+		return to7BitStr(booleanValues, 2);
 	}
 
 	public getConstruct() {
 		let construct = '';
+		// Bytes 0-1: Distributor ID (14-bit)
 		construct += to7BitStr(this.id, 2);
+		// Bytes 2-4: Channels (16-bit, 3 bytes)
 		construct += to7BitStr(this.channels, 3);
+		// Bytes 5-9: Instruments (32-bit, 5 bytes)
 		construct += to7BitStr(this.instruments, 5);
+		// Byte 10: Distribution method
 		construct += this.distributionMethod.toHexString();
-		construct += this.getBoolean();
+		// Byte 11: Min note
 		construct += Number(this.minNote).toHexString();
+		// Byte 12: Max note
 		construct += Number(this.maxNote).toHexString();
+		// Byte 13: Number of polyphonic notes
 		construct += Number(this.maxPolypnonic).toHexString();
-		construct += '00';
+		// Bytes 14-15: Boolean values (14-bit)
+		construct += this.getBoolean();
+		// Bytes 16-23: Reserved (8 bytes)
+		construct += '0000000000000000';
 		return construct;
 	}
 
@@ -89,7 +106,8 @@ export class Distributor {
 		muted: boolean,
 		damper: boolean,
 		polyphonic: boolean,
-		noteOverwrite: boolean
+		noteOverwrite: boolean,
+		vibrato: boolean
 	) {
 		this.channels = channels;
 		this.instruments = instruments;
@@ -101,6 +119,7 @@ export class Distributor {
 		this.damper = damper;
 		this.polyphonic = polyphonic;
 		this.noteOverwrite = noteOverwrite;
+		this.vibrato = vibrato;
 	}
 
 	public decId() {

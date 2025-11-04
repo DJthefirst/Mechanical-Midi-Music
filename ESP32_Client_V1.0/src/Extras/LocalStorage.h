@@ -1,5 +1,5 @@
 #pragma once
-#include "Device.h"
+#include "Config.h"
 
 #ifdef EXTRA_LOCAL_STORAGE
 
@@ -21,14 +21,17 @@ private:
 
 public:
     void Test();
-
+    bool EnsureNVSInitialized();
     void ResetDeviceConfig();
+    bool InitializeDeviceConfiguration(class DistributorManager& distributorManager);
     void GetDeviceConstruct();
     void SetDeviceConstruct();
     std::string GetDeviceName();
     void SetDeviceName(std::string name);
-    uint8_t GetDeviceBoolean();
-    void SetDeviceBoolean(uint8_t deviceBoolean);
+    uint16_t GetDeviceID();
+    void SetDeviceID(uint16_t id);
+    uint16_t GetDeviceBoolean();
+    void SetDeviceBoolean(uint16_t deviceBoolean);
     uint8_t GetNumOfDistributors();
     void SetNumOfDistributors(uint8_t numOfDistributors);
     void GetDistributorConstruct(uint16_t distributorNum, uint8_t* construct);
