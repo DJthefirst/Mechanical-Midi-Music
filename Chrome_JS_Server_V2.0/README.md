@@ -36,3 +36,24 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## Node.js version
+
+This project targets Node.js 22+. To ensure consistent developer environments, the repository includes a `.nvmrc` file set to `22` and the `package.json` declares the expected Node engine.
+
+On Windows (PowerShell), install and use Node 22 via nvm-windows (or use the official installer):
+
+Install nvm-windows: https://github.com/coreybutler/nvm-windows
+
+Then run:
+
+```powershell
+# install Node 22
+nvm install 22.0.0
+# use Node 22
+nvm use 22.0.0
+# verify
+node -v
+```
+
+If you prefer the official installer, download Node 22 from https://nodejs.org/ and run the installer.

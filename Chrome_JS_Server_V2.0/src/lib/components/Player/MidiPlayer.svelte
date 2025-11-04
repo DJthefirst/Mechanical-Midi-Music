@@ -5,8 +5,11 @@
 	import { midiNodeStore } from '$lib/store/stores';
 	import {FileDB} from '../Utility/FileDB';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { Console } from 'console';
 	SMF(JZZ);
+
+	console.log('[MidiPlayer] Component script loaded, browser:', browser);
 
 	$: playlist = new Playlist();
 
@@ -15,23 +18,111 @@
 		"Pirates of the Caribbean - He's a Pirate.mid", "Smash Mouth - All Star.mid"];
 
 	onMount(async() => {
-		fileDB.init().then( async() =>{
-			let files = await fileDB.loadAll();
+		console.log('[MidiPlayer] onMount called');
+		mounted = true;
+		
+		if (!browser) {
+			console.log('[MidiPlayer] Not in browser, skipping initialization');
+			return;
+		}
+		
+		try {
+			await fileDB.init();
+			const files = await fileDB.loadAll();
+			console.log('[MidiPlayer] Loaded files from DB:', files?.length ?? 0);
 
-			//Load demo songs if FileDB is empty
-			if (files.length == 0){
-				for (let fileName of demoSongs){
-					let blob = await (await fetch("/DemoSongs/"+fileName)).blob();
-  					let file = new File([blob], fileName, {type: (blob).type});
-					addSong(file);
-				};
+			// Load demo songs if FileDB is empty
+			if (!files || files.length === 0) {
+				for (let fileName of demoSongs) {
+					try {
+						const resp = await fetch('/DemoSongs/' + encodeURIComponent(fileName));
+						if (!resp.ok) {
+							console.error('[MidiPlayer] Failed to fetch demo song', fileName, resp.status);
+							continue;
+						}
+						const blob = await resp.blob();
+						const file = new File([blob], fileName, { type: blob.type || 'audio/midi' });
+						await addSong(file);
+					} catch (err) {
+						console.error('[MidiPlayer] Error fetching demo song', fileName, err);
+					}
+				}
 				return;
 			}
-			for (let file of await files){
-				addSong(file);
+
+			// Files retrieved from IDB may be Blobs rather than File instances.
+			for (let raw of files) {
+				let file: File;
+				if (raw && (raw as any).name) {
+					file = raw as File;
+				} else {
+					// try to rehydrate as File
+					try {
+						file = new File([raw], 'stored.mid', { type: raw?.type || 'audio/midi' });
+					} catch (err) {
+						console.warn('[MidiPlayer] Could not rehydrate stored file, skipping', err);
+						continue;
+					}
+				}
+				await addSong(file);
 			}
-		});
+		} catch (err) {
+			console.error('[MidiPlayer] Error initializing FileDB or loading songs:', err);
+		}
 	});
+
+	// Fallback initialization if onMount doesn't fire (same issue as MIDI components)
+	let mounted = false;
+	if (browser && typeof window !== 'undefined') {
+		console.log('[MidiPlayer] Setting up fallback initialization...');
+		setTimeout(async () => {
+			if (!mounted) {
+				console.log('[MidiPlayer] onMount never fired, initializing manually');
+				mounted = true;
+				try {
+					await fileDB.init();
+					const files = await fileDB.loadAll();
+					console.log('[MidiPlayer] Manual init - Loaded files from DB:', files?.length ?? 0);
+
+					if (!files || files.length === 0) {
+						console.log('[MidiPlayer] Manual init - Loading demo songs');
+						for (let fileName of demoSongs) {
+							try {
+								const resp = await fetch('/DemoSongs/' + encodeURIComponent(fileName));
+								if (!resp.ok) {
+									console.error('[MidiPlayer] Failed to fetch demo song', fileName, resp.status);
+									continue;
+								}
+								const blob = await resp.blob();
+								const file = new File([blob], fileName, { type: blob.type || 'audio/midi' });
+								await addSong(file);
+							} catch (err) {
+								console.error('[MidiPlayer] Error fetching demo song', fileName, err);
+							}
+						}
+						return;
+					}
+
+					for (let raw of files) {
+						let file: File;
+						if (raw && (raw as any).name) {
+							file = raw as File;
+						} else {
+							try {
+								file = new File([raw], 'stored.mid', { type: raw?.type || 'audio/midi' });
+							} catch (err) {
+								console.warn('[MidiPlayer] Could not rehydrate stored file, skipping', err);
+								continue;
+							}
+						}
+						await addSong(file);
+					}
+				} catch (err) {
+					console.error('[MidiPlayer] Manual init error:', err);
+				}
+			}
+		}, 1500);
+	}
 
 	let _cursong: null|Song= null;
 	$: curSong = _cursong;
@@ -105,8 +196,9 @@
 	}
 
 	// Add Song
+
 	export async function addSong(file: File) {
-		fileDB.add(file);
+			await fileDB.add(file);
 		let song = new Song(file); // @ts-ignore
 		song.time = Math.floor(JZZ.MIDI.SMF(await song.getData()).player().durationMS() / 1000);
 		if (curSong === null) {

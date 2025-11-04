@@ -1,6 +1,9 @@
 {
 	"name": "my-app",
 	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.0.0"
+	},
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
