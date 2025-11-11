@@ -71,6 +71,11 @@ public:
     virtual void setEffectCrtl_1(uint8_t channel, uint8_t value);
     virtual void setEffectCrtl_2(uint8_t channel, uint8_t value);
 
+    // Optional periodic update function
+    virtual void periodic() {
+        checkInstrumentTimeouts();
+    }
+
     // Return the last distributor (as a void* value) that sent a note to the
     // given instrument. Use setLastDistributor to update/clear this value.
     void* getLastDistributor(uint8_t instrument) {
@@ -100,4 +105,13 @@ public:
         }
         return 0;
     }
+
+protected:
+    // LED Helper Functions (can be overridden by derived classes for custom behavior)
+    // These provide default implementations that work for most instruments
+    virtual void setupLEDs();
+    virtual void updateLEDs();
+    virtual void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
+    virtual void setInstrumentLedOff(uint8_t instrument);
+    virtual void resetLEDs();
 };

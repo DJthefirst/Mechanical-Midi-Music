@@ -23,6 +23,11 @@ StepperSynthSw::StepperSynthSw() : SwPWM()
     delay(500); // Wait a half second for safety
 }
 
+void StepperSynthSw::periodic() {
+    SwPWM::periodic();
+    updateLEDs();
+}
+
 void StepperSynthSw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     m_outputenabled[instrument] = true;
@@ -86,10 +91,6 @@ void StepperSynthSw::updateShiftRegister() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef EXTRA_ADDRESSABLE_LEDS
 
-void StepperSynthSw::setupLEDs(){
-    AddrLED::get().setup();
-}
-
 //Set an Instrument Led to on
 void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
     CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
@@ -101,16 +102,10 @@ void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){
     AddrLED::get().turnLedsOn(instrument*5, instrument*5+4, CHSV(0,0,0));
 }
 
-//Reset Leds
-void StepperSynthSw::resetLEDs(){
-    AddrLED::get().reset();
-}
 
 #else
-void StepperSynthSw::setupLEDs(){}
 void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
 void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){}
-void StepperSynthSw::resetLEDs(){}
 #endif
 
 #endif // SHIFTREG_TYPE_74HC595

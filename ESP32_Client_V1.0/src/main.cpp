@@ -106,6 +106,6 @@ void loop() {
   
   // Check for instrument timeouts
   if (instrumentController) {
-    instrumentController->checkInstrumentTimeouts();
+    instrumentController->periodic();
   }
 }

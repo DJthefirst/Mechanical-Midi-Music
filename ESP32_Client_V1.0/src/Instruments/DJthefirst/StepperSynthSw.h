@@ -21,6 +21,7 @@ private:
 
 public: 
     StepperSynthSw();
+    void periodic() override;
     void reset(uint8_t instrument) override;
     void resetAll() override;
     void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
@@ -29,9 +30,7 @@ public:
 
 private:
     //LEDs
-    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
-    void setInstrumentLedOff(uint8_t instrument);
-    void resetLEDs();
-    void setupLEDs();
+    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) override;
+    void setInstrumentLedOff(uint8_t instrument) override;
     void updateShiftRegister();
 };

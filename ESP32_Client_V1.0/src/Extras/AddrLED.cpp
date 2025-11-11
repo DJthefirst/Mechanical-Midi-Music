@@ -8,6 +8,14 @@ void AddrLED::setup(){
     FastLED.setBrightness(BRIGHTNESS);
 }
 
+//Update LEDs
+void AddrLED::update(){
+    if(m_updateLEDs){
+        FastLED.show();
+        m_updateLEDs = false;
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,20 +55,20 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 //Set LED on by id
 void AddrLED::turnLedOn(uint8_t id,CHSV color){
     leds[id] = color;
-    FastLED.show();
+    m_updateLEDs = true;
 }
 
 //Set LED on by id
 void AddrLED::turnLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color){
 
     for(int i=idStart; i <= idEnd; i++)leds[i] = color;
-    FastLED.show();
+    m_updateLEDs = true;
 }
 
 //Set an id LED to off
 void AddrLED::turnLedOff(uint8_t id){
     leds[id] = CRGB::Black; 
-    FastLED.show();
+    m_updateLEDs = true;
 }
 
 //Reset Leds
@@ -68,7 +76,7 @@ void AddrLED::reset(){
     for( int i = 0; i < NUM_LEDS; ++i) {
         leds[i] = CRGB::Black;
     }
-    FastLED.show();
+    m_updateLEDs = true;
 }
 
 #endif

@@ -1,4 +1,5 @@
 #include "InstrumentControllerBase.h"
+#include "Config.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
@@ -48,3 +49,25 @@ void InstrumentControllerBase::setEffectCrtl_2(uint8_t channel, uint8_t value){
 void InstrumentControllerBase::checkInstrumentTimeouts(){
     // Default implementation does nothing - derived classes should override if needed
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// LED Helper Functions - Default Implementations
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef EXTRA_ADDRESSABLE_LEDS
+#include "Extras/AddrLED.h"
+
+void InstrumentControllerBase::updateLEDs(){ AddrLED::get().update(); }
+void InstrumentControllerBase::setupLEDs(){ AddrLED::get().setup(); }
+void InstrumentControllerBase::resetLEDs(){ AddrLED::get().reset(); }
+#else
+
+void InstrumentControllerBase::setupLEDs() {};
+void InstrumentControllerBase::updateLEDs() {};
+void InstrumentControllerBase::resetLEDs() {};
+#endif
+
+void InstrumentControllerBase::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {};
+void InstrumentControllerBase::setInstrumentLedOff(uint8_t instrument) {};
+
+

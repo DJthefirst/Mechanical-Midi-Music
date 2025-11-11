@@ -18,10 +18,13 @@ class AddrLED{
         HUE_METHOD m_hueMethod = HUE_METHOD::CHANNEL;
         bool m_hueTimeProgression = true;
         bool m_brightnessByVelocity = true;
+        bool m_updateLEDs = false;
 
     public:
         //Setup LEDs
         void setup();
+        //Update LEDs
+        void update();
         //Generate LED color
         CHSV getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t velocity);
         //Set LED on by id
