@@ -64,6 +64,7 @@
         "concepts": "cpp",
         "numbers": "cpp",
         "semaphore": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "teensy41_swshiftcpp": "cpp"
     }
 }

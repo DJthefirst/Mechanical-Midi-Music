@@ -34,7 +34,7 @@
     // Shift Register Configuration
     // Use FlexIO hardware acceleration on Teensy 4.1 for faster, more efficient operation
     #define SHIFTREG_TYPE_74HC595
-    #define SHIFTREG_USE_FLEXIO         // Comment out to use software bit-banging instead
+    //#define SHIFTREG_USE_FLEXIO         // DISABLED: FlexIO implementation needs debugging - Comment out to use software bit-banging instead
     #define SHIFTREG_HOLDTIME_NS 25
     #define PIN_SHIFTREG_Data 17
     #define PIN_SHIFTREG_Clock 16
