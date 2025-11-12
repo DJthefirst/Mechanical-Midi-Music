@@ -2,7 +2,7 @@
 #ifdef PLATFORM_TEENSY41
 
 #include "Instruments/Base/SwPWM/Teensy41_SwPWM.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>

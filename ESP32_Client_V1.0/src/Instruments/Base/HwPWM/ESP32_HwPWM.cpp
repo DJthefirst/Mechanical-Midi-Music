@@ -3,7 +3,7 @@
 
 #include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
 #include "Instruments/InstrumentController.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include <cmath>
 #include "esp32-hal-ledc.h"

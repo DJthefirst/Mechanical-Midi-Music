@@ -31,7 +31,10 @@
     constexpr std::array<uint8_t, 10> INSTRUMENT_PINS = {23,22,28,6,7,24,3,4,5,36};
     // constexpr std::array<uint8_t, 10> INSTRUMENT_PINS = {2, 3, 4, 5, 6, 7, 8, 9, 10, 12};
 
+    // Shift Register Configuration
+    // Use FlexIO hardware acceleration on Teensy 4.1 for faster, more efficient operation
     #define SHIFTREG_TYPE_74HC595
+    #define SHIFTREG_USE_FLEXIO         // Comment out to use software bit-banging instead
     #define SHIFTREG_HOLDTIME_NS 25
     #define PIN_SHIFTREG_Data 17
     #define PIN_SHIFTREG_Clock 16

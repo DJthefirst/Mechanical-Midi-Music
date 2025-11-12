@@ -14,7 +14,7 @@
 #include "Distributor.h"
 #include "DistributionStrategies.h"
 #include "../Instruments/InstrumentController.h"
-#include "../Utility/Utility.h"
+#include "../Utility/BitManipulation.h"
 
 Distributor::Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController)
     : m_instrumentController(instrumentController)

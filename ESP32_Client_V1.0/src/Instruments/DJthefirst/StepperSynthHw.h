@@ -7,6 +7,7 @@
 
 #include "Constants.h"
 #include "Instruments/Base/HwPWM/HwPWM.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
 
 #include <cstdint>
 using std::int8_t;
@@ -16,7 +17,6 @@ class StepperSynthHw : public HwPWM{
 public:
 
 private:
-    static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
     static void togglePin(uint8_t instrument);
 
 public: 
@@ -31,5 +31,4 @@ public:
 private:
     void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) override;
     void setInstrumentLedOff(uint8_t instrument) override;
-    void updateShiftRegister();
 };

@@ -2,8 +2,8 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "Instruments/Base/StepHwPWM/ESP32_StepHwPWM.h"
-#include "Instruments/Utility/InterruptTimer.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/InterruptTimer.h"
+#include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include <bitset>
 

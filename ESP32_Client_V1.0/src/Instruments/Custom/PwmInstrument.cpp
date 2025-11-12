@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "Instruments/Custom/PwmInstrument.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/NoteTable.h"
 #include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

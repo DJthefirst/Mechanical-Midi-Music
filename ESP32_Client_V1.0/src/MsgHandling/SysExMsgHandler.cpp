@@ -7,7 +7,7 @@
 
 #include "SysExMsgHandler.h"
 #include "Distributors/DistributorManager.h"
-#include "Utility/Utility.h"
+#include "Utility/BitManipulation.h"
 #include <Arduino.h>
 #include <cstring>  // For memcpy and strncpy
 #include <algorithm> // For std::min

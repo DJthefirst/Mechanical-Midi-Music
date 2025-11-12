@@ -3,8 +3,8 @@
 #ifdef ARDUINO_ARCH_ESP32
 
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
-#include "Instruments/Utility/InterruptTimer.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/InterruptTimer.h"
+#include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>

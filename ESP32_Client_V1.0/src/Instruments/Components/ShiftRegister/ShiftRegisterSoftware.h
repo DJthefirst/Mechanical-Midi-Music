@@ -1,35 +1,36 @@
+/*
+ * ShiftRegisterSoftware.h
+ * 
+ * Software-based shift register implementation using bit-banging
+ * Works on all platforms with GPIO support (ESP32, Teensy, Arduino, etc.)
+ * Uses optimized dirty flag to avoid unnecessary hardware updates
+ */
+
 #pragma once
 
+#include "IShiftRegister.h"
 #include "Config.h"
+#include "Arduino.h"
 #include <array>
 #include <cstdint>
 
-#ifdef SHIFTREG_TYPE_74HC595
-
-#include "Arduino.h"
-
 /**
- * ShiftRegister - Platform-independent shift register control utility
+ * ShiftRegisterSoftware - Software bit-banging implementation
  * 
- * Manages output enable states and provides hardware abstraction for
- * controlling 74HC595-style shift registers with configurable pins.
- * 
- * Usage:
- *   1. Call init() once during setup
- *   2. Use setOutputEnabled() to enable/disable individual outputs
- *   3. Call update() to push changes to hardware
+ * Controls 74HC595-style shift registers using direct GPIO manipulation.
+ * Optimized with dirty flag to only update hardware when state changes.
  */
-class ShiftRegister {
+class ShiftRegisterSoftware : public IShiftRegister {
 private:
     static std::array<bool, HardwareConfig::NUM_INSTRUMENTS> m_outputEnabled;
     static bool m_initialized;
+    static bool m_dirty;  // Tracks if m_outputEnabled has changed since last update
 
 public:
     /**
      * Initialize shift register pins and state
-     * Must be called once before using other functions
      */
-    static void init() {
+    void init() override {
         if (m_initialized) return;
         
         // Setup pins
@@ -39,6 +40,7 @@ public:
         
         // Initialize all outputs as disabled
         m_outputEnabled = {};
+        m_dirty = true;  // Force initial update
         
         m_initialized = true;
         
@@ -48,20 +50,21 @@ public:
 
     /**
      * Set output enable state for a specific instrument
-     * @param instrument Index of the instrument (0 to NUM_INSTRUMENTS-1)
-     * @param enabled true to enable output, false to disable
      */
-    static void setOutputEnabled(uint8_t instrument, bool enabled) {
+    void setOutputEnabled(uint8_t instrument, bool enabled) override {
         if (instrument >= HardwareConfig::NUM_INSTRUMENTS) return;
-        m_outputEnabled[instrument] = enabled;
+        
+        // Only mark dirty if value actually changed
+        if (m_outputEnabled[instrument] != enabled) {
+            m_outputEnabled[instrument] = enabled;
+            m_dirty = true;
+        }
     }
 
     /**
      * Get output enable state for a specific instrument
-     * @param instrument Index of the instrument
-     * @return true if output is enabled, false otherwise
      */
-    static bool getOutputEnabled(uint8_t instrument) {
+    bool getOutputEnabled(uint8_t instrument) override {
         if (instrument >= HardwareConfig::NUM_INSTRUMENTS) return false;
         return m_outputEnabled[instrument];
     }
@@ -69,18 +72,36 @@ public:
     /**
      * Disable all outputs
      */
-    static void disableAll() {
+    void disableAll() override {
+        // Check if any are currently enabled
+        bool wasEnabled = false;
+        for (const auto& enabled : m_outputEnabled) {
+            if (enabled) {
+                wasEnabled = true;
+                break;
+            }
+        }
+        
         m_outputEnabled = {};
+        
+        // Only mark dirty if we actually changed something
+        if (wasEnabled) {
+            m_dirty = true;
+        }
     }
 
     /**
      * Update shift register hardware with current output enable states
+     * Only performs update if state has changed (dirty flag optimization)
      * 
      * For 74HC595-style shift registers: last bit shifted in appears at Q7
      * Shifts MSB first so highest instrument index ends up at Q7,
      * LSB last (instrument 0) ends up at Q0
      */
-    static void update() {
+    void update() override {
+        // Skip update if nothing has changed
+        if (!m_dirty) return;
+        
         // Write and Shift Data
         // Using NOP instructions for tiny delays without blocking SW PWM
         for(int8_t i = HardwareConfig::NUM_INSTRUMENTS - 1; i >= 0; i--) {
@@ -99,11 +120,13 @@ public:
         delayNanoseconds(SHIFTREG_HOLDTIME_NS);
         digitalWriteFast(PIN_SHIFTREG_Load, LOW);  // Register Load (latch output)
         digitalWriteFast(PIN_SHIFTREG_Data, LOW);  // Leave data line low when idle
+        
+        // Clear dirty flag after successful update
+        m_dirty = false;
     }
 };
 
 // Static member initialization
-bool ShiftRegister::m_initialized = false;
-std::array<bool, HardwareConfig::NUM_INSTRUMENTS> ShiftRegister::m_outputEnabled = {};
-
-#endif // SHIFTREG_TYPE_74HC595
+inline bool ShiftRegisterSoftware::m_initialized = false;
+inline bool ShiftRegisterSoftware::m_dirty = false;
+inline std::array<bool, HardwareConfig::NUM_INSTRUMENTS> ShiftRegisterSoftware::m_outputEnabled = {};
