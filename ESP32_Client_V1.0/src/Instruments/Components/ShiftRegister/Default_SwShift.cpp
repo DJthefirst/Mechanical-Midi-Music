@@ -6,7 +6,7 @@
  */
 #include "Config.h"
 
-#if defined(PLATFORM_ESP32)
+#if defined(PLATFORM_ESP32) && defined(COMPONENT_SHIFTREG_74HC595)
 
 #include "Cross_SwShift.h"
 #include "Arduino.h"

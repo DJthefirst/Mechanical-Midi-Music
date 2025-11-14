@@ -1,6 +1,6 @@
 #include "Config.h"
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32) && defined(COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
 #include "Instruments/Components/InterruptTimer.h"
@@ -23,14 +23,17 @@ std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_vibratoRa
 ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
-        pinMode(HardwareConfig::PINS[i], OUTPUT);
+    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
+        pinMode(HardwareConfig::PINS_INSTRUMENT_PWM[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
 
-    // Setup timer to handle interrupts for driving the instrument
-    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, Tick);
+    // Setup timer hardware and register the base tick callback. If a
+    // specialized subclass (like StepSwPWM) wants to take ownership it can
+    // call InterruptTimer::setCallback() to replace this handler.
+    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, nullptr);
+    InterruptTimer::setCallback(tick);
 
     //Initalize Default values
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
@@ -91,7 +94,7 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     m_vibratoPhase[instrument] = 0;  // Reset vibrato phase to prevent carryover
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
     m_currentState.reset(instrument);  // Reset pin state bit
-    digitalWrite(HardwareConfig::PINS[instrument], 0);
+    digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], 0);
     
     if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
@@ -113,8 +116,8 @@ void ESP32_SwPWM::stopAll(){
     m_vibratoPhase = {};
     m_vibratoDepth = {};
 
-    for(uint8_t i = 0; i < HardwareConfig::PINS.size(); i++){
-        digitalWrite(HardwareConfig::PINS[i], LOW);
+    for(uint8_t i = 0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
+        digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[i], LOW);
     }
 }
 
@@ -126,7 +129,7 @@ void ESP32_SwPWM::stopAll(){
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
 */
-void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
+void ICACHE_RAM_ATTR ESP32_SwPWM::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -171,7 +174,7 @@ void ESP32_SwPWM::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
-    digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
+    digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
         
 }
 // #pragma GCC pop_options (Legacy)

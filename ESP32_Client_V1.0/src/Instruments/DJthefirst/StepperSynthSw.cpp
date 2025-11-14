@@ -1,5 +1,5 @@
 #include "Config.h"
-#ifdef SHIFTREG_TYPE_74HC595
+#ifdef COMPONENT_SHIFTREG_74HC595
 
 #include "Extras/AddrLED.h"
 #include "Instruments/DJthefirst/StepperSynthSw.h"
@@ -81,4 +81,4 @@ void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uin
 void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){}
 #endif
 
-#endif // SHIFTREG_TYPE_74HC595
+#endif // COMPONENT_SHIFTREG_74HC595

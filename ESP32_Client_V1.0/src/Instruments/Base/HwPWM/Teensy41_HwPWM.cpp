@@ -1,5 +1,5 @@
 #include "Config.h"
-#ifdef PLATFORM_TEENSY41
+#if defined(PLATFORM_TEENSY41) && defined(COMPONENT_PWM)
 
 #include "Instruments/Base/HwPWM/Teensy41_HwPWM.h"
 #include "Instruments/InstrumentController.h"
@@ -17,7 +17,7 @@ std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_HwPWM::m_active
 Teensy41_HwPWM::Teensy41_HwPWM() : InstrumentControllerBase()
 {
     // Initialize PWM pins for each instrument
-    const auto& pins = HardwareConfig::PINS;
+    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
     for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         initializePwmPin(i, pins[i]);
     }
@@ -46,7 +46,7 @@ void Teensy41_HwPWM::setFrequency(uint8_t instrument, double frequency)
     if (frequency < 10.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
-    const auto& pins = HardwareConfig::PINS;
+    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
     
     // // Only update if frequency changed significantly (>0.5Hz difference for better precision)
     // if (abs(lastFrequency[instrument] - frequency) > 0.5) {
@@ -67,7 +67,7 @@ void Teensy41_HwPWM::stopChannel(uint8_t instrument)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
-    const auto& pins = HardwareConfig::PINS;
+    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
     // Set duty cycle to 0 to stop PWM output
     analogWrite(pins[instrument], 0);
     m_activeInstruments.reset(instrument);

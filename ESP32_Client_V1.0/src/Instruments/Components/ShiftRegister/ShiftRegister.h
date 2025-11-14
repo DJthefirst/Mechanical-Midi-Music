@@ -2,7 +2,7 @@
 
 #include "Config.h"
 
-#ifdef SHIFTREG_TYPE_74HC595
+#ifdef COMPONENT_SHIFTREG_74HC595
 
     // Platform-specific includes - follows same pattern as SwPWM.h
     #if defined(PLATFORM_TEENSY41) && defined(SHIFTREG_USE_FLEXIO)
@@ -19,4 +19,4 @@
         #define ShiftRegister Default_SwShift
     #endif
 
-#endif // SHIFTREG_TYPE_74HC595
+#endif // COMPONENT_SHIFTREG_74HC595

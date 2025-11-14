@@ -21,9 +21,10 @@ using std::int8_t;
     #ifndef DEVICE_CONFIG
         // #define DEVICE_CONFIG "Configs/Example/HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/Example/SwPwmCfg.h"
+        #define DEVICE_CONFIG "Configs/Example/StepSwCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41SwPwmCfg.h"
-        #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthTeensyCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthTeensyCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthSwCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthHwCfg.h"
     #endif
@@ -71,9 +72,6 @@ using std::int8_t;
 
 namespace HardwareConfig {
 
-    // INSTRUMENT_PINS is derived from the configuration.
-    constexpr auto PINS = INSTRUMENT_PINS;
-
     // Optional settings with defaults
     #ifdef TIMER_RESOLUTION_US_VALUE
         constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_US_VALUE;
@@ -90,7 +88,7 @@ namespace HardwareConfig {
     #ifdef NUM_INSTRUMENTS_VALUE
     constexpr uint8_t NUM_INSTRUMENTS = NUM_INSTRUMENTS_VALUE;
     #else
-    constexpr uint8_t NUM_INSTRUMENTS = static_cast<uint8_t>(PINS.size());
+    constexpr uint8_t NUM_INSTRUMENTS = 1;
     #endif
 
     #ifdef NUM_SUBINSTRUMENTS_VALUE

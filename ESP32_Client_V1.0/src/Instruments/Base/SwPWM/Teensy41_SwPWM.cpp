@@ -1,17 +1,12 @@
 #include "Config.h"
-#ifdef PLATFORM_TEENSY41
+#if defined(PLATFORM_TEENSY41) && defined(COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/Teensy41_SwPWM.h"
 #include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>
-
-#include <IntervalTimer.h>
-
-
-// Teensy 4.1 IntervalTimer for software PWM
-IntervalTimer swPwmTimer;
+#include "Instruments/Components/InterruptTimer.h"
 
 // Define static member variables
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activeNotes = {};
@@ -27,15 +22,18 @@ std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibrat
 Teensy41_SwPWM::Teensy41_SwPWM() : InstrumentControllerBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
-        pinMode(HardwareConfig::PINS[i], OUTPUT);
+    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
+        pinMode(HardwareConfig::PINS_INSTRUMENT_PWM[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
 
-    // Setup timer to handle interrupts for driving the instrument
-    // Teensy IntervalTimer uses microseconds
-    swPwmTimer.begin(Tick, HardwareConfig::TIMER_RESOLUTION);
+    // Setup timer hardware and register the base tick callback. If a
+    // specialized subclass (like Teensy41_StepSwPWM) wants to take
+    // ownership it can call InterruptTimer::setCallback() to replace this
+    // handler.
+    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, nullptr);
+    InterruptTimer::setCallback(Tick);
 
 
     //Initialize Default values
@@ -97,7 +95,7 @@ void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     m_vibratoPhase[instrument] = 0;  // Reset vibrato phase to prevent carryover
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
     m_currentState.reset(instrument);  // Reset pin state bit
-    digitalWriteFast(HardwareConfig::PINS[instrument], 0);
+    digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], 0);
     
     if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
@@ -119,8 +117,8 @@ void Teensy41_SwPWM::stopAll(){
     m_vibratoPhase = {};
     m_vibratoDepth = {};
 
-    for(uint8_t i = 0; i < HardwareConfig::PINS.size(); i++){
-        digitalWriteFast(HardwareConfig::PINS[i], LOW);
+    for(uint8_t i = 0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
+        digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[i], LOW);
     }
 }
 
@@ -172,7 +170,7 @@ void Teensy41_SwPWM::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
-    digitalWriteFast(HardwareConfig::PINS[instrument], m_currentState[instrument]);
+    digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

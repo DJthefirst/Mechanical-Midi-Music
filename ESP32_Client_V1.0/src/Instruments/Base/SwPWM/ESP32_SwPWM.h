@@ -13,7 +13,7 @@ using std::int8_t;
 /* Outputs a PWM signal at the Notes Frequency on each Digital IO Pin */
 class ESP32_SwPWM : public InstrumentControllerBase{
 protected:
-    static void Tick();
+    static void tick();
     static void togglePin(uint8_t instrument);
 
     //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 

@@ -15,31 +15,32 @@
     #define DEVICE_NAME "ESP32 PWM"
     #define DEVICE_ID 0x0003
 
-    //Absolute max number of Polyphonic notes is 16
-    constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
-
     //Max Number of Instrument groups is 32
-    constexpr uint8_t NUM_INSTRUMENTS = 8; 
+    #define NUM_INSTRUMENTS_VALUE 8
     //Multiplies Instrument groups into individual instruments
-    constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
+    #define NUM_SUBINSTRUMENTS_VALUE 1
 
     //Absolute Lowest Note Min=0
-    constexpr uint8_t MIN_MIDI_NOTE = 0; 
+    #define MIN_NOTE_VALUE 0
     //Absolute Highest Note Max=127
-    constexpr uint8_t MAX_MIDI_NOTE = 127;
+    #define MAX_NOTE_VALUE 127
 
 //---------- Hardware Configuration ----------
-
-    constexpr std::array<uint8_t,8> INSTRUMENT_PINS = {33,32,19,21,22,23,2,4};//,16,13};
-
-    #define SHIFTREG_TYPE_74HC595
-    #define SHIFTREG_HOLDTIME_NS 25
-    #define PIN_SHIFTREG_Data 25
-    #define PIN_SHIFTREG_Clock 27
-    #define PIN_SHIFTREG_Load 26
-    #define PIN_LED_Data 18
+namespace HardwareConfig {
 
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
+
+    #define COMPONENT_PWM
+        constexpr std::array<uint8_t,8> PINS_INSTRUMENT_PWM = {33,32,19,21,22,23,2,4};//,16,13};
+
+    #define COMPONENT_SHIFTREG_74HC595
+        #define SHIFTREG_HOLDTIME_NS 25
+        constexpr uint8_t PIN_SHIFTREG_Data = 25;
+        constexpr uint8_t PIN_SHIFTREG_Clock = 27;
+        constexpr uint8_t PIN_SHIFTREG_Load = 26;
+
+    #define PIN_LED_Data 18
+}
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
@@ -72,7 +73,7 @@
 
     //FAST LED Variables
     #ifdef EXTRA_ADDRESSABLE_LEDS
-        #define LED_PIN     18
+        #define LED_PIN     PIN_LED_Data
         #define NUM_LEDS    50
         #define BRIGHTNESS  255
         #define LED_TYPE    WS2811

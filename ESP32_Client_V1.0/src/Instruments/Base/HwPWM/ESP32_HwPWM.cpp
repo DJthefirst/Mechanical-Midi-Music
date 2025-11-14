@@ -1,5 +1,5 @@
 #include "Config.h"
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && defined(COMPONENT_PWM)
 
 #include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
 #include "Instruments/InstrumentController.h"
@@ -21,7 +21,7 @@ ESP32_HwPWM::ESP32_HwPWM() : InstrumentControllerBase()
     // Initialize LedC channels for each instrument
     // Use channels 0, 2, 4, 6, 8, 10, 12, 14 to ensure each uses a unique timer
     // This avoids timer sharing which causes frequency interference
-    const auto& pins = HardwareConfig::PINS;
+    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
     for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         m_ledcChannels[i] = i * 2; // Map: instrument 0->ch0, 1->ch2, 2->ch4, etc.
         initializeLedcChannel(i, pins[i]);

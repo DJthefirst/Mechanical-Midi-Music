@@ -14,27 +14,23 @@
     #define DEVICE_NAME "ESP32 HW PWM"
     #define DEVICE_ID 0x0018
 
-    // Maximum number of polyphonic notes (absolute max is 16)
-    constexpr uint8_t MAX_POLYPHONIC_NOTES = 1;
+    //Max Number of Instrument groups is 32
+    #define NUM_INSTRUMENTS_VALUE 8
+    //Multiplies Instrument groups into individual instruments
+    #define NUM_SUBINSTRUMENTS_VALUE 1
 
-    // Maximum number of instrument groups (max is 32)
-    // REDUCED TO 8: ESP32 LEDC has 8 timers, using 8 channels ensures no timer sharing/interference
-    // Channel mapping: 0,2,4,6,8,10,12,14 each use different timers
-    constexpr uint8_t NUM_INSTRUMENTS = 8;
-    // Multiplies instrument groups into individual instruments
-    constexpr uint8_t NUM_SUBINSTRUMENTS = 1; 
-
-    // MIDI note range (0-127)
-    constexpr uint8_t MIN_MIDI_NOTE = 0; 
-    constexpr uint8_t MAX_MIDI_NOTE = 127;
+    //Absolute Lowest Note Min=0
+    #define MIN_NOTE_VALUE 0
+    //Absolute Highest Note Max=127
+    #define MAX_NOTE_VALUE 127
 
 //---------- Hardware Configuration ----------
-
-    // Hardware Configuration - Reduced to 8 pins to match 8 independent timers
-    constexpr std::array<uint8_t, 8> INSTRUMENT_PINS = {2, 4, 18, 19, 21, 22, 23, 25}; // ESP32 PWM-capable pins
-
+namespace HardwareConfig {
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
 
+    #define COMPONENT_PWM
+        constexpr std::array<uint8_t, 8> PINS_INSTRUMENT_PWM = {2, 4, 18, 19, 21, 22, 23, 25}; // ESP32 PWM-capable pins
+}
 
 //---------- Uncomment Your Selected Instrument Type ----------
 

@@ -7,7 +7,7 @@
 
 #include "Config.h"
 
-#if defined(PLATFORM_TEENSY41) && !defined(SHIFTREG_USE_FLEXIO)
+#if defined(PLATFORM_TEENSY41) && !defined(SHIFTREG_USE_FLEXIO) && defined(COMPONENT_SHIFTREG_74HC595)
 
 #include "Teensy41_SwShift.h"
 #include "Arduino.h"
@@ -24,10 +24,10 @@ void Teensy41_SwShift::init() {
     if (m_initialized) return;
     
     // Setup pins
-    pinMode(PIN_SHIFTREG_Data, OUTPUT);
-    pinMode(PIN_SHIFTREG_Clock, OUTPUT);
-    pinMode(PIN_SHIFTREG_Load, OUTPUT);
-    
+    pinMode(HardwareConfig::PIN_SHIFTREG_Data, OUTPUT);
+    pinMode(HardwareConfig::PIN_SHIFTREG_Clock, OUTPUT);
+    pinMode(HardwareConfig::PIN_SHIFTREG_Load, OUTPUT);
+
     // Initialize all outputs as disabled
     m_outputEnabled = {};
     m_update = true;  // Force initial update
@@ -97,19 +97,19 @@ void Teensy41_SwShift::update() {
     for(int8_t i = HardwareConfig::NUM_INSTRUMENTS - 1; i >= 0; i--) {
         // Note: Using ! for active-low enable logic (LOW = enabled)
         // If your drivers are active-high, change to: m_outputEnabled[i]
-        digitalWriteFast(PIN_SHIFTREG_Data, !m_outputEnabled[i]);
+        digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Data, !m_outputEnabled[i]);
         delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-        digitalWriteFast(PIN_SHIFTREG_Clock, HIGH); // Serial Clock
+        digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Clock, HIGH); // Serial Clock
         delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-        digitalWriteFast(PIN_SHIFTREG_Clock, LOW);  // Serial Clock (latch data)
+        digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Clock, LOW);  // Serial Clock (latch data)
         delayNanoseconds(SHIFTREG_HOLDTIME_NS);
     }
     
     // Toggle Load to transfer shift register to output latches
-    digitalWriteFast(PIN_SHIFTREG_Load, HIGH); // Register Load
+    digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Load, HIGH); // Register Load
     delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-    digitalWriteFast(PIN_SHIFTREG_Load, LOW);  // Register Load (latch output)
-    digitalWriteFast(PIN_SHIFTREG_Data, LOW);  // Leave data line low when idle
+    digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Load, LOW);  // Register Load (latch output)
+    digitalWriteFast(HardwareConfig::PIN_SHIFTREG_Data, LOW);  // Leave data line low when idle
     
     // Clear update flag after successful update
     m_update = false;

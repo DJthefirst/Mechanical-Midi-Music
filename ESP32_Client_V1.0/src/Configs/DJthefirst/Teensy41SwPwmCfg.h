@@ -12,7 +12,6 @@
 #include <cstdint>
 
 //---------- Device Configuration ----------
-
     #define DEVICE_NAME "Teensy 4.1 SW PWM"
     #define DEVICE_ID 0x0043
 
@@ -23,15 +22,16 @@
     #define MAX_NOTE_VALUE 127
 
 //---------- Hardware Configuration ----------
+namespace HardwareConfig {
 
-    // Teensy 4.1 has many digital I/O pins available for software PWM
-    // Using 16 pins for good coverage
-    constexpr std::array<uint8_t, 16> INSTRUMENT_PINS = {
-        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18
-    };
-
-    #define TIMER_RESOLUTION_US_VALUE 1 // Timer resolution in microseconds
     #define INSTRUMENT_TIMEOUT_MS_VALUE 10000
+
+    #define COMPONENT_PWM
+        #define TIMER_RESOLUTION_US_VALUE 1 // Timer resolution in microseconds
+        constexpr std::array<uint8_t, 16> PINS_INSTRUMENT_PWM = {
+            2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18
+        };
+}
 
 //---------- Uncomment Your Selected Instrument Type ----------
 
