@@ -14,7 +14,8 @@ StepperSynthHw::StepperSynthHw() : HwPWM()
     ShiftRegister::init();
 
     //Setup FAST LED
-    setupLEDs();
+    
+    
 
     delay(500); // Wait a half second for safety
 }

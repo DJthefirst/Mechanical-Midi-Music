@@ -4,8 +4,8 @@
 
 //---------- Device Configuration ----------
 
-    #define DEVICE_NAME "Step SW PWM"
-    #define DEVICE_ID 0x0033
+    #define DEVICE_NAME "Step SW Shift"
+    #define DEVICE_ID 0x0037
 
     //Max Number of Instrument groups is 32
     #define NUM_INSTRUMENTS_VALUE 8
@@ -26,13 +26,18 @@ namespace HardwareConfig {
         //Min Resolutions, ESP32: 8us, Teensy4.1: 1us
         #define TIMER_RESOLUTION_US_VALUE 1 // Timer resolution in microseconds
         #define PWM_NOTES_DOUBLE
-        constexpr std::array<uint8_t, 8> PINS_INSTRUMENT_PWM = {0, 2, 4, 6, 8, 10, 14, 18};
+        constexpr std::array<uint8_t, 10> PINS_INSTRUMENT_PWM = {23,22,28,6,7,24,3,4,5,36};
 
-
-    #define COMPONENT_STEP
+    #define COMPONENT_STEP_SHIFT
         #define STEP_MIN_HEAD_POS 0
         #define STEP_MAX_HEAD_POS 150 // 79 Tracks*2 for 3.5in or 49*2 for 5.25in
-        constexpr std::array<uint8_t, 8> PINS_INSTRUMENT_DIR ={1, 3, 5, 7, 9, 11, 15, 19};
+    
+    #define COMPONENT_SHIFTREG_74HC595
+        //#define SHIFTREG_USE_FLEXIO         // DISABLED: FlexIO implementation needs debugging - Comment out to use software bit-banging instead
+        #define SHIFTREG_HOLDTIME_NS 25
+        constexpr uint8_t PIN_SHIFTREG_Data = 17;
+        constexpr uint8_t PIN_SHIFTREG_Clock = 16;
+        constexpr uint8_t PIN_SHIFTREG_Load = 15;
 
     #define PIN_LED_Data 13
     

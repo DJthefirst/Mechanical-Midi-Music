@@ -1,9 +1,9 @@
 #include "Config.h"
-#if defined(PLATFORM_ESP32) && defined(COMPONENT_STEP) 
+#if defined(PLATFORM_ESP32) && defined(COMPONENT_STEP_SHIFT) && defined(COMPONENT_SHIFTREG_74HC595) 
 
 #include "Instruments/Base/StepSw/ESP32_StepSw.h"
 #include "Instruments/Components/InterruptTimer.h"
-#include "Instruments/Components/NoteTable.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
 #include "Arduino.h"
 #include <bitset>
 
@@ -14,10 +14,7 @@ std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_pinStateDir = 0
 ESP32_StepSw::ESP32_StepSw() : ESP32_SwPWM()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_DIR.size(); i++){
-        pinMode(HardwareConfig::PINS_INSTRUMENT_DIR[i], OUTPUT);
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_DIR[i], LOW);
-    }
+    ShiftRegister::init();
 
     delay(500); // Wait a half second for safety
 
@@ -67,7 +64,8 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == STEP_MAX_HEAD_POS) || (m_headPosition[instrument] == STEP_MIN_HEAD_POS)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_DIR[instrument], m_pinStateDir[instrument]);
+        ShiftRegister::setOutputEnabled(instrument, m_pinStateDir[instrument]);
+        ShiftRegister::update();
     }
 
     //Pulse the step pin.

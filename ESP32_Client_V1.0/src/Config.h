@@ -21,7 +21,9 @@ using std::int8_t;
     #ifndef DEVICE_CONFIG
         // #define DEVICE_CONFIG "Configs/Example/HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/Example/SwPwmCfg.h"
-        #define DEVICE_CONFIG "Configs/Example/StepSwCfg.h"
+        // #define DEVICE_CONFIG "Configs/Example/StepSwCfg.h"
+        #define DEVICE_CONFIG "Configs/DJthefirst/PneumaticValvesCfg.h"
+        // #define DEVICE_CONFIG "Configs/DJthefirst/FloppySynthCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41HwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41SwPwmCfg.h"
         // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthTeensyCfg.h"
