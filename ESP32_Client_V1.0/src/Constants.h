@@ -136,6 +136,7 @@ enum class Instrument
     StepHW_PWM,
     StepSW_PWM,
     ShiftRegister,
+    MultiPhase,
     StepperMotor = 0x10,
     FloppyDrive = 0x11
 };
