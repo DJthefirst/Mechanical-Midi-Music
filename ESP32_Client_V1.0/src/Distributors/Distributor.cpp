@@ -130,7 +130,7 @@ void Distributor::stopActiveNotes() {
             // If instrument is active, stop it. Use stopNote which will
             // also clear the _lastDistributor entry in most implementations.
             if (m_instrumentController->getNumActiveNotes(i) != 0) {
-                m_instrumentController->stopNote(i, 0);
+                m_instrumentController->stopNote(i, 0, 0, 0);
             } else {
                 // Ensure the distributor tracking is cleared even if not active
                 m_instrumentController->setLastDistributor(i, nullptr, NONE);

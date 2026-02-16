@@ -11,7 +11,7 @@
 #include "../MsgHandling/MidiMessage.h"
 #include "../Constants.h"
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
     #include "../Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
@@ -96,7 +96,7 @@ private:
     }
 
     // Local Storage helpers
-    #ifdef EXTRA_LOCAL_STORAGE
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);
     void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data);

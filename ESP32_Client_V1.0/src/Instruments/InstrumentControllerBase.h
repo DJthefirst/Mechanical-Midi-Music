@@ -46,7 +46,7 @@ public:
         // Default implementation just calls the base method
         playNote(instrument, note, velocity, channel);
     }
-    virtual void stopNote(uint8_t instrument, uint8_t velocity) = 0;
+    virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     virtual void stopAll() = 0;
 
     //Required Getters

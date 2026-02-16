@@ -26,9 +26,9 @@ void PneumaticValvesSw::playNote(uint8_t instrument, uint8_t note, uint8_t veloc
     return;
 }
 
-void PneumaticValvesSw::stopNote(uint8_t instrument, uint8_t velocity)
+void PneumaticValvesSw::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
-   SwPWM::stopNote(instrument, velocity);
+   SwPWM::stopNote(instrument, note, velocity, channel);
     setInstrumentLedOff(instrument);
 }
 
@@ -49,7 +49,7 @@ void PneumaticValvesSw::stopAll(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 
 //Set an Instrument Led to on
 void PneumaticValvesSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){

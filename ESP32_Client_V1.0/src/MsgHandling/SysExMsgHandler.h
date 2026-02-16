@@ -11,7 +11,7 @@
 #include "MidiMessage.h"
 #include "Constants.h"
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
     #include "Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
@@ -86,7 +86,7 @@ private:
     bool isValidDestination(const MidiMessage& message) const;
     
     // Local Storage helpers
-    #ifdef EXTRA_LOCAL_STORAGE
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
         void localStorageSetDeviceName(char* name);
         void localStorageAddDistributor();
         void localStorageRemoveDistributor(uint8_t id);

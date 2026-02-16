@@ -7,7 +7,7 @@
 
 #include "NetworkUSB.h"
 
-#ifdef MMM_NETWORK_USB
+#ifdef CFG_MMM_NETWORK_USB
 
 void NetworkUSB::begin() {
     // TODO: Initialize USB MIDI interface

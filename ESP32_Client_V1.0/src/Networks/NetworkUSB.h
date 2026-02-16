@@ -8,7 +8,7 @@
 
 #include "INetwork.h"
 
-#ifdef MMM_NETWORK_USB
+#ifdef CFG_MMM_NETWORK_USB
 
 class NetworkUSB : public INetwork {
 public:
@@ -19,4 +19,4 @@ public:
     std::optional<MidiMessage> readMessage() override;
 };
 
-#endif
+#endif /* CFG_MMM_NETWORK_USB */

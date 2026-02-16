@@ -23,13 +23,13 @@ namespace NoteTables {
         1046.502261, 1108.730524, 1174.659072, 1244.507935, 1318.510228, 1396.912926, 1479.977691, 1567.981744, 1661.218790, 1760.000000, 1864.655046, 1975.533205, //C6 - B6
         2093.004522, 2217.461048, 2349.318143, 2489.015870, 2637.020455, 2793.825851, 2959.955382, 3135.963488, 3322.437581, 3520.000000, 3729.310092, 3951.066410, //C7 - B7
         4186.009045, 4434.922096, 4698.636287, 4978.031740, 5274.040911, 5587.651703, 5919.910763, 6271.926976, 6644.875161, 7040.000000, 7458.620184, 7902.132820, //C8 - B8
-        8372.018090, 8869.844191, 9397.272573, 9956.063479, 10548.081821, 11175.303406, 11839.821527, 12543.853951
+        8372.018090, 8869.844191, 9397.272573, 9956.063479, 10548.081821, 11175.303406, 11839.821527, 12543.853951 //C9 - G9
     };
 
     // NOTE_PERIODS defined explicitly as a constexpr array (values in microseconds,
     // clamped to uint16_t max for very low frequencies).
     constexpr std::array<uint16_t, 128> NOTE_PERIODS = {
-        65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 64793, 
+        65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 64793, //C-1 - B-1
         61156, 57724, 54484, 51426, 48540, 45815, 43244, 40817, 38526, 36364, 34323, 32396, //C-0 - B-0
         30578, 28862, 27242, 25713, 24270, 22908, 21622, 20408, 19263, 18182, 17161, 16198, //C1 - B1
         15289, 14431, 13621, 12856, 12135, 11454, 10811, 10204, 9631, 9091, 8581, 8099, //C2 - B2
@@ -39,7 +39,7 @@ namespace NoteTables {
         956, 902, 851, 804, 758, 716, 676, 638, 602, 568, 536, 506, //C6 - B6
         478, 451, 426, 402, 379, 358, 338, 319, 301, 284, 268, 253, //C7 - B7
         239, 225, 213, 201, 190, 179, 169, 159, 150, 142, 134, 127, //C8 - B8
-        119, 113, 106, 100, 95, 89, 84, 80
+        119, 113, 106, 100, 95, 89, 84, 80 //C9 - G9
     };
 
     /*
@@ -60,12 +60,12 @@ namespace NoteTables {
         return noteDoubleTicks;
     }
 
-    constexpr auto NOTE_TICKS = compute_divided_ticks(HardwareConfig::TIMER_RESOLUTION);
+    constexpr auto NOTE_TICKS = compute_divided_ticks(CFG_TIMER_RESOLUTION_US);
 
     // In some cases a pulse will only happen every-other tick (e.g. if the tick is
     // toggling a pin on and off and pulses happen on rising signal) so to simplify
     // the math multiply the RESOLUTION by 2 here.
-    constexpr auto NOTE_TICKS_DOUBLE = compute_divided_ticks(HardwareConfig::TIMER_RESOLUTION*2);
+    constexpr auto NOTE_TICKS_DOUBLE = compute_divided_ticks(CFG_TIMER_RESOLUTION_US*2);
     
     // Apply pitch bend to frequency
     constexpr float applyPitchBend(float baseFrequency, uint16_t pitchBend) {
@@ -78,11 +78,11 @@ namespace NoteTables {
     constexpr uint32_t applyPitchBendToPeriod(uint32_t basePeriodTicks, uint16_t pitchBend) {
         // Convert base period to frequency, apply pitch bend multiplier, then back to period
         // Use floating point in constexpr for clarity; cast back to integer ticks
-        float baseFreq = 1000000.0f / static_cast<float>(basePeriodTicks * HardwareConfig::TIMER_RESOLUTION);
+        float baseFreq = 1000000.0f / static_cast<float>(basePeriodTicks * CFG_TIMER_RESOLUTION_US);
         float bentFreq = applyPitchBend(baseFreq, pitchBend);
         float bentPeriodMicros = 1000000.0f / bentFreq;
-        // Convert microsecond period to ticks using HardwareConfig::TIMER_RESOLUTION
-        uint32_t ticks = static_cast<uint32_t>(bentPeriodMicros / static_cast<float>(HardwareConfig::TIMER_RESOLUTION));
+        // Convert microsecond period to ticks using HardwareConfig::CFG_TIMER_RESOLUTION
+        uint32_t ticks = static_cast<uint32_t>(bentPeriodMicros / static_cast<float>(CFG_TIMER_RESOLUTION_US));
         return ticks > 0 ? ticks : 1;
     }
 

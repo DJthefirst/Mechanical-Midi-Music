@@ -268,7 +268,7 @@ void SysExMsgHandler::sysExSetDeviceID(const MidiMessage& message)
     uint16_t newID = (static_cast<uint16_t>(msb) << 7) | static_cast<uint16_t>(lsb);
     Device::SetDeviceID(newID);
     // persist
-    #ifdef EXTRA_LOCAL_STORAGE
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
     LocalStorageFactory::getInstance().setDeviceID(newID);
     #endif
     broadcastDeviceChanged();
@@ -307,7 +307,7 @@ void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
     Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);        // Bit 0
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);  // Bit 1
     
-    #ifdef EXTRA_LOCAL_STORAGE
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
         LocalStorageFactory::getInstance().setDeviceBoolean(deviceBoolValue);
     #endif
     
@@ -502,7 +502,7 @@ bool SysExMsgHandler::isValidDestination(const MidiMessage& message) const
 // Local Storage Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
 
 void SysExMsgHandler::localStorageSetDeviceName(char* name)
 {

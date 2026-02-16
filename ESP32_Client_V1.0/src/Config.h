@@ -13,34 +13,6 @@
 #include <cstdint>
 using std::int8_t;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Device Config Include
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-    // Default device config used when no selection is provided by the application
-    #ifndef DEVICE_CONFIG
-        // #define DEVICE_CONFIG "Configs/Example/HwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/Example/SwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/Example/StepSwCfg.h"
-        #define DEVICE_CONFIG "Configs/DJthefirst/PneumaticValvesCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/FloppySynthCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41HwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/Teensy41SwPwmCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthTeensyCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthSwCfg.h"
-        // #define DEVICE_CONFIG "Configs/DJthefirst/StepperSynthHwCfg.h"
-    #endif
-
-    // Include the selected config header
-    #define STRINGIFY(x) #x
-    #define INCLUDE_FILE(x) STRINGIFY(x)
-        #include DEVICE_CONFIG
-    #undef STRINGIFY
-    #undef INCLUDE_FILE
-
-    #ifndef INSTRUMENT_TYPE_VALUE
-        #define INSTRUMENT_TYPE_VALUE "Instruments/Base/SwPWM/SwPWM.h"
-    #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform Detection
@@ -74,32 +46,7 @@ using std::int8_t;
 
 namespace HardwareConfig {
 
-    // Optional settings with defaults
-    #ifdef TIMER_RESOLUTION_US_VALUE
-        constexpr uint32_t TIMER_RESOLUTION = TIMER_RESOLUTION_US_VALUE;
-    #else
-        constexpr uint32_t TIMER_RESOLUTION = 40;  // Default 40 microseconds
-    #endif
-
-    #ifdef INSTRUMENT_TIMEOUT_MS_VALUE
-        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = INSTRUMENT_TIMEOUT_MS_VALUE;
-    #else
-        constexpr uint32_t INSTRUMENT_TIMEOUT_MS = 15000;  // Default 0 = infinite timeout (no timeout)
-    #endif
-
-    #ifdef NUM_INSTRUMENTS_VALUE
-    constexpr uint8_t NUM_INSTRUMENTS = NUM_INSTRUMENTS_VALUE;
-    #else
-    constexpr uint8_t NUM_INSTRUMENTS = 1;
-    #endif
-
-    #ifdef NUM_SUBINSTRUMENTS_VALUE
-    constexpr uint8_t NUM_SUBINSTRUMENTS = NUM_SUBINSTRUMENTS_VALUE;
-    #else
-    constexpr uint8_t NUM_SUBINSTRUMENTS = 1;
-    #endif
-
-    constexpr uint8_t MAX_NUM_INSTRUMENTS = NUM_INSTRUMENTS * NUM_SUBINSTRUMENTS;
+    constexpr uint8_t MAX_NUM_INSTRUMENTS = CFG_NUM_INSTRUMENTS * CFG_NUM_SUBINSTRUMENTS;
 
 
     // Platform capabilities
@@ -124,8 +71,8 @@ namespace HardwareConfig {
 namespace DeviceConfig {
     
      // Device identity
-    constexpr const char* DEVICE_NAME_STR = DEVICE_NAME;
-    constexpr uint16_t DEVICE_ID_VAL = DEVICE_ID;
+    constexpr const char* DEVICE_NAME_STR = CFG_DEVICE_NAME;
+    constexpr uint16_t DEVICE_ID_VAL = CFG_DEVICE_ID;
     constexpr uint16_t FIRMWARE_VERSION = 2;
 
     #ifdef MIN_NOTE_VALUE

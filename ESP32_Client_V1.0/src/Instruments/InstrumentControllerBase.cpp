@@ -54,7 +54,7 @@ void InstrumentControllerBase::checkInstrumentTimeouts(){
 // LED Helper Functions - Default Implementations
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 #include "Extras/AddrLED.h"
 
 void InstrumentControllerBase::updateLEDs(){ AddrLED::get().update(); }

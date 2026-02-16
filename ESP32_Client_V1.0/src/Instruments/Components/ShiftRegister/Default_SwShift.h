@@ -9,21 +9,19 @@
 #pragma once
 
 #include "Config.h"
-#include <array>
+#include "IShiftRegister.h"
+#include <bitset>
 #include <cstdint>
 
-class Default_SwShift {
-private:
-    static std::array<bool, HardwareConfig::NUM_INSTRUMENTS> m_outputEnabled;
-    static bool m_initialized;
-    static bool m_update;  // Tracks if m_outputEnabled has changed since last update
-
+template<size_t numOutputs>
+class Default_SwShift : public IShiftRegister<numOutputs> {
 public:
-
-    static void init();
-    static void setOutputEnabled(uint8_t instrument, bool enabled);
-    static bool getOutputEnabled(uint8_t instrument);
-    static void disableAll();
-    static void update();
+    Default_SwShift(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD, uint8_t PIN_EN, uint8_t PIN_RST):
+        Default_SwShift::IShiftRegister(PIN_SER, PIN_CLK, PIN_LD, PIN_EN, PIN_RST) {}
+    void init() override;
+    void setOutputEnabled(uint8_t instrument, bool enabled) override;
+    bool getOutputEnabled(uint8_t instrument) override;
+    void disableAll() override;
+    void update() override;
 };
 

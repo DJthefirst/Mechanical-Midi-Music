@@ -13,44 +13,21 @@
 
 #pragma once
 
+#pragma once
+
 #include "Config.h"
-
-#if defined(PLATFORM_TEENSY41)
-
-#include <array>
+#include "IShiftRegister.h"
+#include <bitset>
 #include <cstdint>
 
-/**
- * Teensy41_FlexShift - Hardware-accelerated FlexIO implementation for Teensy 4.x
- * 
- * Uses FlexIO peripheral to generate precise shift register timing with minimal CPU overhead.
- * Significantly faster and more efficient than software bit-banging.
- */
-
-class Teensy41_FlexShift {
-private:
-    static std::array<bool, HardwareConfig::NUM_INSTRUMENTS> m_outputEnabled;
-    static bool m_initialized;
-    static bool m_dirty;  // Tracks if m_outputEnabled has changed since last update
-    
-    // Pin configuration (from config file)
-    static constexpr uint8_t PIN_DATA = PIN_SHIFTREG_Data;   // Pin 17
-    static constexpr uint8_t PIN_CLOCK = PIN_SHIFTREG_Clock; // Pin 16
-    static constexpr uint8_t PIN_LOAD = PIN_SHIFTREG_Load;   // Pin 15
-    
-    // FlexIO pin assignments
-    static constexpr uint8_t FLEXIO_DATA_PIN = 4;   // FlexIO1 pin 4 = physical pin 17
-    static constexpr uint8_t FLEXIO_CLOCK_PIN = 5;  // FlexIO1 pin 5 = physical pin 16
-
-    static void initFlexIO();
-    static void waitShifterComplete();
-
+template<size_t numOutputs>
+class Teensy41_FlexShift : public IShiftRegister<numOutputs> {
 public:
-    static void init();
-    static void setOutputEnabled(uint8_t instrument, bool enabled);
-    static bool getOutputEnabled(uint8_t instrument);
-    static void disableAll();
-    static void update();
+    Teensy41_FlexShift(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD, uint8_t PIN_EN, uint8_t PIN_RST):
+        Teensy41_FlexShift::IShiftRegister(PIN_SER, PIN_CLK, PIN_LD, PIN_EN, PIN_RST) {}
+    void init() override;
+    void setOutputEnabled(uint8_t instrument, bool enabled) override;
+    bool getOutputEnabled(uint8_t instrument) override;
+    void disableAll() override;
+    void update() override;
 };
-
-#endif // PLATFORM_TEENSY41

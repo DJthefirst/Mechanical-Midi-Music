@@ -7,7 +7,7 @@
 // Custom LED Implementations
 // PwmInstrument uses 1 LED per instrument instead of the default 5
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 #include "Extras/AddrLED.h"
 
 //Set an Instrument Led to on - CUSTOM: uses single LED per instrument

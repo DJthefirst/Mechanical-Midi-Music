@@ -181,7 +181,7 @@ std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8
 // Local Storage Implementation
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
 
 void DistributorManager::localStorageAddDistributor()
 {

@@ -23,8 +23,8 @@ public:
     void periodic() override;
     void reset(uint8_t instrument) override;
     void resetAll() override;
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t velocity) override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopAll() override;
 
 private:

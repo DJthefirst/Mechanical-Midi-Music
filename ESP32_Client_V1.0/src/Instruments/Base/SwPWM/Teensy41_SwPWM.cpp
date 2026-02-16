@@ -79,7 +79,7 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     return;
 }
 
-void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
+void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -240,7 +240,7 @@ void Teensy41_SwPWM::checkInstrumentTimeouts() {
         if (m_activeNotes[i] != 0 && 
             (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
             // Stop the note due to timeout
-            stopNote(i, 0);
+            stopNote(i, 0, 0, 0);
         }
     }
 }

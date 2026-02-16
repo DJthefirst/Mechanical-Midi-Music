@@ -59,7 +59,7 @@ void RoundRobinBalanceStrategy::stopActiveInstrument(uint8_t note, uint8_t veloc
             && instrumentController->getLastDistributor(instrument) == static_cast<void*>(m_distributor)
             && instrumentController->getLastChannel(instrument) == channel 
             && instrumentController->isNoteActive(instrument, note)) {
-            instrumentController->stopNote(instrument, velocity);
+            instrumentController->stopNote(instrument, note, velocity, channel);
             return;
         }
     }
@@ -94,7 +94,7 @@ void RoundRobinStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, ui
             && instrumentController->getLastDistributor(instrument) == static_cast<void*>(m_distributor)
             && instrumentController->getLastChannel(instrument) == channel 
             && instrumentController->isNoteActive(instrument, note)) {
-            instrumentController->stopNote(instrument, velocity);
+            instrumentController->stopNote(instrument, note, velocity, channel);
             return;
         }
     }
@@ -137,7 +137,7 @@ void AscendingStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, uin
             && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
             && instrumentController->getLastChannel(i) == channel 
             && instrumentController->isNoteActive(i, note)) {
-            instrumentController->stopNote(i, velocity);
+            instrumentController->stopNote(i, note, velocity, channel);
             return;
         }
     }
@@ -181,7 +181,7 @@ void DescendingStrategy::stopActiveInstrument(uint8_t note, uint8_t velocity, ui
             && instrumentController->getLastDistributor(i) == static_cast<void*>(m_distributor)
             && instrumentController->getLastChannel(i) == channel 
             && instrumentController->isNoteActive(i, note)) {
-            instrumentController->stopNote(i, velocity);
+            instrumentController->stopNote(i, note, velocity, channel);
             return;
         }
     }
@@ -202,6 +202,6 @@ void StraightThroughStrategy::stopActiveInstrument(uint8_t note, uint8_t velocit
             && instrumentController->getLastDistributor(channel) == static_cast<void*>(m_distributor)
             && instrumentController->getLastChannel(channel) == channel
             && instrumentController->isNoteActive(channel, note)){
-        instrumentController->stopNote(channel, velocity);
+        instrumentController->stopNote(channel, note, velocity, channel);
     }
 }

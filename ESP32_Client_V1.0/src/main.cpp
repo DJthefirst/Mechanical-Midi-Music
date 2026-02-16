@@ -9,8 +9,9 @@
 // See Device.h and the Configs folder for device setup.
 // Configuration is selected in platformio.ini build_flags section
 
+// #define CFG_INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/Dulcimer.h"
+
 #include <Arduino.h>
-#include "Config.h"
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MsgHandling/MessageRouter.h"
@@ -21,12 +22,12 @@
 //Include the selected Instrument Type
 #define STRINGIFY(x) #x
 #define INCLUDE_FILE(x) STRINGIFY(x)
-  #include INSTRUMENT_TYPE_VALUE
+  #include CFG_INSTRUMENT_TYPE_VALUE
 #undef STRINGIFY
 #undef INCLUDE_FILE
 
 // Optional features
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
   #include "Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
@@ -42,7 +43,7 @@ std::shared_ptr<MidiMsgHandler> midiMsgHandler;
 void setup() {
   // Device::validateConfiguration();
 
-  // Initialize core components with proper dependency injection
+  // Initialize core components with dependency injection
   instrumentController = InstrumentController<INSTRUMENT_TYPE>::getInstance();
   Device::InstrumentType = instrumentController->getInstrumentType();
 
@@ -68,7 +69,7 @@ void setup() {
   delay(100);
 
   // Initialize device configuration from local storage
-  #ifdef EXTRA_LOCAL_STORAGE
+  #ifdef CFG_EXTRA_LOCAL_STORAGE
     LocalStorageFactory::getInstance().initializeDeviceConfiguration(*distributorManager);
   #endif
 

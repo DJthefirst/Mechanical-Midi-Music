@@ -34,9 +34,9 @@ void StepperSynthHw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     return;
 }
 
-void StepperSynthHw::stopNote(uint8_t instrument, uint8_t velocity)
+void StepperSynthHw::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
-    HwPWM::stopNote(instrument, velocity);
+    HwPWM::stopNote(instrument, note, velocity, channel);
     ShiftRegister::setOutputEnabled(instrument, false);
     ShiftRegister::update();
     setInstrumentLedOff(instrument);
@@ -63,7 +63,7 @@ void StepperSynthHw::stopAll(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 
 //Set an Instrument Led to on
 void StepperSynthHw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){

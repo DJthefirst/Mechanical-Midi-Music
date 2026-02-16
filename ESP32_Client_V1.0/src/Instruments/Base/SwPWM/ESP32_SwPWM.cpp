@@ -78,7 +78,7 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     return;
 }
 
-void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
+void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -246,7 +246,7 @@ void ESP32_SwPWM::checkInstrumentTimeouts() {
         if (m_activeNotes[i] != 0 && 
             (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
             // Stop the note due to timeout
-            stopNote(i, 0);
+            stopNote(i, 0, 0, 0);
         }
     }
 }

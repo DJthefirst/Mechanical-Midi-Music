@@ -1,11 +1,11 @@
 #include "AddrLed.h"
 
-#ifdef EXTRA_ADDRESSABLE_LEDS
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 
 //Setup FAST LED
 void AddrLED::setup(){
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds.data(), NUM_LEDS).setCorrection(TypicalLEDStrip);
-    FastLED.setBrightness(BRIGHTNESS);
+    FastLED.addLeds<CFG_LED_TYPE, CFG_PIN_LED_DATA, CFG_COLOR_ORDER>(leds.data(), CFG_NUM_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.setBrightness(CFG_BRIGHTNESS);
 }
 
 //Update LEDs
@@ -54,12 +54,16 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 
 //Set LED on by id
 void AddrLED::turnLedOn(uint8_t id,CHSV color){
+    if (id >= CFG_NUM_LEDS) return;
     leds[id] = color;
     m_updateLEDs = true;
 }
 
 //Set LED on by id
 void AddrLED::turnLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color){
+    if (idStart >= CFG_NUM_LEDS) return;
+    if (idEnd >= CFG_NUM_LEDS) idEnd = CFG_NUM_LEDS - 1;
+    if (idStart > idEnd) return;
 
     for(int i=idStart; i <= idEnd; i++)leds[i] = color;
     m_updateLEDs = true;
@@ -67,13 +71,14 @@ void AddrLED::turnLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color){
 
 //Set an id LED to off
 void AddrLED::turnLedOff(uint8_t id){
+    if (id >= CFG_NUM_LEDS) return;
     leds[id] = CRGB::Black; 
     m_updateLEDs = true;
 }
 
 //Reset Leds
 void AddrLED::reset(){
-    for( int i = 0; i < NUM_LEDS; ++i) {
+    for( int i = 0; i < CFG_NUM_LEDS; ++i) {
         leds[i] = CRGB::Black;
     }
     m_updateLEDs = true;

@@ -52,8 +52,8 @@ namespace Device{
         uint16_t runtimeId = ID;
         deviceObj[0] = static_cast<uint8_t>((runtimeId >> 7) & 0x7F); // Device ID MSB
         deviceObj[1] = static_cast<uint8_t>((runtimeId >> 0) & 0x7F); // Device ID LSB
-        deviceObj[2] = HardwareConfig::NUM_INSTRUMENTS;
-        deviceObj[3] = HardwareConfig::NUM_SUBINSTRUMENTS;
+        deviceObj[2] = CFG_NUM_INSTRUMENTS;
+        deviceObj[3] = CFG_NUM_SUBINSTRUMENTS;
         deviceObj[4] = static_cast<uint8_t>(InstrumentType);
         deviceObj[5] = static_cast<uint8_t>(PLATFORM_TYPE);
         deviceObj[6] = DeviceConfig::MIN_NOTE;

@@ -68,13 +68,13 @@ namespace HardwareConfig {
 //---------- Uncomment Your Desired Extras ----------
 
     // Save configuration on power off
-    #define EXTRA_LOCAL_STORAGE
+    #define CFG_EXTRA_LOCAL_STORAGE
 
     // Addressable LED lighting effects
-    //#define EXTRA_ADDRESSABLE_LEDS
+    //#define CFG_EXTRA_ADDRESSABLE_LEDS
 
     // FastLED Variables
-    #ifdef EXTRA_ADDRESSABLE_LEDS
+    #ifdef CFG_EXTRA_ADDRESSABLE_LEDS
         #define LED_PIN     13 // Teensy pin for WS2811 data
         #define NUM_LEDS    64 // Number of LEDs in strip
         #define BRIGHTNESS  255 // Maximum brightness (0-255)
