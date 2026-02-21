@@ -49,7 +49,7 @@ void setup() {
 
   distributorManager = DistributorManager::getInstance(instrumentController); 
 
-  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager);
+  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager, instrumentController);
   midiMsgHandler = std::make_shared<MidiMsgHandler>(distributorManager, sysExHandler, instrumentController);
 
   // Initialize network and message router

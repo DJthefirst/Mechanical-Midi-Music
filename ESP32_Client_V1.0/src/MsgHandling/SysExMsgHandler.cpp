@@ -7,14 +7,17 @@
 
 #include "SysExMsgHandler.h"
 #include "Distributors/DistributorManager.h"
+#include "Instruments/InstrumentControllerBase.h"
 #include "Utility/BitManipulation.h"
 #include <Arduino.h>
 #include <cstring>  // For memcpy and strncpy
 #include <algorithm> // For std::min
 
 // Constructor with dependency injection
-SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager)
+SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager, 
+    std::shared_ptr<InstrumentControllerBase> instrumentController)
     : distributorManager(distributorManager)
+    , instrumentController(instrumentController)
     , m_sourceId(Device::GetDeviceID())
 {
 }
@@ -151,7 +154,26 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessag
         case (SysEx::SetDistributorNumPolyphonicNotes):
             sysExSetDistributorNumPolyphonicNotes(message); 
             return {};
-            
+
+        case (SysEx::ResetAllInstruments):
+            sysExResetAllInstruments(message);
+            return {};
+
+        case (SysEx::ResetInstrument):
+            sysExResetInstrument(message);
+            return {};
+
+        case (SysEx::GetInstrumentNumActiveNotes):
+            return sysExGetInstrumentNumActiveNotes(message);
+
+        case (SysEx::SetInstrumentNoteOn):
+            sysExSetInstrumentNoteOn(message);
+            return {};
+
+        case (SysEx::SetInstrumentNoteOff):
+            sysExSetInstrumentNoteOff(message);
+            return {};
+
         default:
             return {};
     }
@@ -479,6 +501,66 @@ void SysExMsgHandler::sysExSetDistributorNumPolyphonicNotes(const MidiMessage& m
     distributorManager->setDistributorNumPolyphonicNotes(message.sysExDistributorID(),
                                                           message.sysExCmdPayload()[2]);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Instrument Direct Methods
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SysExMsgHandler::sysExResetAllInstruments(const MidiMessage& message)
+{
+    if (instrumentController) {
+        instrumentController->resetAll();
+    }
+}
+
+void SysExMsgHandler::sysExResetInstrument(const MidiMessage& message)
+{
+    if (!instrumentController || message.length < SYSEX_HeaderSize + 1) return;
+
+    const uint8_t instrumentId = message.sysExCmdPayload()[0];
+    if (instrumentId >= NUM_Instruments) return;
+
+    instrumentController->reset(instrumentId);
+}
+
+MidiMessage SysExMsgHandler::sysExGetInstrumentNumActiveNotes(const MidiMessage& message)
+{
+    uint8_t numActiveNotes = 0;
+    if (instrumentController && message.length >= SYSEX_HeaderSize + 1) {
+        const uint8_t instrumentId = message.sysExCmdPayload()[0];
+        if (instrumentId < NUM_Instruments) {
+            numActiveNotes = instrumentController->getNumActiveNotes(instrumentId);
+        }
+    }
+    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &numActiveNotes, 1);
+}
+
+void SysExMsgHandler::sysExSetInstrumentNoteOn(const MidiMessage& message)
+{
+    if (!instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+
+    const uint8_t instrumentId = message.sysExCmdPayload()[0];
+    if (instrumentId >= NUM_Instruments) return;
+
+    instrumentController->playNote(instrumentId,// Instrument ID
+        message.sysExCmdPayload()[2], // Note
+        message.sysExCmdPayload()[3], // Velocity
+        message.sysExCmdPayload()[1]);// Channel
+}
+
+void SysExMsgHandler::sysExSetInstrumentNoteOff(const MidiMessage& message)
+{
+    if (!instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+
+    const uint8_t instrumentId = message.sysExCmdPayload()[0];
+    if (instrumentId >= NUM_Instruments) return;
+
+    instrumentController->stopNote(instrumentId,// Instrument ID
+        message.sysExCmdPayload()[2], // Note
+        message.sysExCmdPayload()[3], // Velocity
+        message.sysExCmdPayload()[1]);// Channel
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper Methods

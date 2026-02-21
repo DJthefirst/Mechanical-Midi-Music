@@ -23,10 +23,12 @@
 
 // Forward declaration
 class DistributorManager;
+class InstrumentControllerBase;
 
 class SysExMsgHandler {
 private:
     std::shared_ptr<DistributorManager> distributorManager;
+    std::shared_ptr<InstrumentControllerBase> instrumentController;
 
     uint16_t m_sourceId = Device::GetDeviceID();
     uint16_t m_destinationId = 0;
@@ -36,7 +38,7 @@ private:
 
 public:
 
-    explicit SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager);
+    explicit SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager, std::shared_ptr<InstrumentControllerBase> instrumentController);
 
     std::optional<MidiMessage> processSysExMessage(const MidiMessage& message);
     
@@ -80,6 +82,12 @@ private:
     void sysExSetDistributorBoolValues(const MidiMessage& message);
     void sysExSetDistributorMinMaxNotes(const MidiMessage& message);
     void sysExSetDistributorNumPolyphonicNotes(const MidiMessage& message);
+
+    void sysExResetAllInstruments(const MidiMessage& message);
+    void sysExResetInstrument(const MidiMessage& message);
+    MidiMessage sysExGetInstrumentNumActiveNotes(const MidiMessage& message);
+    void sysExSetInstrumentNoteOn(const MidiMessage& message);
+    void sysExSetInstrumentNoteOff(const MidiMessage& message);
     
     // Helper methods
     void broadcastDeviceChanged();

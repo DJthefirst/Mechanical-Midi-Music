@@ -122,6 +122,13 @@ namespace SysEx {
     constexpr uint8_t SetDistributorBoolValues = 0x54;
     constexpr uint8_t SetDistributorMinMaxNotes = 0x55;
     constexpr uint8_t SetDistributorNumPolyphonicNotes = 0x56;
+
+    constexpr uint8_t ResetAllInstruments = 0x60;
+    constexpr uint8_t ResetInstrument = 0x61;
+    constexpr uint8_t GetInstrumentNumActiveNotes = 0x62;
+    constexpr uint8_t SetInstrumentDirectMessage = 0x63;
+    constexpr uint8_t SetInstrumentNoteOn = 0x64;
+    constexpr uint8_t SetInstrumentNoteOff = 0x65;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

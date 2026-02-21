@@ -31,6 +31,7 @@ void MessageRouter::broadcastDeviceChanged(INetwork* sourceNetwork)
 {
     if (!m_networkManager) return;
 
+    // Create a device changed message to Notify the Server 
     MidiMessage deviceChangedMsg(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceChanged, nullptr, 0);
     
     if (sourceNetwork) {
@@ -68,9 +69,7 @@ void MessageRouter::processMessages()
 // Process a single message from a specific network
 void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork)
 {
-    //INetwork* currentSourceNetwork = sourceNetwork;
-
-    // Process message based on type - optimize for most common case first
+    // Process message based on type
     if (message.type() == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
         // Handle SysEx messages
         auto response = m_sysExMsgHandler->processSysExMessage(message);
@@ -82,7 +81,4 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
         // Handle other MIDI messages with MidiMsgHandler
         m_midiMsgHandler->processMessage(message);
     }
-
-    // Clear the source network context
-    //currentSourceNetwork = nullptr;
 }
