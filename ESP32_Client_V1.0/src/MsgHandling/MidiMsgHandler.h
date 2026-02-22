@@ -22,9 +22,9 @@ class InstrumentControllerBase;
 
 class MidiMsgHandler {
 private:
-    std::shared_ptr<DistributorManager> distributorManager;
-    std::shared_ptr<SysExMsgHandler> sysExHandler;
-    std::shared_ptr<InstrumentControllerBase> instrumentController;
+    std::shared_ptr<DistributorManager> m_distributorManager;
+    std::shared_ptr<SysExMsgHandler> m_sysExHandler;
+    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
 
 public:
 
@@ -32,12 +32,12 @@ public:
                    std::shared_ptr<SysExMsgHandler> sysExHandler,
                    std::shared_ptr<InstrumentControllerBase> instrumentController);
 
-    std::optional<MidiMessage> processMessage(MidiMessage& message);
+    std::optional<MidiMessage> processMessage(const MidiMessage& message);
 
 private:
 
-    void distributeMessage(MidiMessage& message);
-    void processCC(MidiMessage& message);
+    void distributeMessage(const MidiMessage& message);
+    void processCC(const MidiMessage& message);
     
-    std::optional<MidiMessage> processSystemMessage(MidiMessage& message);
+    std::optional<MidiMessage> processSystemMessage(const MidiMessage& message);
 };

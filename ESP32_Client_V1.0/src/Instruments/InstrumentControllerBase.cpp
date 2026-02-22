@@ -23,22 +23,7 @@ void InstrumentControllerBase::setProgramChange(uint8_t channel, uint8_t value){
 void InstrumentControllerBase::setChannelPressure(uint8_t channel, uint8_t value){
     // Default implementation does nothing - derived classes should override if needed
 }
-void InstrumentControllerBase::setModulationWheel(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setFootPedal(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setVolume(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setExpression(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setEffectCrtl_1(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setEffectCrtl_2(uint8_t channel, uint8_t value){
+void InstrumentControllerBase::setControlChange(uint8_t channel, uint8_t controller, uint8_t value){
     // Default implementation does nothing - derived classes should override if needed
 }
 

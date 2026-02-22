@@ -66,6 +66,23 @@ namespace MidiCC {
     constexpr uint8_t Legato = 68;
     constexpr uint8_t Hold2 = 69;
 
+    constexpr uint8_t SoundVariation = 70;
+    constexpr uint8_t SoundTimbre = 71;
+    constexpr uint8_t SoundReleaseTime = 72;
+    constexpr uint8_t SoundAttackTime = 73;
+    constexpr uint8_t SoundBrightness = 74;
+    constexpr uint8_t SoundControl6 = 75;
+    constexpr uint8_t SoundControl7 = 76;
+    constexpr uint8_t SoundControl8 = 77;
+    constexpr uint8_t SoundControl9 = 78;
+    constexpr uint8_t SoundControl10 = 79;
+
+    constexpr uint8_t ReverbLevel = 91;
+    constexpr uint8_t TremoloLevel = 92;
+    constexpr uint8_t ChorusLevel = 93;
+    constexpr uint8_t DetuneLevel = 94;
+    constexpr uint8_t PhaserLevel = 95;
+
     // Channel Mode messages (handled across all active channels)
     constexpr uint8_t Mute = 120;
     constexpr uint8_t Reset = 121;
@@ -82,24 +99,24 @@ namespace SysEx {
     constexpr uint16_t Broadcast = 0x0000;
     constexpr uint16_t Server = 0x3FFF; //Server address is the MAX uint14
 
+    // Command(System)
     constexpr uint8_t DeviceReady = 0x00;
     constexpr uint8_t ResetDeviceConfig = 0x01;
     constexpr uint8_t DiscoverDevices = 0x02;
     constexpr uint8_t Message = 0x03;
     constexpr uint8_t DeviceChanged = 0x04;
 
-    constexpr uint8_t GetDeviceConstructWithDistributors = 0x10;
-    constexpr uint8_t GetDeviceConstruct = 0x11;
-    constexpr uint8_t GetDeviceID = 0x12;
-    constexpr uint8_t GetDeviceName = 0x13;
-    constexpr uint8_t GetDeviceBoolean = 0x14;
+    // Command(Reserved)
 
-    constexpr uint8_t SetDeviceConstructWithDistributors = 0x20;
-    constexpr uint8_t SetDeviceConstruct = 0x21;
-    constexpr uint8_t SetDeviceID = 0x22;
-    constexpr uint8_t SetDeviceName = 0x23;
-    constexpr uint8_t SetDeviceBoolean = 0x24;
+    // Command(Device Configuration)
+    constexpr uint8_t DeviceConstructWithDistributors = 0x20;
+    constexpr uint8_t DeviceConstruct = 0x21;
+    constexpr uint8_t DeviceID = 0x22;
+    constexpr uint8_t DeviceName = 0x23;
+    constexpr uint8_t DeviceBoolean = 0x24;
+    constexpr uint8_t DeviceNumPolyphonicNotes = 0x25;
 
+    // Command(Distributor Management)
     constexpr uint8_t GetNumOfDistributors = 0x30;
     constexpr uint8_t AddDistributor = 0x31;
     constexpr uint8_t GetAllDistributors = 0x32;
@@ -107,28 +124,26 @@ namespace SysEx {
     constexpr uint8_t RemoveAllDistributors = 0x34;
     constexpr uint8_t ToggleMuteDistributor = 0x35;
 
-    constexpr uint8_t GetDistributorConstruct = 0x40;
-    constexpr uint8_t GetDistributorChannels = 0x41;
-    constexpr uint8_t GetDistributorInstruments = 0x42;
-    constexpr uint8_t GetDistributorMethod = 0x43;
-    constexpr uint8_t GetDistributorBoolValues = 0x44;
-    constexpr uint8_t GetDistributorMinMaxNotes = 0x45;
-    constexpr uint8_t GetDistributorNumPolyphonicNotes = 0x46;
+    // Command(Distributor Configuration)
+    constexpr uint8_t DistributorConstruct = 0x40;
+    constexpr uint8_t DistributorChannels = 0x41;
+    constexpr uint8_t DistributorInstruments = 0x42;
+    constexpr uint8_t DistributorMethod = 0x43;
+    constexpr uint8_t DistributorBoolValues = 0x44;
+    constexpr uint8_t DistributorMinMaxNotes = 0x45;
 
-    constexpr uint8_t SetDistributor = 0x50;
-    constexpr uint8_t SetDistributorChannels = 0x51;
-    constexpr uint8_t SetDistributorInstruments = 0x52;
-    constexpr uint8_t SetDistributorMethod = 0x53;
-    constexpr uint8_t SetDistributorBoolValues = 0x54;
-    constexpr uint8_t SetDistributorMinMaxNotes = 0x55;
-    constexpr uint8_t SetDistributorNumPolyphonicNotes = 0x56;
+    // Command(Instrument Control)
+    constexpr uint8_t ResetAllInstruments = 0x50;
+    constexpr uint8_t ResetInstrument = 0x51;
+    constexpr uint8_t GetInstrumentNumActiveNotes = 0x52;
+    constexpr uint8_t SetInstrumentDirectMessage = 0x53;
+    constexpr uint8_t SetInstrumentNoteOn = 0x54;
+    constexpr uint8_t SetInstrumentNoteOff = 0x55;
 
-    constexpr uint8_t ResetAllInstruments = 0x60;
-    constexpr uint8_t ResetInstrument = 0x61;
-    constexpr uint8_t GetInstrumentNumActiveNotes = 0x62;
-    constexpr uint8_t SetInstrumentDirectMessage = 0x63;
-    constexpr uint8_t SetInstrumentNoteOn = 0x64;
-    constexpr uint8_t SetInstrumentNoteOff = 0x65;
+    // Command(Extras)
+    constexpr uint8_t ExtraStorage = 0x60;
+    constexpr uint8_t ExtraLED = 0x61;
+    constexpr uint8_t ExtraSdPlayback = 0x62;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

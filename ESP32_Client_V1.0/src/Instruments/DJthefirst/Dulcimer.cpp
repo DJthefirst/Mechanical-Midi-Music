@@ -6,7 +6,6 @@
 // Static member definitions
 IShiftRegister<NUM_REG1_OUTPUTS>* Dulcimer::m_shiftReg1 = nullptr;
 IShiftRegister<NUM_REG2_OUTPUTS>* Dulcimer::m_shiftReg2 = nullptr;
-std::array<uint32_t, NUM_OUTPUTS> Dulcimer::m_noteStartTime = {};
 uint8_t Dulcimer::m_numActiveNotes = 0;
 
 Dulcimer::Dulcimer() 

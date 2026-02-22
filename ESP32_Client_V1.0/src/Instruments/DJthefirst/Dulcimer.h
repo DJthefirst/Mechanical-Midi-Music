@@ -40,7 +40,6 @@ private:
     static IShiftRegister<NUM_REG2_OUTPUTS>* m_shiftReg2;  // Second shift register (C5-B5)
     
     // Tracking arrays
-    static std::array<uint32_t, NUM_OUTPUTS> m_noteStartTime;    // When each note started
     static uint8_t m_numActiveNotes;
 
 public: 

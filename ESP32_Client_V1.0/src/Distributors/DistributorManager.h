@@ -67,14 +67,13 @@ public:
     
     // Message processing
     void distributeMessage(const MidiMessage& message);
-    void processCC(const MidiMessage& message);
+
     
     // Distributor configuration helpers
     void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);
     void setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments);
     void setDistributorMethod(uint8_t distributorId, DistributionMethod method);
     void setDistributorMinMaxNotes(uint8_t distributorId, uint8_t minNote, uint8_t maxNote);
-    void setDistributorNumPolyphonicNotes(uint8_t distributorId, uint8_t numNotes);
     void toggleDistributorMute(uint8_t distributorId);
     void setDistributorBoolValues(uint8_t distributorId, uint16_t boolValues);
     
@@ -85,7 +84,6 @@ public:
     uint16_t getDistributorBoolValues(uint8_t distributorId);
     uint8_t getDistributorMinNote(uint8_t distributorId);
     uint8_t getDistributorMaxNote(uint8_t distributorId);
-    uint8_t getDistributorNumPolyphonicNotes(uint8_t distributorId);
 
 private:
     // Helper to broadcast distributor changes

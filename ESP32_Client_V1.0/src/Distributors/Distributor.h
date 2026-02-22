@@ -32,10 +32,7 @@ static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
 //Distributor Bool Value Bit Indexes
 namespace DISTRIBUTOR_BOOL_MASK {
     const uint16_t MUTED         = 1 << 0;
-    const uint16_t POLYPHONIC    = 1 << 1;
-    const uint16_t NOTEOVERWRITE = 1 << 2;
-    const uint16_t DAMPERPEDAL   = 1 << 3;
-    const uint16_t VIBRATO       = 1 << 4;
+    const uint16_t NOTEOVERWRITE = 1 << 1;
 };
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
@@ -52,10 +49,9 @@ private:
     std::unique_ptr<DistributionStrategy> m_distributionStrategy;
 
     //Settings
-    uint16_t m_deviceBools = 0; // Initialize with all features disabled
+    uint16_t m_distributorBools = 0; // Initialize with all features disabled
     uint8_t m_minNote = 0;
     uint8_t m_maxNote = 127;
-    uint8_t m_numPolyphonicNotes = 1;
     DistributionMethod m_distributionMethod = DistributionMethod::RoundRobinBalance;
 
 public:
@@ -79,10 +75,7 @@ public:
 
     uint16_t getDistributorBoolValues() const;
     bool getMuted() const;
-    bool getPolyphonic() const;
     bool getNoteOverwrite() const;
-    bool getDamperPedal() const;
-    bool getVibratoEnabled() const;
     std::bitset<NUM_Channels> getChannels() const;
     std::bitset<NUM_Instruments> getInstruments() const;
     DistributionMethod getDistributionMethod() const;
@@ -97,13 +90,9 @@ public:
     void setMuted(bool muted);
 
     void setDistributorBoolValues(uint16_t boolValues);
-    void setPolyphonic(bool enable);
     void setNoteOverwrite(bool noteOverwrite);
-    void setDamperPedal(bool enable);
-    void setVibratoEnabled(bool enable);
 
     void setMinMaxNote(uint8_t minNote, uint8_t maxNote);
-    void setNumPolyphonicNotes(uint8_t numPolyphonicNotes);
     void setChannels(std::bitset<NUM_Channels> channels);
     void setInstruments(std::bitset<NUM_Instruments> instruments);
 

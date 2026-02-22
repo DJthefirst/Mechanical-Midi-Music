@@ -46,39 +46,34 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessag
         case (SysEx::DiscoverDevices):
             return {sysExDiscoverDevices(message)};
 
-        case (SysEx::GetDeviceConstructWithDistributors):
-            return sysExGetDeviceConstructWithDistributors(message);
-
-        case (SysEx::GetDeviceConstruct):
-            return sysExGetDeviceConstruct(message);
-
-        case (SysEx::GetDeviceName):
-            return sysExGetDeviceName(message);
-
-        case (SysEx::GetDeviceBoolean):
-            return sysExGetDeviceBoolean(message);
-
-        case (SysEx::GetDeviceID):
-            return sysExGetDeviceID(message);
-
-        case (SysEx::SetDeviceConstructWithDistributors):
-            sysExSetDeviceConstructWithDistributors(message);
+        case (SysEx::DeviceConstructWithDistributors):
+            if (message.length == 7) 
+                return sysExGetDeviceConstructWithDistributors(message);
+            else sysExSetDeviceConstructWithDistributors(message); 
             return {};
 
-        case (SysEx::SetDeviceConstruct):
-            sysExSetDeviceConstruct(message); 
+        case (SysEx::DeviceConstruct):
+            if (message.length == 7) 
+                return sysExGetDeviceConstruct(message);
+            else sysExSetDeviceConstruct(message); 
             return {};
 
-        case (SysEx::SetDeviceID):
-            sysExSetDeviceID(message);
+        case (SysEx::DeviceName):
+            if (message.length == 7) 
+                return sysExGetDeviceName(message);
+            else sysExSetDeviceName(message); 
             return {};
 
-        case (SysEx::SetDeviceName):
-            sysExSetDeviceName(message); 
+        case (SysEx::DeviceBoolean):
+            if (message.length == 7) 
+                return sysExGetDeviceBoolean(message);
+            else sysExSetDeviceBoolean(message); 
             return {};
-            
-        case (SysEx::SetDeviceBoolean):
-            sysExSetDeviceBoolean(message);
+
+        case (SysEx::DeviceID):
+            if (message.length == 7) 
+                return sysExGetDeviceID(message);
+            else sysExSetDeviceID(message);
             return {};
 
         case (SysEx::RemoveDistributor):
@@ -106,53 +101,40 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessag
         case (SysEx::ToggleMuteDistributor):
             return sysExToggleMuteDistributor(message);
 
-        case (SysEx::GetDistributorConstruct):
-            return sysExGetDistributorConstruct(message);
-
-        case (SysEx::GetDistributorChannels):
-            return sysExGetDistributorChannels(message);
-
-        case (SysEx::GetDistributorInstruments):
-            return sysExGetDistributorInstruments(message);
-
-        case (SysEx::GetDistributorMethod):
-            return sysExGetDistributorMethod(message);
-
-        case (SysEx::GetDistributorBoolValues):
-            return sysExGetDistributorBoolValues(message);
-
-        case (SysEx::GetDistributorMinMaxNotes):
-            return sysExGetDistributorMinMaxNotes(message);
-
-        case (SysEx::GetDistributorNumPolyphonicNotes):
-            return sysExGetDistributorNumPolyphonicNotes(message);
-
-        case (SysEx::SetDistributor):
-            sysExSetDistributor(message); 
+        case (SysEx::DistributorConstruct):
+            if (message.length == 9) 
+                return sysExGetDistributorConstruct(message);
+            else sysExSetDistributor(message); 
             return {};
-            
-        case (SysEx::SetDistributorChannels):
-            sysExSetDistributorChannels(message); 
+
+        case (SysEx::DistributorChannels):
+            if (message.length == 9) 
+                return sysExGetDistributorChannels(message);
+            else sysExSetDistributorChannels(message); 
             return {};
-            
-        case (SysEx::SetDistributorInstruments):
-            sysExSetDistributorInstruments(message); 
+
+        case (SysEx::DistributorInstruments):
+            if (message.length == 9) 
+                return sysExGetDistributorInstruments(message);
+            else sysExSetDistributorInstruments(message); 
             return {};
-            
-        case (SysEx::SetDistributorMethod):
-            sysExSetDistributorMethod(message); 
+
+        case (SysEx::DistributorMethod):
+            if (message.length == 9) 
+                return sysExGetDistributorMethod(message);
+            else sysExSetDistributorMethod(message); 
             return {};
-            
-        case (SysEx::SetDistributorBoolValues):
-            sysExSetDistributorBoolValues(message);
+
+        case (SysEx::DistributorBoolValues):
+            if (message.length == 9) 
+                return sysExGetDistributorBoolValues(message);
+            else sysExSetDistributorBoolValues(message); 
             return {};
-            
-        case (SysEx::SetDistributorMinMaxNotes):
-            sysExSetDistributorMinMaxNotes(message); 
-            return {};
-            
-        case (SysEx::SetDistributorNumPolyphonicNotes):
-            sysExSetDistributorNumPolyphonicNotes(message); 
+
+        case (SysEx::DistributorMinMaxNotes):
+            if (message.length == 9) 
+                return sysExGetDistributorMinMaxNotes(message);
+            else sysExSetDistributorMinMaxNotes(message); 
             return {};
 
         case (SysEx::ResetAllInstruments):
@@ -270,14 +252,23 @@ MidiMessage SysExMsgHandler::sysExGetDeviceID(const MidiMessage& message)
 // Set Device Construct With Distributors
 void SysExMsgHandler::sysExSetDeviceConstructWithDistributors(const MidiMessage& message)
 {
-    // TODO: Implementation needed
-    broadcastDeviceChanged();
+    sysExSetDeviceConstruct(message);
+    // TODO: Handle distributors from payload - needs different implementation approach to handle multiple messages and larger payload
 }
 
 // Configure Device Construct
 void SysExMsgHandler::sysExSetDeviceConstruct(const MidiMessage& message)
 {
-    // TODO: Implementation needed
+    if (message.length < (SYSEX_HeaderSize + DEVICE_NUM_CFG_BYTES + 1)) return;
+
+    if (!Device::SetDeviceConstruct(message.sysExCmdPayload(), DEVICE_NUM_CFG_BYTES)) return;
+
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
+        LocalStorageFactory::getInstance().setDeviceID(Device::GetDeviceID());
+        LocalStorageFactory::getInstance().setDeviceName(Device::Name);
+        LocalStorageFactory::getInstance().setDeviceBoolean(Device::GetDeviceBoolean());
+    #endif
+
     broadcastDeviceChanged();
 }
 
@@ -328,6 +319,8 @@ void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
                                 static_cast<uint16_t>(message.sysExCmdPayload()[1]);
     Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);        // Bit 0
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);  // Bit 1
+    Device::DamperPedal = ((deviceBoolValue & DEVICE_BOOL_MASK::DAMPER_PEDAL) != 0); // Bit 2
+    Device::Vibrato = ((deviceBoolValue & DEVICE_BOOL_MASK::VIBRATO) != 0); // Bit 3
     
     #ifdef CFG_EXTRA_LOCAL_STORAGE
         LocalStorageFactory::getInstance().setDeviceBoolean(deviceBoolValue);
@@ -429,8 +422,13 @@ MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(const MidiMessage& me
 // Respond with the requested Distributor Min/Max Notes Config
 MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(const MidiMessage& message)
 {
-    // TODO: Implementation needed - need to add getDistributorMinMaxNotes to DistributorManager
-    const uint8_t bytesToSend[2] = {0, 127};
+    uint8_t minNote = 0;
+    uint8_t maxNote = 127;
+    if (distributorManager) {
+        minNote = distributorManager->getDistributorMinNote(message.sysExDistributorID());
+        maxNote = distributorManager->getDistributorMaxNote(message.sysExDistributorID());
+    }
+    const uint8_t bytesToSend[2] = { minNote, maxNote };
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 2);
 }
 
@@ -493,13 +491,6 @@ void SysExMsgHandler::sysExSetDistributorMinMaxNotes(const MidiMessage& message)
     distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
                                                    message.sysExCmdPayload()[2],
                                                    message.sysExCmdPayload()[3]);
-}
-
-// Configure the designated Distributor's Max number of Polyphonic Notes
-void SysExMsgHandler::sysExSetDistributorNumPolyphonicNotes(const MidiMessage& message)
-{
-    distributorManager->setDistributorNumPolyphonicNotes(message.sysExDistributorID(),
-                                                          message.sysExCmdPayload()[2]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

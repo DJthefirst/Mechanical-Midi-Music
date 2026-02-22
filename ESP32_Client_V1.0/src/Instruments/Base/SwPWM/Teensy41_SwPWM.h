@@ -40,7 +40,7 @@ public:
     void stopAll() override;
 
     void setPitchBend(uint8_t channel, uint16_t value) override;
-    void setModulationWheel(uint8_t channel, uint8_t value) override;
+    void setModulationWheel(uint8_t channel, uint8_t value);
 
     Instrument getInstrumentType() const override { return Instrument::SW_PWM; }
     uint8_t getNumActiveNotes(uint8_t instrument) override;

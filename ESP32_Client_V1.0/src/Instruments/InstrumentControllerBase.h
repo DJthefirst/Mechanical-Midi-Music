@@ -22,15 +22,9 @@ protected:
 
     //Local CC Effect Atributes
     uint16_t m_pitchBend[Midi::NUM_CH]; 
-    uint8_t m_modulationWheel[Midi::NUM_CH];
-    uint8_t m_footPedal[Midi::NUM_CH];
-    uint8_t m_volume[Midi::NUM_CH];
-    uint8_t m_expression[Midi::NUM_CH];
-    uint8_t m_effectCrtl_1[Midi::NUM_CH];
-    uint8_t m_effectCrtl_2[Midi::NUM_CH];
-
-
-
+    uint8_t m_program[Midi::NUM_CH];
+    uint8_t m_channelPressure[Midi::NUM_CH];
+    
 public:
     //Required Functions
     virtual void reset(uint8_t instrument) = 0;
@@ -64,12 +58,7 @@ public:
     virtual void setPitchBend(uint8_t channel, uint16_t value);
     virtual void setProgramChange(uint8_t channel, uint8_t value);
     virtual void setChannelPressure(uint8_t channel, uint8_t value);
-    virtual void setModulationWheel(uint8_t channel, uint8_t value);
-    virtual void setFootPedal(uint8_t channel, uint8_t value);
-    virtual void setVolume(uint8_t channel, uint8_t value);
-    virtual void setExpression(uint8_t channel, uint8_t value);
-    virtual void setEffectCrtl_1(uint8_t channel, uint8_t value);
-    virtual void setEffectCrtl_2(uint8_t channel, uint8_t value);
+    virtual void setControlChange(uint8_t channel, uint8_t controller, uint8_t value);
 
     // Optional periodic update function
     virtual void periodic() {
