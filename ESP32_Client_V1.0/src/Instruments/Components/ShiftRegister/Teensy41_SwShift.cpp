@@ -4,7 +4,7 @@
  * Software-based shift register implementation using bit-banging
  */
 #include "Config.h"
-#if defined (PLATFORM_TEENSY41) && (CFG_SHIFTREGISTER_TYPE)
+#if defined (PLATFORM_TEENSY41) && (CFG_COMPONENT_SHIFTREGISTER)
 
 #include "Teensy41_SwShift.h"
 #include "Arduino.h"
