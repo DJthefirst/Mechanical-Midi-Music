@@ -9,22 +9,26 @@
 #include "Distributors/Distributor.h"
 #include <bitset>
 
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+constexpr uint8_t wavetable[CFG_MULTIPHASE_WAVE_TABLE_STEPS][CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS] = CFG_MULTIPHASE_WAVE_TABLE;
+
 // Define static member variables
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_activeNotes = {};
+std::array<uint8_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_activeNotes = {};
 uint8_t ESP32_MultiPhase::m_numActiveNotes = 0;
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_notePeriod = {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_activePeriod =  {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_currentTick = {};
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_currentState = {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoPhase = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoDepth = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoRate = {}; //slow default rate
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_notePeriod = {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_activePeriod =  {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_currentTick = {};
+std::array<uint8_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_currentState = {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoPhase = {};
+std::array<uint8_t,CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoDepth = {};
+std::array<uint8_t,CFG_NUM_INSTRUMENTS> ESP32_MultiPhase::m_vibratoRate = {}; //slow default rate
 
 ESP32_MultiPhase::ESP32_MultiPhase() : InstrumentControllerBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
-        pinMode(HardwareConfig::PINS_INSTRUMENT_PWM[i], OUTPUT);
+    for(uint8_t i=0; i <numPwmPins; i++){
+        pinMode(pwmPins[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
@@ -32,7 +36,7 @@ ESP32_MultiPhase::ESP32_MultiPhase() : InstrumentControllerBase()
     // Setup timer hardware and register the base tick callback. If a
     // specialized subclass (like StepSwPWM) wants to take ownership it can
     // call InterruptTimer::setCallback() to replace this handler.
-    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, nullptr);
+    InterruptTimer::initialize(CFG_TIMER_RESOLUTION_US, nullptr);
     InterruptTimer::setCallback(tick);
 
     //Initalize Default values
@@ -68,18 +72,18 @@ void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t veloci
 
     if(m_lastDistributor[instrument] != nullptr){
         Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[instrument]);
-            m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
-            m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
+            //m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
+            //m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
     }
 
     if (!wasActive) {
         m_numActiveNotes++;
     }
-    digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], HIGH); // Start pin HIGH to begin waveform
+    digitalWrite(pwmPins[instrument], HIGH); // Start pin HIGH to begin waveform
     return;
 }
 
-void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t velocity)
+void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -96,8 +100,8 @@ void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t velocity)
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
     //m_currentState[instrument] = 0;  // Reset state f wavetable
 
-    for(uint8_t output=0; output < WAVE_TABLE_OUTPUTS+1; output++){
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument + output], LOW);
+    for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS+1; output++){
+        digitalWrite(pwmPins[instrument + output], LOW);
     }
     
     if (wasActive && m_numActiveNotes > 0) {
@@ -120,8 +124,8 @@ void ESP32_MultiPhase::stopAll(){
     m_vibratoPhase = {};
     m_vibratoDepth = {};
 
-    for(uint8_t i = 0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[i], LOW);
+    for(uint8_t i = 0; i < numPwmPins; i++){
+        digitalWrite(pwmPins[i], LOW);
     }
 }
 
@@ -136,7 +140,7 @@ it's crucial that any computations here be kept to a minimum!
 void ICACHE_RAM_ATTR ESP32_MultiPhase::tick()
 {
     // Go through every Instrument
-    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < CFG_NUM_INSTRUMENTS; i++) {
         // Early exit if no notes are active - check inside loop like original
         if(m_numActiveNotes == 0) return;
         
@@ -177,10 +181,10 @@ void ESP32_MultiPhase::updatePhase(uint8_t instrument)
 #endif
 {
     //Pulse the control pin
-    m_currentState[instrument]+=1; if (m_currentState[instrument]>=WAVE_TABLE_STEPS) m_currentState[instrument]=0;
-    for(uint8_t output=0; output < WAVE_TABLE_OUTPUTS; output++){
-        bool pinState = (HardwareConfig::WAVE_TABLE[m_currentState[instrument]][output]);
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument + output + 1], pinState);
+    m_currentState[instrument]+=1; if (m_currentState[instrument]>=CFG_MULTIPHASE_WAVE_TABLE_STEPS) m_currentState[instrument]=0;
+    for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS; output++){
+        bool pinState = (wavetable[m_currentState[instrument]][output]);
+        digitalWrite(pwmPins[instrument + output + 1], pinState);
     }
 }
 // #pragma GCC pop_options (Legacy)
@@ -202,7 +206,7 @@ bool ESP32_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 
 void ESP32_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
     m_pitchBend[channel] = bend; 
-    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
+    for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
             if(m_notePeriod[i] == 0) continue;
             // Mask off the MSB flag bit to get the actual note value (0-127)
@@ -217,42 +221,21 @@ void ESP32_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
     }
 }
 
-void ESP32_MultiPhase::setModulationWheel(uint8_t channel, uint8_t value)
-{
-    #ifdef VIBRATO_ENABLED
-        // Map modulation wheel (0-127) to vibrato depth (0-127)
-        // The depth will determine how much pitch variation occurs
-        
-        // Check each instrument's last distributor to see if vibrato is enabled
-        m_modulationWheel[channel] = value;
-        for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
-            if(m_lastChannel[i] == channel){
-                if(m_notePeriod[i] == 0) continue;
-                if(m_lastDistributor[i] == nullptr) continue;
-                Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[i]);
-
-                m_vibratoDepth[i] = distributor->getVibratoEnabled() ? value : 0;
-                m_vibratoRate[i] = value >> 3; // Higher modulation wheel = faster vibrato
-            }
-        }
-    #endif
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Timeout Tracking Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ESP32_MultiPhase::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (CFG_NOTE_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
-    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+    for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > CFG_NOTE_TIMEOUT_MS) {
             // Stop the note due to timeout
-            stopNote(i, 0);
+            stopNote(i, 0, 0, 0);
         }
     }
 }

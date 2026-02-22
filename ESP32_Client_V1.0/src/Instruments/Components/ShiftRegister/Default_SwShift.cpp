@@ -93,19 +93,19 @@ void Default_SwShift<numOutputs>::update() {
     // Write and Shift Data
     // Using microsecond delays for timing requirements
     for (int32_t i = static_cast<int32_t>(numOutputs) - 1; i >= 0; i--) {
-        digitalWriteFast(this->m_PIN_SER, this->m_outputEnabled[i]);
+        digitalWrite(this->m_PIN_SER, this->m_outputEnabled[i]);
         delayMicroseconds(1); // Short delay to meet timing requirements
-        digitalWriteFast(this->m_PIN_CLK, HIGH); // Serial Clock
+        digitalWrite(this->m_PIN_CLK, HIGH); // Serial Clock
         delayMicroseconds(1); // Short delay to meet timing requirements
-        digitalWriteFast(this->m_PIN_CLK, LOW);  // Serial Clock (latch data)
+        digitalWrite(this->m_PIN_CLK, LOW);  // Serial Clock (latch data)
         delayMicroseconds(1); // Short delay to meet timing requirements
     }
     
     // Toggle Load to transfer shift register to output latches
-    digitalWriteFast(this->m_PIN_LD, HIGH); // Register Load
+    digitalWrite(this->m_PIN_LD, HIGH); // Register Load
     delayMicroseconds(1); // Short delay to meet timing requirements
-    digitalWriteFast(this->m_PIN_LD, LOW);  // Register Load (latch output)
-    digitalWriteFast(this->m_PIN_SER, LOW);  // Leave data line low when idle
+    digitalWrite(this->m_PIN_LD, LOW);  // Register Load (latch output)
+    digitalWrite(this->m_PIN_SER, LOW);  // Leave data line low when idle
     
     // Clear update flag after successful update
     this->m_update = false;
