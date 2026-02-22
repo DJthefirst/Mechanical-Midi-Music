@@ -4,11 +4,12 @@
     #define INSTRUMENT_TYPE MultiPhase
 #endif
 
+
 // Platform-specific includes
 #if defined(PLATFORM_ESP32) || defined(ARDUINO_ARCH_ESP32)
     #include "Instruments/Base/MultiPhase/ESP32_MultiPhase.h"
     #define MultiPhase ESP32_MultiPhase
-#elif defined(PLATFORM_TEENSY41) || defined(ARDUINO_ARCH_TEENSY41)
+#elif defined(__IMXRT1062__) || defined(ARDUINO_TEENSY41)
     #include "Instruments/Base/MultiPhase/Teensy41_MultiPhase.h"
     #define MultiPhase Teensy41_MultiPhase
 #elif defined(ARDUINO) && !defined(ESP8266)

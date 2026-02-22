@@ -8,7 +8,7 @@
 #if defined(PLATFORM_ESP32) || defined(ARDUINO_ARCH_ESP32)
     #include "Instruments/Base/StepSw/ESP32_StepSw.h"
     #define StepSw ESP32_StepSw
-#elif defined(PLATFORM_TEENSY41) || defined(ARDUINO_ARCH_TEENSY41)
+#elif defined(__IMXRT1062__) || defined(ARDUINO_TEENSY41)
     #include "Instruments/Base/StepSw/Teensy41_StepSw.h"
     #define StepSw Teensy41_StepSw
 #elif defined(ARDUINO) && !defined(ESP8266)

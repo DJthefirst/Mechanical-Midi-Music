@@ -1,5 +1,5 @@
 #include "Config.h"
-#if defined(PLATFORM_ESP32) && defined(COMPONENT_PWM)
+#if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_HWPWM) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
 #include "Instruments/InstrumentController.h"
@@ -198,4 +198,4 @@ void ESP32_HwPWM::checkInstrumentTimeouts() {
     }
 }
 
-#endif // PLATFORM_ESP32
+#endif // PLATFORM_ESP32 && CFG_INSTRUMENT_HWPWM && CFG_COMPONENT_PWM

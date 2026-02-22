@@ -1,5 +1,7 @@
 #include "Config.h"
 
+#if (defined(PLATFORM_ESP32) || defined(PLATFORM_TEENSY41)) && defined(CFG_INSTRUMENT_PNEUMATICVALVESSW) && defined(CFG_COMPONENT_PWM)
+
 #include "Extras/AddrLED.h"
 #include "Instruments/DJthefirst/PneumaticValvesSw.h"
 #include "Arduino.h"
@@ -67,3 +69,5 @@ void PneumaticValvesSw::setInstrumentLedOff(uint8_t instrument){
 void PneumaticValvesSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
 void PneumaticValvesSw::setInstrumentLedOff(uint8_t instrument){}
 #endif
+
+#endif // (PLATFORM_ESP32 || PLATFORM_TEENSY41) && CFG_INSTRUMENT_PNEUMATICVALVESSW && CFG_COMPONENT_PWM

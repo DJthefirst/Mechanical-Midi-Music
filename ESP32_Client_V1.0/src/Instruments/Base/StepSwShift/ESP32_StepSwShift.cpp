@@ -1,5 +1,5 @@
 #include "Config.h"
-#if defined(PLATFORM_ESP32) && defined(COMPONENT_STEP_SHIFT) && defined(COMPONENT_SHIFTREG_74HC595) 
+#if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_STEPSWSHIFT) && defined(CFG_COMPONENT_PWM) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
 #include "Instruments/Base/StepSw/ESP32_StepSw.h"
 #include "Instruments/Components/InterruptTimer.h"
@@ -73,4 +73,4 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
     digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
 }
 
-#endif //ARDUINO_ARCH_ESP32
+#endif // PLATFORM_ESP32 && CFG_INSTRUMENT_STEPSWSHIFT && CFG_COMPONENT_PWM && CFG_COMPONENT_SHIFTREGISTER

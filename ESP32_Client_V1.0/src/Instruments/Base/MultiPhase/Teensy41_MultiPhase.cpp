@@ -1,56 +1,58 @@
 #include "Config.h"
-#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_SWPWM) && defined(CFG_COMPONENT_PWM)
+#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_MULTIPHASE) && defined(CFG_COMPONENT_MULTIPHASE) && defined(CFG_COMPONENT_PWM)
 
-#include "Instruments/Base/SwPWM/Teensy41_SwPWM.h"
+#include "Instruments/Base/MultiPhase/Teensy41_MultiPhase.h"
+#include "Instruments/Components/InterruptTimer.h"
 #include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>
-#include "Instruments/Components/InterruptTimer.h"
+
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM}; // Arbitrary scaling factor to convert modulation wheel value to a usable vibrato rate
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+constexpr uint8_t wavetable[CFG_MULTIPHASE_WAVE_TABLE_STEPS][CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS] = CFG_MULTIPHASE_WAVE_TABLE;
 
 // Define static member variables
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activeNotes = {};
-uint8_t Teensy41_SwPWM::m_numActiveNotes = 0;
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_notePeriod = {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activePeriod =  {};
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_currentTick = {};
-std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_currentState = 0;
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoPhase = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoDepth = {};
-std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_vibratoRate = {}; //slow default rate
+std::array<uint8_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_activeNotes = {};
+uint8_t Teensy41_MultiPhase::m_numActiveNotes = 0;
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_notePeriod = {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_activePeriod =  {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_currentTick = {};
+std::array<uint8_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_currentState = {};
+std::array<uint16_t, CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_vibratoPhase = {};
+std::array<uint8_t,CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_vibratoDepth = {};
+std::array<uint8_t,CFG_NUM_INSTRUMENTS> Teensy41_MultiPhase::m_vibratoRate = {}; //slow default rate
 
-Teensy41_SwPWM::Teensy41_SwPWM() : InstrumentControllerBase()
+Teensy41_MultiPhase::Teensy41_MultiPhase() : InstrumentControllerBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
-        pinMode(HardwareConfig::PINS_INSTRUMENT_PWM[i], OUTPUT);
+    for(uint8_t i=0; i <numPwmPins; i++){
+        pinMode(pwmPins[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
 
     // Setup timer hardware and register the base tick callback. If a
-    // specialized subclass (like Teensy41_StepSwPWM) wants to take
-    // ownership it can call InterruptTimer::setCallback() to replace this
-    // handler.
-    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, nullptr);
-    InterruptTimer::setCallback(Tick);
+    // specialized subclass (like StepSwPWM) wants to take ownership it can
+    // call InterruptTimer::setCallback() to replace this handler.
+    InterruptTimer::initialize(CFG_TIMER_RESOLUTION_US, nullptr);
+    InterruptTimer::setCallback(tick);
 
-
-    //Initialize Default values
+    //Initalize Default values
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
 }
 
-void Teensy41_SwPWM::reset(uint8_t instrument)
+void Teensy41_MultiPhase::reset(uint8_t instrument)
 {
     //Not Yet Implemented
 }
 
-void Teensy41_SwPWM::resetAll()
+void Teensy41_MultiPhase::resetAll()
 {
     stopAll();
 }
 
-void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
+void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -68,18 +70,19 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
     if(m_lastDistributor[instrument] != nullptr){
-        const Distributor* distributor = static_cast<const Distributor*>(m_lastDistributor[instrument]);
-            m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
-            m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
+        Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[instrument]);
+            //m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
+            //m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
     }
 
     if (!wasActive) {
         m_numActiveNotes++;
     }
+    digitalWrite(pwmPins[instrument], HIGH); // Start pin HIGH to begin waveform
     return;
 }
 
-void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
+void Teensy41_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
@@ -94,8 +97,11 @@ void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity
     m_currentTick[instrument] = 0;  // Reset tick counter to prevent residual state
     m_vibratoPhase[instrument] = 0;  // Reset vibrato phase to prevent carryover
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
-    m_currentState.reset(instrument);  // Reset pin state bit
-    digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], 0);
+    //m_currentState[instrument] = 0;  // Reset state f wavetable
+
+    for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS+1; output++){
+        digitalWrite(pwmPins[instrument + output], LOW);
+    }
     
     if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
@@ -103,7 +109,7 @@ void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity
     return;
 }
 
-void Teensy41_SwPWM::stopAll(){
+void Teensy41_MultiPhase::stopAll(){
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     m_lastDistributor.fill(nullptr);
@@ -113,12 +119,12 @@ void Teensy41_SwPWM::stopAll(){
     m_notePeriod = {};
     m_activePeriod = {};
     m_currentTick = {};
-    m_currentState.reset();
+    //m_currentState = {};
     m_vibratoPhase = {};
     m_vibratoDepth = {};
 
-    for(uint8_t i = 0; i < HardwareConfig::PINS_INSTRUMENT_PWM.size(); i++){
-        digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[i], LOW);
+    for(uint8_t i = 0; i < numPwmPins; i++){
+        digitalWrite(pwmPins[i], LOW);
     }
 }
 
@@ -130,10 +136,10 @@ void Teensy41_SwPWM::stopAll(){
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
 */
-void Teensy41_SwPWM::Tick()
+void Teensy41_MultiPhase::tick()
 {
     // Go through every Instrument
-    for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+    for (int i = 0; i < CFG_NUM_INSTRUMENTS; i++) {
         // Early exit if no notes are active - check inside loop like original
         if(m_numActiveNotes == 0) return;
         
@@ -157,7 +163,7 @@ void Teensy41_SwPWM::Tick()
             #endif
             
             if (m_currentTick[i] >= targetPeriod) {
-                togglePin(i);
+                updatePhase(i);
                 m_currentTick[i] = 0;
             } else {
                 m_currentTick[i]++;
@@ -166,31 +172,40 @@ void Teensy41_SwPWM::Tick()
     }
 }
 
-void Teensy41_SwPWM::togglePin(uint8_t instrument)
+
+#ifdef ARDUINO_ARCH_ESP32
+void ICACHE_RAM_ATTR Teensy41_MultiPhase::updatePhase(uint8_t instrument)
+#else
+void Teensy41_MultiPhase::updatePhase(uint8_t instrument)
+#endif
 {
     //Pulse the control pin
-    m_currentState.flip(instrument);
-    digitalWriteFast(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
+    m_currentState[instrument]+=1; if (m_currentState[instrument]>=CFG_MULTIPHASE_WAVE_TABLE_STEPS) m_currentState[instrument]=0;
+    for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS; output++){
+        bool pinState = (wavetable[m_currentState[instrument]][output]);
+        digitalWrite(pwmPins[instrument + output + 1], pinState);
+    }
 }
+// #pragma GCC pop_options (Legacy)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t Teensy41_SwPWM::getNumActiveNotes(uint8_t instrument)
+uint8_t Teensy41_MultiPhase::getNumActiveNotes(uint8_t instrument)
 {
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
-bool Teensy41_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
+bool Teensy41_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 {
-    //Mask lower 7bits and return true if the instrument is playing the respective note.
+    //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }
 
-void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
+void Teensy41_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
     m_pitchBend[channel] = bend; 
-    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
+    for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
             if(m_notePeriod[i] == 0) continue;
             // Mask off the MSB flag bit to get the actual note value (0-127)
@@ -205,44 +220,44 @@ void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
     }
 }
 
-void Teensy41_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
-{
-    #ifdef VIBRATO_ENABLED
-        // Map modulation wheel (0-127) to vibrato depth (0-127)
-        // The depth will determine how much pitch variation occurs
+// void Teensy41_MultiPhase::setModulationWheel(uint8_t channel, uint8_t value)
+// {
+//     #ifdef VIBRATO_ENABLED
+//         // Map modulation wheel (0-127) to vibrato depth (0-127)
+//         // The depth will determine how much pitch variation occurs
         
-        // Check each instrument's last distributor to see if vibrato is enabled
-        m_modulationWheel[channel] = value;
-        for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
-            if(m_lastChannel[i] == channel){
-                if(m_notePeriod[i] == 0) continue;
-                if(m_lastDistributor[i] == nullptr) continue;
-                Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[i]);
+//         // Check each instrument's last distributor to see if vibrato is enabled
+//         m_modulationWheel[channel] = value;
+//         for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++){
+//             if(m_lastChannel[i] == channel){
+//                 if(m_notePeriod[i] == 0) continue;
+//                 if(m_lastDistributor[i] == nullptr) continue;
+//                 Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[i]);
 
-                m_vibratoDepth[i] = distributor->getVibratoEnabled() ? value : 0;
-                m_vibratoRate[i] = value >> 3; // Higher modulation wheel = faster vibrato
-            }
-        }
-    #endif
-}
+//                 m_vibratoDepth[i] = distributor->getVibratoEnabled() ? value : 0;
+//                 m_vibratoRate[i] = value >> 3; // Higher modulation wheel = faster vibrato
+//             }
+//         }
+//     #endif
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Timeout Tracking Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Teensy41_SwPWM::checkInstrumentTimeouts() {
+void Teensy41_MultiPhase::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (CFG_NOTE_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
-    for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
+    for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > CFG_NOTE_TIMEOUT_MS) {
             // Stop the note due to timeout
             stopNote(i, 0, 0, 0);
         }
     }
 }
 
-#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_SWPWM && CFG_COMPONENT_PWM
+#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_MULTIPHASE && CFG_COMPONENT_MULTIPHASE && CFG_COMPONENT_PWM

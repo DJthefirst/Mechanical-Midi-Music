@@ -1,6 +1,6 @@
 #pragma once
 
-// Must be at topp of file
+// Must be at top of file
 #ifndef INSTRUMENT_TYPE
     #define INSTRUMENT_TYPE PneumaticValvesSw
 #endif

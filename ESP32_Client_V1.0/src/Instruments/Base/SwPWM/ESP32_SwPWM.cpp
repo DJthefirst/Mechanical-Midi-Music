@@ -1,6 +1,6 @@
 #include "Config.h"
 
-#if defined(ARDUINO_ARCH_ESP32) && defined(COMPONENT_PWM)
+#if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_SWPWM) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
 #include "Instruments/Components/InterruptTimer.h"
@@ -251,4 +251,4 @@ void ESP32_SwPWM::checkInstrumentTimeouts() {
     }
 }
 
-#endif // ARDUINO_ARCH_ESP32
+#endif // PLATFORM_ESP32 && CFG_INSTRUMENT_SWPWM && CFG_COMPONENT_PWM

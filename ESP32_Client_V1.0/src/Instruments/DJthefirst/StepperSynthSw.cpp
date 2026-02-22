@@ -1,5 +1,5 @@
 #include "Config.h"
-#ifdef COMPONENT_SHIFTREG_74HC595
+#if (defined(PLATFORM_ESP32) || defined(PLATFORM_TEENSY41)) && defined(CFG_INSTRUMENT_STEPPERSYNTHSW) && defined(CFG_COMPONENT_PWM) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
 #include "Extras/AddrLED.h"
 #include "Instruments/DJthefirst/StepperSynthSw.h"
@@ -81,4 +81,4 @@ void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uin
 void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){}
 #endif
 
-#endif // COMPONENT_SHIFTREG_74HC595
+#endif // (PLATFORM_ESP32 || PLATFORM_TEENSY41) && CFG_INSTRUMENT_STEPPERSYNTHSW && CFG_COMPONENT_PWM && CFG_COMPONENT_SHIFTREGISTER

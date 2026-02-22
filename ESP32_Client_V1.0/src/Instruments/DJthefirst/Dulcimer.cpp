@@ -3,6 +3,8 @@
 #include "Instruments/DJthefirst/Dulcimer.h"
 #include "Arduino.h"
 
+#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_DULCIMER) && defined(CFG_COMPONENT_SHIFTREGISTER)
+
 // Static member definitions
 IShiftRegister<NUM_REG1_OUTPUTS>* Dulcimer::m_shiftReg1 = nullptr;
 IShiftRegister<NUM_REG2_OUTPUTS>* Dulcimer::m_shiftReg2 = nullptr;
@@ -169,3 +171,5 @@ void Dulcimer::setInstrumentLedOff(uint8_t instrument) {
 void Dulcimer::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {}
 void Dulcimer::setInstrumentLedOff(uint8_t instrument) {}
 #endif
+
+#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_DULCIMER && CFG_COMPONENT_SHIFTREGISTER

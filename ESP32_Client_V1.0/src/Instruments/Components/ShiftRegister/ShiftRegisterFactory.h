@@ -18,11 +18,11 @@ public:
     static IShiftRegister<numOutputs>* create(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD, uint8_t PIN_EN, uint8_t PIN_RST) {
 
     // Teensy 4.x with software bit-banging
-    #if defined PLATFORM_TEENSY41 && CFG_SHIFTREG_TYPE == HW_DEFAULT
+    #if defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_DEFAULT
         return new Teensy41_SwShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, PIN_EN, PIN_RST);
 
     // Teensy 4.x with FlexIO hardware acceleration
-    #elif defined PLATFORM_TEENSY41 && CFG_SHIFTREG_TYPE == HW_DEFAULT
+    #elif defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_DEFAULT
         return new Teensy41_FlexShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, PIN_EN, PIN_RST);
 
     // Default: Software bit-banging (works on all platforms)

@@ -1,6 +1,6 @@
 #include "Config.h"
 
-#if defined(ARDUINO_ARCH_ESP32) && defined(COMPONENT_MultiPhase)
+#if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_MULTIPHASE) && defined(CFG_COMPONENT_MULTIPHASE) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/MultiPhase/ESP32_MultiPhase.h"
 #include "Instruments/Components/InterruptTimer.h"
@@ -257,4 +257,4 @@ void ESP32_MultiPhase::checkInstrumentTimeouts() {
     }
 }
 
-#endif // ARDUINO_ARCH_ESP32
+#endif // PLATFORM_ESP32 && CFG_INSTRUMENT_MULTIPHASE && CFG_COMPONENT_MULTIPHASE && CFG_COMPONENT_PWM

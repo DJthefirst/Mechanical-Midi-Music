@@ -4,7 +4,7 @@
  * Software-based shift register implementation using bit-banging
  */
 #include "Config.h"
-#if defined (PLATFORM_TEENSY41)
+#if defined (PLATFORM_TEENSY41) && (CFG_SHIFTREGISTER_TYPE)
 
 #include "Teensy41_SwShift.h"
 #include "Arduino.h"
@@ -99,16 +99,16 @@ void Teensy41_SwShift<numOutputs>::update() {
     // Send LSB first (output 0 first, which will end up at Q0 after all shifts)
     for (int32_t i = static_cast<int32_t>(numOutputs) - 1; i >= 0; i--) {
         digitalWriteFast(this->m_PIN_SER, this->m_outputEnabled[i]);
-        delayNanoseconds(CFG_SHIFTREG_DATA_HOLDTIME_NS);
+        delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);
         digitalWriteFast(this->m_PIN_CLK, HIGH); // Serial Clock
-        delayNanoseconds(CFG_SHIFTREG_DATA_HOLDTIME_NS);
+        delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);
         digitalWriteFast(this->m_PIN_CLK, LOW);  // Serial Clock (latch data)
-        delayNanoseconds(CFG_SHIFTREG_DATA_HOLDTIME_NS);
+        delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);
     }
     
     // Toggle Load to transfer shift register to output latches
     digitalWriteFast(this->m_PIN_LD, HIGH); // Register Load
-    delayNanoseconds(CFG_SHIFTREG_DATA_HOLDTIME_NS);
+    delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);
     digitalWriteFast(this->m_PIN_LD, LOW);  // Register Load (latch output)
     digitalWriteFast(this->m_PIN_SER, LOW);  // Leave data line low when idle
     

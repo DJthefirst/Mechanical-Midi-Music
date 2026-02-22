@@ -1,5 +1,5 @@
 #include "Config.h"
-#if defined(PLATFORM_TEENSY41) && defined(COMPONENT_STEP) 
+#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_STEPSW) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/StepSw/Teensy41_StepSw.h"
 #include "Instruments/Components/InterruptTimer.h"
@@ -75,4 +75,4 @@ void Teensy41_StepSw::togglePin(uint8_t instrument)
     digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
 }
 
-#endif //ARDUINO_ARCH_Teensy41
+#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_STEPSW && CFG_COMPONENT_PWM

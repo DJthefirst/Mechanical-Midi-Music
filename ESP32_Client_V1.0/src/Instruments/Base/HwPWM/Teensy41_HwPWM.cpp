@@ -1,5 +1,5 @@
 #include "Config.h"
-#if defined(PLATFORM_TEENSY41) && defined(COMPONENT_PWM)
+#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_HWPWM) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/HwPWM/Teensy41_HwPWM.h"
 #include "Instruments/InstrumentController.h"
@@ -197,4 +197,4 @@ void Teensy41_HwPWM::checkInstrumentTimeouts() {
     }
 }
 
-#endif
+#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_HWPWM && CFG_COMPONENT_PWM
