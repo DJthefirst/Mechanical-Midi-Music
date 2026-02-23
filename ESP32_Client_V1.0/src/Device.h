@@ -69,8 +69,8 @@ namespace Device{
         deviceObj[9] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 7) & 0x7F);
         deviceObj[10] = static_cast<uint8_t>((DeviceConfig::FIRMWARE_VERSION >> 0) & 0x7F);
         deviceObj[11] = 0; // Reserved byte, set to 0
-        deviceObj[12] = DeviceConfig::MIN_NOTE;
-        deviceObj[13] = DeviceConfig::MAX_NOTE;
+        deviceObj[12] = CFG_MIN_NOTE;
+        deviceObj[13] = CFG_MAX_NOTE;
         deviceObj[14] = (GetDeviceBoolean() >> 7) & 0x7F;
         deviceObj[15] = (GetDeviceBoolean() >> 0) & 0x7F;
         deviceObj[16] = 0; // Reserved byte, set to 0
@@ -119,7 +119,7 @@ namespace Device{
     static uint16_t GetDeviceID() noexcept { return ID; }
     static void SetDeviceID(uint16_t id) noexcept { ID = id; }
     
-    // // Additional accessors for SysEx responses
+    // // Additional accessors for SysEx responses (OUTDATED)
     // static const char* GetDeviceName(){ return Name.c_str(); }
     // static void SetDeviceName(const std::string& name){ Name = name; }
     // static uint16_t GetFirmwareVersion(){ return Config::FIRMWARE_VERSION; }

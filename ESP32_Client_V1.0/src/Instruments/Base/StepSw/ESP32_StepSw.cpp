@@ -7,6 +7,12 @@
 #include "Arduino.h"
 #include <bitset>
 
+// Define constants for Pin configuration
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t dirPins[] = {CFG_PINS_INSTRUMENT_DIR};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+constexpr uint8_t numDirPins = sizeof(dirPins) / sizeof(dirPins[0]);
+
 // Define static member variables
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_headPosition = {};
 std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_pinStateDir = 0;
@@ -14,9 +20,9 @@ std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_pinStateDir = 0
 ESP32_StepSw::ESP32_StepSw() : ESP32_SwPWM()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS_INSTRUMENT_DIR.size(); i++){
-        pinMode(HardwareConfig::PINS_INSTRUMENT_DIR[i], OUTPUT);
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_DIR[i], LOW);
+    for(uint8_t i=0; i < numDirPins; i++){
+        pinMode(dirPins[i], OUTPUT);
+        digitalWrite(dirPins[i], LOW);
     }
 
     delay(500); // Wait a half second for safety
@@ -65,14 +71,14 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
 
     //Toggle Direction if the Drive Head is at a limit.
-    if ((m_headPosition[instrument] == STEP_MAX_HEAD_POS) || (m_headPosition[instrument] == STEP_MIN_HEAD_POS)){
+    if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        digitalWrite(HardwareConfig::PINS_INSTRUMENT_DIR[instrument], m_pinStateDir[instrument]);
+        digitalWrite(dirPins[instrument], m_pinStateDir[instrument]);
     }
 
     //Pulse the step pin.
     ESP32_SwPWM::m_currentState.flip(instrument);
-    digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
+    digitalWrite(pwmPins[instrument], m_currentState[instrument]);
 }
 
 #endif // PLATFORM_ESP32 && CFG_INSTRUMENT_STEPSW && CFG_COMPONENT_PWM

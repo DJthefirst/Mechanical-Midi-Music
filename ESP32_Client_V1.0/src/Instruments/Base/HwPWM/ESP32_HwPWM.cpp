@@ -8,6 +8,10 @@
 #include <cmath>
 #include "esp32-hal-ledc.h"
 
+// Define constants for PWM configuration
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeNotes = {};
 uint8_t ESP32_HwPWM::m_numActiveNotes = 0;
@@ -21,10 +25,10 @@ ESP32_HwPWM::ESP32_HwPWM() : InstrumentControllerBase()
     // Initialize LedC channels for each instrument
     // Use channels 0, 2, 4, 6, 8, 10, 12, 14 to ensure each uses a unique timer
     // This avoids timer sharing which causes frequency interference
-    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
-    for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+
+    for(uint8_t i = 0; i < numPwmPins && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
         m_ledcChannels[i] = i * 2; // Map: instrument 0->ch0, 1->ch2, 2->ch4, etc.
-        initializeLedcChannel(i, pins[i]);
+        initializeLedcChannel(i, pwmPins[i]);
     }
 
     delay(500); // Wait a half second for safety
@@ -185,13 +189,13 @@ void ESP32_HwPWM::setPitchBend(uint8_t channel, uint16_t bend){
 
 void ESP32_HwPWM::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (CFG_NOTE_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > CFG_NOTE_TIMEOUT_MS) {
             // Stop the note due to timeout
             stopNote(i, 0, 0, 0); // Note, velocity, channel are not relevant for timeout stop
         }

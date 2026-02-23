@@ -7,6 +7,10 @@
 #include "Arduino.h"
 #include <bitset>
 
+// Define constants for PWM configuration
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+
 // Define static member variables
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_headPosition = {};
 std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_pinStateDir = 0;
@@ -62,7 +66,7 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
 
     //Toggle Direction if the Drive Head is at a limit.
-    if ((m_headPosition[instrument] == STEP_MAX_HEAD_POS) || (m_headPosition[instrument] == STEP_MIN_HEAD_POS)){
+    if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
         ShiftRegister::setOutputEnabled(instrument, m_pinStateDir[instrument]);
         ShiftRegister::update();
@@ -70,7 +74,7 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
 
     //Pulse the step pin.
     ESP32_SwPWM::m_currentState.flip(instrument);
-    digitalWrite(HardwareConfig::PINS_INSTRUMENT_PWM[instrument], m_currentState[instrument]);
+    digitalWrite(pwmPins[instrument], m_currentState[instrument]);
 }
 
 #endif // PLATFORM_ESP32 && CFG_INSTRUMENT_STEPSWSHIFT && CFG_COMPONENT_PWM && CFG_COMPONENT_SHIFTREGISTER

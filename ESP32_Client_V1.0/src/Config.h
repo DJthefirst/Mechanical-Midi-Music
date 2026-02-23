@@ -13,6 +13,70 @@
 #include <cstdint>
 using std::int8_t;
 
+#ifndef CFG_NUM_INSTRUMENTS
+    #define CFG_NUM_INSTRUMENTS 1
+#endif
+
+#ifndef CFG_NUM_SUBINSTRUMENTS
+    #define CFG_NUM_SUBINSTRUMENTS 1
+#endif
+
+#ifndef CFG_DEVICE_NAME
+    #define CFG_DEVICE_NAME "New Device"
+#endif
+
+#ifndef CFG_DEVICE_ID
+    #define CFG_DEVICE_ID 0
+#endif
+
+#ifndef CFG_TIMER_RESOLUTION_US
+    #define CFG_TIMER_RESOLUTION_US 8
+#endif
+
+#ifndef CFG_NOTE_TIMEOUT_MS
+    #define CFG_NOTE_TIMEOUT_MS 0
+#endif
+
+#ifndef CFG_MIN_NOTE
+    #define CFG_MIN_NOTE 0
+#endif
+
+#ifndef CFG_MAX_NOTE
+    #define CFG_MAX_NOTE 127
+#endif
+
+#ifndef CFG_LIMITS_POS_MIN
+    #define CFG_LIMITS_POS_MIN 0
+#endif
+
+#ifndef CFG_LIMITS_POS_MAX
+    #define CFG_LIMITS_POS_MAX 150
+#endif
+
+#ifndef CFG_PINS_INSTRUMENT_ShiftRegister
+    #define CFG_PINS_INSTRUMENT_ShiftRegister 0,0,0,0,0
+#endif
+
+#ifndef CFG_PINS_INSTRUMENT_ShiftRegister1
+    #define CFG_PINS_INSTRUMENT_ShiftRegister1 0,0,0,0,0
+#endif
+
+#ifndef CFG_PINS_INSTRUMENT_ShiftRegister2
+    #define CFG_PINS_INSTRUMENT_ShiftRegister2 0,0,0,0,0
+#endif
+
+#ifndef CFG_COMPONENT_PWM
+    #if defined(CFG_INSTRUMENT_SWPWM) || defined(CFG_INSTRUMENT_HWPWM) || defined(CFG_INSTRUMENT_STEPSW) || defined(CFG_INSTRUMENT_STEPSWSHIFT)
+        #define CFG_COMPONENT_PWM
+    #endif
+#endif
+
+#ifndef CFG_COMPONENT_SHIFTREGISTER
+    #if defined(CFG_INSTRUMENT_DULCIMER) || defined(CFG_INSTRUMENT_STEPSWSHIFT) || defined(CFG_INSTRUMENT_STEPPERSYNTHHW) || defined(CFG_INSTRUMENT_STEPPERSYNTHSW)
+        #define CFG_COMPONENT_SHIFTREGISTER
+    #endif
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform Detection
@@ -48,7 +112,6 @@ namespace HardwareConfig {
 
     constexpr uint8_t MAX_NUM_INSTRUMENTS = CFG_NUM_INSTRUMENTS * CFG_NUM_SUBINSTRUMENTS;
 
-
     // Platform capabilities
     #ifdef PLATFORM_ESP32
         constexpr bool HAS_HARDWARE_PWM_VAL = true;
@@ -66,6 +129,13 @@ namespace HardwareConfig {
         constexpr bool HAS_BLE_VAL = false;
         constexpr bool HAS_NVS_VAL = false;
     #endif
+
+
+    #ifdef CFG_PINS_INSTRUMENT_PWM
+        constexpr std::array<uint8_t, NUM_Instruments> PINS_INSTRUMENT_PWM = {CFG_PINS_INSTRUMENT_PWM};
+    #else
+        constexpr std::array<uint8_t, NUM_Instruments> PINS_INSTRUMENT_PWM = {};
+    #endif
 }
 
 namespace DeviceConfig {
@@ -74,18 +144,6 @@ namespace DeviceConfig {
     constexpr const char* DEVICE_NAME_STR = CFG_DEVICE_NAME;
     constexpr uint16_t DEVICE_ID_VAL = CFG_DEVICE_ID;
     constexpr uint16_t FIRMWARE_VERSION = 2;
-
-    #ifdef MIN_NOTE_VALUE
-        constexpr uint8_t MIN_NOTE = MIN_NOTE_VALUE;
-    #else
-        constexpr uint8_t MIN_NOTE = 0;
-    #endif
-
-    #ifdef MAX_NOTE_VALUE
-        constexpr uint8_t MAX_NOTE = MAX_NOTE_VALUE;
-    #else
-        constexpr uint8_t MAX_NOTE = 127;
-    #endif
 
 }
     // (no global pins alias — code should reference Config::INSTRUMENT_PINS or provide its own `pins`)

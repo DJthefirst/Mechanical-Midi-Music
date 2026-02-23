@@ -7,6 +7,10 @@
 #include "Arduino.h"
 #include <cmath>
 
+// Define constants for PWM configuration
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_HwPWM::m_activeNotes = {};
 uint8_t Teensy41_HwPWM::m_numActiveNotes = 0;
@@ -17,9 +21,8 @@ std::array<double, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_HwPWM::m_active
 Teensy41_HwPWM::Teensy41_HwPWM() : InstrumentControllerBase()
 {
     // Initialize PWM pins for each instrument
-    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
-    for(uint8_t i = 0; i < pins.size() && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-        initializePwmPin(i, pins[i]);
+    for(uint8_t i = 0; i < numPwmPins && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
+        initializePwmPin(i, pwmPins[i]);
     }
 
     delay(500); // Wait a half second for safety
@@ -46,20 +49,18 @@ void Teensy41_HwPWM::setFrequency(uint8_t instrument, double frequency)
     if (frequency < 10.0) frequency = 10.0;
     if (frequency > 20000.0) frequency = 20000.0;
     
-    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
-    
     // // Only update if frequency changed significantly (>0.5Hz difference for better precision)
     // if (abs(lastFrequency[instrument] - frequency) > 0.5) {
     //     // Use analogWriteFrequency to set the PWM frequency for this pin
-    //     analogWriteFrequency(pins[instrument], frequency);
+    //     analogWriteFrequency(pwmPins[instrument], frequency);
     //     lastFrequency[instrument] = frequency;
     // }
     
     // Set the PWM frequency for this pin
-    analogWriteFrequency(pins[instrument], frequency);
+    analogWriteFrequency(pwmPins[instrument], frequency);
     
     // Set duty cycle - 50% for square wave audio output
-    analogWrite(pins[instrument], DUTY_CYCLE_50_PERCENT);
+    analogWrite(pwmPins[instrument], DUTY_CYCLE_50_PERCENT);
     m_activeInstruments.set(instrument);
 }
 
@@ -67,9 +68,8 @@ void Teensy41_HwPWM::stopChannel(uint8_t instrument)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     
-    const auto& pins = HardwareConfig::PINS_INSTRUMENT_PWM;
     // Set duty cycle to 0 to stop PWM output
-    analogWrite(pins[instrument], 0);
+    analogWrite(pwmPins[instrument], 0);
     m_activeInstruments.reset(instrument);
 }
 
@@ -184,13 +184,13 @@ void Teensy41_HwPWM::setPitchBend(uint8_t channel, uint16_t bend){
 
 void Teensy41_HwPWM::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (CFG_NOTE_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > CFG_NOTE_TIMEOUT_MS) {
             // Stop the note due to timeout
             stopNote(i, 0, 0, 0);
         }

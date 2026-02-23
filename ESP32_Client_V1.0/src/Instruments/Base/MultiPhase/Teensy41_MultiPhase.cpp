@@ -8,7 +8,7 @@
 #include "Distributors/Distributor.h"
 #include <bitset>
 
-constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM}; // Arbitrary scaling factor to convert modulation wheel value to a usable vibrato rate
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 constexpr uint8_t wavetable[CFG_MULTIPHASE_WAVE_TABLE_STEPS][CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS] = CFG_MULTIPHASE_WAVE_TABLE;
 
