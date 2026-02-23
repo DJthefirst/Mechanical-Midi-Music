@@ -1,9 +1,9 @@
 #include "Config.h"
 #if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_STEPSWSHIFT) && defined(CFG_COMPONENT_PWM) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
-#include "Instruments/Base/StepSw/ESP32_StepSw.h"
+#include "Instruments/Base/StepSwShift/ESP32_StepSwShift.h"
 #include "Instruments/Components/InterruptTimer.h"
-#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegisterFactory.h"
 #include "Arduino.h"
 #include <bitset>
 
@@ -14,11 +14,14 @@ constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 // Define static member variables
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_headPosition = {};
 std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_pinStateDir = 0;
+IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* ESP32_StepSw::m_shiftReg = nullptr;
 
 ESP32_StepSw::ESP32_StepSw() : ESP32_SwPWM()
 {
     //Setup pins
-    ShiftRegister::init();
+    m_shiftReg = ShiftRegisterFactory::create<CFG_SHIFTREGISTER_NUM_OUTPUTS>(
+        CFG_PINS_INSTRUMENT_ShiftRegister);
+    m_shiftReg->init();
 
     delay(500); // Wait a half second for safety
 
@@ -68,8 +71,8 @@ void ICACHE_RAM_ATTR ESP32_StepSw::togglePin(uint8_t instrument)
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        ShiftRegister::setOutputEnabled(instrument, m_pinStateDir[instrument]);
-        ShiftRegister::update();
+        m_shiftReg->setOutputEnabled(instrument, m_pinStateDir[instrument]);
+        m_shiftReg->update();
     }
 
     //Pulse the step pin.

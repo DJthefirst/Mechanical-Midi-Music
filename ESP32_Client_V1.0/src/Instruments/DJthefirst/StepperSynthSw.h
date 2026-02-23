@@ -7,7 +7,7 @@
 
 #include "Constants.h"
 #include "Instruments/Base/SwPWM/SwPWM.h"
-#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
+#include "Instruments/Components/ShiftRegister/IShiftRegister.h"
 
 #include <cstdint>
 using std::int8_t;
@@ -18,6 +18,7 @@ public:
 
 private:
     static void togglePin(uint8_t instrument);
+    static IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* m_shiftReg;
 
 public: 
     StepperSynthSw();

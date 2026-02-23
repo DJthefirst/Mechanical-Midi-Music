@@ -22,7 +22,7 @@ void Default_SwShift<numOutputs>::init() {
     if (this->m_PIN_EN.has_value()) pinMode(this->m_PIN_EN.value(), OUTPUT);
     if (this->m_PIN_RST.has_value()) pinMode(this->m_PIN_RST.value(), OUTPUT);
 
-    if (this->m_PIN_RST.has_value()) digitalWriteFast(this->m_PIN_RST.value(), HIGH);
+    if (this->m_PIN_RST.has_value()) digitalWrite(this->m_PIN_RST.value(), HIGH);
 
     // Initialize all outputs as disabled
     this->m_outputEnabled.reset();

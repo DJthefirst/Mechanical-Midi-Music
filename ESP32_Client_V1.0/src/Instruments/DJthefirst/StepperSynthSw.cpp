@@ -3,15 +3,18 @@
 
 #include "Extras/AddrLED.h"
 #include "Instruments/DJthefirst/StepperSynthSw.h"
-#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegisterFactory.h"
 #include "Arduino.h"
 
 #include "Device.h"
 
+IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* StepperSynthSw::m_shiftReg = nullptr;
+
 StepperSynthSw::StepperSynthSw() : SwPWM()
 {
-
-    ShiftRegister::init();
+    m_shiftReg = ShiftRegisterFactory::create<CFG_SHIFTREGISTER_NUM_OUTPUTS>(
+        CFG_PINS_INSTRUMENT_ShiftRegister);
+    m_shiftReg->init();
 
     //Setup FAST LED
     setupLEDs();
@@ -26,8 +29,8 @@ void StepperSynthSw::periodic() {
 
 void StepperSynthSw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
-    ShiftRegister::setOutputEnabled(instrument, true);
-    ShiftRegister::update();
+    m_shiftReg->setOutputEnabled(instrument, true);
+    m_shiftReg->update();
     SwPWM::playNote(instrument, note, velocity, channel);
     setInstrumentLedOn(instrument, channel, note, velocity);
     return;
@@ -36,15 +39,15 @@ void StepperSynthSw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
 void StepperSynthSw::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
    SwPWM::stopNote(instrument, note, velocity, channel);
-    ShiftRegister::setOutputEnabled(instrument, false);
-    ShiftRegister::update();
+    m_shiftReg->setOutputEnabled(instrument, false);
+    m_shiftReg->update();
     setInstrumentLedOff(instrument);
 }
 
 void StepperSynthSw::reset(uint8_t instrument){
     SwPWM::reset(instrument);
-    ShiftRegister::setOutputEnabled(instrument, false);
-    ShiftRegister::update();
+    m_shiftReg->setOutputEnabled(instrument, false);
+    m_shiftReg->update();
     setInstrumentLedOff(instrument);
 }
 
@@ -54,8 +57,8 @@ void StepperSynthSw::resetAll(){
 
 void StepperSynthSw::stopAll(){
     SwPWM::stopAll();
-    ShiftRegister::disableAll();
-    ShiftRegister::update();
+    m_shiftReg->disableAll();
+    m_shiftReg->update();
     resetLEDs();
 }
 

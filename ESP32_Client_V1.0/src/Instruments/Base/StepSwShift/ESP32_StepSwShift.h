@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Instruments/InstrumentControllerBase.h"
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
+#include "Instruments/Components/ShiftRegister/IShiftRegister.h"
 
 #include <cstdint>
 using std::int8_t;
@@ -17,6 +18,7 @@ protected:
     //Static Member Variables
     static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_headPosition;
     static std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> m_pinStateDir;
+    static IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* m_shiftReg;
 
 
 public: 
