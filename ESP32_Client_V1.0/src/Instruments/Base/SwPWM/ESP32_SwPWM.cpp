@@ -1,6 +1,6 @@
 #include "Config.h"
 
-#if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_SWPWM) && defined(CFG_COMPONENT_PWM)
+#if defined(PLATFORM_ESP32) && (defined(CFG_INSTRUMENT_SWPWM) || defined(CFG_INSTRUMENT_STEPSW) || defined(CFG_INSTRUMENT_STEPSWSHIFT)) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
 #include "Instruments/Components/InterruptTimer.h"

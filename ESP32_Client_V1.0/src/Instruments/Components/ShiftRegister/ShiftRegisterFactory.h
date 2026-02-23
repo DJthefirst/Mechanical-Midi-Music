@@ -31,4 +31,22 @@ public:
 
     #endif
     }
+
+    template<size_t numOutputs>
+    static IShiftRegister<numOutputs>* create(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD) {
+
+    // Teensy 4.x with software bit-banging
+    #if defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_DEFAULT
+        return new Teensy41_SwShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, std::nullopt, std::nullopt);
+
+    // Teensy 4.x with FlexIO hardware acceleration
+    #elif defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_DEFAULT
+        return new Teensy41_FlexShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, std::nullopt, std::nullopt);
+
+    // Default: Software bit-banging (works on all platforms)
+    #else
+        return new Default_SwShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, std::nullopt, std::nullopt);
+
+    #endif
+    }
 };

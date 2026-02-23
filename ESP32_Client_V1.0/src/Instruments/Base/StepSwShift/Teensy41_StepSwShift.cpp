@@ -1,9 +1,9 @@
 #include "Config.h"
 #if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_STEPSWSHIFT) && defined(CFG_COMPONENT_PWM) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
-#include "Instruments/Base/StepSw/Teensy41_StepSw.h"
+#include "Instruments/Base/StepSwShift/Teensy41_StepSwShift.h"
 #include "Instruments/Components/InterruptTimer.h"
-#include "Instruments/Components/ShiftRegister/ShiftRegister.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegisterFactory.h"
 #include "Arduino.h"
 #include <bitset>
 
@@ -12,13 +12,16 @@ constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 
 // Define static member variables
-std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSw::m_headPosition = {};
-std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSw::m_pinStateDir = 0;
+std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSwShift::m_headPosition = {};
+std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSwShift::m_pinStateDir = 0;
+IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* Teensy41_StepSwShift::m_shiftReg = nullptr;
 
-Teensy41_StepSw::Teensy41_StepSw() : Teensy41_SwPWM()
+Teensy41_StepSwShift::Teensy41_StepSwShift() : Teensy41_SwPWM()
 {
     //Setup pins
-    ShiftRegister::init();
+    m_shiftReg = ShiftRegisterFactory::create<CFG_SHIFTREGISTER_NUM_OUTPUTS>(
+        CFG_PINS_INSTRUMENT_ShiftRegister);
+    m_shiftReg->init();
 
     delay(500); // Wait a half second for safety
 
@@ -39,7 +42,7 @@ Called by the timer interrupt at the specified resolution.  Because this is call
 it's crucial that any computations here be kept to a minimum!
 */
 
-void Teensy41_StepSw::tick()
+void Teensy41_StepSwShift::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -58,7 +61,7 @@ void Teensy41_StepSw::tick()
     }
 }
 
-void Teensy41_StepSw::togglePin(uint8_t instrument)
+void Teensy41_StepSwShift::togglePin(uint8_t instrument)
 {
     //Increment/Decrement Head position
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
@@ -66,8 +69,8 @@ void Teensy41_StepSw::togglePin(uint8_t instrument)
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        ShiftRegister::setOutputEnabled(instrument, m_pinStateDir[instrument]);
-        ShiftRegister::update();
+        m_shiftReg->setOutputEnabled(instrument, m_pinStateDir[instrument]);
+        m_shiftReg->update();
     }
 
     //Pulse the step pin.

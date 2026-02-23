@@ -1,5 +1,5 @@
 #include "Config.h"
-#if defined(PLATFORM_TEENSY41) && defined(CFG_INSTRUMENT_SWPWM) && defined(CFG_COMPONENT_PWM)
+#if defined(PLATFORM_TEENSY41) && (defined(CFG_INSTRUMENT_SWPWM) || defined(CFG_INSTRUMENT_STEPSW) || defined(CFG_INSTRUMENT_STEPSWSHIFT)) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/Teensy41_SwPWM.h"
 #include "Instruments/Components/NoteTable.h"
@@ -250,4 +250,4 @@ void Teensy41_SwPWM::checkInstrumentTimeouts() {
     }
 }
 
-#endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_SWPWM && CFG_COMPONENT_PWM
+#endif // PLATFORM_TEENSY41 && (CFG_INSTRUMENT_SWPWM || CFG_INSTRUMENT_STEPSW || CFG_INSTRUMENT_STEPSWSHIFT) && CFG_COMPONENT_PWM

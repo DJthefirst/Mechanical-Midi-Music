@@ -19,8 +19,10 @@ void Default_SwShift<numOutputs>::init() {
     pinMode(this->m_PIN_SER, OUTPUT);
     pinMode(this->m_PIN_CLK, OUTPUT);
     pinMode(this->m_PIN_LD, OUTPUT);
-    pinMode(this->m_PIN_EN, OUTPUT);
-    pinMode(this->m_PIN_RST, OUTPUT);
+    if (this->m_PIN_EN.has_value()) pinMode(this->m_PIN_EN.value(), OUTPUT);
+    if (this->m_PIN_RST.has_value()) pinMode(this->m_PIN_RST.value(), OUTPUT);
+
+    if (this->m_PIN_RST.has_value()) digitalWriteFast(this->m_PIN_RST.value(), HIGH);
 
     // Initialize all outputs as disabled
     this->m_outputEnabled.reset();

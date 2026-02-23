@@ -4,7 +4,7 @@
  * Software-based shift register implementation using bit-banging
  */
 #include "Config.h"
-#if defined (PLATFORM_TEENSY41) && (CFG_COMPONENT_SHIFTREGISTER)
+#if defined(PLATFORM_TEENSY41) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
 #include "Teensy41_SwShift.h"
 #include "Arduino.h"
@@ -21,10 +21,10 @@ void Teensy41_SwShift<numOutputs>::init() {
     pinMode(this->m_PIN_SER, OUTPUT);
     pinMode(this->m_PIN_CLK, OUTPUT);
     pinMode(this->m_PIN_LD, OUTPUT);
-    pinMode(this->m_PIN_EN, OUTPUT);
-    pinMode(this->m_PIN_RST, OUTPUT);
+    if (this->m_PIN_EN.has_value()) pinMode(this->m_PIN_EN.value(), OUTPUT);
+    if (this->m_PIN_RST.has_value()) pinMode(this->m_PIN_RST.value(), OUTPUT);
 
-    digitalWriteFast(this->m_PIN_RST, HIGH);
+    if (this->m_PIN_RST.has_value()) digitalWriteFast(this->m_PIN_RST.value(), HIGH);
 
     // Initialize all outputs as disabled
     this->m_outputEnabled.reset();

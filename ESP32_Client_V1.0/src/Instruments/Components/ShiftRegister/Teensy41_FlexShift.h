@@ -19,11 +19,12 @@
 #include "IShiftRegister.h"
 #include <bitset>
 #include <cstdint>
+#include <optional>
 
 template<size_t numOutputs>
 class Teensy41_FlexShift : public IShiftRegister<numOutputs> {
 public:
-    Teensy41_FlexShift(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD, uint8_t PIN_EN, uint8_t PIN_RST):
+    Teensy41_FlexShift(uint8_t PIN_SER, uint8_t PIN_CLK, uint8_t PIN_LD, std::optional<uint8_t> PIN_EN, std::optional<uint8_t> PIN_RST):
         Teensy41_FlexShift::IShiftRegister(PIN_SER, PIN_CLK, PIN_LD, PIN_EN, PIN_RST) {}
     void init() override;
     void setOutputEnabled(uint8_t instrument, bool enabled) override;
