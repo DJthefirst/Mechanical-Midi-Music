@@ -98,7 +98,7 @@ void Teensy41_SwShift<numOutputs>::update() {
     // Using nanosecond delays for Teensy's faster timing requirements
     // Send LSB first (output 0 first, which will end up at Q0 after all shifts)
     for (int32_t i = static_cast<int32_t>(numOutputs) - 1; i >= 0; i--) {
-        digitalWriteFast(this->m_PIN_SER, this->m_outputEnabled[i]);
+        digitalWriteFast(this->m_PIN_SER, this->m_outputEnabled[i] ^ this->m_inverted); // Data line (consider inversion)
         delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);
         digitalWriteFast(this->m_PIN_CLK, HIGH); // Serial Clock
         delayNanoseconds(CFG_SHIFTREGISTER_DATA_HOLDTIME_NS);

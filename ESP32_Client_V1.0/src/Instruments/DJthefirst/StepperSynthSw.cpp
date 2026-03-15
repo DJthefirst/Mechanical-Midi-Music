@@ -14,6 +14,7 @@ StepperSynthSw::StepperSynthSw() : SwPWM()
 {
     m_shiftReg = ShiftRegisterFactory::create<CFG_SHIFTREGISTER_NUM_OUTPUTS>(
         CFG_PINS_INSTRUMENT_ShiftRegister);
+    m_shiftReg->setInverted(true); // Invert shift register outputs if using in sinking configuration
     m_shiftReg->init();
 
     //Setup FAST LED

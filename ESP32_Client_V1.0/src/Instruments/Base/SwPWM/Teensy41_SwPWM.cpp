@@ -8,6 +8,13 @@
 #include <bitset>
 #include "Instruments/Components/InterruptTimer.h"
 
+namespace {
+struct InterruptLock {
+    InterruptLock() { noInterrupts(); }
+    ~InterruptLock() { interrupts(); }
+};
+}
+
 // Define constants for PWM configuration
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
@@ -57,6 +64,8 @@ void Teensy41_SwPWM::resetAll()
 
 void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -83,6 +92,8 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
 
 void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -106,6 +117,8 @@ void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity
 }
 
 void Teensy41_SwPWM::stopAll(){
+    InterruptLock lock;
+
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     m_lastDistributor.fill(nullptr);
@@ -191,6 +204,8 @@ bool Teensy41_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 }
 
 void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
+    InterruptLock lock;
+
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
@@ -209,6 +224,8 @@ void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
 
 void Teensy41_SwPWM::setControlChange(uint8_t channel, uint8_t controller, uint8_t value)
 {
+    InterruptLock lock;
+
         // Map modulation wheel (0-127) to vibrato depth (0-127)
         // The depth will determine how much pitch variation occurs
     switch(controller) {

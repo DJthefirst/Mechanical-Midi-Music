@@ -95,7 +95,7 @@ void Default_SwShift<numOutputs>::update() {
     // Write and Shift Data
     // Using microsecond delays for timing requirements
     for (int32_t i = static_cast<int32_t>(numOutputs) - 1; i >= 0; i--) {
-        digitalWrite(this->m_PIN_SER, this->m_outputEnabled[i]);
+        digitalWrite(this->m_PIN_SER, this->m_outputEnabled[i] ^ this->m_inverted);
         delayMicroseconds(1); // Short delay to meet timing requirements
         digitalWrite(this->m_PIN_CLK, HIGH); // Serial Clock
         delayMicroseconds(1); // Short delay to meet timing requirements

@@ -6,19 +6,18 @@
  */
 
 #include "MessageRouter.h"
-#include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
 // Constructor
 MessageRouter::MessageRouter(
-    std::shared_ptr<NetworkManager> networkManager,
-    std::shared_ptr<MidiMsgHandler> midiMsgHandler,
-    std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
-    std::shared_ptr<InstrumentControllerBase> instrumentController) 
-    : m_networkManager(networkManager)
-    , m_midiMsgHandler(midiMsgHandler)
-    , m_sysExMsgHandler(sysExMsgHandler)
-    , m_instrumentController(instrumentController) {}
+    NetworkManager& networkManager,
+    MidiMsgHandler& midiMsgHandler,
+    SysExMsgHandler& sysExMsgHandler,
+    InstrumentControllerBase& instrumentController) 
+    : m_networkManager(&networkManager)
+    , m_midiMsgHandler(&midiMsgHandler)
+    , m_sysExMsgHandler(&sysExMsgHandler)
+    , m_instrumentController(&instrumentController) {}
 
 // Set callback for device changed notifications
 void MessageRouter::setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback)

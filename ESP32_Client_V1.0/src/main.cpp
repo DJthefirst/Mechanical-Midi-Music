@@ -12,6 +12,7 @@
 // #define CFG_INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/Dulcimer.h"
 
 #include <Arduino.h>
+#include <memory>
 #include "Networks/NetworkManager.h"
 #include "Instruments/InstrumentController.h"
 #include "MsgHandling/MessageRouter.h"
@@ -32,31 +33,28 @@
 #endif
 
 // Global components
-std::shared_ptr<NetworkManager> network;
-std::shared_ptr<MessageRouter> messageRouter;
 std::shared_ptr<InstrumentControllerBase> instrumentController;
 std::shared_ptr<DistributorManager> distributorManager;
-std::shared_ptr<SysExMsgHandler> sysExHandler;
-std::shared_ptr<MidiMsgHandler> midiMsgHandler;
+std::unique_ptr<NetworkManager> network;
+std::unique_ptr<SysExMsgHandler> sysExHandler;
+std::unique_ptr<MidiMsgHandler> midiMsgHandler;
+std::unique_ptr<MessageRouter> messageRouter;
 
 
 void setup() {
   // Device::validateConfiguration();
 
-  // Initialize core components with dependency injection
   instrumentController = InstrumentController<INSTRUMENT_TYPE>::getInstance();
   Device::InstrumentType = instrumentController->getInstrumentType();
 
-  distributorManager = DistributorManager::getInstance(instrumentController); 
+  distributorManager = DistributorManager::getInstance(instrumentController);
 
-  sysExHandler = std::make_shared<SysExMsgHandler>(distributorManager, instrumentController);
-  midiMsgHandler = std::make_shared<MidiMsgHandler>(distributorManager, sysExHandler, instrumentController);
+  sysExHandler = std::make_unique<SysExMsgHandler>(*distributorManager, *instrumentController);
+  midiMsgHandler = std::make_unique<MidiMsgHandler>(*distributorManager, *sysExHandler, *instrumentController);
 
-  // Initialize network and message router
   network = CreateNetwork();
-  messageRouter = std::make_shared<MessageRouter>(network, midiMsgHandler, sysExHandler, instrumentController);
-  
-  // Set device changed callbacks to use the router's broadcast function
+  messageRouter = std::make_unique<MessageRouter>(*network, *midiMsgHandler, *sysExHandler, *instrumentController);
+
   sysExHandler->setDeviceChangedCallback([]() {
     if (messageRouter) messageRouter->broadcastDeviceChanged();
   });
@@ -65,12 +63,16 @@ void setup() {
   });
 
   // Begin network communication
-  network->begin();  
+  if (network) {
+    network->begin();
+  }
   delay(100);
 
   // Initialize device configuration from local storage
   #ifdef CFG_EXTRA_LOCAL_STORAGE
-    LocalStorageFactory::getInstance().initializeDeviceConfiguration(*distributorManager);
+    if (distributorManager) {
+      LocalStorageFactory::getInstance().initializeDeviceConfiguration(*distributorManager);
+    }
   #endif
 
 //=== Hardcode Distributor Configuration For Startup ===
@@ -92,11 +94,15 @@ void setup() {
   //===========================================
 
   //Reset All pins to default
-  instrumentController->resetAll();
+  if (instrumentController) {
+    instrumentController->resetAll();
+  }
 
   //Send Device Ready to Connect
-  MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);
-  network->sendMessage(ready);
+  if (network) {
+    MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);
+    network->sendMessage(ready);
+  }
 }
 
 //Periodically Read Incoming Messages
@@ -104,8 +110,6 @@ void loop() {
   if (messageRouter) {
     messageRouter->processMessages();
   }
-  
-  // Check for instrument timeouts
   if (instrumentController) {
     instrumentController->periodic();
   }

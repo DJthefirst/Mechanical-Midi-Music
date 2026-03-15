@@ -94,8 +94,8 @@ void DistributorManager::distributeMessage(const MidiMessage& message)
 // Removes the designated Distributor from the Distribution Pool
 void DistributorManager::removeDistributor(uint8_t id)
 {
-    if (m_distributors.size() == 0) return;
-    if (id >= m_distributors.size()) id = m_distributors.size();
+    if (m_distributors.empty()) return;
+    if (id >= m_distributors.size()) id = static_cast<uint8_t>(m_distributors.size() - 1);
     m_distributors.erase(m_distributors.begin() + id);
     localStorageRemoveDistributor(id);
     broadcastDistributorChanged();
@@ -113,13 +113,25 @@ void DistributorManager::removeAllDistributors()
 // Returns the indexed Distributor from the Distribution Pool
 Distributor& DistributorManager::getDistributor(uint8_t index)
 {
-    if (index >= m_distributors.size()) index = m_distributors.size() - 1;
+    if (m_distributors.empty()) {
+        m_distributors.emplace_back(m_ptrInstrumentController);
+    }
+
+    if (index >= m_distributors.size()) index = static_cast<uint8_t>(m_distributors.size() - 1);
     return (m_distributors[index]);
 }
 
 // Returns indexed Distributor Construct
 std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributorSerial(uint8_t index)
 {
+    if (m_distributors.empty()) {
+        return {};
+    }
+
+    if (index >= m_distributors.size()) {
+        index = static_cast<uint8_t>(m_distributors.size() - 1);
+    }
+
     // Append Distributor ID to the Construct
     auto distributorObj = m_distributors[index].toSerial();
     distributorObj[0] = static_cast<uint8_t>((index >> 7) & 0x7F);

@@ -9,6 +9,7 @@
 #include "Constants.h"
 #include <cstdint>
 #include <array>
+#include <algorithm>
 using std::int8_t;
 using std::int16_t;
 
@@ -38,16 +39,20 @@ struct MidiMessage
         buffer[5] = (dest & 0x7F);
         buffer[6] = msgId;
 
+        const uint8_t maxPayloadLength = static_cast<uint8_t>(MAX_PACKET_LENGTH - SYSEX_HeaderSize - 1);
+        const uint8_t boundedPayloadLength = std::min(payloadLength, maxPayloadLength);
+        const uint8_t effectivePayloadLength = payload ? boundedPayloadLength : 0;
+
         // MIDI SysEx message payload
-        if (payload && payloadLength > 0) {
-            std::copy(payload, payload + payloadLength, buffer.begin() + SYSEX_HeaderSize);
+        if (effectivePayloadLength > 0) {
+            std::copy(payload, payload + effectivePayloadLength, buffer.begin() + SYSEX_HeaderSize);
         }
 
         // MIDI message tail: SysEx End
         constexpr uint8_t tail = 0xF7;
-        buffer[SYSEX_HeaderSize + payloadLength] = tail;
+        buffer[SYSEX_HeaderSize + effectivePayloadLength] = tail;
         
-        length = SYSEX_HeaderSize + payloadLength + 1;    
+        length = SYSEX_HeaderSize + effectivePayloadLength + 1;
     }
 
     // Protocol reference: https://docs.google.com/spreadsheets/d/1AgS2-iZVLSL0w_MafbeReRx4u_9m_e4OTCsIhKC-QMg/edit?usp=sharing

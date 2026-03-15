@@ -14,10 +14,10 @@
 #include <algorithm> // For std::min
 
 // Constructor with dependency injection
-SysExMsgHandler::SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager, 
-    std::shared_ptr<InstrumentControllerBase> instrumentController)
-    : distributorManager(distributorManager)
-    , instrumentController(instrumentController)
+SysExMsgHandler::SysExMsgHandler(DistributorManager& distributorManager, 
+    InstrumentControllerBase& instrumentController)
+    : distributorManager(&distributorManager)
+    , instrumentController(&instrumentController)
     , m_sourceId(Device::GetDeviceID())
 {
 }
@@ -34,130 +34,182 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessag
     m_sourceId = Device::GetDeviceID();
     m_destinationId = message.SourceID();
 
+    std::optional<MidiMessage> response;
+    if (handleDeviceCommand(message, response)) {
+        return response;
+    }
+    if (handleDistributorCommand(message, response)) {
+        return response;
+    }
+    if (handleInstrumentCommand(message, response)) {
+        return response;
+    }
+    return {};
+}
+
+bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optional<MidiMessage>& response)
+{
     switch (message.sysExCommand()) {
-        
         case (SysEx::DeviceReady):
-            return sysExDeviceReady(message);
-
+            response = sysExDeviceReady(message);
+            return true;
         case (SysEx::ResetDeviceConfig):
-            sysExResetDeviceConfig(message); 
-            return {};
-            
+            sysExResetDeviceConfig(message);
+            response.reset();
+            return true;
         case (SysEx::DiscoverDevices):
-            return {sysExDiscoverDevices(message)};
-
+            response = sysExDiscoverDevices(message);
+            return true;
         case (SysEx::DeviceConstructWithDistributors):
-            if (message.length == 7) 
-                return sysExGetDeviceConstructWithDistributors(message);
-            else sysExSetDeviceConstructWithDistributors(message); 
-            return {};
-
+            if (message.length == 7) {
+                response = sysExGetDeviceConstructWithDistributors(message);
+                return true;
+            }
+            sysExSetDeviceConstructWithDistributors(message);
+            response.reset();
+            return true;
         case (SysEx::DeviceConstruct):
-            if (message.length == 7) 
-                return sysExGetDeviceConstruct(message);
-            else sysExSetDeviceConstruct(message); 
-            return {};
-
+            if (message.length == 7) {
+                response = sysExGetDeviceConstruct(message);
+                return true;
+            }
+            sysExSetDeviceConstruct(message);
+            response.reset();
+            return true;
         case (SysEx::DeviceName):
-            if (message.length == 7) 
-                return sysExGetDeviceName(message);
-            else sysExSetDeviceName(message); 
-            return {};
-
+            if (message.length == 7) {
+                response = sysExGetDeviceName(message);
+                return true;
+            }
+            sysExSetDeviceName(message);
+            response.reset();
+            return true;
         case (SysEx::DeviceBoolean):
-            if (message.length == 7) 
-                return sysExGetDeviceBoolean(message);
-            else sysExSetDeviceBoolean(message); 
-            return {};
-
+            if (message.length == 7) {
+                response = sysExGetDeviceBoolean(message);
+                return true;
+            }
+            sysExSetDeviceBoolean(message);
+            response.reset();
+            return true;
         case (SysEx::DeviceID):
-            if (message.length == 7) 
-                return sysExGetDeviceID(message);
-            else sysExSetDeviceID(message);
-            return {};
+            if (message.length == 7) {
+                response = sysExGetDeviceID(message);
+                return true;
+            }
+            sysExSetDeviceID(message);
+            response.reset();
+            return true;
+        default:
+            return false;
+    }
+}
 
+bool SysExMsgHandler::handleDistributorCommand(const MidiMessage& message, std::optional<MidiMessage>& response)
+{
+    switch (message.sysExCommand()) {
         case (SysEx::RemoveDistributor):
             if (distributorManager) {
                 distributorManager->removeDistributor(message.sysExDistributorID());
             }
-            return {};
-            
+            response.reset();
+            return true;
         case (SysEx::RemoveAllDistributors):
             if (distributorManager) {
                 distributorManager->removeAllDistributors();
             }
-            return {};
-            
+            response.reset();
+            return true;
         case (SysEx::GetNumOfDistributors):
-            return sysExGetNumOfDistributors(message);
-
+            response = sysExGetNumOfDistributors(message);
+            return true;
         case (SysEx::GetAllDistributors):
-            return sysExGetAllDistributors(message);
-
+            response = sysExGetAllDistributors(message);
+            return true;
         case (SysEx::AddDistributor):
             sysExSetDistributor(message);
-            return {};
-            
+            response.reset();
+            return true;
         case (SysEx::ToggleMuteDistributor):
-            return sysExToggleMuteDistributor(message);
-
+            response = sysExToggleMuteDistributor(message);
+            return true;
         case (SysEx::DistributorConstruct):
-            if (message.length == 9) 
-                return sysExGetDistributorConstruct(message);
-            else sysExSetDistributor(message); 
-            return {};
-
+            if (message.length == 9) {
+                response = sysExGetDistributorConstruct(message);
+                return true;
+            }
+            sysExSetDistributor(message);
+            response.reset();
+            return true;
         case (SysEx::DistributorChannels):
-            if (message.length == 9) 
-                return sysExGetDistributorChannels(message);
-            else sysExSetDistributorChannels(message); 
-            return {};
-
+            if (message.length == 9) {
+                response = sysExGetDistributorChannels(message);
+                return true;
+            }
+            sysExSetDistributorChannels(message);
+            response.reset();
+            return true;
         case (SysEx::DistributorInstruments):
-            if (message.length == 9) 
-                return sysExGetDistributorInstruments(message);
-            else sysExSetDistributorInstruments(message); 
-            return {};
-
+            if (message.length == 9) {
+                response = sysExGetDistributorInstruments(message);
+                return true;
+            }
+            sysExSetDistributorInstruments(message);
+            response.reset();
+            return true;
         case (SysEx::DistributorMethod):
-            if (message.length == 9) 
-                return sysExGetDistributorMethod(message);
-            else sysExSetDistributorMethod(message); 
-            return {};
-
+            if (message.length == 9) {
+                response = sysExGetDistributorMethod(message);
+                return true;
+            }
+            sysExSetDistributorMethod(message);
+            response.reset();
+            return true;
         case (SysEx::DistributorBoolValues):
-            if (message.length == 9) 
-                return sysExGetDistributorBoolValues(message);
-            else sysExSetDistributorBoolValues(message); 
-            return {};
-
+            if (message.length == 9) {
+                response = sysExGetDistributorBoolValues(message);
+                return true;
+            }
+            sysExSetDistributorBoolValues(message);
+            response.reset();
+            return true;
         case (SysEx::DistributorMinMaxNotes):
-            if (message.length == 9) 
-                return sysExGetDistributorMinMaxNotes(message);
-            else sysExSetDistributorMinMaxNotes(message); 
-            return {};
+            if (message.length == 9) {
+                response = sysExGetDistributorMinMaxNotes(message);
+                return true;
+            }
+            sysExSetDistributorMinMaxNotes(message);
+            response.reset();
+            return true;
+        default:
+            return false;
+    }
+}
 
+bool SysExMsgHandler::handleInstrumentCommand(const MidiMessage& message, std::optional<MidiMessage>& response)
+{
+    switch (message.sysExCommand()) {
         case (SysEx::ResetAllInstruments):
             sysExResetAllInstruments(message);
-            return {};
-
+            response.reset();
+            return true;
         case (SysEx::ResetInstrument):
             sysExResetInstrument(message);
-            return {};
-
+            response.reset();
+            return true;
         case (SysEx::GetInstrumentNumActiveNotes):
-            return sysExGetInstrumentNumActiveNotes(message);
-
+            response = sysExGetInstrumentNumActiveNotes(message);
+            return true;
         case (SysEx::SetInstrumentNoteOn):
             sysExSetInstrumentNoteOn(message);
-            return {};
-
+            response.reset();
+            return true;
         case (SysEx::SetInstrumentNoteOff):
             sysExSetInstrumentNoteOff(message);
-            return {};
-
+            response.reset();
+            return true;
         default:
-            return {};
+            return false;
     }
 }
 
@@ -290,15 +342,24 @@ void SysExMsgHandler::sysExSetDeviceID(const MidiMessage& message)
 // Configure Device Name
 void SysExMsgHandler::sysExSetDeviceName(const MidiMessage& message)
 {
+    // Require at least header + tail before subtracting to avoid underflow
+    if (message.length < (SYSEX_HeaderSize + 1)) return;
+
     // Calculate payload length (total message length - SysEx header - end byte)
-    uint8_t payloadLength = message.length - SYSEX_HeaderSize - 1;
+    size_t payloadLength = static_cast<size_t>(message.length - SYSEX_HeaderSize - 1);
+    payloadLength = std::min(payloadLength, static_cast<size_t>(DEVICE_NUM_NAME_BYTES - 1));
     
     // Safely create string from payload with length validation
     std::string newName(reinterpret_cast<const char*>(message.sysExCmdPayload()), 
-                       std::min(payloadLength, static_cast<uint8_t>(DEVICE_NUM_NAME_BYTES - 1)));
+                       payloadLength);
     
     // Remove any null bytes from the end (clean up the string)
-    newName.erase(newName.find_last_not_of('\0') + 1);
+    const auto lastNonNull = newName.find_last_not_of('\0');
+    if (lastNonNull == std::string::npos) {
+        newName.clear();
+    } else {
+        newName.erase(lastNonNull + 1);
+    }
 
     // Assign the processed name (no padding needed for std::string)
     Device::Name = newName;

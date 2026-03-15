@@ -9,6 +9,7 @@ class IShiftRegister {
 protected:
     bool m_initialized = false;
     bool m_update = false;
+    bool m_inverted = false;
     std::bitset<numOutputs> m_outputEnabled = {};
 
     uint8_t m_PIN_SER;
@@ -25,4 +26,5 @@ public:
     virtual bool getOutputEnabled(uint8_t output) = 0;
     virtual void disableAll() = 0;
     virtual void update() = 0;
+    void setInverted(bool inverted) { m_inverted = inverted; }
 };

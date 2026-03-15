@@ -12,7 +12,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <memory>
 #include <functional>
 
 // Forward declarations
@@ -22,15 +21,15 @@ class InstrumentControllerBase;
 
 class MidiMsgHandler {
 private:
-    std::shared_ptr<DistributorManager> m_distributorManager;
-    std::shared_ptr<SysExMsgHandler> m_sysExHandler;
-    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
+    DistributorManager* m_distributorManager;
+    SysExMsgHandler* m_sysExHandler;
+    InstrumentControllerBase* m_instrumentController;
 
 public:
 
-    MidiMsgHandler(std::shared_ptr<DistributorManager> distributorManager,
-                   std::shared_ptr<SysExMsgHandler> sysExHandler,
-                   std::shared_ptr<InstrumentControllerBase> instrumentController);
+    MidiMsgHandler(DistributorManager& distributorManager,
+                   SysExMsgHandler& sysExHandler,
+                   InstrumentControllerBase& instrumentController);
 
     std::optional<MidiMessage> processMessage(const MidiMessage& message);
 

@@ -9,6 +9,13 @@
 #include "Distributors/Distributor.h"
 #include <bitset>
 
+namespace {
+struct InterruptLock {
+    InterruptLock() { noInterrupts(); }
+    ~InterruptLock() { interrupts(); }
+};
+}
+
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 constexpr uint8_t wavetable[CFG_MULTIPHASE_WAVE_TABLE_STEPS][CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS] = CFG_MULTIPHASE_WAVE_TABLE;
@@ -55,6 +62,8 @@ void ESP32_MultiPhase::resetAll()
 
 void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -71,7 +80,6 @@ void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t veloci
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
     if(m_lastDistributor[instrument] != nullptr){
-        Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[instrument]);
             //m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
             //m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
     }
@@ -85,6 +93,8 @@ void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t veloci
 
 void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -111,6 +121,8 @@ void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t veloci
 }
 
 void ESP32_MultiPhase::stopAll(){
+    InterruptLock lock;
+
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     m_lastDistributor.fill(nullptr);
@@ -205,6 +217,8 @@ bool ESP32_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 }
 
 void ESP32_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
+    InterruptLock lock;
+
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){

@@ -12,12 +12,12 @@
 #include <Arduino.h>
 
 // Constructor with dependency injection
-MidiMsgHandler::MidiMsgHandler(std::shared_ptr<DistributorManager> distributorManager,
-                               std::shared_ptr<SysExMsgHandler> sysExHandler,
-                               std::shared_ptr<InstrumentControllerBase> m_instrumentController)
-    : m_distributorManager(distributorManager)
-    , m_sysExHandler(sysExHandler)
-    , m_instrumentController(m_instrumentController)
+MidiMsgHandler::MidiMsgHandler(DistributorManager& distributorManager,
+                               SysExMsgHandler& sysExHandler,
+                               InstrumentControllerBase& instrumentController)
+    : m_distributorManager(&distributorManager)
+    , m_sysExHandler(&sysExHandler)
+    , m_instrumentController(&instrumentController)
 {
 }
 

@@ -18,7 +18,6 @@
 #include <array>
 #include <cstdint>
 #include <optional>
-#include <memory>
 #include <functional>
 
 // Forward declaration
@@ -27,8 +26,8 @@ class InstrumentControllerBase;
 
 class SysExMsgHandler {
 private:
-    std::shared_ptr<DistributorManager> distributorManager;
-    std::shared_ptr<InstrumentControllerBase> instrumentController;
+    DistributorManager* distributorManager;
+    InstrumentControllerBase* instrumentController;
 
     uint16_t m_sourceId = Device::GetDeviceID();
     uint16_t m_destinationId = 0;
@@ -38,13 +37,17 @@ private:
 
 public:
 
-    explicit SysExMsgHandler(std::shared_ptr<DistributorManager> distributorManager, std::shared_ptr<InstrumentControllerBase> instrumentController);
+    explicit SysExMsgHandler(DistributorManager& distributorManager, InstrumentControllerBase& instrumentController);
 
     std::optional<MidiMessage> processSysExMessage(const MidiMessage& message);
     
     void setDeviceChangedCallback(const std::function<void()>& callback);
 
 private:
+    bool handleDeviceCommand(const MidiMessage& message, std::optional<MidiMessage>& response);
+    bool handleDistributorCommand(const MidiMessage& message, std::optional<MidiMessage>& response);
+    bool handleInstrumentCommand(const MidiMessage& message, std::optional<MidiMessage>& response);
+
     // Device configuration commands
     MidiMessage sysExDeviceReady(const MidiMessage& message);
     void sysExResetDeviceConfig(const MidiMessage& message);
