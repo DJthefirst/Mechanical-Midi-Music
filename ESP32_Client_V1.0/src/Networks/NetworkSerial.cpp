@@ -7,10 +7,10 @@
 #include "NetworkSerial.h"
 #include "Config.h"
 
-#ifdef MMM_NETWORK_SERIAL
+#ifdef CFG_MMM_NETWORK_SERIAL
 
 void NetworkSerial::begin() {
-    Serial.begin(MMM_NETWORK_SERIAL_BAUD); // Standard MIDI baud rate
+    Serial.begin(CFG_MMM_NETWORK_SERIAL_BAUD); // Standard MIDI baud rate
     startSerial();
 }
 

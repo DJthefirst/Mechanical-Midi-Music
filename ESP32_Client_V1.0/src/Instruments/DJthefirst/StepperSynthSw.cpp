@@ -1,21 +1,21 @@
 #include "Config.h"
-#ifdef SHIFTREG_TYPE_74HC595
+#if (defined(PLATFORM_ESP32) || defined(PLATFORM_TEENSY41)) && defined(CFG_INSTRUMENT_STEPPERSYNTHSW) && defined(CFG_COMPONENT_PWM) && defined(CFG_COMPONENT_SHIFTREGISTER)
 
 #include "Extras/AddrLED.h"
 #include "Instruments/DJthefirst/StepperSynthSw.h"
+#include "Instruments/Components/ShiftRegister/ShiftRegisterFactory.h"
 #include "Arduino.h"
 
 #include "Device.h"
 
-std::array<bool,HardwareConfig::NUM_INSTRUMENTS> StepperSynthSw::m_outputenabled = {};
+IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* StepperSynthSw::m_shiftReg = nullptr;
 
 StepperSynthSw::StepperSynthSw() : SwPWM()
 {
-    //Setup pins
-    pinMode(PIN_SHIFTREG_Data, OUTPUT);
-    pinMode(PIN_SHIFTREG_Clock, OUTPUT);
-    pinMode(PIN_SHIFTREG_Load, OUTPUT); 
-    pinMode(PIN_LED_Data, OUTPUT);
+    m_shiftReg = ShiftRegisterFactory::create<CFG_SHIFTREGISTER_NUM_OUTPUTS>(
+        CFG_PINS_INSTRUMENT_ShiftRegister);
+    m_shiftReg->setInverted(true); // Invert shift register outputs if using in sinking configuration
+    m_shiftReg->init();
 
     //Setup FAST LED
     setupLEDs();
@@ -23,27 +23,32 @@ StepperSynthSw::StepperSynthSw() : SwPWM()
     delay(500); // Wait a half second for safety
 }
 
+void StepperSynthSw::periodic() {
+    SwPWM::periodic();
+    updateLEDs();
+}
+
 void StepperSynthSw::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
-    m_outputenabled[instrument] = true;
-    updateShiftRegister();
+    m_shiftReg->setOutputEnabled(instrument, true);
+    m_shiftReg->update();
     SwPWM::playNote(instrument, note, velocity, channel);
     setInstrumentLedOn(instrument, channel, note, velocity);
     return;
 }
 
-void StepperSynthSw::stopNote(uint8_t instrument, uint8_t velocity)
+void StepperSynthSw::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
-   SwPWM::stopNote(instrument, velocity);
-    m_outputenabled[instrument] = false;
-    updateShiftRegister();
+   SwPWM::stopNote(instrument, note, velocity, channel);
+    m_shiftReg->setOutputEnabled(instrument, false);
+    m_shiftReg->update();
     setInstrumentLedOff(instrument);
 }
 
 void StepperSynthSw::reset(uint8_t instrument){
     SwPWM::reset(instrument);
-    m_outputenabled[instrument] = false;
-    updateShiftRegister();
+    m_shiftReg->setOutputEnabled(instrument, false);
+    m_shiftReg->update();
     setInstrumentLedOff(instrument);
 }
 
@@ -53,42 +58,15 @@ void StepperSynthSw::resetAll(){
 
 void StepperSynthSw::stopAll(){
     SwPWM::stopAll();
-    m_outputenabled = {};
-    updateShiftRegister();
+    m_shiftReg->disableAll();
+    m_shiftReg->update();
     resetLEDs();
-}
-
-void StepperSynthSw::updateShiftRegister() {
-
-    // Write and Shift Data
-    // For 74HC595-style shift registers: last bit shifted in appears at Q7
-    // Shift MSB first (instrument 9) so it ends up at Q7, LSB last (instrument 0) ends up at Q0
-    // Using NOP instructions for tiny delays without blocking SW PWM
-    for(int8_t i = HardwareConfig::NUM_INSTRUMENTS - 1; i >= 0; i-- ){
-        // Note: Using ! for active-low enable logic (LOW = enabled)
-        // If your drivers are active-high, change to: m_outputenabled[i]
-        digitalWriteFast(PIN_SHIFTREG_Data, !m_outputenabled[i]);
-        delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-        digitalWriteFast(PIN_SHIFTREG_Clock, HIGH); //Serial Clock
-        delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-        digitalWriteFast(PIN_SHIFTREG_Clock, LOW);  //Serial Clock (latch data)
-        delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-    }
-    // Toggle Load to transfer shift register to output latches
-    digitalWriteFast(PIN_SHIFTREG_Load, HIGH); //Register Load
-    delayNanoseconds(SHIFTREG_HOLDTIME_NS);
-    digitalWriteFast(PIN_SHIFTREG_Load, LOW);  //Register Load (latch output)
-    digitalWriteFast(PIN_SHIFTREG_Data, LOW);  //Leave data line low when idle
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //FAST LED Helper Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef EXTRA_ADDRESSABLE_LEDS
-
-void StepperSynthSw::setupLEDs(){
-    AddrLED::get().setup();
-}
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
 
 //Set an Instrument Led to on
 void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){
@@ -101,16 +79,10 @@ void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){
     AddrLED::get().turnLedsOn(instrument*5, instrument*5+4, CHSV(0,0,0));
 }
 
-//Reset Leds
-void StepperSynthSw::resetLEDs(){
-    AddrLED::get().reset();
-}
 
 #else
-void StepperSynthSw::setupLEDs(){}
 void StepperSynthSw::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity){}
 void StepperSynthSw::setInstrumentLedOff(uint8_t instrument){}
-void StepperSynthSw::resetLEDs(){}
 #endif
 
-#endif // SHIFTREG_TYPE_74HC595
+#endif // (PLATFORM_ESP32 || PLATFORM_TEENSY41) && CFG_INSTRUMENT_STEPPERSYNTHSW && CFG_COMPONENT_PWM && CFG_COMPONENT_SHIFTREGISTER

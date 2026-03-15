@@ -80,7 +80,7 @@ void DistributorManager::setDistributor(uint8_t data[])
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Send message to all distributors which accept the designated message's channel.
-void DistributorManager::distributeMessage(MidiMessage& message)
+void DistributorManager::distributeMessage(const MidiMessage& message)
 {
     for (uint8_t i = 0; i < m_distributors.size(); i++) {
         if (m_distributors[i].getChannels().test(message.channel())) {
@@ -89,43 +89,13 @@ void DistributorManager::distributeMessage(MidiMessage& message)
     }
 }
 
-// Process CC MIDI Messages by type
-void DistributorManager::processCC(MidiMessage& message)
-{
-    for (uint8_t i = 0; i < m_distributors.size(); i++) {
-        if (m_distributors[i].getChannels().test(message.channel())) {
-            switch (message.CC_Control()) {
-                case(MidiCC::ModulationWheel):
-                    m_ptrInstrumentController->setModulationWheel(message.channel(), message.CC_Value());
-                    break;
-                case(MidiCC::DamperPedal):
-                    m_distributors[i].setDamperPedal(message.CC_Value() > 64);
-                    break;
-                case(MidiCC::Mute):
-                    m_distributors[i].stopActiveNotes();
-                    break;
-                case(MidiCC::AllNotesOff):
-                    m_ptrInstrumentController->stopAll();
-                    break;
-                case(MidiCC::Monophonic):
-                    m_distributors[i].setPolyphonic(false);
-                    break;
-                case(MidiCC::Polyphonic):
-                    m_distributors[i].setPolyphonic(true);
-                    break;
-                default:
-                    break;
-            }
-            return;
-        }
-    }
-}
+
 
 // Removes the designated Distributor from the Distribution Pool
 void DistributorManager::removeDistributor(uint8_t id)
 {
-    if (m_distributors.size() == 0) return;
-    if (id >= m_distributors.size()) id = m_distributors.size();
+    if (m_distributors.empty()) return;
+    if (id >= m_distributors.size()) id = static_cast<uint8_t>(m_distributors.size() - 1);
     m_distributors.erase(m_distributors.begin() + id);
     localStorageRemoveDistributor(id);
     broadcastDistributorChanged();
@@ -143,13 +113,25 @@ void DistributorManager::removeAllDistributors()
 // Returns the indexed Distributor from the Distribution Pool
 Distributor& DistributorManager::getDistributor(uint8_t index)
 {
-    if (index >= m_distributors.size()) index = m_distributors.size() - 1;
+    if (m_distributors.empty()) {
+        m_distributors.emplace_back(m_ptrInstrumentController);
+    }
+
+    if (index >= m_distributors.size()) index = static_cast<uint8_t>(m_distributors.size() - 1);
     return (m_distributors[index]);
 }
 
 // Returns indexed Distributor Construct
 std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributorSerial(uint8_t index)
 {
+    if (m_distributors.empty()) {
+        return {};
+    }
+
+    if (index >= m_distributors.size()) {
+        index = static_cast<uint8_t>(m_distributors.size() - 1);
+    }
+
     // Append Distributor ID to the Construct
     auto distributorObj = m_distributors[index].toSerial();
     distributorObj[0] = static_cast<uint8_t>((index >> 7) & 0x7F);
@@ -181,12 +163,12 @@ std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8
 // Local Storage Implementation
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
 
 void DistributorManager::localStorageAddDistributor()
 {
-    uint8_t index = m_distributors.size() - 1;
-    LocalStorageFactory::getInstance().setDistributorConstruct(index, getDistributorSerial(index).data());
+    uint8_t distIndex = m_distributors.size() - 1;
+    LocalStorageFactory::getInstance().setDistributorConstruct(distIndex, getDistributorSerial(distIndex).data());
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 }
 
@@ -194,7 +176,7 @@ void DistributorManager::localStorageRemoveDistributor(uint8_t id)
 {
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 
-    for (int i = id; i < m_distributors.size(); i++) {
+    for (size_t i = id; i < m_distributors.size(); i++) {
         LocalStorageFactory::getInstance().setDistributorConstruct(i, getDistributorSerial(i).data());
     }
 }
@@ -219,6 +201,7 @@ void DistributorManager::setDistributorChannels(uint8_t distributorId, std::bits
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setChannels(channels);
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
@@ -227,6 +210,7 @@ void DistributorManager::setDistributorInstruments(uint8_t distributorId, std::b
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setInstruments(instruments);
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
@@ -235,6 +219,7 @@ void DistributorManager::setDistributorMethod(uint8_t distributorId, Distributio
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setDistributionMethod(method);
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
@@ -243,6 +228,7 @@ void DistributorManager::setDistributorBoolValues(uint8_t distributorId, uint16_
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setDistributorBoolValues(boolValues);
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
@@ -251,14 +237,7 @@ void DistributorManager::setDistributorMinMaxNotes(uint8_t distributorId, uint8_
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].setMinMaxNote(minNote, maxNote);
-        broadcastDistributorChanged();
-    }
-}
-
-void DistributorManager::setDistributorNumPolyphonicNotes(uint8_t distributorId, uint8_t numNotes)
-{
-    if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setNumPolyphonicNotes(numNotes);
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
@@ -267,6 +246,7 @@ void DistributorManager::toggleDistributorMute(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
         m_distributors[distributorId].toggleMuted();
+        localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         m_ptrInstrumentController->stopAll();
         broadcastDistributorChanged();
     }
@@ -308,13 +288,4 @@ uint8_t DistributorManager::getDistributorMaxNote(uint8_t distributorId)
         return distributorSerial[13]; // Max note is stored in byte 13
     }
     return 127;
-}
-
-uint8_t DistributorManager::getDistributorNumPolyphonicNotes(uint8_t distributorId)
-{
-    if (distributorId < m_distributors.size()) {
-        auto distributorSerial = m_distributors[distributorId].toSerial();
-        return distributorSerial[14]; // Num polyphonic notes is stored in byte 14
-    }
-    return 1;
 }

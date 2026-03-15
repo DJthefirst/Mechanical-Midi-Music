@@ -16,13 +16,9 @@
 	$: formChannels = '1-4';
 	$: formInstruments = '1-4';
 	$: formDistributionMethod = 2;
-	$: formDamperEnable = false;
-	$: formPolyphonicEnable = false;
 	$: formNoteOverwrite = false;
-	$: formVibratoEnable = false;
 	$: formNoteMin = 0;
 	$: formNoteMax = 127;
-	$: formNumPolyphonicNotes = 1;
 
 	// Save Distributor to Device
 	async function saveDistributor(addDistributor: boolean) {
@@ -34,12 +30,8 @@
 			formDistributionMethod,
 			formNoteMin,
 			formNoteMax,
-			formNumPolyphonicNotes,
 			addDistributor ? false : $selectedDistributorStore.getMuted(), //Muted
-			formDamperEnable,
-			formPolyphonicEnable,
-			formNoteOverwrite,
-			formVibratoEnable
+			formNoteOverwrite
 		);
 
 		if (addDistributor) distributor.setId($selectedDeviceStore.getDistributors().length);
@@ -136,11 +128,7 @@
 		formDistributionMethod = $selectedDistributorStore.distributionMethod;
 		formNoteMin = $selectedDistributorStore.minNote;
 		formNoteMax = $selectedDistributorStore.maxNote;
-		formNumPolyphonicNotes = $selectedDistributorStore.maxPolypnonic;
-		formDamperEnable = $selectedDistributorStore.damper;
-		formPolyphonicEnable = $selectedDistributorStore.polyphonic;
 		formNoteOverwrite = $selectedDistributorStore.noteOverwrite;
-		formVibratoEnable = $selectedDistributorStore.vibrato;
 	}
 </script>
 
@@ -178,33 +166,11 @@
 	</div>
 	<div class="flex justify-start flex-wrap">
 		<div>
-			<label for="damperEnable" class="font-semibold my-2 ml-4">Damper Enable</label>
-			<input bind:checked={formDamperEnable} type="checkbox" id="damperEnable" class="bg-gray-dark" />
-		</div>
-		<div>
-			<label for="polyphonicEnable" class="font-semibold my-2 ml-4">Polyphonic Enable</label>
-			<input
-				bind:checked={formPolyphonicEnable}
-				type="checkbox"
-				id="polyphonicEnable"
-				class="bg-gray-dark"
-			/>
-		</div>
-		<div>
 			<label for="noteOverwrite" class="font-semibold my-2 ml-4">Note Overwrite</label>
 			<input
 				bind:checked={formNoteOverwrite}
 				type="checkbox"
 				id="noteOverwrite"
-				class="bg-gray-dark"
-			/>
-		</div>
-		<div>
-			<label for="vibratoEnable" class="font-semibold my-2 ml-4">Vibrato Enable</label>
-			<input
-				bind:checked={formVibratoEnable}
-				type="checkbox"
-				id="vibratoEnable"
 				class="bg-gray-dark"
 			/>
 		</div>
@@ -225,16 +191,6 @@
 			id="noteMinMax"
 			placeholder="127"
 			class="bg-gray-dark rounded-md px-3 py-1 my-3 w-24 font-semibold"
-		/>
-	</div>
-	<div>
-		<label for="numPolyphonicNotes" class="font-semibold pl-4">Number of Polyphonic Notes</label>
-		<input
-			bind:value={formNumPolyphonicNotes}
-			type="text"
-			id="numPolyphonicNotes"
-			placeholder="1"
-			class="bg-gray-dark rounded-md px-3 py-1 m-3 w-24 font-semibold"
 		/>
 	</div>
 	<div class="flex justify-center m-2">

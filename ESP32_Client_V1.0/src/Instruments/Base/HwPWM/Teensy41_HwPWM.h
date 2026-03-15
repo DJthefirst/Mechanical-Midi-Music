@@ -33,7 +33,6 @@ private:
     //Local MIDI Device Attributes
     uint8_t m_program = 0;
     uint8_t m_channelPressure = 0;
-    uint16_t m_pitchBend[Midi::NUM_CH];
 
     // PWM configuration constants
     static constexpr uint8_t PWM_RESOLUTION = 8; // 8-bit resolution (0-255)
@@ -43,8 +42,8 @@ public:
     Teensy41_HwPWM();
     void reset(uint8_t instrument) override;
     void resetAll() override;
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t velocity) override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopAll() override;
 
     void setPitchBend(uint8_t channel, uint16_t value) override;

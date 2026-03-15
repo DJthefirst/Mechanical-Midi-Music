@@ -1,17 +1,29 @@
 #include "Config.h"
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(PLATFORM_ESP32) && (defined(CFG_INSTRUMENT_SWPWM) || defined(CFG_INSTRUMENT_STEPSW) || defined(CFG_INSTRUMENT_STEPSWSHIFT)) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/SwPWM/ESP32_SwPWM.h"
-#include "Instruments/Utility/InterruptTimer.h"
-#include "Instruments/Utility/NoteTable.h"
+#include "Instruments/Components/InterruptTimer.h"
+#include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include "Distributors/Distributor.h"
 #include <bitset>
 
+namespace {
+struct InterruptLock {
+    InterruptLock() { noInterrupts(); }
+    ~InterruptLock() { interrupts(); }
+};
+}
+
+// Define constants for PWM configuration
+constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
+constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+
 // Define static member variables
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activeNotes = {};
 uint8_t ESP32_SwPWM::m_numActiveNotes = 0;
+std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_modulationWheel = {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_notePeriod = {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_activePeriod =  {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_currentTick = {};
@@ -23,14 +35,17 @@ std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_SwPWM::m_vibratoRa
 ESP32_SwPWM::ESP32_SwPWM() : InstrumentControllerBase()
 {
     //Setup pins
-    for(uint8_t i=0; i < HardwareConfig::PINS.size(); i++){
-        pinMode(HardwareConfig::PINS[i], OUTPUT);
+    for(uint8_t i=0; i < numPwmPins; i++){
+        pinMode(pwmPins[i], OUTPUT);
     }
 
     delay(500); // Wait a half second for safety
 
-    // Setup timer to handle interrupts for driving the instrument
-    InterruptTimer::initialize(HardwareConfig::TIMER_RESOLUTION, Tick);
+    // Setup timer hardware and register the base tick callback. If a
+    // specialized subclass (like StepSwPWM) wants to take ownership it can
+    // call InterruptTimer::setCallback() to replace this handler.
+    InterruptTimer::initialize(CFG_TIMER_RESOLUTION_US, nullptr);
+    InterruptTimer::setCallback(tick);
 
     //Initalize Default values
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
@@ -48,6 +63,8 @@ void ESP32_SwPWM::resetAll()
 
 void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only increment counter if this instrument wasn't already playing a note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -64,9 +81,8 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
     if(m_lastDistributor[instrument] != nullptr){
-        Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[instrument]);
-            m_vibratoDepth[instrument] = distributor->getVibratoEnabled() ? m_modulationWheel[channel] : 0;
-            m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
+    m_vibratoDepth[instrument] = Device::Vibrato ? m_modulationWheel[channel] : 0;
+    m_vibratoRate[instrument] = m_vibratoDepth[instrument] >> 3; // Set vibrato rate from modulation wheel
     }
 
     if (!wasActive) {
@@ -75,8 +91,10 @@ void ESP32_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  
     return;
 }
 
-void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
+void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    InterruptLock lock;
+
     // Only decrement if there was actually an active note
     bool wasActive = (m_activeNotes[instrument] != 0);
     
@@ -91,7 +109,7 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
     m_vibratoPhase[instrument] = 0;  // Reset vibrato phase to prevent carryover
     m_vibratoDepth[instrument] = 0;  // Reset vibrato depth to prevent carryover
     m_currentState.reset(instrument);  // Reset pin state bit
-    digitalWrite(HardwareConfig::PINS[instrument], 0);
+    digitalWrite(pwmPins[instrument], 0);
     
     if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
@@ -100,6 +118,8 @@ void ESP32_SwPWM::stopNote(uint8_t instrument, uint8_t velocity)
 }
 
 void ESP32_SwPWM::stopAll(){
+    InterruptLock lock;
+
     std::fill_n(m_pitchBend, Midi::NUM_CH, Midi::CTRL_CENTER);
     m_numActiveNotes = 0;
     m_lastDistributor.fill(nullptr);
@@ -113,8 +133,8 @@ void ESP32_SwPWM::stopAll(){
     m_vibratoPhase = {};
     m_vibratoDepth = {};
 
-    for(uint8_t i = 0; i < HardwareConfig::PINS.size(); i++){
-        digitalWrite(HardwareConfig::PINS[i], LOW);
+    for(uint8_t i = 0; i < numPwmPins; i++){
+        digitalWrite(pwmPins[i], LOW);
     }
 }
 
@@ -126,7 +146,7 @@ void ESP32_SwPWM::stopAll(){
 Called by the timer interrupt at the specified resolution.  Because this is called extremely often,
 it's crucial that any computations here be kept to a minimum!
 */
-void ICACHE_RAM_ATTR ESP32_SwPWM::Tick()
+void ICACHE_RAM_ATTR ESP32_SwPWM::tick()
 {
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
@@ -171,7 +191,7 @@ void ESP32_SwPWM::togglePin(uint8_t instrument)
 {
     //Pulse the control pin
     m_currentState.flip(instrument);
-    digitalWrite(HardwareConfig::PINS[instrument], m_currentState[instrument]);
+    digitalWrite(pwmPins[instrument], m_currentState[instrument]);
         
 }
 // #pragma GCC pop_options (Legacy)
@@ -192,6 +212,8 @@ bool ESP32_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 }
 
 void ESP32_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
+    InterruptLock lock;
+
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
@@ -208,25 +230,30 @@ void ESP32_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
     }
 }
 
-void ESP32_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
+void ESP32_SwPWM::setControlChange(uint8_t channel, uint8_t controller, uint8_t value)
 {
-    #ifdef VIBRATO_ENABLED
+    InterruptLock lock;
+
         // Map modulation wheel (0-127) to vibrato depth (0-127)
         // The depth will determine how much pitch variation occurs
-        
-        // Check each instrument's last distributor to see if vibrato is enabled
-        m_modulationWheel[channel] = value;
-        for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
-            if(m_lastChannel[i] == channel){
-                if(m_notePeriod[i] == 0) continue;
-                if(m_lastDistributor[i] == nullptr) continue;
-                Distributor* distributor = static_cast<Distributor*>(m_lastDistributor[i]);
+    switch(controller) {
 
-                m_vibratoDepth[i] = distributor->getVibratoEnabled() ? value : 0;
-                m_vibratoRate[i] = value >> 3; // Higher modulation wheel = faster vibrato
+        case MidiCC::ModulationWheel:
+            #ifndef CFG_VIBRATO_ENABLED
+                return;
+            #endif
+            
+            m_modulationWheel[channel] = value;
+            for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
+                if(m_lastChannel[i] == channel){
+                    if(m_notePeriod[i] == 0) continue;
+                    if(m_lastDistributor[i] == nullptr) continue;
+                    m_vibratoDepth[i] = value;
+                    m_vibratoRate[i] = value >> 3; // Higher modulation wheel = faster vibrato
+                }
             }
-        }
-    #endif
+            break;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,17 +262,17 @@ void ESP32_SwPWM::setModulationWheel(uint8_t channel, uint8_t value)
 
 void ESP32_SwPWM::checkInstrumentTimeouts() {
     // Only check timeouts if a timeout is configured
-    if (HardwareConfig::INSTRUMENT_TIMEOUT_MS == 0) return;
+    if (CFG_NOTE_TIMEOUT_MS == 0) return;
     
     uint32_t currentTime = millis();
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
         // Check if instrument is active and has timed out
         if (m_activeNotes[i] != 0 && 
-            (currentTime - m_noteStartTime[i]) > HardwareConfig::INSTRUMENT_TIMEOUT_MS) {
+            (currentTime - m_noteStartTime[i]) > CFG_NOTE_TIMEOUT_MS) {
             // Stop the note due to timeout
-            stopNote(i, 0);
+            stopNote(i, 0, 0, 0);
         }
     }
 }
 
-#endif // ARDUINO_ARCH_ESP32
+#endif // PLATFORM_ESP32 && CFG_INSTRUMENT_SWPWM && CFG_COMPONENT_PWM

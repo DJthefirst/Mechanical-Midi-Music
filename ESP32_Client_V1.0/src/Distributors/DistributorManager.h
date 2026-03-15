@@ -11,7 +11,7 @@
 #include "../MsgHandling/MidiMessage.h"
 #include "../Constants.h"
 
-#ifdef EXTRA_LOCAL_STORAGE
+#ifdef CFG_EXTRA_LOCAL_STORAGE
     #include "../Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
@@ -36,7 +36,7 @@ private:
     /**
      * Private constructor for singleton pattern
      */
-    DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController);
+    explicit DistributorManager(std::shared_ptr<InstrumentControllerBase> instrumentController);
 
 public:
     /**
@@ -63,18 +63,17 @@ public:
      * Set callback for distributor changes
      * @param callback Function to call when distributors are modified
      */
-    void setDeviceChangedCallback(std::function<void()> callback) { m_deviceChangedCallback = callback; }
+    void setDeviceChangedCallback(const std::function<void()>& callback) { m_deviceChangedCallback = callback; }
     
     // Message processing
-    void distributeMessage(MidiMessage& message);
-    void processCC(MidiMessage& message);
+    void distributeMessage(const MidiMessage& message);
+
     
     // Distributor configuration helpers
     void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);
     void setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments);
     void setDistributorMethod(uint8_t distributorId, DistributionMethod method);
     void setDistributorMinMaxNotes(uint8_t distributorId, uint8_t minNote, uint8_t maxNote);
-    void setDistributorNumPolyphonicNotes(uint8_t distributorId, uint8_t numNotes);
     void toggleDistributorMute(uint8_t distributorId);
     void setDistributorBoolValues(uint8_t distributorId, uint16_t boolValues);
     
@@ -85,7 +84,6 @@ public:
     uint16_t getDistributorBoolValues(uint8_t distributorId);
     uint8_t getDistributorMinNote(uint8_t distributorId);
     uint8_t getDistributorMaxNote(uint8_t distributorId);
-    uint8_t getDistributorNumPolyphonicNotes(uint8_t distributorId);
 
 private:
     // Helper to broadcast distributor changes
@@ -96,7 +94,7 @@ private:
     }
 
     // Local Storage helpers
-    #ifdef EXTRA_LOCAL_STORAGE
+    #ifdef CFG_EXTRA_LOCAL_STORAGE
     void localStorageAddDistributor();
     void localStorageRemoveDistributor(uint8_t id);
     void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data);

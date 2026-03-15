@@ -1,4 +1,5 @@
 #include "InstrumentControllerBase.h"
+#include "Config.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //Getters and Setters
@@ -22,22 +23,7 @@ void InstrumentControllerBase::setProgramChange(uint8_t channel, uint8_t value){
 void InstrumentControllerBase::setChannelPressure(uint8_t channel, uint8_t value){
     // Default implementation does nothing - derived classes should override if needed
 }
-void InstrumentControllerBase::setModulationWheel(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setFootPedal(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setVolume(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setExpression(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setEffectCrtl_1(uint8_t channel, uint8_t value){
-    // Default implementation does nothing - derived classes should override if needed
-}
-void InstrumentControllerBase::setEffectCrtl_2(uint8_t channel, uint8_t value){
+void InstrumentControllerBase::setControlChange(uint8_t channel, uint8_t controller, uint8_t value){
     // Default implementation does nothing - derived classes should override if needed
 }
 
@@ -48,3 +34,25 @@ void InstrumentControllerBase::setEffectCrtl_2(uint8_t channel, uint8_t value){
 void InstrumentControllerBase::checkInstrumentTimeouts(){
     // Default implementation does nothing - derived classes should override if needed
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// LED Helper Functions - Default Implementations
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef CFG_EXTRA_ADDRESSABLE_LEDS
+#include "Extras/AddrLED.h"
+
+void InstrumentControllerBase::updateLEDs(){ AddrLED::get().update(); }
+void InstrumentControllerBase::setupLEDs(){ AddrLED::get().setup(); }
+void InstrumentControllerBase::resetLEDs(){ AddrLED::get().reset(); }
+#else
+
+void InstrumentControllerBase::setupLEDs() {};
+void InstrumentControllerBase::updateLEDs() {};
+void InstrumentControllerBase::resetLEDs() {};
+#endif
+
+void InstrumentControllerBase::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {};
+void InstrumentControllerBase::setInstrumentLedOff(uint8_t instrument) {};
+
+

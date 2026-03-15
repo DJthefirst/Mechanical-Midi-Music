@@ -5,7 +5,7 @@
  * 
  */
 
-#ifdef MMM_NETWORK_UDP
+#ifdef CFG_MMM_NETWORK_UDP
 using networkType = NetworkUDP;
 
 #include "NetworkUDP.h"
@@ -21,7 +21,7 @@ void NetworkUDP::begin() {
     Serial.begin(115200); // Magic! - Standard MIDI baud rate for debugging
 
     // Setup and connect to WiFi
-    AsyncWebServer server(MMM_NETWORK_UDP_AsyncWebServer_PORT); // Magic! - HTTP port for WiFi manager
+    AsyncWebServer server(CFG_MMM_NETWORK_UDP_AsyncWebServer_PORT); // Magic! - HTTP port for WiFi manager
     DNSServer dns;
     AsyncWiFiManager wifiManager(&server, &dns);
     wifiManager.autoConnect("FloppyDrives", "m0ppydrives");

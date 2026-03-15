@@ -224,6 +224,8 @@ bool Teensy41LocalStorage::initializeDeviceConfiguration(DistributorManager& dis
     uint16_t deviceBoolValue = getDeviceBoolean();
     Device::Muted = ((deviceBoolValue & DEVICE_BOOL_MASK::MUTED) != 0);
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);
+    Device::DamperPedal = ((deviceBoolValue & DEVICE_BOOL_MASK::DAMPER_PEDAL) != 0);
+    Device::Vibrato = ((deviceBoolValue & DEVICE_BOOL_MASK::VIBRATO) != 0);
     
     // Distributor Config
     uint8_t numDistributors = getNumOfDistributors();

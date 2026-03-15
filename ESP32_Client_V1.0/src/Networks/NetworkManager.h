@@ -1,15 +1,15 @@
 #pragma once
 // Only include network headers if their macros are defined
-#ifdef MMM_NETWORK_SERIAL
+#ifdef CFG_MMM_NETWORK_SERIAL
 #include "Networks/NetworkSerial.h"
 #endif
-#ifdef MMM_NETWORK_USB
-#include "Networks/NetworkUSB.h"
+#ifdef CFG_MMM_NETWORK_USB
+#include "Networks/NetworkUSB/NetworkUSB.h"
 #endif
-#ifdef MMM_NETWORK_UDP
+#ifdef CFG_MMM_NETWORK_UDP
 #include "Networks/NetworkUDP.h"
 #endif
-#ifdef MMM_NETWORK_DIN
+#ifdef CFG_MMM_NETWORK_DIN
 #include "Networks/NetworkDIN.h"
 #endif
 
@@ -52,7 +52,7 @@ public:
     }
 
     // Send message to all networks except the specified one
-    void sendMessageToOthers(const MidiMessage& message, INetwork* excludeNetwork) {
+    void sendMessageToOthers(const MidiMessage& message, const INetwork* excludeNetwork) {
         for (auto& net : m_networks) {
             if (net && net.get() != excludeNetwork) {
                 net->sendMessage(message);
@@ -85,16 +85,16 @@ public:
 inline std::unique_ptr<NetworkManager> CreateNetwork(){
     auto net = std::make_unique<NetworkManager>();
 
-#ifdef MMM_NETWORK_SERIAL
+#ifdef CFG_MMM_NETWORK_SERIAL
     net->addNetwork<NetworkSerial>();
 #endif
-#ifdef MMM_NETWORK_USB
+#ifdef CFG_MMM_NETWORK_USB
     net->addNetwork<NetworkUSB>();
 #endif
-#ifdef MMM_NETWORK_UDP
+#ifdef CFG_MMM_NETWORK_UDP
     net->addNetwork<NetworkUDP>();
 #endif
-#ifdef MMM_NETWORK_DIN
+#ifdef CFG_MMM_NETWORK_DIN
     net->addNetwork<NetworkDIN>();
 #endif
     if(net->numberOfNetworks() == 0){

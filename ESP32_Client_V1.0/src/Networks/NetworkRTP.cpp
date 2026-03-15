@@ -1,4 +1,4 @@
-#ifdef MMM_NETWORK_RTP
+#ifdef CFG_MMM_NETWORK_RTP
 using networkType = NetworkRTP;
 
 #include <WiFi.h>

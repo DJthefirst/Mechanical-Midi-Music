@@ -7,6 +7,7 @@
 
 #include "Constants.h"
 #include "Instruments/Base/SwPWM/SwPWM.h"
+#include "Instruments/Components/ShiftRegister/IShiftRegister.h"
 
 #include <cstdint>
 using std::int8_t;
@@ -16,22 +17,20 @@ class StepperSynthSw : public SwPWM{
 public:
 
 private:
-    static std::array<bool,HardwareConfig::NUM_INSTRUMENTS> m_outputenabled; //Output Enabled
     static void togglePin(uint8_t instrument);
+    static IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* m_shiftReg;
 
 public: 
     StepperSynthSw();
+    void periodic() override;
     void reset(uint8_t instrument) override;
     void resetAll() override;
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t velocity) override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopAll() override;
 
 private:
     //LEDs
-    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
-    void setInstrumentLedOff(uint8_t instrument);
-    void resetLEDs();
-    void setupLEDs();
-    void updateShiftRegister();
+    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) override;
+    void setInstrumentLedOff(uint8_t instrument) override;
 };

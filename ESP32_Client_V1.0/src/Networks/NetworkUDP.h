@@ -6,7 +6,7 @@
 
 #pragma once
 
-#ifdef MMM_NETWORK_UDP
+#ifdef CFG_MMM_NETWORK_UDP
 
 #include "INetwork.h"
 #include <WiFi.h>

@@ -12,7 +12,6 @@
 #include "SysExMsgHandler.h"
 #include "MidiMsgHandler.h"
 #include "MidiMessage.h"
-#include <memory>
 #include <functional>
 
 /**
@@ -21,27 +20,27 @@
  */
 class MessageRouter {
 private:
-    std::shared_ptr<NetworkManager> m_networkManager;
-    std::shared_ptr<MidiMsgHandler> m_midiMsgHandler;
-    std::shared_ptr<SysExMsgHandler> m_sysExMsgHandler;
-    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
+    NetworkManager* m_networkManager;
+    MidiMsgHandler* m_midiMsgHandler;
+    SysExMsgHandler* m_sysExMsgHandler;
+    InstrumentControllerBase* m_instrumentController;
     
     std::function<void(const MidiMessage&, INetwork*)> m_deviceChangedCallback;
 
 public:
     /**
      * Constructor
-     * @param networkManager Shared pointer to network manager
-     * @param midiMsgHandler Shared pointer to MIDI message handler
-     * @param sysExMsgHandler Shared pointer to SysEx message handler
-     * @param instrumentController Shared pointer to instrument controller
+        * @param networkManager Network manager dependency
+        * @param midiMsgHandler MIDI message handler dependency
+        * @param sysExMsgHandler SysEx message handler dependency
+        * @param instrumentController Instrument controller dependency
      */
-    MessageRouter(std::shared_ptr<NetworkManager> networkManager,
-                  std::shared_ptr<MidiMsgHandler> midiMsgHandler,
-                  std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
-                  std::shared_ptr<InstrumentControllerBase> instrumentController);
+    MessageRouter(NetworkManager& networkManager,
+                  MidiMsgHandler& midiMsgHandler,
+                  SysExMsgHandler& sysExMsgHandler,
+                  InstrumentControllerBase& instrumentController);
 
-    void setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback);
+    void setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback);
 
     void broadcastDeviceChanged(INetwork* sourceNetwork = nullptr);
 

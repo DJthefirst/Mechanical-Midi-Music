@@ -6,22 +6,21 @@
  */
 
 #include "MessageRouter.h"
-#include "Instruments/InstrumentController.h"
 #include "Constants.h"
 
 // Constructor
 MessageRouter::MessageRouter(
-    std::shared_ptr<NetworkManager> networkManager,
-    std::shared_ptr<MidiMsgHandler> midiMsgHandler,
-    std::shared_ptr<SysExMsgHandler> sysExMsgHandler,
-    std::shared_ptr<InstrumentControllerBase> instrumentController) 
-    : m_networkManager(networkManager)
-    , m_midiMsgHandler(midiMsgHandler)
-    , m_sysExMsgHandler(sysExMsgHandler)
-    , m_instrumentController(instrumentController) {}
+    NetworkManager& networkManager,
+    MidiMsgHandler& midiMsgHandler,
+    SysExMsgHandler& sysExMsgHandler,
+    InstrumentControllerBase& instrumentController) 
+    : m_networkManager(&networkManager)
+    , m_midiMsgHandler(&midiMsgHandler)
+    , m_sysExMsgHandler(&sysExMsgHandler)
+    , m_instrumentController(&instrumentController) {}
 
 // Set callback for device changed notifications
-void MessageRouter::setDeviceChangedCallback(std::function<void(const MidiMessage&, INetwork*)> callback)
+void MessageRouter::setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback)
 {
     m_deviceChangedCallback = callback;
 }
@@ -31,6 +30,7 @@ void MessageRouter::broadcastDeviceChanged(INetwork* sourceNetwork)
 {
     if (!m_networkManager) return;
 
+    // Create a device changed message to Notify the Server 
     MidiMessage deviceChangedMsg(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceChanged, nullptr, 0);
     
     if (sourceNetwork) {
@@ -68,10 +68,7 @@ void MessageRouter::processMessages()
 // Process a single message from a specific network
 void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork)
 {
-    INetwork* currentSourceNetwork = sourceNetwork;
-
-    // Process message based on type - optimize for most common case first
-    const uint8_t msgType = message.type();
+    // Process message based on type
     if (message.type() == Midi::SysCommon && message.sysCommonType() == Midi::SysEx) {
         // Handle SysEx messages
         auto response = m_sysExMsgHandler->processSysExMessage(message);
@@ -83,7 +80,4 @@ void MessageRouter::processMessage(MidiMessage& message, INetwork* sourceNetwork
         // Handle other MIDI messages with MidiMsgHandler
         m_midiMsgHandler->processMessage(message);
     }
-
-    // Clear the source network context
-    currentSourceNetwork = nullptr;
 }

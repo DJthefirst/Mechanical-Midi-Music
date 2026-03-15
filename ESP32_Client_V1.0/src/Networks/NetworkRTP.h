@@ -7,6 +7,8 @@
 
 #pragma once
 
+#ifdef CFG_MMM_NETWORK_RTP
+
 #include "Arduino.h"
 #include "INetwork.h"
 #include <cstdint>
@@ -16,10 +18,12 @@ class NetworkRTP : public INetwork{
 public:
     NetworkRTP() = default;
     void begin() override;
-    void sendMessage(MidiMessage message) override;
-    void sendString(String message) override;
+    void sendMessage(const MidiMessage& message) override;
+    void sendString(const String& message) override;
     std::optional<MidiMessage> readMessage() override;
 
 private:
     bool startRTP();
 };
+
+#endif /* CFG_MMM_NETWORK_RTP */

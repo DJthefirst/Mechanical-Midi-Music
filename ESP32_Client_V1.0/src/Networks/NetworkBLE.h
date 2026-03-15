@@ -7,6 +7,8 @@
 
 #pragma once
 
+#ifdef CFG_MMM_NETWORK_BLE
+
 #include "Arduino.h"
 #include "INetwork.h"
 #include <cstdint>
@@ -22,3 +24,5 @@ public:
 private:
     bool startBLE();
 };
+
+#endif /* CFG_MMM_NETWORK_BLE */

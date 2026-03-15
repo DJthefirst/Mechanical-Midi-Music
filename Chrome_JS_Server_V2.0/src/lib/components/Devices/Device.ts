@@ -18,12 +18,15 @@ export class Device {
 	public id: number;
 	public muted: boolean;
 	public isOnmiMode: boolean;
+	public damperEnable: boolean;
+	public vibratoEnable: boolean;
 	public numInstruments: number;
 	public numSubInstruments: number;
 	public instrumentType: number;
 	public platform: number;
 	public noteMin: number;
 	public noteMax: number;
+	public numPolyphonicNotes: number;
 	public version: number;
 	public name: string;
 
@@ -36,6 +39,7 @@ export class Device {
 		platform: number,
 		noteMin: number,
 		noteMax: number,
+		numPolyphonicNotes: number,
 		version: number,
 		name: string
 	) {
@@ -43,12 +47,15 @@ export class Device {
 		this.id = id;
 		this.muted = false;
 		this.isOnmiMode = false;
+		this.damperEnable = false;
+		this.vibratoEnable = false;
 		this.numInstruments = numInstruments;
 		this.numSubInstruments = numSubInstruments;
 		this.instrumentType = instrumentType;
 		this.platform = platform;
 		this.noteMin = noteMin;
 		this.noteMax = noteMax;
+		this.numPolyphonicNotes = numPolyphonicNotes;
 		this.version = version;
 		this.name = name;
 		this.distributors = [];
@@ -84,7 +91,7 @@ export class Device {
 	}
 
 	// Saves Config to Device
-	public save(name: string, muted: boolean, isOmniMode: boolean): void {
+	public save(name: string, muted: boolean, isOmniMode: boolean, damperEnable: boolean, vibratoEnable: boolean): void {
 		if (!comManager) {
 			console.error('ComManager not initialized');
 			return;
@@ -92,6 +99,8 @@ export class Device {
 		this.name = name;
 		this.muted = muted;
 		this.isOnmiMode = isOmniMode;
+		this.damperEnable = damperEnable;
+		this.vibratoEnable = vibratoEnable;
 		comManager.saveDevice(this);
 	}
 
@@ -124,24 +133,41 @@ export class Device {
 			this.id = receivedId;
 		}
 		
-		// Parse device configuration (bytes 2-7)
+		// Parse device configuration (56-byte struct)
+		// Byte 2: Number of Instruments (7-bit)
 		this.numInstruments = array[2];
+		// Byte 3: Number of Sub Instruments (7-bit)
 		this.numSubInstruments = array[3];
-		this.instrumentType = array[4];
-		this.platform = array[5];
-		this.noteMin = array[6];
-		this.noteMax = array[7];
+		// Byte 4: Reserved
+		// Byte 5: Instrument Type (7-bit)
+		this.instrumentType = array[5];
+		// Byte 6: Reserved
+		// Byte 7: Platform (7-bit)
+		this.platform = array[7];
+		// Byte 8: Reserved
+		// Bytes 9-10: Firmware Version (14-bit MSB, LSB)
+		this.version = (array[9] << 7) + array[10];
+		// Byte 11: Reserved
+		// Byte 12: Note Min (7-bit)
+		this.noteMin = array[12];
+		// Byte 13: Note Max (7-bit)
+		this.noteMax = array[13];
 		
-		// Parse firmware version (bytes 8-9: 14-bit MSB, LSB)
-		this.version = (array[8] << 7) + array[9];
-		
-		// Parse device boolean flags (bytes 10-11: 14-bit MSB, LSB)
-		const deviceBoolean = (array[10] << 7) + array[11];
+		// Bytes 14-15: Boolean Values (14-bit MSB, LSB)
+		const deviceBoolean = (array[14] << 7) + array[15];
 		console.log('Device Boolean raw:', deviceBoolean, '(0x' + deviceBoolean.toString(16).padStart(4, '0') + ')');
 		
 		this.muted = (deviceBoolean & CONST.DEVICE_BOOL_MASK.MUTED) !== 0;
 		this.isOnmiMode = (deviceBoolean & CONST.DEVICE_BOOL_MASK.OMNIMODE) !== 0;
-		console.log('Parsed: muted =', this.muted, ', omniMode =', this.isOnmiMode);
+		this.damperEnable = (deviceBoolean & CONST.DEVICE_BOOL_MASK.DAMPER) !== 0;
+		this.vibratoEnable = (deviceBoolean & CONST.DEVICE_BOOL_MASK.VIBRATO) !== 0;
+		console.log('Parsed: muted =', this.muted, ', omniMode =', this.isOnmiMode,
+			', damper =', this.damperEnable, ', vibrato =', this.vibratoEnable);
+		
+		// Bytes 16-17: Reserved
+		// Byte 18: Number of Polyphonic Notes (7-bit)
+		this.numPolyphonicNotes = array[18];
+		// Bytes 19-35: Reserved
 		
 		console.log('Config:', {
 			numInstruments: this.numInstruments,
@@ -150,10 +176,11 @@ export class Device {
 			platform: this.platform,
 			noteMin: this.noteMin,
 			noteMax: this.noteMax,
+			numPolyphonicNotes: this.numPolyphonicNotes,
 			version: this.version
 		});
 		
-		// Parse device name (bytes 20-39: 20 ASCII bytes)
+		// Parse device name (bytes 36-55: 20 ASCII bytes)
 		this.name = String.fromCharCode(
 			...array.slice(CONST.DEVICE_NAME_OFFSET, CONST.DEVICE_NAME_OFFSET + CONST.DEVICE_NUM_NAME_BYTES)
 				.filter((val) => val !== 0)
@@ -184,20 +211,16 @@ export class Device {
 		// Parse distribution method (byte 10)
 		const distributionMethod = array[10];
 		
-		// Parse note range (bytes 11-12)
-		const minNote = array[11];
-		const maxNote = array[12];
+		// Byte 11: Reserved
 		
-		// Parse number of polyphonic notes (byte 13)
-		const maxPolypnonic = array[13];
+		// Parse note range (bytes 12-13)
+		const minNote = array[12];
+		const maxNote = array[13];
 		
 		// Parse boolean flags (bytes 14-15: 14-bit MSB, LSB)
 		const booleanValue = (array[14] << 7) + array[15];
 		const muted = (booleanValue & CONST.DISTRIBUTOR_BOOL_MASK.MUTED) !== 0;
-		const polyphonic = (booleanValue & CONST.DISTRIBUTOR_BOOL_MASK.POLYPHONIC) !== 0;
 		const noteOverwrite = (booleanValue & CONST.DISTRIBUTOR_BOOL_MASK.NOTEOVERWRITE) !== 0;
-		const damper = (booleanValue & CONST.DISTRIBUTOR_BOOL_MASK.DAMPERPEDAL) !== 0;
-		const vibrato = (booleanValue & CONST.DISTRIBUTOR_BOOL_MASK.VIBRATO) !== 0;
 
 		const distributor = new Distributor(
 			channels,
@@ -205,12 +228,8 @@ export class Device {
 			distributionMethod,
 			minNote,
 			maxNote,
-			maxPolypnonic,
 			muted,
-			damper,
-			polyphonic,
-			noteOverwrite,
-			vibrato
+			noteOverwrite
 		);
 		
 		// Set the distributor ID
@@ -274,7 +293,7 @@ export class Device {
 export async function connectDevice(baudRate: number): Promise<void> {
 	try {
 		const connection = new SerialConnection();
-		const device = new Device(connection, 0, 0, 0, 0, 0, 0, 127, 0, 'Connecting...');
+		const device = new Device(connection, 0, 0, 0, 0, 0, 0, 127, 0, 0, 'Connecting...');
 		
 		// Set up message handler before opening connection
 		connection.setMessageHandler(device);

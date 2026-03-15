@@ -19,6 +19,7 @@ protected:
     //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
     static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeNotes;
     static uint8_t m_numActiveNotes;
+    static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_modulationWheel;
 
     //Instrument Attributes
     static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note
@@ -35,12 +36,12 @@ public:
     Teensy41_SwPWM();
     void reset(uint8_t instrument) override;
     void resetAll() override;
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel) override;
-    void stopNote(uint8_t instrument, uint8_t velocity) override;
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopAll() override;
 
     void setPitchBend(uint8_t channel, uint16_t value) override;
-    void setModulationWheel(uint8_t channel, uint8_t value) override;
+    void setControlChange(uint8_t channel, uint8_t controller, uint8_t value) override;
 
     Instrument getInstrumentType() const override { return Instrument::SW_PWM; }
     uint8_t getNumActiveNotes(uint8_t instrument) override;

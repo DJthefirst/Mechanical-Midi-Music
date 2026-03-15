@@ -14,7 +14,7 @@
 #include "Distributor.h"
 #include "DistributionStrategies.h"
 #include "../Instruments/InstrumentController.h"
-#include "../Utility/Utility.h"
+#include "../Utility/BitManipulation.h"
 
 Distributor::Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController)
     : m_instrumentController(instrumentController)
@@ -125,12 +125,12 @@ void Distributor::stopActiveNotes() {
     // note to avoid hanging notes and clear the tracking pointer.
 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i) {
-        void* last = m_instrumentController->getLastDistributor(i);
-        if (last == static_cast<void*>(this)) {
+        const void* last = m_instrumentController->getLastDistributor(i);
+        if (last == static_cast<const void*>(this)) {
             // If instrument is active, stop it. Use stopNote which will
             // also clear the _lastDistributor entry in most implementations.
             if (m_instrumentController->getNumActiveNotes(i) != 0) {
-                m_instrumentController->stopNote(i, 0);
+                m_instrumentController->stopNote(i, 0, 0, 0);
             } else {
                 // Ensure the distributor tracking is cleared even if not active
                 m_instrumentController->setLastDistributor(i, nullptr, NONE);
@@ -148,8 +148,8 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 {
     std::array<std::uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> distributorObj = {}; // Initialize all bytes to 0
 
-    // m_deviceBools already contains all bool flags as bits
-    uint16_t distributorBoolByte = m_deviceBools;
+    // m_distributorBools already contains all bool flags as bits
+    uint16_t distributorBoolByte = m_distributorBools;
 
     // Store in 7-bit MIDI format
     distributorObj[0] = 0; //Distributor ID MSB Generated in MsgHandler
@@ -170,9 +170,9 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     distributorObj[9] = instrumentsMidi[4];
 
     distributorObj[10] = static_cast<uint8_t>(m_distributionMethod) & 0x7F;
-    distributorObj[11] = m_minNote & 0x7F;
-    distributorObj[12] = m_maxNote & 0x7F;
-    distributorObj[13] = m_numPolyphonicNotes & 0x7F;
+    distributorObj[11] = 0; // Reserved
+    distributorObj[12] = m_minNote & 0x7F;
+    distributorObj[13] = m_maxNote & 0x7F;
     distributorObj[14] = (distributorBoolByte >> 7)  & 0x7F;
     distributorObj[15] = (distributorBoolByte >> 0) & 0x7F;
 
@@ -180,26 +180,15 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
 }
 
 uint16_t Distributor::getDistributorBoolValues() const {
-    return m_deviceBools;
+    return m_distributorBools;
 }
 
 bool Distributor::getMuted() const {
-    return m_deviceBools & DISTRIBUTOR_BOOL_MASK::MUTED;
-}
-
-bool Distributor::getPolyphonic() const {
-    return m_deviceBools & DISTRIBUTOR_BOOL_MASK::POLYPHONIC;
+    return m_distributorBools & DISTRIBUTOR_BOOL_MASK::MUTED;
 }
 
 bool Distributor::getNoteOverwrite() const {
-    return m_deviceBools & DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
-}
-bool Distributor::getDamperPedal() const {
-    return m_deviceBools & DISTRIBUTOR_BOOL_MASK::DAMPERPEDAL;
-}
-
-bool Distributor::getVibratoEnabled() const {
-    return m_deviceBools & DISTRIBUTOR_BOOL_MASK::VIBRATO;
+    return m_distributorBools & DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
 }
 
 //Returns Distributor Channels
@@ -218,7 +207,7 @@ DistributionMethod Distributor::getDistributionMethod() const {
 }
 
 //Distribute message to instruments
-void Distributor::distributeMessage(MidiMessage& message) {
+void Distributor::distributeMessage(const MidiMessage& message) {
     processMessage(message);
 }
 
@@ -237,11 +226,10 @@ void Distributor::setDistributor(uint8_t data[]){
     
     // Other fields
     m_distributionMethod = static_cast<DistributionMethod>(data[10]);
-    m_minNote = data[11];
-    m_maxNote = data[12];
-    m_numPolyphonicNotes = data[13];
+    m_minNote = data[12] & 0x7F;
+    m_maxNote = data[13] & 0x7F;
     uint16_t boolData = (static_cast<uint16_t>(data[14]) << 7) | static_cast<uint16_t>(data[15]);
-    m_deviceBools = boolData;
+    m_distributorBools = boolData;
 
     // Update strategy if distribution method changed
     updateDistributionStrategy();
@@ -256,62 +244,33 @@ void Distributor::setDistributionMethod(DistributionMethod distribution){
 
 void Distributor::setDistributorBoolValues(uint16_t boolValues){
     stopActiveNotes();
-    m_deviceBools = boolValues;
+    m_distributorBools = boolValues;
 }
 
 void Distributor::toggleMuted(){
     stopActiveNotes();
-    m_deviceBools ^= DISTRIBUTOR_BOOL_MASK::MUTED; // Toggle the MUTED bit
+    m_distributorBools ^= DISTRIBUTOR_BOOL_MASK::MUTED; // Toggle the MUTED bit
 }
 
 //Configures Distributor Boolean
 void Distributor::setMuted(bool muted){
-    bool currentMuted = m_deviceBools & DISTRIBUTOR_BOOL_MASK::MUTED;
+    bool currentMuted = m_distributorBools & DISTRIBUTOR_BOOL_MASK::MUTED;
     if(currentMuted != muted) stopActiveNotes();
     if(muted) {
-        m_deviceBools |= DISTRIBUTOR_BOOL_MASK::MUTED;
+        m_distributorBools |= DISTRIBUTOR_BOOL_MASK::MUTED;
     } else {
-        m_deviceBools &= ~DISTRIBUTOR_BOOL_MASK::MUTED;
+        m_distributorBools &= ~DISTRIBUTOR_BOOL_MASK::MUTED;
     }
 }
 
-//Configures Distributor Damper Pedal
-void Distributor::setDamperPedal(bool damper){
-    stopActiveNotes();
-    if(damper) {
-        m_deviceBools |= DISTRIBUTOR_BOOL_MASK::DAMPERPEDAL;
-    } else {
-        m_deviceBools &= ~DISTRIBUTOR_BOOL_MASK::DAMPERPEDAL;
-    }
-}
-
-//Configures Distributor Polphonic Notes
-void Distributor::setPolyphonic(bool polyphonic){
-    stopActiveNotes();
-    if(polyphonic) {
-        m_deviceBools |= DISTRIBUTOR_BOOL_MASK::POLYPHONIC;
-    } else {
-        m_deviceBools &= ~DISTRIBUTOR_BOOL_MASK::POLYPHONIC;
-    }
-}
 
 //Configures Distributor Note Overwrite
 void Distributor::setNoteOverwrite(bool noteOverwrite){
     stopActiveNotes();
     if(noteOverwrite) {
-        m_deviceBools |= DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
+        m_distributorBools |= DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
     } else {
-        m_deviceBools &= ~DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
-    }
-}
-
-//Configures Distributor Vibrato Enabled
-void Distributor::setVibratoEnabled(bool enable){
-    stopActiveNotes();
-    if(enable) {
-        m_deviceBools |= DISTRIBUTOR_BOOL_MASK::VIBRATO;
-    } else {
-        m_deviceBools &= ~DISTRIBUTOR_BOOL_MASK::VIBRATO;
+        m_distributorBools &= ~DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
     }
 }
 
@@ -320,12 +279,6 @@ void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
     stopActiveNotes();
     m_minNote = minNote;
     m_maxNote = maxNote;
-}
-
-//Configures Distributor maximum number of Polyphonic notes
-void Distributor::setNumPolyphonicNotes(uint8_t numPolyphonicNotes){
-    stopActiveNotes();
-    m_numPolyphonicNotes = numPolyphonicNotes;
 }
 
 //Configures Distributor accepted MIDI channels

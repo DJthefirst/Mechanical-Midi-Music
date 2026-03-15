@@ -31,8 +31,8 @@ public:
         HwPWM::playNote(instrument, note, velocity, channel);
         setInstrumentLedOn(instrument, channel, note, velocity);
     }
-    void stopNote(uint8_t instrument, uint8_t velocity) override{
-        HwPWM::stopNote(instrument, velocity);
+    void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) override{
+        HwPWM::stopNote(instrument, note, velocity, channel);
         setInstrumentLedOff(instrument);
     }
     void stopAll() override{
@@ -42,8 +42,6 @@ public:
 
 private:
     //LEDs
-    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity);
-    void setInstrumentLedOff(uint8_t instrument);
-    void resetLEDs();
-    void setupLEDs();
+    void setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity)  override;
+    void setInstrumentLedOff(uint8_t instrument) override;
 };

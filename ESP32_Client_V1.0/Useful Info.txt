@@ -7,27 +7,6 @@
    0x80 0x39 0x39
    803939
   
-  Dump Data: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x01 0x02 0xF7     
-   F0 7D 00 01 02 F7
-  
-  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x01 0x03 0x02 0xF7
-  
-  (Temp) Set Distribution: SysEx Start, MIDI ID, DevAdr0, DevAdr2, CMD, Value, SysEx End.
-   0xF0 0x7D 0x00 0x01 0x03 0x03 0xF7
-
-  (Temp) Get Num Distributors
-   0xF0 0x7D 0x00 0x01 0x13 0xF7
-   F0 7D 00 01 13 F7
-
-   (Temp) Get Distributor ID
-   0xF0 0x7D 0x00 0x01 0x15 0x00 0x00 0xF7
-   F0 7D 00 01 15 00 00 F7
-
-   (Temp) Set Device Name
-    F0 7D 00 01 0A 41 69 72 20 43 6f 6d 70 72 65 73 73 6f 72 00 00 00 00 00 00 F7
-
   */
 
 

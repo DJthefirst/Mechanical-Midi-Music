@@ -5,7 +5,7 @@
 //  * 
 //  */
 
-#ifdef MMM_NETWORK_BLE
+#ifdef CFG_MMM_NETWORK_BLE
 using networkType = NetworkBLE;
 
 // #include "NetworkBLE.h"
