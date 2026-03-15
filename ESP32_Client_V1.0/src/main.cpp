@@ -110,6 +110,8 @@ void loop() {
   if (messageRouter) {
     messageRouter->processMessages();
   }
+  
+  // Check for instrument timeouts
   if (instrumentController) {
     instrumentController->periodic();
   }

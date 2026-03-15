@@ -4,7 +4,7 @@
 #include "Networks/NetworkSerial.h"
 #endif
 #ifdef CFG_MMM_NETWORK_USB
-#include "Networks/NetworkUSB.h"
+#include "Networks/NetworkUSB/NetworkUSB.h"
 #endif
 #ifdef CFG_MMM_NETWORK_UDP
 #include "Networks/NetworkUDP.h"
