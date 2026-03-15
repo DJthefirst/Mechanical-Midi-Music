@@ -55,11 +55,13 @@ export default class ComManager {
 		// Prepare device boolean flags
 		const deviceBoolean = 
 			(device.muted ? CONST.DEVICE_BOOL_MASK.MUTED : 0) |
-			(device.isOnmiMode ? CONST.DEVICE_BOOL_MASK.OMNIMODE : 0);
+			(device.isOnmiMode ? CONST.DEVICE_BOOL_MASK.OMNIMODE : 0) |
+			(device.damperEnable ? CONST.DEVICE_BOOL_MASK.DAMPER : 0) |
+			(device.vibratoEnable ? CONST.DEVICE_BOOL_MASK.VIBRATO : 0);
 
-		// Send commands
-		await this.sendCommand(device, CONST.SYSEX_SetDeviceName, nameHex);
-		await this.sendCommand(device, CONST.SYSEX_SetDeviceBoolean, this.to14BitStr(deviceBoolean));
+		// Send commands (unified Get/Set - payload presence means Set)
+		await this.sendCommand(device, CONST.SYSEX_DeviceName, nameHex);
+		await this.sendCommand(device, CONST.SYSEX_DeviceBoolean, this.to14BitStr(deviceBoolean));
 		
 		// Sync to get updated configuration
 		await this.syncDevice(device);
@@ -81,7 +83,7 @@ export default class ComManager {
 		console.log('Syncing device:', device.id);
 		
 		// Request device construct (without distributors)
-		await this.sendCommand(device, CONST.SYSEX_GetDeviceConstructOnly, '');
+		await this.sendCommand(device, CONST.SYSEX_DeviceConstructOnly, '');
 		
 		// Note: The response will be handled by MessageHandler
 		// which will trigger device.update() and then request distributors
@@ -108,7 +110,7 @@ export default class ComManager {
 	 */
 	public async saveDistributor(device: Device, distributor: Distributor): Promise<void> {
 		console.log('Saving distributor for device:', device.id);
-		await this.sendCommand(device, CONST.SYSEX_SetDistributor, distributor.getConstruct());
+		await this.sendCommand(device, CONST.SYSEX_AddSetDistributor, distributor.getConstruct());
 		await this.syncDevice(device);
 	}
 
@@ -119,7 +121,7 @@ export default class ComManager {
 		console.log('Saving distributor boolean for device:', device.id);
 		await this.sendCommand(
 			device,
-			CONST.SYSEX_SetDistributorID_Boolean,
+			CONST.SYSEX_DistributorID_Boolean,
 			distributor.getIdStr() + distributor.getBoolean()
 		);
 		await this.syncDevice(device);

@@ -104,20 +104,6 @@
 				</div>
 				<div class="flex flex-col p-2">
 					<div class="flex flex-row">
-						<label class={distributor.damper ? 'mr-2' : 'text-gray-500'}> Damper </label>
-						{#if distributor.damper}
-							<img src={checkmark} alt="Checked" class="w-4" />
-						{/if}
-					</div>
-
-					<div class="flex flex-row">
-						<label class={distributor.polyphonic ? 'mr-2' : 'text-gray-500'}> Polyphonic </label>
-						{#if distributor.polyphonic}
-							<img src={checkmark} alt="Checked" class="w-4" />
-						{/if}
-					</div>
-
-					<div class="flex flex-row">
 						<label class={distributor.noteOverwrite ? 'mr-2' : 'text-gray-500'}>
 							Note Overwrite
 						</label>

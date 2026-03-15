@@ -26,6 +26,7 @@ export class MessageHandler {
 		const type = msg.Type();
 
 		switch (type) {
+			// System Commands (0x00 - 0x0F)
 			case parseInt(CONST.SYSEX_DeviceReady, 16):
 				await this.handleDeviceReady(msg);
 				break;
@@ -38,137 +39,105 @@ export class MessageHandler {
 				await this.handleDiscoverDevices(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_GetDeviceConstructFull, 16):
+			// Get/Set Device Commands (0x20 - 0x2F)
+			// Incoming messages are always responses to Get requests (device sending data)
+			case parseInt(CONST.SYSEX_DeviceConstructFull, 16):
 				await this.handleGetDeviceConstructFull(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_GetDeviceConstructOnly, 16):
+			case parseInt(CONST.SYSEX_DeviceConstructOnly, 16):
 				await this.handleGetDeviceConstructOnly(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_GetDeviceName, 16):
+			case parseInt(CONST.SYSEX_DeviceID, 16):
+				console.log('Received DeviceID response');
+				break;
+
+			case parseInt(CONST.SYSEX_DeviceName, 16):
 				await this.handleGetDeviceName(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_GetDeviceBoolean, 16):
+			case parseInt(CONST.SYSEX_DeviceBoolean, 16):
 				await this.handleGetDeviceBoolean(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_SetDeviceConstructFull, 16):
-				// Not implemented yet
-				console.log('SetDeviceConstructFull not implemented');
-				break;
-
-			case parseInt(CONST.SYSEX_SetDeviceConstructOnly, 16):
-				// Not implemented yet
-				console.log('SetDeviceConstructOnly not implemented');
-				break;
-
-			case parseInt(CONST.SYSEX_SetDeviceName, 16):
-				// Not implemented yet
-				console.log('SetDeviceName not implemented');
-				break;
-
-			case parseInt(CONST.SYSEX_SetDeviceBoolean, 16):
-				// Not implemented yet
-				console.log('SetDeviceBoolean not implemented');
-				break;
-
+			// Distributor Management Commands (0x30 - 0x3F)
 			case parseInt(CONST.SYSEX_GetNumDistributors, 16):
 				await this.handleGetNumOfDistributors(msg);
+				break;
+
+			case parseInt(CONST.SYSEX_AddSetDistributor, 16):
+				console.log('AddSetDistributor response');
 				break;
 
 			case parseInt(CONST.SYSEX_GetAllDistributors, 16):
 				await this.handleGetAllDistributors(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_AddDistributor, 16):
-				// Not implemented yet
-				console.log('AddDistributor not implemented');
-				break;
-
 			case parseInt(CONST.SYSEX_RemoveDistributorID, 16):
-				// Not implemented yet
-				console.log('RemoveDistributorID not implemented');
+				console.log('RemoveDistributorID response');
 				break;
 
 			case parseInt(CONST.SYSEX_RemoveAllDistributors, 16):
-				// Not implemented yet
-				console.log('RemoveAllDistributors not implemented');
+				console.log('RemoveAllDistributors response');
 				break;
 
 			case parseInt(CONST.SYSEX_ToggleMuteDistributorID, 16):
-				// Not implemented yet
-				console.log('ToggleMuteDistributorID not implemented');
+				console.log('ToggleMuteDistributorID response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID, 16):
+			// Get/Set Distributor Commands (0x40 - 0x4F)
+			case parseInt(CONST.SYSEX_DistributorID_Construct, 16):
 				await this.handleGetDistributorConstruct(msg);
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_Channels, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_Channels not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_Channels, 16):
+				console.log('DistributorID_Channels response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_Instruments, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_Instruments not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_Instruments, 16):
+				console.log('DistributorID_Instruments response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_DistributionMethod, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_DistributionMethod not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_DistributionMethod, 16):
+				console.log('DistributorID_DistributionMethod response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_Boolean, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_Boolean not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_Boolean, 16):
+				console.log('DistributorID_Boolean response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_MinMaxNotes, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_MinMaxNotes not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_MinMaxNotes, 16):
+				console.log('DistributorID_MinMaxNotes response');
 				break;
 
-			case parseInt(CONST.SYSEX_GetDistributorID_NumPolyphonicNotes, 16):
-				// Not implemented yet
-				console.log('GetDistributorID_NumPolyphonicNotes not implemented');
+			case parseInt(CONST.SYSEX_DistributorID_NumPolyphonicNotes, 16):
+				console.log('DistributorID_NumPolyphonicNotes response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributor, 16):
-				// Not implemented yet
-				console.log('SetDistributor not implemented');
+			// Instrument Commands (0x50 - 0x5F)
+			case parseInt(CONST.SYSEX_ResetAllInstruments, 16):
+				console.log('ResetAllInstruments response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributorID_Channels, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_Channels not implemented');
+			case parseInt(CONST.SYSEX_ResetInstrument, 16):
+				console.log('ResetInstrument response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributorID_Instruments, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_Instruments not implemented');
+			case parseInt(CONST.SYSEX_GetInstrumentNumActiveNotes, 16):
+				console.log('GetInstrumentNumActiveNotes response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributorID_DistributionMethod, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_DistributionMethod not implemented');
+			case parseInt(CONST.SYSEX_SetInstrumentDirectMessage, 16):
+				console.log('SetInstrumentDirectMessage response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributorID_Boolean, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_Boolean not implemented');
+			case parseInt(CONST.SYSEX_SetInstrumentNoteOn, 16):
+				console.log('SetInstrumentNoteOn response');
 				break;
 
-			case parseInt(CONST.SYSEX_SetDistributorID_MinMaxNotes, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_MinMaxNotes not implemented');
-				break;
-
-			case parseInt(CONST.SYSEX_SetDistributorID_NumPolyphonicNotes, 16):
-				// Not implemented yet
-				console.log('SetDistributorID_NumPolyphonicNotes not implemented');
+			case parseInt(CONST.SYSEX_SetInstrumentNoteOff, 16):
+				console.log('SetInstrumentNoteOff response');
 				break;
 
 			default:
@@ -183,8 +152,8 @@ export class MessageHandler {
 	private async handleDeviceReady(msg: MMM_Msg): Promise<void> {
 		const deviceId = msg.Source();
 		console.log('Device ready from:', deviceId.toString(16), '(0x' + deviceId.toString(16).padStart(4, '0') + ')');
-		// Request device construct by ID (0x11 = GetDeviceConstructOnly)
-		await this.sendMessage(deviceId, parseInt(CONST.SYSEX_GetDeviceConstructOnly, 16));
+		// Request device construct (0x21 = DeviceConstructOnly)
+		await this.sendMessage(deviceId, parseInt(CONST.SYSEX_DeviceConstructOnly, 16));
 	}
 
 	/**
@@ -215,7 +184,7 @@ export class MessageHandler {
 	}
 
 	/**
-	 * Handle GetDeviceConstructOnly - device construct without distributors
+	 * Handle DeviceConstructOnly - device construct without distributors
 	 */
 	private async handleGetDeviceConstructOnly(msg: MMM_Msg): Promise<void> {
 		console.log('Received device construct');
@@ -271,7 +240,7 @@ export class MessageHandler {
 			const idPayload = new Uint8Array(2);
 			idPayload[0] = (i >> 7) & 0x7F; // MSB
 			idPayload[1] = i & 0x7F;        // LSB
-			await this.sendMessage(msg.Source(), parseInt(CONST.SYSEX_GetDistributorID, 16), idPayload);
+			await this.sendMessage(msg.Source(), parseInt(CONST.SYSEX_DistributorID_Construct, 16), idPayload);
 		}
 	}
 

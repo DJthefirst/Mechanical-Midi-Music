@@ -2,19 +2,7 @@
 	import checkmark from '$lib/images/checkmark.svg';
 	import { Device, connectDevice, disconnectDevice } from './Device';
 	import { deviceListStore, selectedDeviceStore } from '$lib/store/stores';
-
-	let InstrumentType = ['N/A', 'PWM', 'Shift Register', 'Stepper Motor', 'Floppy Drive'];
-
-	let PlatformType = [
-		'N/A',
-		'ESP32',
-		'ESP8266',
-		'Arduino Uno',
-		'Arduino Mega',
-		'Arduino Due',
-		'Arduino Micro',
-		'Arduino Nano'
-	];
+	import { InstrumentTypeNames, PlatformTypeNames } from '../Utility/Constants';
 
 	let selectedBaudRate = 115200;
 	let baudRates = [
@@ -87,11 +75,11 @@
 					</label>
 					<label class="px-2"
 						>Platform:
-						<span class="font-semibold">{PlatformType[device.platform]}</span>
+						<span class="font-semibold">{PlatformTypeNames[device.platform] || 'Unknown'}</span>
 					</label>
 					<label class="px-2"
 						>Instrument:
-						<span class="font-semibold">{InstrumentType[device.instrumentType]}</span>
+						<span class="font-semibold">{InstrumentTypeNames[device.instrumentType] || 'Unknown'}</span>
 					</label>
 					<label class="px-2"
 						>Number of Instruments:

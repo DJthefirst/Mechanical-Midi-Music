@@ -5,6 +5,8 @@
 	$: formDeviceName = '';
 	$: formMuted = false;
 	$: formOmniModeEnable = false;
+	$: formDamperEnable = false;
+	$: formVibratoEnable = false;
 
 	function saveDevice() {
 		if (!$selectedDeviceStore || $selectedDeviceStore.id === 0) {
@@ -12,7 +14,7 @@
 			return;
 		}
 
-		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formMuted, formOmniModeEnable);
+		$selectedDeviceStore.save(formDeviceName.slice(0, 20), formMuted, formOmniModeEnable, formDamperEnable, formVibratoEnable);
 	}
 
 	function resetDevice() {
@@ -44,6 +46,8 @@
 		formDeviceName = $selectedDeviceStore.name;
 		formMuted = $selectedDeviceStore.muted;
 		formOmniModeEnable = $selectedDeviceStore.isOnmiMode;
+		formDamperEnable = $selectedDeviceStore.damperEnable;
+		formVibratoEnable = $selectedDeviceStore.vibratoEnable;
 	}
 </script>
 
@@ -71,13 +75,23 @@
 			/>
 		</div>
 	</div>
-	<div class="flex justify-start">
-		<label for="deviceMuted" class="font-semibold m-2 ml-4">Muted</label>
-		<input bind:checked={formMuted} type="checkbox" id="deviceMuted" class="bg-gray-dark" />
-	</div>
-	<div class="flex justify-start">
-		<label for="deviceOmniMode" class="font-semibold m-2 ml-4">Omni Mode Enable</label>
-		<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceOmniMode" class="bg-gray-dark" />
+	<div class="flex justify-start flex-wrap">
+		<div>
+			<label for="deviceMuted" class="font-semibold m-2 ml-4">Muted</label>
+			<input bind:checked={formMuted} type="checkbox" id="deviceMuted" class="bg-gray-dark" />
+		</div>
+		<div>
+			<label for="deviceOmniMode" class="font-semibold m-2 ml-4">Omni Mode Enable</label>
+			<input bind:checked={formOmniModeEnable} type="checkbox" id="deviceOmniMode" class="bg-gray-dark" />
+		</div>
+		<div>
+			<label for="deviceDamper" class="font-semibold m-2 ml-4">Damper Enable</label>
+			<input bind:checked={formDamperEnable} type="checkbox" id="deviceDamper" class="bg-gray-dark" />
+		</div>
+		<div>
+			<label for="deviceVibrato" class="font-semibold m-2 ml-4">Vibrato Enable</label>
+			<input bind:checked={formVibratoEnable} type="checkbox" id="deviceVibrato" class="bg-gray-dark" />
+		</div>
 	</div>
 	<div class="flex justify-center m-2">
 		<button on:click={() => saveDevice()} class="button-player-green mx-2">Update Device</button>
