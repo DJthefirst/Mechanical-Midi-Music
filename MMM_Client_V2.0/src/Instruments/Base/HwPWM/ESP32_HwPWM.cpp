@@ -2,7 +2,7 @@
 #if defined(PLATFORM_ESP32) && defined(CFG_INSTRUMENT_HWPWM) && defined(CFG_COMPONENT_PWM)
 
 #include "Instruments/Base/HwPWM/ESP32_HwPWM.h"
-#include "Instruments/InstrumentController.h"
+#include "Instruments/InstrumentControllerBase.h"
 #include "Instruments/Components/NoteTable.h"
 #include "Arduino.h"
 #include <cmath>

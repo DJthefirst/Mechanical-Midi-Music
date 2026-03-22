@@ -1,7 +1,7 @@
 /* 
  * Distributor.h
  *
- * Distributors serve to route midi notes to varrious instrument groups
+ * Distributors serve to route midi notes to various instrument groups
  * via configurable algorithms.Each Algorithm accounts for the number of 
  * active notes playing on each instrument and the order of instruments 
  * to be played.
@@ -27,12 +27,12 @@ class InstrumentControllerBase;
 using std::int8_t;
 
 //Size of Distributor when convered to Byte array
-static const uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
+constexpr uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
 
 //Distributor Bool Value Bit Indexes
 namespace DISTRIBUTOR_BOOL_MASK {
-    const uint16_t MUTED         = 1 << 0;
-    const uint16_t NOTEOVERWRITE = 1 << 1;
+    constexpr uint16_t MUTED         = 1 << 0;
+    constexpr uint16_t NOTEOVERWRITE = 1 << 1;
 };
 
 /* Routes Midi Notes to various instrument groups via configurable algorithms. */
@@ -68,7 +68,7 @@ public:
     Distributor& operator=(Distributor&&) noexcept = default;
 
     /* Determines which instruments the message is for */
-    void processMessage(MidiMessage message);
+    void processMessage(const MidiMessage& message);
 
     /* Returns a Byte array representing this Distributor in 7-bit MIDI format */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
@@ -82,10 +82,7 @@ public:
     uint8_t getMinNote() const;
     uint8_t getMaxNote() const;
 
-    // Add routing method for messages
-    void distributeMessage(const MidiMessage& message);
-
-    void setDistributor(uint8_t profile[]);
+    void setDistributor(const uint8_t data[]);
     void setDistributionMethod(DistributionMethod);
     void setMuted(bool muted);
 

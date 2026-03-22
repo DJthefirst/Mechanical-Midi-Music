@@ -37,7 +37,7 @@ private:
     inline void setFrequency(uint8_t instrument, double frequency);
     inline void stopChannel(uint8_t instrument);
 
-    //Local MIDI Device Atributes
+    //Local MIDI Device Attributes
     uint8_t m_program = 0;
     uint8_t m_channelPressure = 0;
     uint16_t m_pitchBend[Midi::NUM_CH];

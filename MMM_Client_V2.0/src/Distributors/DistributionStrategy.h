@@ -9,12 +9,11 @@
 #pragma once
 
 #include "../Constants.h"
-#include "Device.h"
-#include "../Instruments/InstrumentController.h"
+#include "../Device.h"
+#include "../Instruments/InstrumentControllerBase.h"
 #include "../Distributors/Distributor.h"
 #include <cstdint>
 #include <bitset>
-#include <optional>
 #include <memory>
 
 // Forward declarations
@@ -24,13 +23,13 @@ class Distributor;
 class DistributionStrategy {
 protected:
     Distributor* m_distributor;
-    std::shared_ptr<InstrumentControllerBase> instrumentController;
+    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
 
-    uint8_t currentInstrument = 0;
+    uint8_t m_currentInstrument = 0;
 
 public:
     DistributionStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : m_distributor(distributor), instrumentController(instrController) {};
+        : m_distributor(distributor), m_instrumentController(instrController) {};
     virtual ~DistributionStrategy() = default;
 
     virtual void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) = 0;

@@ -16,8 +16,8 @@
 // Constructor with dependency injection
 SysExMsgHandler::SysExMsgHandler(DistributorManager& distributorManager, 
     InstrumentControllerBase& instrumentController)
-    : distributorManager(&distributorManager)
-    , instrumentController(&instrumentController)
+    : m_distributorManager(&distributorManager)
+    , m_instrumentController(&instrumentController)
     , m_sourceId(Device::GetDeviceID())
 {
 }
@@ -109,14 +109,14 @@ bool SysExMsgHandler::handleDistributorCommand(const MidiMessage& message, std::
 {
     switch (message.sysExCommand()) {
         case (SysEx::RemoveDistributor):
-            if (distributorManager) {
-                distributorManager->removeDistributor(message.sysExDistributorID());
+            if (m_distributorManager) {
+                m_distributorManager->removeDistributor(message.sysExDistributorID());
             }
             response.reset();
             return true;
         case (SysEx::RemoveAllDistributors):
-            if (distributorManager) {
-                distributorManager->removeAllDistributors();
+            if (m_distributorManager) {
+                m_distributorManager->removeAllDistributors();
             }
             response.reset();
             return true;
@@ -232,8 +232,8 @@ MidiMessage SysExMsgHandler::sysExDeviceReady(const MidiMessage& message)
 // Reset Distributors, LocalStorage and Set Device name to "New Device"
 void SysExMsgHandler::sysExResetDeviceConfig(const MidiMessage& message)
 {
-    if (distributorManager) {
-        distributorManager->removeAllDistributors();
+    if (m_distributorManager) {
+        m_distributorManager->removeAllDistributors();
     }
     localStorageReset();
     char name[DEVICE_NUM_NAME_BYTES] = "New Device";
@@ -397,7 +397,7 @@ void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
 // Respond with the Number of Distributors
 MidiMessage SysExMsgHandler::sysExGetNumOfDistributors(const MidiMessage& message)
 {
-    uint8_t sizeByte = distributorManager ? distributorManager->getDistributorCount() : 0;
+    uint8_t sizeByte = m_distributorManager ? m_distributorManager->getDistributorCount() : 0;
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &sizeByte, 1);
 }
 
@@ -411,8 +411,8 @@ MidiMessage SysExMsgHandler::sysExGetAllDistributors(const MidiMessage& message)
 // Toggle Distributor Mute
 MidiMessage SysExMsgHandler::sysExToggleMuteDistributor(const MidiMessage& message)
 {
-    if (distributorManager) {
-        distributorManager->toggleDistributorMute(message.sysExDistributorID());
+    if (m_distributorManager) {
+        m_distributorManager->toggleDistributorMute(message.sysExDistributorID());
     }
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
 }
@@ -420,12 +420,12 @@ MidiMessage SysExMsgHandler::sysExToggleMuteDistributor(const MidiMessage& messa
 // Respond with the requested Distributor Construct
 MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(const MidiMessage& message)
 {
-    if (!distributorManager) {
+    if (!m_distributorManager) {
         return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
     }
     
     // Get distributor in 7-bit MIDI format
-    auto distributorBytes = distributorManager->getDistributorSerial(message.sysExDistributorID());
+    auto distributorBytes = m_distributorManager->getDistributorSerial(message.sysExDistributorID());
     
     // Set Return Distributor ID from message
     distributorBytes[0] = message.sysExCmdPayload()[0];
@@ -437,26 +437,26 @@ MidiMessage SysExMsgHandler::sysExGetDistributorConstruct(const MidiMessage& mes
 // Respond with the requested Distributor Channel Config
 MidiMessage SysExMsgHandler::sysExGetDistributorChannels(const MidiMessage& message)
 {
-    if (!distributorManager) {
+    if (!m_distributorManager) {
         const uint8_t bytesToSend[3] = {0, 0, 0};
         return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 3);
     }
     
     // Encode 16-bit channels to 3 MIDI 7-bit bytes
-    auto channelsMidi = Utility::encodeTo7Bit(distributorManager->getDistributorChannels(message.sysExDistributorID()));
+    auto channelsMidi = Utility::encodeTo7Bit(m_distributorManager->getDistributorChannels(message.sysExDistributorID()));
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), channelsMidi.data(), channelsMidi.size());
 }
 
 // Respond with the requested Distributor Instrument Config
 MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(const MidiMessage& message)
 {
-    if (!distributorManager) {
+    if (!m_distributorManager) {
         const uint8_t bytesToSend[5] = {0, 0, 0, 0, 0};
         return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 5);
     }
     
     // Encode 32-bit instruments to 5 MIDI 7-bit bytes
-    auto instrumentsMidi = Utility::encodeTo7Bit(distributorManager->getDistributorInstruments(message.sysExDistributorID()));
+    auto instrumentsMidi = Utility::encodeTo7Bit(m_distributorManager->getDistributorInstruments(message.sysExDistributorID()));
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), instrumentsMidi.data(), instrumentsMidi.size());
 }
 
@@ -464,14 +464,14 @@ MidiMessage SysExMsgHandler::sysExGetDistributorInstruments(const MidiMessage& m
 MidiMessage SysExMsgHandler::sysExGetDistributorMethod(const MidiMessage& message)
 {
 
-    uint8_t method = static_cast<uint8_t>(distributorManager->getDistributorMethod(message.sysExDistributorID()));
+    uint8_t method = static_cast<uint8_t>(m_distributorManager->getDistributorMethod(message.sysExDistributorID()));
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &method, 1);
 }
 
 // Respond with the requested Distributor Bool Values Config
 MidiMessage SysExMsgHandler::sysExGetDistributorBoolValues(const MidiMessage& message)
 {
-    uint16_t boolValues = distributorManager->getDistributorBoolValues(message.sysExDistributorID());
+    uint16_t boolValues = m_distributorManager->getDistributorBoolValues(message.sysExDistributorID());
     // Split into 2 MIDI 7-bit bytes
     uint8_t bytesToSend[2];
     bytesToSend[0] = (boolValues >> 7) & 0x7F;
@@ -485,9 +485,9 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(const MidiMessage& m
 {
     uint8_t minNote = 0;
     uint8_t maxNote = 127;
-    if (distributorManager) {
-        minNote = distributorManager->getDistributorMinNote(message.sysExDistributorID());
-        maxNote = distributorManager->getDistributorMaxNote(message.sysExDistributorID());
+    if (m_distributorManager) {
+        minNote = m_distributorManager->getDistributorMinNote(message.sysExDistributorID());
+        maxNote = m_distributorManager->getDistributorMaxNote(message.sysExDistributorID());
     }
     const uint8_t bytesToSend[2] = { minNote, maxNote };
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), bytesToSend, 2);
@@ -504,9 +504,9 @@ MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(const MidiMes
 // Set Distributor
 void SysExMsgHandler::sysExSetDistributor(const MidiMessage& message)
 {
-    if (distributorManager) {
+    if (m_distributorManager) {
         // Data is already in 7-bit MIDI format, use directly
-        distributorManager->setDistributor(const_cast<uint8_t*>(message.sysExCmdPayload()));
+        m_distributorManager->setDistributor(message.sysExCmdPayload());
     }
 }
 
@@ -517,7 +517,7 @@ void SysExMsgHandler::sysExSetDistributorChannels(const MidiMessage& message)
     
     // Decode from 3 MIDI 7-bit bytes
     auto channels = Utility::decodeFrom7Bit<NUM_Channels>(&message.sysExCmdPayload()[2]);
-    distributorManager->setDistributorChannels(message.sysExDistributorID(), channels.to_ulong());
+    m_distributorManager->setDistributorChannels(message.sysExDistributorID(), channels.to_ulong());
 }
 
 // Configure the designated Distributor's Instruments
@@ -527,13 +527,13 @@ void SysExMsgHandler::sysExSetDistributorInstruments(const MidiMessage& message)
     
     // Decode from 5 MIDI 7-bit bytes
     auto instruments = Utility::decodeFrom7Bit<NUM_Instruments>(&message.sysExCmdPayload()[2]);
-    distributorManager->setDistributorInstruments(message.sysExDistributorID(), instruments.to_ulong());
+    m_distributorManager->setDistributorInstruments(message.sysExDistributorID(), instruments.to_ulong());
 }
 
 // Configure the designated Distributor's Distribution Method
 void SysExMsgHandler::sysExSetDistributorMethod(const MidiMessage& message)
 {
-    distributorManager->setDistributorMethod(message.sysExDistributorID(), 
+    m_distributorManager->setDistributorMethod(message.sysExDistributorID(), 
                                              DistributionMethod(message.sysExCmdPayload()[2]));
 }
 
@@ -543,13 +543,13 @@ void SysExMsgHandler::sysExSetDistributorBoolValues(const MidiMessage& message)
     // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
     uint16_t distributorBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[2]) << 7) | 
                                      static_cast<uint16_t>(message.sysExCmdPayload()[3]);
-    distributorManager->setDistributorBoolValues(message.sysExDistributorID(), distributorBoolValue);
+    m_distributorManager->setDistributorBoolValues(message.sysExDistributorID(), distributorBoolValue);
 }
 
 // Configure the designated Distributor's Minimum and Maximum Notes
 void SysExMsgHandler::sysExSetDistributorMinMaxNotes(const MidiMessage& message)
 {
-    distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
+    m_distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
                                                    message.sysExCmdPayload()[2],
                                                    message.sysExCmdPayload()[3]);
 }
@@ -560,28 +560,28 @@ void SysExMsgHandler::sysExSetDistributorMinMaxNotes(const MidiMessage& message)
 
 void SysExMsgHandler::sysExResetAllInstruments(const MidiMessage& message)
 {
-    if (instrumentController) {
-        instrumentController->resetAll();
+    if (m_instrumentController) {
+        m_instrumentController->resetAll();
     }
 }
 
 void SysExMsgHandler::sysExResetInstrument(const MidiMessage& message)
 {
-    if (!instrumentController || message.length < SYSEX_HeaderSize + 1) return;
+    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 1) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
     if (instrumentId >= NUM_Instruments) return;
 
-    instrumentController->reset(instrumentId);
+    m_instrumentController->reset(instrumentId);
 }
 
 MidiMessage SysExMsgHandler::sysExGetInstrumentNumActiveNotes(const MidiMessage& message)
 {
     uint8_t numActiveNotes = 0;
-    if (instrumentController && message.length >= SYSEX_HeaderSize + 1) {
+    if (m_instrumentController && message.length >= SYSEX_HeaderSize + 1) {
         const uint8_t instrumentId = message.sysExCmdPayload()[0];
         if (instrumentId < NUM_Instruments) {
-            numActiveNotes = instrumentController->getNumActiveNotes(instrumentId);
+            numActiveNotes = m_instrumentController->getNumActiveNotes(instrumentId);
         }
     }
     return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &numActiveNotes, 1);
@@ -589,12 +589,12 @@ MidiMessage SysExMsgHandler::sysExGetInstrumentNumActiveNotes(const MidiMessage&
 
 void SysExMsgHandler::sysExSetInstrumentNoteOn(const MidiMessage& message)
 {
-    if (!instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 4) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
     if (instrumentId >= NUM_Instruments) return;
 
-    instrumentController->playNote(instrumentId,// Instrument ID
+    m_instrumentController->playNote(instrumentId,// Instrument ID
         message.sysExCmdPayload()[2], // Note
         message.sysExCmdPayload()[3], // Velocity
         message.sysExCmdPayload()[1]);// Channel
@@ -602,12 +602,12 @@ void SysExMsgHandler::sysExSetInstrumentNoteOn(const MidiMessage& message)
 
 void SysExMsgHandler::sysExSetInstrumentNoteOff(const MidiMessage& message)
 {
-    if (!instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 4) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
     if (instrumentId >= NUM_Instruments) return;
 
-    instrumentController->stopNote(instrumentId,// Instrument ID
+    m_instrumentController->stopNote(instrumentId,// Instrument ID
         message.sysExCmdPayload()[2], // Note
         message.sysExCmdPayload()[3], // Velocity
         message.sysExCmdPayload()[1]);// Channel

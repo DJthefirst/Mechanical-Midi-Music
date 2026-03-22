@@ -5,12 +5,6 @@
 //Getters and Setters
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// uint8_t InstrumentController::getNumActiveNotes(uint8_t instrument){
-//     return 0;
-// }
-// bool InstrumentController::isNoteActive(uint8_t instrument, uint8_t note){
-//     return false;
-// }
 void InstrumentControllerBase::setKeyPressure(uint8_t channel, uint8_t note, uint8_t velocity){
     // Default implementation does nothing - derived classes should override if needed
 }
@@ -47,12 +41,11 @@ void InstrumentControllerBase::setupLEDs(){ AddrLED::get().setup(); }
 void InstrumentControllerBase::resetLEDs(){ AddrLED::get().reset(); }
 #else
 
-void InstrumentControllerBase::setupLEDs() {};
-void InstrumentControllerBase::updateLEDs() {};
-void InstrumentControllerBase::resetLEDs() {};
+void InstrumentControllerBase::setupLEDs() {}
+void InstrumentControllerBase::updateLEDs() {}
+void InstrumentControllerBase::resetLEDs() {}
 #endif
 
-void InstrumentControllerBase::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {};
-void InstrumentControllerBase::setInstrumentLedOff(uint8_t instrument) {};
-
+void InstrumentControllerBase::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {}
+void InstrumentControllerBase::setInstrumentLedOff(uint8_t instrument) {}
 

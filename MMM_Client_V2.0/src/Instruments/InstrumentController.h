@@ -1,11 +1,7 @@
 #pragma once
 
 #include "InstrumentControllerBase.h"
-#include "Device.h"
-#include <cstdint>
 #include <memory>
-using std::int8_t;
-using std::int16_t;
 
 // Singleton template class for instrument controllers
 template<typename ConcreteInstrumentType>

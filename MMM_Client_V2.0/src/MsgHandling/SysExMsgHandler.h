@@ -26,8 +26,8 @@ class InstrumentControllerBase;
 
 class SysExMsgHandler {
 private:
-    DistributorManager* distributorManager;
-    InstrumentControllerBase* instrumentController;
+    DistributorManager* m_distributorManager;
+    InstrumentControllerBase* m_instrumentController;
 
     uint16_t m_sourceId = Device::GetDeviceID();
     uint16_t m_destinationId = 0;

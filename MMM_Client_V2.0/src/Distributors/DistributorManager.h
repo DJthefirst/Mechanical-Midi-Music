@@ -49,8 +49,8 @@ public:
     // Distributor management
     void addDistributor(); 
     void addDistributor(Distributor&& distributor); 
-    void addDistributor(uint8_t data[]); 
-    void setDistributor(uint8_t data[]); 
+    void addDistributor(const uint8_t data[]); 
+    void setDistributor(const uint8_t data[]); 
     void removeDistributor(uint8_t id);
     void removeAllDistributors();
     

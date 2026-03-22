@@ -40,7 +40,7 @@ public:
         return new Teensy41_SwShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, std::nullopt, std::nullopt);
 
     // Teensy 4.x with FlexIO hardware acceleration
-    #elif defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_DEFAULT
+    #elif defined PLATFORM_TEENSY41 && CFG_SHIFTREGISTER_TYPE == HW_HWACCEL
         return new Teensy41_FlexShift<numOutputs>(PIN_SER, PIN_CLK, PIN_LD, std::nullopt, std::nullopt);
 
     // Default: Software bit-banging (works on all platforms)

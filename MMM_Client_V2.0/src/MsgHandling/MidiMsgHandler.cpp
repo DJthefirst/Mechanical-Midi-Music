@@ -8,7 +8,7 @@
 #include "MidiMsgHandler.h"
 #include "Distributors/DistributorManager.h"
 #include "SysExMsgHandler.h"
-#include "../Instruments/InstrumentController.h"
+#include "../Instruments/InstrumentControllerBase.h"
 #include <Arduino.h>
 
 // Constructor with dependency injection

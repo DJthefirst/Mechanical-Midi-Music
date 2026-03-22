@@ -35,7 +35,6 @@ public:
 
 private:
 
-    void distributeMessage(const MidiMessage& message);
     void processCC(const MidiMessage& message);
     
     std::optional<MidiMessage> processSystemMessage(const MidiMessage& message);

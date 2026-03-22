@@ -50,7 +50,7 @@ namespace NoteTables {
     */
     // constexpr int TIMER_RESOLUTION = 40; //40
 
-    // Create Note Arrays in terms of Ticks(Interupt Intervals)
+    // Create Note Arrays in terms of Ticks(Interrupt Intervals)
     constexpr std::array<std::uint16_t,128> compute_divided_ticks(const int divisor)
     {
         std::array<std::uint16_t,128> noteDoubleTicks{};

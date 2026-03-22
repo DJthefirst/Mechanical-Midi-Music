@@ -6,9 +6,6 @@
 #ifdef CFG_MMM_NETWORK_USB
 #include "Networks/NetworkUSB/NetworkUSB.h"
 #endif
-#ifdef CFG_MMM_NETWORK_UDP
-#include "Networks/NetworkUDP.h"
-#endif
 #ifdef CFG_MMM_NETWORK_DIN
 #include "Networks/NetworkDIN.h"
 #endif
@@ -90,9 +87,6 @@ inline std::unique_ptr<NetworkManager> CreateNetwork(){
 #endif
 #ifdef CFG_MMM_NETWORK_USB
     net->addNetwork<NetworkUSB>();
-#endif
-#ifdef CFG_MMM_NETWORK_UDP
-    net->addNetwork<NetworkUDP>();
 #endif
 #ifdef CFG_MMM_NETWORK_DIN
     net->addNetwork<NetworkDIN>();

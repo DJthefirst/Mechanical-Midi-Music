@@ -13,7 +13,7 @@
 
 #include "Distributor.h"
 #include "DistributionStrategies.h"
-#include "../Instruments/InstrumentController.h"
+#include "../Instruments/InstrumentControllerBase.h"
 #include "../Utility/BitManipulation.h"
 
 Distributor::Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController)
@@ -35,7 +35,7 @@ Distributor::~Distributor(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Determine Type of MIDI Msg and Call Associated Event
-void Distributor::processMessage(MidiMessage message){
+void Distributor::processMessage(const MidiMessage& message){
     uint8_t currentChannel = message.channel();
 
     // Check if this distributor handles this channel
@@ -57,16 +57,6 @@ void Distributor::processMessage(MidiMessage message){
         break;
     case(Midi::ControlChange):
         // controlChangeEvent(message.buffer[1],message.buffer[2]); //Implemented in MessageHandler
-        break;
-    case(Midi::ProgramChange):
-
-        m_instrumentController->setProgramChange(message.channel(), message.buffer[1]);
-        break;
-    case(Midi::ChannelPressure):
-        m_instrumentController->setChannelPressure(message.channel(), message.buffer[1]);
-        break;
-    case(Midi::PitchBend):
-        m_instrumentController->setPitchBend(message.channel(), (static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]));
         break;
     case(Midi::SysCommon):
         break;
@@ -196,7 +186,7 @@ std::bitset<NUM_Channels> Distributor::getChannels() const {
     return m_channels;
 }
 
-//Returns Distributor Channels
+//Returns Distributor Instruments
 std::bitset<NUM_Instruments> Distributor::getInstruments() const {
     return m_instruments;
 }
@@ -206,13 +196,16 @@ DistributionMethod Distributor::getDistributionMethod() const {
     return m_distributionMethod;
 }
 
-//Distribute message to instruments
-void Distributor::distributeMessage(const MidiMessage& message) {
-    processMessage(message);
+uint8_t Distributor::getMinNote() const {
+    return m_minNote;
+}
+
+uint8_t Distributor::getMaxNote() const {
+    return m_maxNote;
 }
 
 //Configures Distributor from construct (expects 7-bit MIDI format)
-void Distributor::setDistributor(uint8_t data[]){
+void Distributor::setDistributor(const uint8_t data[]){
     // Stop any active notes before changing configuration
     stopActiveNotes();
     

@@ -22,7 +22,7 @@ void AddrLED::update(){
 
 //Generate LED color
 CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t velocity){
-    uint8_t hue;
+    uint8_t hue = 0;
     static uint8_t offset = 0;
     offset++;
 

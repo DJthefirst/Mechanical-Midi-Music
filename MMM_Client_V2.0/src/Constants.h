@@ -15,10 +15,10 @@ using std::int16_t;
 
 // Bit masks
 constexpr uint8_t MSB_BITMASK = 0x80;
-constexpr uint8_t NONE = -1;
+constexpr uint8_t NONE = 0xFF; // Special value to indicate "no channel" or "no distributor"
 
-static const uint8_t NUM_Channels = 16; //Multiple of 8 for bitset alignment
-static const uint8_t NUM_Instruments = 32; //Multiple of 8 for bitset alignment
+constexpr uint8_t NUM_Channels = 16; //Multiple of 8 for bitset alignment
+constexpr uint8_t NUM_Instruments = 32; //Multiple of 8 for bitset alignment
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MIDI Constants
@@ -57,8 +57,8 @@ namespace MidiCC {
     constexpr uint8_t Volume = 7;
     constexpr uint8_t Pan = 10;
     constexpr uint8_t Expression = 11;
-    constexpr uint8_t EffectCrtl_1 = 12;
-    constexpr uint8_t EffectCrtl_2 = 13;
+    constexpr uint8_t EffectCtrl_1 = 12;
+    constexpr uint8_t EffectCtrl_2 = 13;
     constexpr uint8_t DamperPedal = 64;
     constexpr uint8_t Portamento = 65;
     constexpr uint8_t Sostenuto = 66;

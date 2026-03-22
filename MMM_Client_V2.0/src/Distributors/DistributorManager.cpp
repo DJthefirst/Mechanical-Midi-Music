@@ -6,7 +6,7 @@
  */
 
 #include "DistributorManager.h"
-#include "../Instruments/InstrumentController.h"
+#include "../Instruments/InstrumentControllerBase.h"
 #include <Arduino.h>
 #include <algorithm>
 
@@ -49,7 +49,7 @@ void DistributorManager::addDistributor(Distributor&& distributor)
 }
 
 // Create a Distributor from a Construct and add it to the Distribution Pool
-void DistributorManager::addDistributor(uint8_t data[])
+void DistributorManager::addDistributor(const uint8_t data[])
 {
     m_distributors.emplace_back(m_ptrInstrumentController);
     m_distributors.back().setDistributor(data);
@@ -59,7 +59,7 @@ void DistributorManager::addDistributor(uint8_t data[])
 
 // Updates the designated Distributor in the Distribution Pool
 // from a construct or adds a new Distributor
-void DistributorManager::setDistributor(uint8_t data[])
+void DistributorManager::setDistributor(const uint8_t data[])
 {
     // Decode distributor ID from the first two bytes
     uint16_t distributorID = (static_cast<uint16_t>(data[0]) << 7) | static_cast<uint16_t>(data[1]);
@@ -275,8 +275,7 @@ uint16_t DistributorManager::getDistributorBoolValues(uint8_t distributorId)
 uint8_t DistributorManager::getDistributorMinNote(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        auto distributorSerial = m_distributors[distributorId].toSerial();
-        return distributorSerial[12]; // Min note is stored in byte 12
+        return m_distributors[distributorId].getMinNote();
     }
     return 0;
 }
@@ -284,8 +283,7 @@ uint8_t DistributorManager::getDistributorMinNote(uint8_t distributorId)
 uint8_t DistributorManager::getDistributorMaxNote(uint8_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        auto distributorSerial = m_distributors[distributorId].toSerial();
-        return distributorSerial[13]; // Max note is stored in byte 13
+        return m_distributors[distributorId].getMaxNote();
     }
     return 127;
 }

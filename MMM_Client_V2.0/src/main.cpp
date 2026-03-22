@@ -1,6 +1,6 @@
 /*
  *-------------------------------------Mechanical-Midi-Music------------------------------------------
- *  Version: V3.0
+ *  Version: V2.0
  *  Author: DJthefirst
  *  Description: This program implements advanced MIDI control over a microcontroller-based instrument
  *----------------------------------------------------------------------------------------------------
@@ -8,8 +8,6 @@
 
 // See Device.h and the Configs folder for device setup.
 // Configuration is selected in platformio.ini build_flags section
-
-// #define CFG_INSTRUMENT_TYPE_VALUE "Instruments/DJthefirst/Dulcimer.h"
 
 #include <Arduino.h>
 #include <memory>
@@ -42,7 +40,6 @@ std::unique_ptr<MessageRouter> messageRouter;
 
 
 void setup() {
-  // Device::validateConfiguration();
 
   instrumentController = InstrumentController<INSTRUMENT_TYPE>::getInstance();
   Device::InstrumentType = instrumentController->getInstrumentType();
@@ -78,18 +75,18 @@ void setup() {
 //=== Hardcode Distributor Configuration For Startup ===
 
   // //Distributor 1
-  // Distributor distributor1(&instrumentController);
+  // Distributor distributor1(instrumentController);
   // distributor1.setChannels(0x0001); // 1
   // distributor1.setInstruments(0x000000FF); // 1-8
   // distributor1.setDistributionMethod(DistributionMethod::RoundRobinBalance);
-  // messageHandler.addDistributor(distributor1);
+  // distributorManager->addDistributor(std::move(distributor1));
 
   // //Distributor 2
-  // Distributor distributor2(&instrumentController);
+  // Distributor distributor2(instrumentController);
   // distributor2.setChannels(0x0002); // 2
   // distributor2.setInstruments(0x000000FF); // 1-8
   // distributor2.setDistributionMethod(DistributionMethod::StraightThrough);
-  // messageHandler.addDistributor(distributor2);
+  // distributorManager->addDistributor(std::move(distributor2));
 
   //===========================================
 

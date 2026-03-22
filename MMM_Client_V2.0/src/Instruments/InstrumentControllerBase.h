@@ -8,7 +8,7 @@
 // Forward declarations
 class DistributionStrategy;
 
-class InstrumentControllerBase{
+class InstrumentControllerBase {
 public:
     // Friend class for access to private members
     friend class DistributionStrategy;
@@ -20,7 +20,7 @@ protected:
     std::bitset<NUM_Instruments> m_activeInstruments = 0;
     std::array<uint32_t, NUM_Instruments> m_noteStartTime = {0}; // When each note started (for timeout and longest-playing tracking)
 
-    //Local CC Effect Atributes
+    //Local CC Effect Attributes
     uint16_t m_pitchBend[Midi::NUM_CH]; 
     uint8_t m_program[Midi::NUM_CH];
     uint8_t m_channelPressure[Midi::NUM_CH];

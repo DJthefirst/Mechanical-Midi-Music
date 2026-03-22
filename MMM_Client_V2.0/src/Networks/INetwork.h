@@ -1,5 +1,5 @@
 /* 
- * Network.h 
+ * INetwork.h 
  *
  * An Interface Class For Network Connections
  * 
