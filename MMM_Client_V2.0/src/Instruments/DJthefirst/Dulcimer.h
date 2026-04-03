@@ -20,16 +20,16 @@ constexpr std::array<uint16_t, 128> NOTE_TO_SHIFT_REG_OUTPUT = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C-0 - B-0
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C1 - B1
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C2 - B2
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C3 - B3
-    25, 0, 26,  0, 27, 28,  0, 33,  0, 34, 35,  0,  //C4 - B4
-    36, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C5 - B5
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C6 - B6
+    0,  0,  1,  0,  2,  0,  3,  4, 17, 18,  5,  6,  //C3 - B3
+    7, 25,  8, 19,  9, 10, 32, 11, 20, 12, 13, 31,  //C4 - B4
+   30, 14, 29, 15, 40, 39, 26, 27, 38, 28, 37, 33,  //C5 - B5
+   34,  0, 35,  0, 36,  0,  0,  0,  0,  0,  0,  0,  //C6 - B6
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C7 - B7
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C8 - B8
     0,  0,  0,  0,  0,  0,  0,  0   //C9 - G9
 };
-constexpr uint8_t NUM_REG1_OUTPUTS = 24;
-constexpr uint8_t NUM_REG2_OUTPUTS = 16;
+constexpr uint8_t NUM_REG1_OUTPUTS = 16;
+constexpr uint8_t NUM_REG2_OUTPUTS = 24;
 constexpr uint8_t NUM_OUTPUTS = NUM_REG1_OUTPUTS + NUM_REG2_OUTPUTS;
 
 /* Dual ShiftRegister controlled solenoid instrument */
