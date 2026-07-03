@@ -61,7 +61,7 @@ void Dulcimer::checkSolenoidTimeouts() {
                 // Push Update
                 m_shiftReg1->update();
                 m_shiftReg2->update();
-                setInstrumentLedOff(i);
+                setInstrumentLedOff(OUTPUT_REG_TO_NOTE[i]);
             }
         }
     }
@@ -116,7 +116,7 @@ void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     // Push Update
     m_shiftReg1->update();
     m_shiftReg2->update();
-    setInstrumentLedOff(notePos);
+    setInstrumentLedOff(note);
 }
 
 void Dulcimer::reset(uint8_t instrument) {
@@ -160,16 +160,16 @@ bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note) {
 
 void Dulcimer::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {
     CHSV color = AddrLED::get().getColor(instrument, channel, note, velocity);
-    AddrLED::get().turnLedOn(instrument, color);
+    AddrLED::get().turnLedOn(NOTE_TO_LED_MAP[note], color);
 }
 
-void Dulcimer::setInstrumentLedOff(uint8_t instrument) {
-    AddrLED::get().turnLedOff(instrument);
+void Dulcimer::setInstrumentLedOff(uint8_t note) {
+    AddrLED::get().turnLedOff(NOTE_TO_LED_MAP[note]);
 }
 
 #else
 void Dulcimer::setInstrumentLedOn(uint8_t instrument, uint8_t channel, uint8_t note, uint8_t velocity) {}
-void Dulcimer::setInstrumentLedOff(uint8_t instrument) {}
+void Dulcimer::setInstrumentLedOff(uint8_t note) {}
 #endif
 
 #endif // (PLATFORM_TEENSY41 || PLATFORM_ESP32) && CFG_INSTRUMENT_DULCIMER && CFG_COMPONENT_SHIFTREGISTER
