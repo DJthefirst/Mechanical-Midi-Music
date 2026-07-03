@@ -8,12 +8,13 @@
 // Static member definitions
 IShiftRegister<NUM_REG1_OUTPUTS>* Dulcimer::m_shiftReg1 = nullptr;
 IShiftRegister<NUM_REG2_OUTPUTS>* Dulcimer::m_shiftReg2 = nullptr;
+std::array<uint32_t, NUM_OUTPUTS> Dulcimer::m_outputStartTime = {};
 uint8_t Dulcimer::m_numActiveNotes = 0;
 
 Dulcimer::Dulcimer() 
 {
     // Initialize tracking arrays
-    m_noteStartTime.fill(0);
+    m_outputStartTime.fill(0);
     m_numActiveNotes = 0;
     
     // Create shift register instances using factory
@@ -43,9 +44,9 @@ void Dulcimer::checkSolenoidTimeouts() {
     if (m_numActiveNotes == 0) return; // No active notes, skip checking
     for (uint8_t i = 0; i < NUM_OUTPUTS; i++) {
         // Check if this note is active
-        if (m_noteStartTime[i] != 0) {
+        if (m_outputStartTime[i] != 0) {
             // Check if the solenoid on-time has expired
-            if (currentTime - m_noteStartTime[i] >= CFG_NOTE_TIMEOUT_MS) {
+            if (currentTime - m_outputStartTime[i] >= CFG_NOTE_TIMEOUT_MS) {
 
                 // Turn off the appropriate solenoid
                 if (i < NUM_REG1_OUTPUTS) {
@@ -56,7 +57,7 @@ void Dulcimer::checkSolenoidTimeouts() {
                 m_numActiveNotes--;
                 
                 // Clear tracking
-                m_noteStartTime[i] = 0;
+                m_outputStartTime[i] = 0;
                 
                 // Push Update
                 m_shiftReg1->update();
@@ -77,7 +78,7 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     notePos--; // Decrement notePos by 1 to convert from 1-based to 0-based indexing
 
     // Record when this note started
-    m_noteStartTime[notePos] = millis();
+    m_outputStartTime[notePos] = millis();
     m_numActiveNotes++;
     
     // Turn on the appropriate solenoid
@@ -110,8 +111,10 @@ void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     }
     
     // Clear tracking
-    m_noteStartTime[notePos] = 0;
-    m_numActiveNotes--;
+    m_outputStartTime[notePos] = 0;
+    if (m_numActiveNotes > 0) {
+        m_numActiveNotes--;
+    }
 
     // Push Update
     m_shiftReg1->update();
@@ -132,7 +135,7 @@ void Dulcimer::resetAll() {
     m_shiftReg2->update();
     
     // Clear all tracking
-    m_noteStartTime.fill(0);
+    m_outputStartTime.fill(0);
     m_numActiveNotes = 0;
     
     // Reset LEDs
@@ -150,7 +153,7 @@ uint8_t Dulcimer::getNumActiveNotes(uint8_t instrument) {
 bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note) {
     uint8_t notePos = NOTE_TO_SHIFT_REG_OUTPUT[note];
     if (notePos == 0) return false; // Note not mapped to an output
-    return m_noteStartTime[notePos-1] != 0;
+    return m_outputStartTime[notePos-1] != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
