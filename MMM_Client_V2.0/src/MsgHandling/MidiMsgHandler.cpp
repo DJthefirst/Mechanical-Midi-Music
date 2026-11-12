@@ -28,30 +28,38 @@ MidiMsgHandler::MidiMsgHandler(DistributorManager& distributorManager,
 // Process a MIDI message and return optional response
 std::optional<MidiMessage> MidiMsgHandler::processMessage(const MidiMessage& message)
 {
+    if (!message.isValid()) return std::nullopt;
+
     // Handle messages based on type - optimize for most common cases first
     const uint8_t msgType = message.type();
     
     switch(msgType){
         case(Midi::ControlChange):
+            if (message.length < 3) break;
             processCC(message);
             break;
         case (Midi::SysCommon):
             return processSystemMessage(message);
         case(Midi::NoteOff):
         case(Midi::NoteOn):
+            if (message.length < 3) break;
             // Route message to appropriate distributors based on channel
             if (m_distributorManager) m_distributorManager->distributeMessage(message);
             break;
         case(Midi::KeyPressure):
+            if (message.length < 3) break;
             m_instrumentController->setKeyPressure(message.channel(), message.buffer[1], message.buffer[2]);
             break;
         case(Midi::ProgramChange):
+            if (message.length < 2) break;
             m_instrumentController->setProgramChange(message.channel(), message.buffer[1]);
             break;
         case(Midi::ChannelPressure):
+            if (message.length < 2) break;
             m_instrumentController->setChannelPressure(message.channel(), message.buffer[1]);
             break;
         case(Midi::PitchBend):
+            if (message.length < 3) break;
             m_instrumentController->setPitchBend(message.channel(), (static_cast<uint16_t>(message.buffer[2]) << 7) | static_cast<uint16_t>(message.buffer[1]));
             break;
         default:

@@ -29,7 +29,7 @@ class InstrumentControllerBase;
  */
 class DistributorManager {
 private:
-    std::vector<Distributor> m_distributors;
+    std::vector<std::unique_ptr<Distributor>> m_distributors;
     std::shared_ptr<InstrumentControllerBase> m_ptrInstrumentController;
     std::function<void()> m_deviceChangedCallback;
 
@@ -48,15 +48,14 @@ public:
     
     // Distributor management
     void addDistributor(); 
-    void addDistributor(Distributor&& distributor); 
-    void addDistributor(const uint8_t data[]); 
-    void setDistributor(const uint8_t data[]); 
-    void removeDistributor(uint8_t id);
+    bool addDistributor(const uint8_t data[], size_t length = DISTRIBUTOR_NUM_CFG_BYTES);
+    bool setDistributor(const uint8_t data[], size_t length = DISTRIBUTOR_NUM_CFG_BYTES);
+    void removeDistributor(uint16_t id);
     void removeAllDistributors();
     
     // Distributor access
-    Distributor& getDistributor(uint8_t id);
-    std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> getDistributorSerial(uint8_t id);
+    Distributor& getDistributor(uint16_t id);
+    std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> getDistributorSerial(uint16_t id);
     size_t getDistributorCount() const { return m_distributors.size(); }
 
     /**
@@ -70,20 +69,20 @@ public:
 
     
     // Distributor configuration helpers
-    void setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels);
-    void setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments);
-    void setDistributorMethod(uint8_t distributorId, DistributionMethod method);
-    void setDistributorMinMaxNotes(uint8_t distributorId, uint8_t minNote, uint8_t maxNote);
-    void toggleDistributorMute(uint8_t distributorId);
-    void setDistributorBoolValues(uint8_t distributorId, uint16_t boolValues);
+    void setDistributorChannels(uint16_t distributorId, std::bitset<NUM_Channels> channels);
+    void setDistributorInstruments(uint16_t distributorId, std::bitset<NUM_Instruments> instruments);
+    void setDistributorMethod(uint16_t distributorId, DistributionMethod method);
+    void setDistributorMinMaxNotes(uint16_t distributorId, uint8_t minNote, uint8_t maxNote);
+    void toggleDistributorMute(uint16_t distributorId);
+    void setDistributorBoolValues(uint16_t distributorId, uint16_t boolValues);
     
     // Distributor query helpers
-    std::bitset<NUM_Channels> getDistributorChannels(uint8_t distributorId);
-    std::bitset<NUM_Instruments> getDistributorInstruments(uint8_t distributorId);
-    DistributionMethod getDistributorMethod(uint8_t distributorId);
-    uint16_t getDistributorBoolValues(uint8_t distributorId);
-    uint8_t getDistributorMinNote(uint8_t distributorId);
-    uint8_t getDistributorMaxNote(uint8_t distributorId);
+    std::bitset<NUM_Channels> getDistributorChannels(uint16_t distributorId);
+    std::bitset<NUM_Instruments> getDistributorInstruments(uint16_t distributorId);
+    DistributionMethod getDistributorMethod(uint16_t distributorId);
+    uint16_t getDistributorBoolValues(uint16_t distributorId);
+    uint8_t getDistributorMinNote(uint16_t distributorId);
+    uint8_t getDistributorMaxNote(uint16_t distributorId);
 
 private:
     // Helper to broadcast distributor changes
@@ -96,12 +95,12 @@ private:
     // Local Storage helpers
     #ifdef CFG_EXTRA_LOCAL_STORAGE
     void localStorageAddDistributor();
-    void localStorageRemoveDistributor(uint8_t id);
+    void localStorageRemoveDistributor(uint16_t id);
     void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data);
     void localStorageClearDistributors();
     #else
     void localStorageAddDistributor() {}
-    void localStorageRemoveDistributor(uint8_t id) {}
+    void localStorageRemoveDistributor(uint16_t id) {}
     void localStorageUpdateDistributor(uint16_t distributorID, const uint8_t* data) {}
     void localStorageClearDistributors() {}
     #endif

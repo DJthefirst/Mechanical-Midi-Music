@@ -52,7 +52,8 @@ ESP32_MultiPhase::ESP32_MultiPhase() : InstrumentControllerBase()
 
 void ESP32_MultiPhase::reset(uint8_t instrument)
 {
-    //Not Yet Implemented
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    stopNote(instrument, 0, 0, 0);
 }
 
 void ESP32_MultiPhase::resetAll()
@@ -62,6 +63,7 @@ void ESP32_MultiPhase::resetAll()
 
 void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
     InterruptLock lock;
 
     // Only increment counter if this instrument wasn't already playing a note
@@ -93,6 +95,7 @@ void ESP32_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t veloci
 
 void ESP32_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     InterruptLock lock;
 
     // Only decrement if there was actually an active note
@@ -207,11 +210,13 @@ void ESP32_MultiPhase::updatePhase(uint8_t instrument)
 
 uint8_t ESP32_MultiPhase::getNumActiveNotes(uint8_t instrument)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return 0;
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
 bool ESP32_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
     //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }

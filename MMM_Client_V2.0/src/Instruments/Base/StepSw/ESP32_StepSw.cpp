@@ -12,6 +12,10 @@ constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t dirPins[] = {CFG_PINS_INSTRUMENT_DIR};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 constexpr uint8_t numDirPins = sizeof(dirPins) / sizeof(dirPins[0]);
+static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "CFG_PINS_INSTRUMENT_PWM must provide one step pin per configured instrument");
+static_assert(numDirPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "CFG_PINS_INSTRUMENT_DIR must provide one direction pin per configured instrument");
 
 // Define static member variables
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_StepSw::m_headPosition = {};

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ILocalStorage.h"
+#include "Distributors/Distributor.h"
 
 #if defined(PLATFORM_ESP32)
 
@@ -22,6 +23,8 @@
  */
 class ESP32LocalStorage : public ILocalStorage {
 private:
+    static constexpr uint8_t STORAGE_SCHEMA_VERSION = 2;
+    static constexpr uint8_t DISTRIBUTOR_RECORD_BYTES = DISTRIBUTOR_NUM_CFG_BYTES + 1;
     bool m_initialized;
     
     /**
@@ -99,7 +102,7 @@ public:
     uint8_t getNumOfDistributors() override;
     void setNumOfDistributors(uint8_t numOfDistributors) override;
     
-    void getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override;
+    bool getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override;
     void setDistributorConstruct(uint16_t distributorNum, const uint8_t* construct) override;
 };
 

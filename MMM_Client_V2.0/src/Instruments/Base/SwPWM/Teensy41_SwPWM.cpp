@@ -18,6 +18,8 @@ struct InterruptLock {
 // Define constants for PWM configuration
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "CFG_PINS_INSTRUMENT_PWM must provide one pin per configured instrument");
 
 // Define static member variables
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activeNotes = {};
@@ -54,7 +56,8 @@ Teensy41_SwPWM::Teensy41_SwPWM() : InstrumentControllerBase()
 
 void Teensy41_SwPWM::reset(uint8_t instrument)
 {
-    //Not Yet Implemented
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    stopNote(instrument, 0, 0, 0);
 }
 
 void Teensy41_SwPWM::resetAll()
@@ -64,6 +67,7 @@ void Teensy41_SwPWM::resetAll()
 
 void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
     InterruptLock lock;
 
     // Only increment counter if this instrument wasn't already playing a note
@@ -92,6 +96,7 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
 
 void Teensy41_SwPWM::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     InterruptLock lock;
 
     // Only decrement if there was actually an active note
@@ -194,11 +199,13 @@ void Teensy41_SwPWM::togglePin(uint8_t instrument)
 
 uint8_t Teensy41_SwPWM::getNumActiveNotes(uint8_t instrument)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return 0;
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
 bool Teensy41_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
     //Mask lower 7bits and return true if the instrument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }

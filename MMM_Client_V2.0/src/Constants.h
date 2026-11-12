@@ -144,6 +144,14 @@ namespace SysEx {
     constexpr uint8_t ExtraStorage = 0x60;
     constexpr uint8_t ExtraLED = 0x61;
     constexpr uint8_t ExtraSdPlayback = 0x62;
+
+    constexpr uint8_t Error = 0x7F;
+}
+
+namespace SysExError {
+    constexpr uint8_t UnsupportedCommand = 0x01;
+    constexpr uint8_t InvalidPayload = 0x02;
+    constexpr uint8_t InvalidDistributor = 0x03;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

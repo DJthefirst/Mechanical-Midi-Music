@@ -111,6 +111,13 @@ using std::int8_t;
 namespace HardwareConfig {
 
     constexpr uint8_t MAX_NUM_INSTRUMENTS = CFG_NUM_INSTRUMENTS * CFG_NUM_SUBINSTRUMENTS;
+    static_assert(CFG_NUM_INSTRUMENTS > 0, "CFG_NUM_INSTRUMENTS must be greater than zero");
+    static_assert(CFG_NUM_SUBINSTRUMENTS > 0, "CFG_NUM_SUBINSTRUMENTS must be greater than zero");
+    static_assert(CFG_NUM_INSTRUMENTS * CFG_NUM_SUBINSTRUMENTS <= NUM_Instruments,
+                  "Configured instrument count exceeds the 32-instrument protocol limit");
+    static_assert(CFG_TIMER_RESOLUTION_US > 0, "CFG_TIMER_RESOLUTION_US must be greater than zero");
+    static_assert(CFG_MIN_NOTE >= 0 && CFG_MAX_NOTE <= 127 && CFG_MIN_NOTE <= CFG_MAX_NOTE,
+                  "Configured MIDI note range must be ordered and within 0-127");
 
     // Platform capabilities
     #ifdef PLATFORM_ESP32

@@ -11,6 +11,7 @@
 #include "Device.h"
 #include "Distributors/Distributor.h"
 #include "Distributors/DistributorManager.h"
+#include "Utility/Crc8.h"
 #include <string>
 #include <algorithm>
 
@@ -41,7 +42,7 @@ bool Teensy41LocalStorage::isEEPROMInitialized() {
     uint8_t magic_msb = EEPROM.read(ADDR_MAGIC);
     uint8_t magic_lsb = EEPROM.read(ADDR_MAGIC + 1);
     uint16_t magic = (static_cast<uint16_t>(magic_msb) << 8) | static_cast<uint16_t>(magic_lsb);
-    return (magic == EEPROM_MAGIC);
+    return magic == EEPROM_MAGIC && EEPROM.read(ADDR_SCHEMA_VERSION) == STORAGE_SCHEMA_VERSION;
 }
 
 void Teensy41LocalStorage::initializeEEPROM() {
@@ -50,6 +51,7 @@ void Teensy41LocalStorage::initializeEEPROM() {
     uint8_t magic_lsb = static_cast<uint8_t>(EEPROM_MAGIC & 0xFF);
     EEPROM.update(ADDR_MAGIC, magic_msb);
     EEPROM.update(ADDR_MAGIC + 1, magic_lsb);
+    EEPROM.update(ADDR_SCHEMA_VERSION, STORAGE_SCHEMA_VERSION);
     
     // Initialize with default values
     // Device name - write spaces
@@ -71,7 +73,7 @@ void Teensy41LocalStorage::initializeEEPROM() {
 }
 
 uint16_t Teensy41LocalStorage::getDistributorAddress(uint16_t distributorNum) {
-    return ADDR_DISTRIBUTORS_START + (distributorNum * DISTRIBUTOR_NUM_CFG_BYTES);
+    return ADDR_DISTRIBUTORS_START + (distributorNum * DISTRIBUTOR_RECORD_BYTES);
 }
 
 void Teensy41LocalStorage::resetDeviceConfig() {
@@ -177,7 +179,7 @@ uint8_t Teensy41LocalStorage::getNumOfDistributors() {
         return 0;
     }
     
-    return EEPROM.read(ADDR_NUM_DISTRIBUTORS);
+    return std::min(EEPROM.read(ADDR_NUM_DISTRIBUTORS), MAX_DISTRIBUTORS);
 }
 
 void Teensy41LocalStorage::setNumOfDistributors(uint8_t numOfDistributors) {
@@ -185,22 +187,23 @@ void Teensy41LocalStorage::setNumOfDistributors(uint8_t numOfDistributors) {
         return;
     }
     
-    EEPROM.update(ADDR_NUM_DISTRIBUTORS, numOfDistributors);
+    EEPROM.update(ADDR_NUM_DISTRIBUTORS, std::min(numOfDistributors, MAX_DISTRIBUTORS));
 }
 
-void Teensy41LocalStorage::getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) {
-    if (!m_initialized) {
-        return;
+bool Teensy41LocalStorage::getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) {
+    if (!m_initialized || construct == nullptr || distributorNum >= MAX_DISTRIBUTORS) {
+        return false;
     }
     
     uint16_t addr = getDistributorAddress(distributorNum);
     for (uint8_t i = 0; i < DISTRIBUTOR_NUM_CFG_BYTES; i++) {
         construct[i] = EEPROM.read(addr + i);
     }
+    return EEPROM.read(addr + DISTRIBUTOR_NUM_CFG_BYTES) == Utility::crc8(construct, DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
 void Teensy41LocalStorage::setDistributorConstruct(uint16_t distributorNum, const uint8_t* construct) {
-    if (!m_initialized) {
+    if (!m_initialized || construct == nullptr || distributorNum >= MAX_DISTRIBUTORS) {
         return;
     }
     
@@ -208,6 +211,7 @@ void Teensy41LocalStorage::setDistributorConstruct(uint16_t distributorNum, cons
     for (uint8_t i = 0; i < DISTRIBUTOR_NUM_CFG_BYTES; i++) {
         EEPROM.update(addr + i, construct[i]);
     }
+    EEPROM.update(addr + DISTRIBUTOR_NUM_CFG_BYTES, Utility::crc8(construct, DISTRIBUTOR_NUM_CFG_BYTES));
 }
 
 bool Teensy41LocalStorage::initializeDeviceConfiguration(DistributorManager& distributorManager) {
@@ -231,8 +235,9 @@ bool Teensy41LocalStorage::initializeDeviceConfiguration(DistributorManager& dis
     uint8_t numDistributors = getNumOfDistributors();
     for (uint8_t i = 0; i < numDistributors; i++) {
         uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-        getDistributorConstruct(i, distributorData);
-        distributorManager.addDistributor(distributorData);
+        if (getDistributorConstruct(i, distributorData)) {
+            distributorManager.addDistributor(distributorData, sizeof(distributorData));
+        }
     }
     
     return true; // Successfully loaded configuration

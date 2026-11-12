@@ -19,9 +19,11 @@ protected:
     static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_headPosition;
     static std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> m_pinStateDir;
     static IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* m_shiftReg;  // First shift register (C3-B4)
+    static volatile uint32_t m_pendingDirectionUpdates;
 
 
 public: 
     Teensy41_StepSwShift();
     Instrument getInstrumentType() const override { return Instrument::StepSW_PWM; }
+    void periodic() override;
 };

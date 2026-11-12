@@ -13,7 +13,7 @@
 #endif
 
 // Single callback storage; the trampoline ISR calls this if non-null.
-static void (*s_callback)() = nullptr;
+static void (* volatile s_callback)() = nullptr;
 
 // Timer object (ESP32) kept around so repeated initialize() calls reuse it.
 #ifdef ARDUINO_ARCH_ESP32
@@ -62,5 +62,7 @@ void InterruptTimer::initialize(uint32_t microseconds, void (*isr)()) {
 }
 
 void InterruptTimer::setCallback(void (*isr)()) {
+    noInterrupts();
     s_callback = isr;
+    interrupts();
 }

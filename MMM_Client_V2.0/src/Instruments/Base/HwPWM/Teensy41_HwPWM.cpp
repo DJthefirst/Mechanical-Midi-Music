@@ -10,6 +10,8 @@
 // Define constants for PWM configuration
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "CFG_PINS_INSTRUMENT_PWM must provide one pin per configured instrument");
 
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_HwPWM::m_activeNotes = {};
@@ -75,7 +77,8 @@ void Teensy41_HwPWM::stopChannel(uint8_t instrument)
 
 void Teensy41_HwPWM::reset(uint8_t instrument)
 {
-    //Not Yet Implemented
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    stopNote(instrument, 0, 0, 0);
 }
 
 void Teensy41_HwPWM::resetAll()
@@ -86,7 +89,7 @@ void Teensy41_HwPWM::resetAll()
 void Teensy41_HwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     // Early bounds checking for performance
-    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note >= 128) return;
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note >= 128 || channel >= Midi::NUM_CH) return;
 
     const double baseFreq = NoteTables::noteFrequency[note];
     
@@ -149,11 +152,13 @@ void Teensy41_HwPWM::stopAll(){
 
 uint8_t Teensy41_HwPWM::getNumActiveNotes(uint8_t instrument)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return 0;
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
 bool Teensy41_HwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
     //Mask lower 7bits and return true if the instrument is playing the respective note.
     return ((m_activeNotes[instrument] & 0x7F) == note && m_activeNotes[instrument] != 0);
 }

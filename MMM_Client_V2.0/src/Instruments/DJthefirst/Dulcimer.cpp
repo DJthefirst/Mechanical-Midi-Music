@@ -70,6 +70,8 @@ void Dulcimer::checkSolenoidTimeouts() {
 
 void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
+
     // Calculate note position
     uint8_t notePos = NOTE_TO_SHIFT_REG_OUTPUT[note];
 
@@ -77,9 +79,11 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     if (NOTE_TO_SHIFT_REG_OUTPUT[note] == 0) return;
     notePos--; // Decrement notePos by 1 to convert from 1-based to 0-based indexing
 
-    // Record when this note started
+    // Record when this note started without double-counting retriggers.
+    if (m_outputStartTime[notePos] == 0) {
+        m_numActiveNotes++;
+    }
     m_outputStartTime[notePos] = millis();
-    m_numActiveNotes++;
     
     // Turn on the appropriate solenoid
     if (notePos < NUM_REG1_OUTPUTS) {
@@ -96,6 +100,8 @@ void Dulcimer::playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
 
 void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return;
+
     // Calculate note position
     uint8_t notePos = NOTE_TO_SHIFT_REG_OUTPUT[note];
 
@@ -111,8 +117,9 @@ void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
     }
     
     // Clear tracking
+    const bool wasActive = m_outputStartTime[notePos] != 0;
     m_outputStartTime[notePos] = 0;
-    if (m_numActiveNotes > 0) {
+    if (wasActive && m_numActiveNotes > 0) {
         m_numActiveNotes--;
     }
 
@@ -123,6 +130,7 @@ void Dulcimer::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint
 }
 
 void Dulcimer::reset(uint8_t instrument) {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     resetAll(); // No individual instrument reset, just reset everything
 }
 
@@ -147,10 +155,12 @@ void Dulcimer::stopAll() {
 }
 
 uint8_t Dulcimer::getNumActiveNotes(uint8_t instrument) {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return 0;
     return m_numActiveNotes;
 }
 
 bool Dulcimer::isNoteActive(uint8_t instrument, uint8_t note) {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
     uint8_t notePos = NOTE_TO_SHIFT_REG_OUTPUT[note];
     if (notePos == 0) return false; // Note not mapped to an output
     return m_outputStartTime[notePos-1] != 0;

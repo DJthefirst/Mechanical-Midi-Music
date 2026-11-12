@@ -11,6 +11,7 @@
 #include "Device.h"
 #include "Distributors/Distributor.h"
 #include "Distributors/DistributorManager.h"
+#include "Utility/Crc8.h"
 #include <iostream>
 #include <string>
 
@@ -43,6 +44,15 @@ bool ESP32LocalStorage::initialize() {
     // If initialization still fails, we can't use NVS but shouldn't crash
     // Device will run with default configuration
     m_initialized = (g_err == ESP_OK);
+    if (m_initialized) {
+        const uint8_t storedVersion = readNvsU8("Schema_version", 0);
+        if (storedVersion == 0) {
+            writeNvsU8("Schema_version", STORAGE_SCHEMA_VERSION);
+        } else if (storedVersion != STORAGE_SCHEMA_VERSION) {
+            resetDeviceConfig();
+            writeNvsU8("Schema_version", STORAGE_SCHEMA_VERSION);
+        }
+    }
     return m_initialized;
 }
 
@@ -121,11 +131,6 @@ uint8_t ESP32LocalStorage::readNvsU8(const char *key, uint8_t defaultValue) {
         case ESP_OK:
             return value;
         case ESP_ERR_NVS_NOT_FOUND:
-            // Key not found, write default and return it
-            if (openNvs()) {
-                writeNvsU8(key, defaultValue);
-                nvs_close(g_handle);
-            }
             return defaultValue;
         default:
             return defaultValue;
@@ -181,6 +186,7 @@ void ESP32LocalStorage::resetDeviceConfig() {
     nvs_erase_key(g_handle, "Device_id");
     nvs_erase_key(g_handle, "Device_bool");
     nvs_erase_key(g_handle, "Distributor_num");
+    nvs_erase_key(g_handle, "Schema_version");
     
     // Erase all distributor constructs (support up to 256 distributors)
     for (uint16_t i = 0; i < 256; i++) {
@@ -269,23 +275,30 @@ void ESP32LocalStorage::setDeviceBoolean(uint16_t deviceBoolean) {
 }
 
 uint8_t ESP32LocalStorage::getNumOfDistributors() {
-    return readNvsU8("Distributor_num", 0);
+    return std::min(readNvsU8("Distributor_num", 0), MAX_DISTRIBUTORS);
 }
 
 void ESP32LocalStorage::setNumOfDistributors(uint8_t numOfDistributors) {
-    writeNvsU8("Distributor_num", numOfDistributors);
+    writeNvsU8("Distributor_num", std::min(numOfDistributors, MAX_DISTRIBUTORS));
 }
 
-void ESP32LocalStorage::getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) {
+bool ESP32LocalStorage::getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) {
+    if (construct == nullptr || distributorNum >= MAX_DISTRIBUTORS) return false;
     std::string key = uint16ToKey(distributorNum);
-    const char *ptr_key = key.c_str();
-    readNvsBlob(ptr_key, construct, DISTRIBUTOR_NUM_CFG_BYTES);
+    uint8_t record[DISTRIBUTOR_RECORD_BYTES] = {};
+    if (readNvsBlob(key.c_str(), record, sizeof(record)) != ESP_OK) return false;
+
+    std::copy(record, record + DISTRIBUTOR_NUM_CFG_BYTES, construct);
+    return record[DISTRIBUTOR_NUM_CFG_BYTES] == Utility::crc8(construct, DISTRIBUTOR_NUM_CFG_BYTES);
 }
 
 void ESP32LocalStorage::setDistributorConstruct(uint16_t distributorNum, const uint8_t* construct) {
+    if (construct == nullptr || distributorNum >= MAX_DISTRIBUTORS) return;
     std::string key = uint16ToKey(distributorNum);
-    const char *ptr_key = key.c_str();
-    writeNvsBlob(ptr_key, construct, DISTRIBUTOR_NUM_CFG_BYTES);
+    uint8_t record[DISTRIBUTOR_RECORD_BYTES];
+    std::copy(construct, construct + DISTRIBUTOR_NUM_CFG_BYTES, record);
+    record[DISTRIBUTOR_NUM_CFG_BYTES] = Utility::crc8(construct, DISTRIBUTOR_NUM_CFG_BYTES);
+    writeNvsBlob(key.c_str(), record, sizeof(record));
 }
 
 bool ESP32LocalStorage::initializeDeviceConfiguration(DistributorManager& distributorManager) {
@@ -309,8 +322,9 @@ bool ESP32LocalStorage::initializeDeviceConfiguration(DistributorManager& distri
     uint8_t numDistributors = getNumOfDistributors();
     for (uint8_t i = 0; i < numDistributors; i++) {
         uint8_t distributorData[DISTRIBUTOR_NUM_CFG_BYTES];
-        getDistributorConstruct(i, distributorData);
-        distributorManager.addDistributor(distributorData);
+        if (getDistributorConstruct(i, distributorData)) {
+            distributorManager.addDistributor(distributorData, sizeof(distributorData));
+        }
     }
     
     return true; // Successfully loaded configuration

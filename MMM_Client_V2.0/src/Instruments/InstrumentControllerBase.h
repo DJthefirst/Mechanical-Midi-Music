@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Config.h"
 #include "Constants.h"
 #include <cstdint>
 #include <array>
@@ -7,6 +8,7 @@
 
 // Forward declarations
 class DistributionStrategy;
+class Distributor;
 
 class InstrumentControllerBase {
 public:
@@ -15,7 +17,7 @@ public:
 
 protected:
     //Distributor Tracking Attributes
-    std::array<void*, NUM_Instruments> m_lastDistributor = {nullptr};
+    std::array<const Distributor*, NUM_Instruments> m_lastDistributor = {nullptr};
     std::array<uint8_t, NUM_Instruments> m_lastChannel = {NONE};
     std::bitset<NUM_Instruments> m_activeInstruments = 0;
     std::array<uint32_t, NUM_Instruments> m_noteStartTime = {0}; // When each note started (for timeout and longest-playing tracking)
@@ -31,7 +33,8 @@ public:
     virtual void resetAll() = 0;
     virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     // Overloaded version with distributor tracking
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, void* distributor) {
+    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, const Distributor* distributor) {
+        if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
 
         // Set the distributor that sent this note
         m_lastDistributor[instrument] = distributor;
@@ -65,9 +68,8 @@ public:
         checkInstrumentTimeouts();
     }
 
-    // Return the last distributor (as a void* value) that sent a note to the
-    // given instrument. Use setLastDistributor to update/clear this value.
-    void* getLastDistributor(uint8_t instrument) {
+    // Return the distributor that most recently sent a note to this instrument.
+    const Distributor* getLastDistributor(uint8_t instrument) {
         if (instrument < NUM_Instruments) {
             return m_lastDistributor[instrument];
         }
@@ -81,7 +83,7 @@ public:
         return NONE;
     }
 
-    void setLastDistributor(uint8_t instrument, void* distributor, uint8_t channel) {
+    void setLastDistributor(uint8_t instrument, const Distributor* distributor, uint8_t channel) {
         if (instrument < NUM_Instruments) {
             m_lastDistributor[instrument] = distributor;
             m_lastChannel[instrument] = channel;

@@ -66,6 +66,7 @@ $tempFiles = @()
 
 try {
     foreach ($entry in $extendEntries) {
+        $safeName = ($entry.Value -replace '[^A-Za-z0-9_\-]+', '_')
         $tempLines = [System.Collections.Generic.List[string]]::new()
         for ($lineIndex = 0; $lineIndex -lt $lines.Count; $lineIndex++) {
             $line = $lines[$lineIndex]
@@ -80,9 +81,13 @@ try {
             else {
                 $tempLines.Add($line)
             }
+
+            if ($line -match '^\s*\[platformio\]\s*$') {
+                $tempLines.Add("build_dir = .pio/build/matrix/$safeName")
+                $tempLines.Add("libdeps_dir = .pio/libdeps/matrix/$safeName")
+            }
         }
 
-        $safeName = ($entry.Value -replace '[^A-Za-z0-9_\-]+', '_')
         $tempPath = Join-Path $ProjectRoot ("platformio.selected.$safeName.ini")
         $tempFiles += $tempPath
 

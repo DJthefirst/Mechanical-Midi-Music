@@ -78,7 +78,7 @@ private:
     MidiMessage sysExGetDistributorMinMaxNotes(const MidiMessage& message);
     MidiMessage sysExGetDistributorNumPolyphonicNotes(const MidiMessage& message);
     
-    void sysExSetDistributor(const MidiMessage& message);
+    bool sysExSetDistributor(const MidiMessage& message);
     void sysExSetDistributorChannels(const MidiMessage& message);
     void sysExSetDistributorInstruments(const MidiMessage& message);
     void sysExSetDistributorMethod(const MidiMessage& message);
@@ -95,6 +95,8 @@ private:
     // Helper methods
     void broadcastDeviceChanged();
     bool isValidDestination(const MidiMessage& message) const;
+    MidiMessage commandError(const MidiMessage& message, uint8_t errorCode) const;
+    MidiMessage unsupportedCommand(const MidiMessage& message) const;
     
     // Local Storage helpers
     #ifdef CFG_EXTRA_LOCAL_STORAGE

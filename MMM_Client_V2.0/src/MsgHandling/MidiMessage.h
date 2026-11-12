@@ -19,7 +19,7 @@ constexpr uint8_t SYSEX_HeaderSize = 7; //Header size of SysEx message
 struct MidiMessage
 {
     uint8_t length = 0;
-    std::array<uint8_t, MAX_PACKET_LENGTH> buffer;
+    std::array<uint8_t, MAX_PACKET_LENGTH> buffer{};
     constexpr bool isValid() const noexcept { return length != 0; }
 
     // Generate empty MIDI message
@@ -71,6 +71,14 @@ struct MidiMessage
     constexpr uint8_t sysExCommand() const noexcept { return buffer[6]; } 
     const uint8_t* sysExCmdPayload() const noexcept { return buffer.data() + 7; } // Returns the start of data from a SysEx message
     uint8_t* sysExCmdPayload() noexcept { return buffer.data() + 7; }
+
+    constexpr bool isCompleteSysEx() const noexcept {
+        return length >= SYSEX_HeaderSize + 1 && buffer[0] == 0xF0 && buffer[length - 1] == 0xF7;
+    }
+
+    constexpr uint8_t sysExPayloadLength() const noexcept {
+        return isCompleteSysEx() ? static_cast<uint8_t>(length - SYSEX_HeaderSize - 1) : 0;
+    }
 
     // Return distributor ID
     constexpr uint16_t sysExDistributorID() const noexcept { return (buffer[7] << 7) | buffer[8]; }

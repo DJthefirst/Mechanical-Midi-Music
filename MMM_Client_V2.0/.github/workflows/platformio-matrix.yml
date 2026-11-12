@@ -1,0 +1,40 @@
+name: PlatformIO instrument matrix
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO
+        run: python -m pip install platformio
+
+      - name: Run native tests
+        run: pio test -e native_tests
+
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO
+        run: python -m pip install platformio
+
+      - name: Build selectable instrument configurations
+        shell: pwsh
+        run: ./scripts/test_instrument_compilation.ps1

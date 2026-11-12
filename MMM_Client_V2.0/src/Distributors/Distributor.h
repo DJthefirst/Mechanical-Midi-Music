@@ -28,6 +28,7 @@ using std::int8_t;
 
 //Size of Distributor when convered to Byte array
 constexpr uint8_t DISTRIBUTOR_NUM_CFG_BYTES = 24;
+constexpr uint8_t MAX_DISTRIBUTORS = 64;
 
 //Distributor Bool Value Bit Indexes
 namespace DISTRIBUTOR_BOOL_MASK {
@@ -61,11 +62,11 @@ public:
     explicit Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController);
     ~Distributor();
 
-    // Disable copy (unique_ptr is not copyable) and enable move semantics
+    // Address identity is used for active-note ownership.
     Distributor(const Distributor&) = delete;
     Distributor& operator=(const Distributor&) = delete;
-    Distributor(Distributor&&) noexcept = default;
-    Distributor& operator=(Distributor&&) noexcept = default;
+    Distributor(Distributor&& other) = delete;
+    Distributor& operator=(Distributor&& other) = delete;
 
     /* Determines which instruments the message is for */
     void processMessage(const MidiMessage& message);

@@ -68,30 +68,37 @@ void Teensy41_NetworkUSB::sendMessage(const MidiMessage& message) {
 
     switch (type) {
         case Midi::NoteOff:
+            if (message.length < 3) break;
             usbMIDI.sendNoteOff(message.buffer[1], message.buffer[2], channel);
             break;
 
         case Midi::NoteOn:
+            if (message.length < 3) break;
             usbMIDI.sendNoteOn(message.buffer[1], message.buffer[2], channel);
             break;
 
         case Midi::KeyPressure:
+            if (message.length < 3) break;
             usbMIDI.sendAfterTouchPoly(message.buffer[1], message.buffer[2], channel);
             break;
 
         case Midi::ControlChange:
+            if (message.length < 3) break;
             usbMIDI.sendControlChange(message.buffer[1], message.buffer[2], channel);
             break;
 
         case Midi::ProgramChange:
+            if (message.length < 2) break;
             usbMIDI.sendProgramChange(message.buffer[1], channel);
             break;
 
         case Midi::ChannelPressure:
+            if (message.length < 2) break;
             usbMIDI.sendAfterTouch(message.buffer[1], channel);
             break;
 
         case Midi::PitchBend: {
+            if (message.length < 3) break;
             // Raw MIDI: data1 = LSB (7-bit), data2 = MSB (7-bit)
             // usbMIDI expects a signed value from -8192 to +8191
             const int rawValue  = (static_cast<int>(message.buffer[2]) << 7) | message.buffer[1];

@@ -15,6 +15,7 @@
 #include "DistributionStrategies.h"
 #include "../Instruments/InstrumentControllerBase.h"
 #include "../Utility/BitManipulation.h"
+#include <algorithm>
 
 Distributor::Distributor(std::shared_ptr<InstrumentControllerBase> instrumentController)
     : m_instrumentController(instrumentController)
@@ -115,8 +116,8 @@ void Distributor::stopActiveNotes() {
     // note to avoid hanging notes and clear the tracking pointer.
 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i) {
-        const void* last = m_instrumentController->getLastDistributor(i);
-        if (last == static_cast<const void*>(this)) {
+        const Distributor* last = m_instrumentController->getLastDistributor(i);
+        if (last == this) {
             // If instrument is active, stop it. Use stopNote which will
             // also clear the _lastDistributor entry in most implementations.
             if (m_instrumentController->getNumActiveNotes(i) != 0) {
@@ -218,11 +219,15 @@ void Distributor::setDistributor(const uint8_t data[]){
     m_instruments = Utility::decodeFrom7Bit<NUM_Instruments>(&data[5]);
     
     // Other fields
-    m_distributionMethod = static_cast<DistributionMethod>(data[10]);
+    const uint8_t method = data[10] & 0x7F;
+    m_distributionMethod = method <= static_cast<uint8_t>(DistributionMethod::Descending)
+        ? static_cast<DistributionMethod>(method)
+        : DistributionMethod::RoundRobinBalance;
     m_minNote = data[12] & 0x7F;
     m_maxNote = data[13] & 0x7F;
+    if (m_minNote > m_maxNote) std::swap(m_minNote, m_maxNote);
     uint16_t boolData = (static_cast<uint16_t>(data[14]) << 7) | static_cast<uint16_t>(data[15]);
-    m_distributorBools = boolData;
+    m_distributorBools = boolData & (DISTRIBUTOR_BOOL_MASK::MUTED | DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE);
 
     // Update strategy if distribution method changed
     updateDistributionStrategy();
@@ -231,13 +236,16 @@ void Distributor::setDistributor(const uint8_t data[]){
 //Configures Distributor Distribution Method
 void Distributor::setDistributionMethod(DistributionMethod distribution){
     stopActiveNotes();
-    m_distributionMethod = distribution;
+    const uint8_t method = static_cast<uint8_t>(distribution);
+    m_distributionMethod = method <= static_cast<uint8_t>(DistributionMethod::Descending)
+        ? distribution
+        : DistributionMethod::RoundRobinBalance;
     updateDistributionStrategy();
 }
 
 void Distributor::setDistributorBoolValues(uint16_t boolValues){
     stopActiveNotes();
-    m_distributorBools = boolValues;
+    m_distributorBools = boolValues & (DISTRIBUTOR_BOOL_MASK::MUTED | DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE);
 }
 
 void Distributor::toggleMuted(){
@@ -270,8 +278,9 @@ void Distributor::setNoteOverwrite(bool noteOverwrite){
 //Configures Distributor Minimum and Maximum Notes
 void Distributor::setMinMaxNote(uint8_t minNote, uint8_t maxNote){
     stopActiveNotes();
-    m_minNote = minNote;
-    m_maxNote = maxNote;
+    m_minNote = std::min<uint8_t>(minNote, 127);
+    m_maxNote = std::min<uint8_t>(maxNote, 127);
+    if (m_minNote > m_maxNote) std::swap(m_minNote, m_maxNote);
 }
 
 //Configures Distributor accepted MIDI channels

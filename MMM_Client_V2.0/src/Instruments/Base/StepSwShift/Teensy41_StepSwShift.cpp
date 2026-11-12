@@ -10,11 +10,16 @@
 // Define constants for PWM configuration
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "CFG_PINS_INSTRUMENT_PWM must provide one step pin per configured instrument");
+static_assert(CFG_SHIFTREGISTER_NUM_OUTPUTS >= HardwareConfig::MAX_NUM_INSTRUMENTS,
+              "Shift register must provide one direction output per configured instrument");
 
 // Define static member variables
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSwShift::m_headPosition = {};
 std::bitset<HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_StepSwShift::m_pinStateDir = 0;
 IShiftRegister<CFG_SHIFTREGISTER_NUM_OUTPUTS>* Teensy41_StepSwShift::m_shiftReg = nullptr;
+volatile uint32_t Teensy41_StepSwShift::m_pendingDirectionUpdates = 0;
 
 Teensy41_StepSwShift::Teensy41_StepSwShift() : Teensy41_SwPWM()
 {
@@ -63,19 +68,42 @@ void Teensy41_StepSwShift::tick()
 
 void Teensy41_StepSwShift::togglePin(uint8_t instrument)
 {
+    const uint32_t instrumentMask = uint32_t{1} << instrument;
+    if ((m_pendingDirectionUpdates & instrumentMask) != 0) return;
+
     //Increment/Decrement Head position
     m_pinStateDir[instrument] ? m_headPosition[instrument]-- : m_headPosition[instrument]++;
 
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        m_shiftReg->setOutputEnabled(instrument, m_pinStateDir[instrument]);
-        m_shiftReg->update();
+        m_pendingDirectionUpdates |= instrumentMask;
     }
 
     //Pulse the step pin.
     Teensy41_SwPWM::m_currentState.flip(instrument);
     digitalWrite(pwmPins[instrument], m_currentState[instrument]);
+}
+
+void Teensy41_StepSwShift::periodic()
+{
+    Teensy41_SwPWM::periodic();
+
+    noInterrupts();
+    const uint32_t pending = m_pendingDirectionUpdates;
+    interrupts();
+    if (pending == 0) return;
+
+    for (uint8_t instrument = 0; instrument < HardwareConfig::MAX_NUM_INSTRUMENTS; ++instrument) {
+        if ((pending & (uint32_t{1} << instrument)) != 0) {
+            m_shiftReg->setOutputEnabled(instrument, m_pinStateDir[instrument]);
+        }
+    }
+    m_shiftReg->update();
+
+    noInterrupts();
+    m_pendingDirectionUpdates &= ~pending;
+    interrupts();
 }
 
 #endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_STEPSWSHIFT && CFG_COMPONENT_PWM && CFG_COMPONENT_SHIFTREGISTER

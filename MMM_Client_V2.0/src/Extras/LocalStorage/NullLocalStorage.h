@@ -38,6 +38,6 @@ public:
     uint8_t getNumOfDistributors() override { return 0; }
     void setNumOfDistributors(uint8_t numOfDistributors) override {}
     
-    void getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override {}
+    bool getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override { return false; }
     void setDistributorConstruct(uint16_t distributorNum, const uint8_t* construct) override {}
 };

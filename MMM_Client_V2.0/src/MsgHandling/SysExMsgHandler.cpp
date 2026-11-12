@@ -25,6 +25,7 @@ SysExMsgHandler::SysExMsgHandler(DistributorManager& distributorManager,
 // Process a SysEx message and return optional response
 std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessage& message)
 {
+    if (!message.isCompleteSysEx()) return {};
     // Check MIDI ID
     if (message.sysExID() != SysEx::ID) return {};
     // Check Device ID or Global ID 0x00;
@@ -61,15 +62,10 @@ bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optio
             response = sysExDiscoverDevices(message);
             return true;
         case (SysEx::DeviceConstructWithDistributors):
-            if (message.length == 7) {
-                response = sysExGetDeviceConstructWithDistributors(message);
-                return true;
-            }
-            sysExSetDeviceConstructWithDistributors(message);
-            response.reset();
+            response = unsupportedCommand(message);
             return true;
         case (SysEx::DeviceConstruct):
-            if (message.length == 7) {
+            if (message.sysExPayloadLength() == 0) {
                 response = sysExGetDeviceConstruct(message);
                 return true;
             }
@@ -77,7 +73,7 @@ bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optio
             response.reset();
             return true;
         case (SysEx::DeviceName):
-            if (message.length == 7) {
+            if (message.sysExPayloadLength() == 0) {
                 response = sysExGetDeviceName(message);
                 return true;
             }
@@ -85,7 +81,7 @@ bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optio
             response.reset();
             return true;
         case (SysEx::DeviceBoolean):
-            if (message.length == 7) {
+            if (message.sysExPayloadLength() == 0) {
                 response = sysExGetDeviceBoolean(message);
                 return true;
             }
@@ -93,7 +89,7 @@ bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optio
             response.reset();
             return true;
         case (SysEx::DeviceID):
-            if (message.length == 7) {
+            if (message.sysExPayloadLength() == 0) {
                 response = sysExGetDeviceID(message);
                 return true;
             }
@@ -107,12 +103,20 @@ bool SysExMsgHandler::handleDeviceCommand(const MidiMessage& message, std::optio
 
 bool SysExMsgHandler::handleDistributorCommand(const MidiMessage& message, std::optional<MidiMessage>& response)
 {
+    const uint8_t payloadLength = message.sysExPayloadLength();
+    const auto validExistingDistributor = [&]() {
+        return m_distributorManager && payloadLength >= 2
+            && message.sysExDistributorID() < m_distributorManager->getDistributorCount();
+    };
+
     switch (message.sysExCommand()) {
         case (SysEx::RemoveDistributor):
-            if (m_distributorManager) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else {
                 m_distributorManager->removeDistributor(message.sysExDistributorID());
+                response.reset();
             }
-            response.reset();
             return true;
         case (SysEx::RemoveAllDistributors):
             if (m_distributorManager) {
@@ -127,59 +131,84 @@ bool SysExMsgHandler::handleDistributorCommand(const MidiMessage& message, std::
             response = sysExGetAllDistributors(message);
             return true;
         case (SysEx::AddDistributor):
-            sysExSetDistributor(message);
-            response.reset();
+            if (sysExSetDistributor(message)) response.reset();
+            else response = commandError(message, payloadLength < DISTRIBUTOR_NUM_CFG_BYTES
+                ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
             return true;
         case (SysEx::ToggleMuteDistributor):
-            response = sysExToggleMuteDistributor(message);
+            response = validExistingDistributor()
+                ? sysExToggleMuteDistributor(message)
+                : commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
             return true;
         case (SysEx::DistributorConstruct):
-            if (message.length == 9) {
-                response = sysExGetDistributorConstruct(message);
+            if (payloadLength == 2) {
+                response = validExistingDistributor() ? sysExGetDistributorConstruct(message)
+                    : commandError(message, SysExError::InvalidDistributor);
                 return true;
             }
-            sysExSetDistributor(message);
-            response.reset();
+            if (sysExSetDistributor(message)) response.reset();
+            else response = commandError(message, payloadLength < DISTRIBUTOR_NUM_CFG_BYTES
+                ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
             return true;
         case (SysEx::DistributorChannels):
-            if (message.length == 9) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else if (payloadLength == 2) {
                 response = sysExGetDistributorChannels(message);
-                return true;
+            } else if (payloadLength >= 5) {
+                sysExSetDistributorChannels(message);
+                response.reset();
+            } else {
+                response = commandError(message, SysExError::InvalidPayload);
             }
-            sysExSetDistributorChannels(message);
-            response.reset();
             return true;
         case (SysEx::DistributorInstruments):
-            if (message.length == 9) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else if (payloadLength == 2) {
                 response = sysExGetDistributorInstruments(message);
-                return true;
+            } else if (payloadLength >= 7) {
+                sysExSetDistributorInstruments(message);
+                response.reset();
+            } else {
+                response = commandError(message, SysExError::InvalidPayload);
             }
-            sysExSetDistributorInstruments(message);
-            response.reset();
             return true;
         case (SysEx::DistributorMethod):
-            if (message.length == 9) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else if (payloadLength == 2) {
                 response = sysExGetDistributorMethod(message);
-                return true;
+            } else if (payloadLength >= 3) {
+                sysExSetDistributorMethod(message);
+                response.reset();
+            } else {
+                response = commandError(message, SysExError::InvalidPayload);
             }
-            sysExSetDistributorMethod(message);
-            response.reset();
             return true;
         case (SysEx::DistributorBoolValues):
-            if (message.length == 9) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else if (payloadLength == 2) {
                 response = sysExGetDistributorBoolValues(message);
-                return true;
+            } else if (payloadLength >= 4) {
+                sysExSetDistributorBoolValues(message);
+                response.reset();
+            } else {
+                response = commandError(message, SysExError::InvalidPayload);
             }
-            sysExSetDistributorBoolValues(message);
-            response.reset();
             return true;
         case (SysEx::DistributorMinMaxNotes):
-            if (message.length == 9) {
+            if (!validExistingDistributor()) {
+                response = commandError(message, payloadLength < 2 ? SysExError::InvalidPayload : SysExError::InvalidDistributor);
+            } else if (payloadLength == 2) {
                 response = sysExGetDistributorMinMaxNotes(message);
-                return true;
+            } else if (payloadLength >= 4) {
+                sysExSetDistributorMinMaxNotes(message);
+                response.reset();
+            } else {
+                response = commandError(message, SysExError::InvalidPayload);
             }
-            sysExSetDistributorMinMaxNotes(message);
-            response.reset();
             return true;
         default:
             return false;
@@ -255,8 +284,7 @@ MidiMessage SysExMsgHandler::sysExDiscoverDevices(const MidiMessage& message)
 // Respond with Device Construct With Distributors
 MidiMessage SysExMsgHandler::sysExGetDeviceConstructWithDistributors(const MidiMessage& message)
 {
-    // TODO: Implementation needed
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), nullptr, 0);
+    return unsupportedCommand(message);
 }
 
 // Respond with Device Construct
@@ -304,14 +332,13 @@ MidiMessage SysExMsgHandler::sysExGetDeviceID(const MidiMessage& message)
 // Set Device Construct With Distributors
 void SysExMsgHandler::sysExSetDeviceConstructWithDistributors(const MidiMessage& message)
 {
-    sysExSetDeviceConstruct(message);
-    // TODO: Handle distributors from payload - needs different implementation approach to handle multiple messages and larger payload
+    (void)message;
 }
 
 // Configure Device Construct
 void SysExMsgHandler::sysExSetDeviceConstruct(const MidiMessage& message)
 {
-    if (message.length < (SYSEX_HeaderSize + DEVICE_NUM_CFG_BYTES + 1)) return;
+    if (message.sysExPayloadLength() < DEVICE_NUM_CFG_BYTES) return;
 
     if (!Device::SetDeviceConstruct(message.sysExCmdPayload(), DEVICE_NUM_CFG_BYTES)) return;
 
@@ -327,7 +354,7 @@ void SysExMsgHandler::sysExSetDeviceConstruct(const MidiMessage& message)
 // Set Device ID from incoming payload (expecting at least 2 bytes MSB,LSB)
 void SysExMsgHandler::sysExSetDeviceID(const MidiMessage& message)
 {
-    if (message.length < SYSEX_HeaderSize + 2) return; // not enough data
+    if (message.sysExPayloadLength() < 2) return;
     uint8_t msb = message.sysExCmdPayload()[0];
     uint8_t lsb = message.sysExCmdPayload()[1];
     uint16_t newID = (static_cast<uint16_t>(msb) << 7) | static_cast<uint16_t>(lsb);
@@ -343,10 +370,10 @@ void SysExMsgHandler::sysExSetDeviceID(const MidiMessage& message)
 void SysExMsgHandler::sysExSetDeviceName(const MidiMessage& message)
 {
     // Require at least header + tail before subtracting to avoid underflow
-    if (message.length < (SYSEX_HeaderSize + 1)) return;
+    if (!message.isCompleteSysEx()) return;
 
     // Calculate payload length (total message length - SysEx header - end byte)
-    size_t payloadLength = static_cast<size_t>(message.length - SYSEX_HeaderSize - 1);
+    size_t payloadLength = message.sysExPayloadLength();
     payloadLength = std::min(payloadLength, static_cast<size_t>(DEVICE_NUM_NAME_BYTES - 1));
     
     // Safely create string from payload with length validation
@@ -375,6 +402,7 @@ void SysExMsgHandler::sysExSetDeviceName(const MidiMessage& message)
 // Configure Device Boolean
 void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
 {
+    if (message.sysExPayloadLength() < 2) return;
     // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
     uint16_t deviceBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[0]) << 7) | 
                                 static_cast<uint16_t>(message.sysExCmdPayload()[1]);
@@ -404,8 +432,7 @@ MidiMessage SysExMsgHandler::sysExGetNumOfDistributors(const MidiMessage& messag
 // Respond with All Distributors
 MidiMessage SysExMsgHandler::sysExGetAllDistributors(const MidiMessage& message)
 {
-    // TODO: Return Multiple Messages - needs different implementation approach
-    return sysExGetNumOfDistributors(message);
+    return unsupportedCommand(message);
 }
 
 // Toggle Distributor Mute
@@ -496,24 +523,23 @@ MidiMessage SysExMsgHandler::sysExGetDistributorMinMaxNotes(const MidiMessage& m
 // Respond with the requested Distributor Num Polyphonic Notes Config
 MidiMessage SysExMsgHandler::sysExGetDistributorNumPolyphonicNotes(const MidiMessage& message)
 {
-    // TODO: Implementation needed - need to add getDistributorNumPolyphonicNotes to DistributorManager
-    uint8_t numNotes = 1;
-    return MidiMessage(m_sourceId, m_destinationId, message.sysExCommand(), &numNotes, 1);
+    return unsupportedCommand(message);
 }
 
 // Set Distributor
-void SysExMsgHandler::sysExSetDistributor(const MidiMessage& message)
+bool SysExMsgHandler::sysExSetDistributor(const MidiMessage& message)
 {
-    if (m_distributorManager) {
+    if (m_distributorManager && message.sysExPayloadLength() >= DISTRIBUTOR_NUM_CFG_BYTES) {
         // Data is already in 7-bit MIDI format, use directly
-        m_distributorManager->setDistributor(message.sysExCmdPayload());
+        return m_distributorManager->setDistributor(message.sysExCmdPayload(), message.sysExPayloadLength());
     }
+    return false;
 }
 
 // Configure the designated Distributor's Channels
 void SysExMsgHandler::sysExSetDistributorChannels(const MidiMessage& message)
 {
-    if (message.length < SYSEX_HeaderSize + 5) return; // or log error
+    if (message.sysExPayloadLength() < 5) return;
     
     // Decode from 3 MIDI 7-bit bytes
     auto channels = Utility::decodeFrom7Bit<NUM_Channels>(&message.sysExCmdPayload()[2]);
@@ -523,7 +549,7 @@ void SysExMsgHandler::sysExSetDistributorChannels(const MidiMessage& message)
 // Configure the designated Distributor's Instruments
 void SysExMsgHandler::sysExSetDistributorInstruments(const MidiMessage& message)
 {   
-    if (message.length < SYSEX_HeaderSize + 7) return; // or log error
+    if (message.sysExPayloadLength() < 7) return;
     
     // Decode from 5 MIDI 7-bit bytes
     auto instruments = Utility::decodeFrom7Bit<NUM_Instruments>(&message.sysExCmdPayload()[2]);
@@ -533,6 +559,7 @@ void SysExMsgHandler::sysExSetDistributorInstruments(const MidiMessage& message)
 // Configure the designated Distributor's Distribution Method
 void SysExMsgHandler::sysExSetDistributorMethod(const MidiMessage& message)
 {
+    if (message.sysExPayloadLength() < 3) return;
     m_distributorManager->setDistributorMethod(message.sysExDistributorID(), 
                                              DistributionMethod(message.sysExCmdPayload()[2]));
 }
@@ -540,6 +567,7 @@ void SysExMsgHandler::sysExSetDistributorMethod(const MidiMessage& message)
 // Configure the designated Distributor's Boolean Values
 void SysExMsgHandler::sysExSetDistributorBoolValues(const MidiMessage& message)
 {
+    if (message.sysExPayloadLength() < 4) return;
     // Reconstruct 16-bit boolean value from 2 MIDI 7-bit bytes
     uint16_t distributorBoolValue = (static_cast<uint16_t>(message.sysExCmdPayload()[2]) << 7) | 
                                      static_cast<uint16_t>(message.sysExCmdPayload()[3]);
@@ -549,6 +577,7 @@ void SysExMsgHandler::sysExSetDistributorBoolValues(const MidiMessage& message)
 // Configure the designated Distributor's Minimum and Maximum Notes
 void SysExMsgHandler::sysExSetDistributorMinMaxNotes(const MidiMessage& message)
 {
+    if (message.sysExPayloadLength() < 4) return;
     m_distributorManager->setDistributorMinMaxNotes(message.sysExDistributorID(),
                                                    message.sysExCmdPayload()[2],
                                                    message.sysExCmdPayload()[3]);
@@ -567,10 +596,10 @@ void SysExMsgHandler::sysExResetAllInstruments(const MidiMessage& message)
 
 void SysExMsgHandler::sysExResetInstrument(const MidiMessage& message)
 {
-    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 1) return;
+    if (!m_instrumentController || message.sysExPayloadLength() < 1) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
-    if (instrumentId >= NUM_Instruments) return;
+    if (instrumentId >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
 
     m_instrumentController->reset(instrumentId);
 }
@@ -578,9 +607,9 @@ void SysExMsgHandler::sysExResetInstrument(const MidiMessage& message)
 MidiMessage SysExMsgHandler::sysExGetInstrumentNumActiveNotes(const MidiMessage& message)
 {
     uint8_t numActiveNotes = 0;
-    if (m_instrumentController && message.length >= SYSEX_HeaderSize + 1) {
+    if (m_instrumentController && message.sysExPayloadLength() >= 1) {
         const uint8_t instrumentId = message.sysExCmdPayload()[0];
-        if (instrumentId < NUM_Instruments) {
+        if (instrumentId < HardwareConfig::MAX_NUM_INSTRUMENTS) {
             numActiveNotes = m_instrumentController->getNumActiveNotes(instrumentId);
         }
     }
@@ -589,10 +618,12 @@ MidiMessage SysExMsgHandler::sysExGetInstrumentNumActiveNotes(const MidiMessage&
 
 void SysExMsgHandler::sysExSetInstrumentNoteOn(const MidiMessage& message)
 {
-    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+    if (!m_instrumentController || message.sysExPayloadLength() < 4) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
-    if (instrumentId >= NUM_Instruments) return;
+    if (instrumentId >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    if (message.sysExCmdPayload()[1] >= Midi::NUM_CH ||
+        message.sysExCmdPayload()[2] > 127 || message.sysExCmdPayload()[3] > 127) return;
 
     m_instrumentController->playNote(instrumentId,// Instrument ID
         message.sysExCmdPayload()[2], // Note
@@ -602,10 +633,12 @@ void SysExMsgHandler::sysExSetInstrumentNoteOn(const MidiMessage& message)
 
 void SysExMsgHandler::sysExSetInstrumentNoteOff(const MidiMessage& message)
 {
-    if (!m_instrumentController || message.length < SYSEX_HeaderSize + 4) return;
+    if (!m_instrumentController || message.sysExPayloadLength() < 4) return;
 
     const uint8_t instrumentId = message.sysExCmdPayload()[0];
-    if (instrumentId >= NUM_Instruments) return;
+    if (instrumentId >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    if (message.sysExCmdPayload()[1] >= Midi::NUM_CH ||
+        message.sysExCmdPayload()[2] > 127 || message.sysExCmdPayload()[3] > 127) return;
 
     m_instrumentController->stopNote(instrumentId,// Instrument ID
         message.sysExCmdPayload()[2], // Note
@@ -630,6 +663,17 @@ void SysExMsgHandler::broadcastDeviceChanged()
 bool SysExMsgHandler::isValidDestination(const MidiMessage& message) const
 {
     return (message.DestinationID() == Device::GetDeviceID() || message.DestinationID() == 0x00);
+}
+
+MidiMessage SysExMsgHandler::unsupportedCommand(const MidiMessage& message) const
+{
+    return commandError(message, SysExError::UnsupportedCommand);
+}
+
+MidiMessage SysExMsgHandler::commandError(const MidiMessage& message, uint8_t errorCode) const
+{
+    const uint8_t payload[] = {message.sysExCommand(), errorCode};
+    return MidiMessage(m_sourceId, m_destinationId, SysEx::Error, payload, sizeof(payload));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

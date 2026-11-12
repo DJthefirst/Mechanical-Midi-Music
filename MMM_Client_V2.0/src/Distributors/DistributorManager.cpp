@@ -35,34 +35,34 @@ std::shared_ptr<DistributorManager> DistributorManager::getInstance(std::shared_
 // Create a default Distributor and add it to the Distribution Pool
 void DistributorManager::addDistributor()
 {
-    m_distributors.emplace_back(m_ptrInstrumentController);
-    localStorageAddDistributor();
-    broadcastDistributorChanged();
-}
-
-// Add an existing Distributor to the Distribution Pool
-void DistributorManager::addDistributor(Distributor&& distributor)
-{
-    m_distributors.push_back(std::move(distributor));
+    if (m_distributors.size() >= MAX_DISTRIBUTORS) return;
+    m_distributors.push_back(std::make_unique<Distributor>(m_ptrInstrumentController));
     localStorageAddDistributor();
     broadcastDistributorChanged();
 }
 
 // Create a Distributor from a Construct and add it to the Distribution Pool
-void DistributorManager::addDistributor(const uint8_t data[])
+bool DistributorManager::addDistributor(const uint8_t data[], size_t length)
 {
-    m_distributors.emplace_back(m_ptrInstrumentController);
-    m_distributors.back().setDistributor(data);
+    if (data == nullptr || length < DISTRIBUTOR_NUM_CFG_BYTES || m_distributors.size() >= MAX_DISTRIBUTORS) {
+        return false;
+    }
+    m_distributors.push_back(std::make_unique<Distributor>(m_ptrInstrumentController));
+    m_distributors.back()->setDistributor(data);
     localStorageAddDistributor();
     broadcastDistributorChanged();
+    return true;
 }
 
 // Updates the designated Distributor in the Distribution Pool
 // from a construct or adds a new Distributor
-void DistributorManager::setDistributor(const uint8_t data[])
+bool DistributorManager::setDistributor(const uint8_t data[], size_t length)
 {
+    if (data == nullptr || length < DISTRIBUTOR_NUM_CFG_BYTES) return false;
+
     // Decode distributor ID from the first two bytes
     uint16_t distributorID = (static_cast<uint16_t>(data[0]) << 7) | static_cast<uint16_t>(data[1]);
+    if (distributorID >= MAX_DISTRIBUTORS) return false;
     
     // If distributor ID is beyond current range, add new distributors
     while (distributorID >= m_distributors.size()) {
@@ -70,9 +70,10 @@ void DistributorManager::setDistributor(const uint8_t data[])
     }
     
     // Update the specified distributor
-    m_distributors[distributorID].setDistributor(data);
+    m_distributors[distributorID]->setDistributor(data);
     localStorageUpdateDistributor(distributorID, data);
     broadcastDistributorChanged();
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,9 +83,9 @@ void DistributorManager::setDistributor(const uint8_t data[])
 // Send message to all distributors which accept the designated message's channel.
 void DistributorManager::distributeMessage(const MidiMessage& message)
 {
-    for (uint8_t i = 0; i < m_distributors.size(); i++) {
-        if (m_distributors[i].getChannels().test(message.channel())) {
-            m_distributors[i].processMessage(message);
+    for (size_t i = 0; i < m_distributors.size(); i++) {
+        if (m_distributors[i]->getChannels().test(message.channel())) {
+            m_distributors[i]->processMessage(message);
         }
     }
 }
@@ -92,10 +93,9 @@ void DistributorManager::distributeMessage(const MidiMessage& message)
 
 
 // Removes the designated Distributor from the Distribution Pool
-void DistributorManager::removeDistributor(uint8_t id)
+void DistributorManager::removeDistributor(uint16_t id)
 {
-    if (m_distributors.empty()) return;
-    if (id >= m_distributors.size()) id = static_cast<uint8_t>(m_distributors.size() - 1);
+    if (id >= m_distributors.size()) return;
     m_distributors.erase(m_distributors.begin() + id);
     localStorageRemoveDistributor(id);
     broadcastDistributorChanged();
@@ -111,29 +111,27 @@ void DistributorManager::removeAllDistributors()
 }
 
 // Returns the indexed Distributor from the Distribution Pool
-Distributor& DistributorManager::getDistributor(uint8_t index)
+Distributor& DistributorManager::getDistributor(uint16_t index)
 {
     if (m_distributors.empty()) {
-        m_distributors.emplace_back(m_ptrInstrumentController);
+        m_distributors.push_back(std::make_unique<Distributor>(m_ptrInstrumentController));
     }
 
-    if (index >= m_distributors.size()) index = static_cast<uint8_t>(m_distributors.size() - 1);
-    return (m_distributors[index]);
+    if (index >= m_distributors.size()) index = static_cast<uint16_t>(m_distributors.size() - 1);
+    return *m_distributors[index];
 }
 
 // Returns indexed Distributor Construct
-std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributorSerial(uint8_t index)
+std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributorSerial(uint16_t index)
 {
     if (m_distributors.empty()) {
         return {};
     }
 
-    if (index >= m_distributors.size()) {
-        index = static_cast<uint8_t>(m_distributors.size() - 1);
-    }
+    if (index >= m_distributors.size()) return {};
 
     // Append Distributor ID to the Construct
-    auto distributorObj = m_distributors[index].toSerial();
+    auto distributorObj = m_distributors[index]->toSerial();
     distributorObj[0] = static_cast<uint8_t>((index >> 7) & 0x7F);
     distributorObj[1] = static_cast<uint8_t>((index >> 0) & 0x7F);
     return distributorObj;
@@ -143,18 +141,18 @@ std::array<uint8_t, DISTRIBUTOR_NUM_CFG_BYTES> DistributorManager::getDistributo
 // Distributor Query Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::bitset<NUM_Channels> DistributorManager::getDistributorChannels(uint8_t distributorId)
+std::bitset<NUM_Channels> DistributorManager::getDistributorChannels(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getChannels();
+        return m_distributors[distributorId]->getChannels();
     }
     return 0;
 }
 
-std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint8_t distributorId)
+std::bitset<NUM_Instruments> DistributorManager::getDistributorInstruments(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getInstruments();
+        return m_distributors[distributorId]->getInstruments();
     }
     return 0;
 }
@@ -172,7 +170,7 @@ void DistributorManager::localStorageAddDistributor()
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 }
 
-void DistributorManager::localStorageRemoveDistributor(uint8_t id)
+void DistributorManager::localStorageRemoveDistributor(uint16_t id)
 {
     LocalStorageFactory::getInstance().setNumOfDistributors(m_distributors.size());
 
@@ -197,55 +195,55 @@ void DistributorManager::localStorageClearDistributors()
 // Distributor Configuration Helpers
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DistributorManager::setDistributorChannels(uint8_t distributorId, std::bitset<NUM_Channels> channels)
+void DistributorManager::setDistributorChannels(uint16_t distributorId, std::bitset<NUM_Channels> channels)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setChannels(channels);
+        m_distributors[distributorId]->setChannels(channels);
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
 
-void DistributorManager::setDistributorInstruments(uint8_t distributorId, std::bitset<NUM_Instruments> instruments)
+void DistributorManager::setDistributorInstruments(uint16_t distributorId, std::bitset<NUM_Instruments> instruments)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setInstruments(instruments);
+        m_distributors[distributorId]->setInstruments(instruments);
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
 
-void DistributorManager::setDistributorMethod(uint8_t distributorId, DistributionMethod method)
+void DistributorManager::setDistributorMethod(uint16_t distributorId, DistributionMethod method)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setDistributionMethod(method);
+        m_distributors[distributorId]->setDistributionMethod(method);
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
 
-void DistributorManager::setDistributorBoolValues(uint8_t distributorId, uint16_t boolValues)
+void DistributorManager::setDistributorBoolValues(uint16_t distributorId, uint16_t boolValues)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setDistributorBoolValues(boolValues);
+        m_distributors[distributorId]->setDistributorBoolValues(boolValues);
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
 
-void DistributorManager::setDistributorMinMaxNotes(uint8_t distributorId, uint8_t minNote, uint8_t maxNote)
+void DistributorManager::setDistributorMinMaxNotes(uint16_t distributorId, uint8_t minNote, uint8_t maxNote)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].setMinMaxNote(minNote, maxNote);
+        m_distributors[distributorId]->setMinMaxNote(minNote, maxNote);
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         broadcastDistributorChanged();
     }
 }
 
-void DistributorManager::toggleDistributorMute(uint8_t distributorId)
+void DistributorManager::toggleDistributorMute(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        m_distributors[distributorId].toggleMuted();
+        m_distributors[distributorId]->toggleMuted();
         localStorageUpdateDistributor(distributorId, getDistributorSerial(distributorId).data());
         m_ptrInstrumentController->stopAll();
         broadcastDistributorChanged();
@@ -256,34 +254,34 @@ void DistributorManager::toggleDistributorMute(uint8_t distributorId)
 // Additional Getter Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DistributionMethod DistributorManager::getDistributorMethod(uint8_t distributorId)
+DistributionMethod DistributorManager::getDistributorMethod(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getDistributionMethod();
+        return m_distributors[distributorId]->getDistributionMethod();
     }
     return DistributionMethod::RoundRobinBalance; // Default fallback
 }
 
-uint16_t DistributorManager::getDistributorBoolValues(uint8_t distributorId)
+uint16_t DistributorManager::getDistributorBoolValues(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getDistributorBoolValues();
+        return m_distributors[distributorId]->getDistributorBoolValues();
     }
     return 0;
 }
 
-uint8_t DistributorManager::getDistributorMinNote(uint8_t distributorId)
+uint8_t DistributorManager::getDistributorMinNote(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getMinNote();
+        return m_distributors[distributorId]->getMinNote();
     }
     return 0;
 }
 
-uint8_t DistributorManager::getDistributorMaxNote(uint8_t distributorId)
+uint8_t DistributorManager::getDistributorMaxNote(uint16_t distributorId)
 {
     if (distributorId < m_distributors.size()) {
-        return m_distributors[distributorId].getMaxNote();
+        return m_distributors[distributorId]->getMaxNote();
     }
     return 127;
 }

@@ -21,7 +21,15 @@ public:
     std::optional<MidiMessage> readMessage() override;
 
 private:
+    MidiMessage m_pendingMessage;
+    uint8_t m_expectedLength = 0;
+    uint8_t m_runningStatus = 0;
+    bool m_readingSysEx = false;
+    bool m_discardingSysEx = false;
+
     bool startSerial();
+    void resetPendingMessage();
+    static uint8_t expectedMessageLength(uint8_t status);
 };
 
 #endif /* CFG_MMM_NETWORK_SERIAL */

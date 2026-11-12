@@ -51,7 +51,8 @@ Teensy41_MultiPhase::Teensy41_MultiPhase() : InstrumentControllerBase()
 
 void Teensy41_MultiPhase::reset(uint8_t instrument)
 {
-    //Not Yet Implemented
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
+    stopNote(instrument, 0, 0, 0);
 }
 
 void Teensy41_MultiPhase::resetAll()
@@ -61,6 +62,7 @@ void Teensy41_MultiPhase::resetAll()
 
 void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
     InterruptLock lock;
 
     // Only increment counter if this instrument wasn't already playing a note
@@ -92,6 +94,7 @@ void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t vel
 
 void Teensy41_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return;
     InterruptLock lock;
 
     // Only decrement if there was actually an active note
@@ -206,11 +209,13 @@ void Teensy41_MultiPhase::updatePhase(uint8_t instrument)
 
 uint8_t Teensy41_MultiPhase::getNumActiveNotes(uint8_t instrument)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS) return 0;
     return (m_activeNotes[instrument] != 0) ? 1 : 0;
 }
  
 bool Teensy41_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 {
+    if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
     //Mask lower 7bits and return true if the instument is playing the respective note.
     return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
 }

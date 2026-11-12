@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ILocalStorage.h"
+#include "Distributors/Distributor.h"
 
 #if defined(PLATFORM_TEENSY41)
 
@@ -27,17 +28,20 @@
  * - 0x0016-0x0017: Device ID (2 bytes)
  * - 0x0018-0x0019: Device boolean flags (2 bytes)
  * - 0x001A: Number of distributors (1 byte)
- * - 0x001B: Reserved (1 byte)
- * - 0x001C-0x107B: Distributor constructs (256 distributors * 16 bytes each = 4096 bytes)
+ * - 0x001B: Storage schema version (1 byte)
+ * - 0x001C-0x065B: 64 distributor records (24-byte construct + CRC-8)
  */
 class Teensy41LocalStorage : public ILocalStorage {
 private:
     static constexpr uint16_t EEPROM_MAGIC = 0xA5B6;
+    static constexpr uint8_t STORAGE_SCHEMA_VERSION = 2;
+    static constexpr uint8_t DISTRIBUTOR_RECORD_BYTES = DISTRIBUTOR_NUM_CFG_BYTES + 1;
     static constexpr uint16_t ADDR_MAGIC = 0x0000;
     static constexpr uint16_t ADDR_DEVICE_NAME = 0x0002;
     static constexpr uint16_t ADDR_DEVICE_ID = 0x0016;
     static constexpr uint16_t ADDR_DEVICE_BOOL = 0x0018;
     static constexpr uint16_t ADDR_NUM_DISTRIBUTORS = 0x001A;
+    static constexpr uint16_t ADDR_SCHEMA_VERSION = 0x001B;
     static constexpr uint16_t ADDR_DISTRIBUTORS_START = 0x001C;
     
     bool m_initialized;
@@ -89,7 +93,7 @@ public:
     uint8_t getNumOfDistributors() override;
     void setNumOfDistributors(uint8_t numOfDistributors) override;
     
-    void getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override;
+    bool getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) override;
     void setDistributorConstruct(uint16_t distributorNum, const uint8_t* construct) override;
 };
 

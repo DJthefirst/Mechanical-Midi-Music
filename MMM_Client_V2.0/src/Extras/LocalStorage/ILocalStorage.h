@@ -103,7 +103,7 @@ public:
      * @param distributorNum Distributor index
      * @param construct Buffer to receive configuration data
      */
-    virtual void getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) = 0;
+    virtual bool getDistributorConstruct(uint16_t distributorNum, uint8_t* construct) = 0;
 
     /**
      * @brief Store distributor configuration
