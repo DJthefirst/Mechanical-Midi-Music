@@ -7,12 +7,23 @@
 #include "Arduino.h"
 #include <cmath>
 #include "esp32-hal-ledc.h"
+#include "soc/soc_caps.h"
 
 // Define constants for PWM configuration
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
 static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
               "CFG_PINS_INSTRUMENT_PWM must provide one pin per configured instrument");
+
+// Every voice needs its own LEDC timer for an independent frequency.
+// Classic ESP32 has 8 timers (4 high-speed + 4 low-speed); ESP32-S3 has 4.
+#if SOC_LEDC_SUPPORT_HS_MODE
+constexpr uint8_t LEDC_VOICES = 8;
+#else
+constexpr uint8_t LEDC_VOICES = 4;
+#endif
+static_assert(HardwareConfig::MAX_NUM_INSTRUMENTS <= LEDC_VOICES,
+              "Too many hardware PWM instruments: ESP32 supports 8, ESP32-S3 supports 4 (one LEDC timer each)");
 
 // Static member definitions - properly scoped as class members
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_activeNotes = {};
@@ -24,12 +35,10 @@ std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> ESP32_HwPWM::m_ledcChan
 
 ESP32_HwPWM::ESP32_HwPWM() : InstrumentControllerBase()
 {
-    // Initialize LedC channels for each instrument
-    // Use channels 0, 2, 4, 6, 8, 10, 12, 14 to ensure each uses a unique timer
-    // This avoids timer sharing which causes frequency interference
-
+    // Use even LEDC channels so each instrument gets a unique timer (0->ch0, 1->ch2, ...).
+    // This avoids timer sharing which causes frequency interference.
     for(uint8_t i = 0; i < numPwmPins && i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i){
-        m_ledcChannels[i] = i * 2; // Map: instrument 0->ch0, 1->ch2, 2->ch4, etc.
+        m_ledcChannels[i] = i * 2;
         initializeLedcChannel(i, pwmPins[i]);
     }
 
@@ -57,7 +66,9 @@ void ESP32_HwPWM::setFrequency(uint8_t instrument, double frequency)
     if (frequency > 20000.0) frequency = 20000.0;
     
     // Only update if frequency changed significantly (>0.5Hz difference for better precision)
-    if (abs(lastFrequency[instrument] - frequency) > 0.5) {
+    const bool frequencyChanged = std::fabs(lastFrequency[instrument] - frequency) > 0.5;
+
+    if (frequencyChanged) {
         // Use ledcChangeFrequency for much faster frequency updates (no full reconfiguration)
         ledcChangeFrequency(m_ledcChannels[instrument], frequency, LEDC_RESOLUTION);
         lastFrequency[instrument] = frequency;

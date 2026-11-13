@@ -39,7 +39,7 @@ std::optional<MidiMessage> Teensy41_NetworkUSB::readMessage() {
         return message;
     }
 
-    // System common and real-time messages (0xF1-0xFF) have no channel. usbMIDI keeps the
+    // System common and real-time messages (0xF1-0xFF) have no channel. UsbMIDI keeps the
     // channel of the previous channel message, so it must not be merged into the status byte.
     if (type >= 0xF0) {
         message.buffer[0] = type;

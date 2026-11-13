@@ -7,14 +7,13 @@
 
 
 /**
- * ESP32-specific PWM implementation using LedC peripheral
+ * ESP32-specific hardware PWM implementation using the LedC peripheral
  * Provides PWM functionality for ESP32 microcontrollers
  * 
  * Channel Mapping Strategy:
- * - Uses LEDC channels 0, 2, 4, 6, 8, 10, 12, 14 (even channels only)
- * - This ensures each channel uses a unique timer (8 timers total)
+ * - Uses LEDC even channels (0, 2, 4, ...) so each instrument has a unique timer
  * - Prevents timer sharing which causes frequency interference
- * - Maximum 8 simultaneous instruments supported
+ * - Maximum 8 simultaneous instruments on ESP32; 4 on ESP32-S3
  */
 class ESP32_HwPWM : public InstrumentControllerBase {
 public:

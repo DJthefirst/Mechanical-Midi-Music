@@ -39,7 +39,7 @@ namespace Midi {
     // System Common MIDI message types
     constexpr uint8_t SysEx    = 0x0;
     constexpr uint8_t SysExEnd = 0x7;
-    constexpr uint8_t SysStop  = 0xC; // 0xFC (0xFA is MIDI Start)
+    constexpr uint8_t SysStop  = 0xC;
     constexpr uint8_t SysReset = 0xF;
 
     //MIDI Constants

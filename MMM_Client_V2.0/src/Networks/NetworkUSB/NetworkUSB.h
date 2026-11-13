@@ -14,11 +14,11 @@
 #if defined(__IMXRT1062__) || defined(ARDUINO_TEENSY41)
     #include "Networks/NetworkUSB/Teensy41_NetworkUSB.h"
     #define NetworkUSB Teensy41_NetworkUSB
-//#elif defined(ESP32)
-    // TODO: Add ESP32 USB MIDI implementation
-    // #include "Networks/NetworkUSB/ESP32_NetworkUSB.h"
-    // #define NetworkUSB ESP32_NetworkUSB
-    //#error "USB MIDI network is not yet implemented for ESP32"
+#elif defined(CFG_ESP32_S3)
+    #include "Networks/NetworkUSB/ESP32_S3_NetworkUSB.h"
+    #define NetworkUSB ESP32_S3_NetworkUSB
+#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+    #error "USB MIDI network requires an ESP32-S3; other ESP32 targets are not implemented"
 #else
     // Unsupported platform: compile a no-op stub so the project still builds.
     #include "Networks/INetwork.h"

@@ -89,6 +89,9 @@ using std::int8_t;
         #define HAS_WIFI
         #define HAS_BLE
         #define HAS_NVS
+        #if defined(CFG_ESP32_S3)
+            #define HAS_USB_MIDI
+        #endif
     #elif defined(ARDUINO_TEENSY41) || defined(__IMXRT1062__)
         #define PLATFORM_TEENSY41
         constexpr Platform PLATFORM_TYPE = Platform::_Teensy41;
