@@ -12,7 +12,11 @@
 #if defined(PLATFORM_ESP32)
     #include "ESP32LocalStorage.h"
 #elif defined(PLATFORM_TEENSY41)
-    #include "Teensy41LocalStorage.h"
+    #if defined(CFG_LOCAL_STORAGE_SD)
+        #include "Teensy41SDLocalStorage.h"
+    #else
+        #include "Teensy41LocalStorage.h"
+    #endif
 #else
     #include "NullLocalStorage.h"
 #endif
@@ -33,7 +37,11 @@ public:
         #if defined(PLATFORM_ESP32)
             return std::make_unique<ESP32LocalStorage>();
         #elif defined(PLATFORM_TEENSY41)
-            return std::make_unique<Teensy41LocalStorage>();
+            #if defined(CFG_LOCAL_STORAGE_SD)
+                return std::make_unique<Teensy41SDLocalStorage>();
+            #else
+                return std::make_unique<Teensy41LocalStorage>();
+            #endif
         #else
             return std::make_unique<NullLocalStorage>();
         #endif
