@@ -50,6 +50,16 @@ static_assert(MMM_STORAGE_TYPE_VALUE(CFG_LOCAL_STORAGE_TYPE) == LOCAL_STORAGE_TY
     #define CFG_TIMER_RESOLUTION_US 8
 #endif
 
+#ifndef CFG_SD_MIDI_AUTOPLAY
+    #define CFG_SD_MIDI_AUTOPLAY 1
+#endif
+#ifndef CFG_SD_MIDI_LOOP
+    #define CFG_SD_MIDI_LOOP 1
+#endif
+#ifndef CFG_SD_MIDI_DELAY_SECONDS
+    #define CFG_SD_MIDI_DELAY_SECONDS 0
+#endif
+
 #ifndef CFG_NOTE_TIMEOUT_MS
     #define CFG_NOTE_TIMEOUT_MS 0
 #endif
@@ -130,6 +140,18 @@ static_assert(MMM_STORAGE_TYPE_VALUE(CFG_LOCAL_STORAGE_TYPE) == LOCAL_STORAGE_TY
 
 #if defined(CFG_LOCAL_STORAGE_SD) && !defined(PLATFORM_TEENSY41)
     #error "SD local storage requires Teensy 4.1"
+#endif
+
+#if defined(CFG_EXTRA_SD_MIDI_PLAYER)
+    #if !defined(PLATFORM_TEENSY41)
+        #error "SD MIDI playback requires Teensy 4.1"
+    #endif
+    static_assert(CFG_SD_MIDI_AUTOPLAY == 0 || CFG_SD_MIDI_AUTOPLAY == 1,
+                  "CFG_SD_MIDI_AUTOPLAY must be 0 or 1");
+    static_assert(CFG_SD_MIDI_LOOP == 0 || CFG_SD_MIDI_LOOP == 1,
+                  "CFG_SD_MIDI_LOOP must be 0 or 1");
+    static_assert(CFG_SD_MIDI_DELAY_SECONDS >= 0 && CFG_SD_MIDI_DELAY_SECONDS <= 86400,
+                  "CFG_SD_MIDI_DELAY_SECONDS must be between 0 and 86400");
 #endif
 
 namespace HardwareConfig {

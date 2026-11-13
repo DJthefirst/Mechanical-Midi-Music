@@ -12,6 +12,9 @@
 #include <Arduino.h>
 #include <cstring>  // For memcpy and strncpy
 #include <algorithm> // For std::min
+#ifdef CFG_EXTRA_SD_MIDI_PLAYER
+#include "Extras/SdMidiPlayer.h"
+#endif
 
 // Constructor with dependency injection
 SysExMsgHandler::SysExMsgHandler(DistributorManager& distributorManager, 
@@ -34,6 +37,14 @@ std::optional<MidiMessage> SysExMsgHandler::processSysExMessage(const MidiMessag
     // Update source ID to current runtime Device ID to ensure responses use correct ID
     m_sourceId = Device::GetDeviceID();
     m_destinationId = message.SourceID();
+
+    if (message.sysExCommand() == SysEx::ExtraPlayback) {
+        #ifdef CFG_EXTRA_SD_MIDI_PLAYER
+        if (m_sdMidiPlayer) return m_sdMidiPlayer->processCommand(message, millis());
+        #endif
+        return unsupportedCommand(message);
+    }
+    if (message.sysExCommand() == SysEx::ExtraSD) return unsupportedCommand(message);
 
     std::optional<MidiMessage> response;
     if (handleDeviceCommand(message, response)) {

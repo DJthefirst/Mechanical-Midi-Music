@@ -30,6 +30,11 @@
   #include "Extras/LocalStorage/LocalStorageFactory.h"
 #endif
 
+#ifdef CFG_EXTRA_SD_MIDI_PLAYER
+  #include "Extras/SdMidiPlayer.h"
+  std::unique_ptr<SdMidiPlayer> sdMidiPlayer;
+#endif
+
 // Global components
 std::shared_ptr<InstrumentControllerBase> instrumentController;
 std::shared_ptr<DistributorManager> distributorManager;
@@ -95,6 +100,23 @@ void setup() {
     instrumentController->resetAll();
   }
 
+  #ifdef CFG_EXTRA_SD_MIDI_PLAYER
+    sdMidiPlayer = std::make_unique<SdMidiPlayer>(
+      [](const MidiMessage& message) {
+        if (auto response = midiMsgHandler->processMessage(message); response && network) {
+          network->sendMessage(*response);
+        }
+      },
+      []() { instrumentController->stopAll(); },
+      [](uint8_t error) {
+        const uint8_t payload[] = {SysEx::ExtraPlayback, error};
+        if (network) network->sendMessage(MidiMessage(
+          Device::GetDeviceID(), SysEx::Server, SysEx::Error, payload, sizeof(payload)));
+      }, millis);
+    sysExHandler->setSdMidiPlayer(*sdMidiPlayer);
+    sdMidiPlayer->begin();
+  #endif
+
   //Send Device Ready to Connect
   if (network) {
     MidiMessage ready(Device::GetDeviceID(), SysEx::Server, SysEx::DeviceReady, nullptr, 0);
@@ -107,6 +129,10 @@ void loop() {
   if (messageRouter) {
     messageRouter->processMessages();
   }
+
+  #ifdef CFG_EXTRA_SD_MIDI_PLAYER
+    if (sdMidiPlayer) sdMidiPlayer->update(millis());
+  #endif
   
   // Check for instrument timeouts
   if (instrumentController) {

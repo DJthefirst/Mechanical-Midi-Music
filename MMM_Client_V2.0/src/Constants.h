@@ -143,7 +143,8 @@ namespace SysEx {
     // Command(Extras)
     constexpr uint8_t ExtraStorage = 0x60;
     constexpr uint8_t ExtraLED = 0x61;
-    constexpr uint8_t ExtraSdPlayback = 0x62;
+    constexpr uint8_t ExtraSD = 0x62;
+    constexpr uint8_t ExtraPlayback = 0x63;
 
     constexpr uint8_t Error = 0x7F;
 }
@@ -152,7 +153,22 @@ namespace SysExError {
     constexpr uint8_t UnsupportedCommand = 0x01;
     constexpr uint8_t InvalidPayload = 0x02;
     constexpr uint8_t InvalidDistributor = 0x03;
+    constexpr uint8_t InvalidSongIndex = 0x04;
+    constexpr uint8_t SdUnavailable = 0x05;
+    constexpr uint8_t NoSong = 0x06;
+    constexpr uint8_t InvalidMidiFile = 0x07;
+    constexpr uint8_t IoError = 0x08;
+    constexpr uint8_t CapacityExceeded = 0x09;
 };
+
+namespace MidiPlayerSubCmd {
+    constexpr uint8_t Reset = 0x00, GetState = 0x01, Play = 0x02, PlaySongAt = 0x03;
+    constexpr uint8_t Pause = 0x04, Stop = 0x05, Next = 0x08, Prev = 0x09;
+    constexpr uint8_t Repeat = 0x0A, AutoPlay = 0x0B, Loop = 0x0C;
+    constexpr uint8_t GetSongIndex = 0x10, GetSongName = 0x11;
+    constexpr uint8_t GetSongDuration = 0x15, GetPosition = 0x16;
+    constexpr uint8_t SetPosition = 0x17, Navigate = 0x18;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enums

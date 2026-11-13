@@ -22,6 +22,7 @@
 // Forward declaration
 class DistributorManager;
 class InstrumentControllerBase;
+class SdMidiPlayer;
 
 class SysExMsgHandler {
 public:
@@ -37,6 +38,9 @@ private:
     
     // Callback for when device configuration changes
     DeviceChangedCallback m_deviceChangedCallback = nullptr;
+#ifdef CFG_EXTRA_SD_MIDI_PLAYER
+    SdMidiPlayer* m_sdMidiPlayer = nullptr;
+#endif
 
 public:
 
@@ -45,6 +49,9 @@ public:
     std::optional<MidiMessage> processSysExMessage(const MidiMessage& message);
     
     void setDeviceChangedCallback(DeviceChangedCallback callback);
+#ifdef CFG_EXTRA_SD_MIDI_PLAYER
+    void setSdMidiPlayer(SdMidiPlayer& player) { m_sdMidiPlayer = &player; }
+#endif
 
 private:
     bool handleDeviceCommand(const MidiMessage& message, std::optional<MidiMessage>& response);
