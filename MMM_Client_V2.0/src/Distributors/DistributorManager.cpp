@@ -83,9 +83,11 @@ bool DistributorManager::setDistributor(const uint8_t data[], size_t length)
 // Send message to all distributors which accept the designated message's channel.
 void DistributorManager::distributeMessage(const MidiMessage& message)
 {
-    for (size_t i = 0; i < m_distributors.size(); i++) {
-        if (m_distributors[i]->getChannels().test(message.channel())) {
-            m_distributors[i]->processMessage(message);
+    // In omni mode every distributor listens on all channels
+    const uint8_t channel = message.channel();
+    for (const auto& distributor : m_distributors) {
+        if (Device::OmniMode || distributor->getChannels()[channel]) {
+            distributor->processMessage(message);
         }
     }
 }

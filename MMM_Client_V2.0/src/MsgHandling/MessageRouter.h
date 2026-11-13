@@ -12,20 +12,23 @@
 #include "SysExMsgHandler.h"
 #include "MidiMsgHandler.h"
 #include "MidiMessage.h"
-#include <functional>
 
 /**
  * MessageRouter handles the core message routing logic between networks and handlers.
  * This class encapsulates the main loop functionality for processing MIDI messages.
  */
 class MessageRouter {
+public:
+    // A plain function pointer is all a capture-less callback needs and is lighter than std::function
+    using DeviceChangedCallback = void (*)(const MidiMessage&, INetwork*);
+
 private:
     NetworkManager* m_networkManager;
     MidiMsgHandler* m_midiMsgHandler;
     SysExMsgHandler* m_sysExMsgHandler;
     InstrumentControllerBase* m_instrumentController;
     
-    std::function<void(const MidiMessage&, INetwork*)> m_deviceChangedCallback;
+    DeviceChangedCallback m_deviceChangedCallback = nullptr;
 
 public:
     /**
@@ -40,7 +43,7 @@ public:
                   SysExMsgHandler& sysExMsgHandler,
                   InstrumentControllerBase& instrumentController);
 
-    void setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback);
+    void setDeviceChangedCallback(DeviceChangedCallback callback);
 
     void broadcastDeviceChanged(INetwork* sourceNetwork = nullptr);
 

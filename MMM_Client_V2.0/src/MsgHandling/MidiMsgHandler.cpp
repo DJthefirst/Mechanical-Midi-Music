@@ -43,6 +43,8 @@ std::optional<MidiMessage> MidiMsgHandler::processMessage(const MidiMessage& mes
         case(Midi::NoteOff):
         case(Midi::NoteOn):
             if (message.length < 3) break;
+            // A muted device ignores new notes. Note offs still pass so nothing is left hanging.
+            if (Device::Muted && msgType == Midi::NoteOn) break;
             // Route message to appropriate distributors based on channel
             if (m_distributorManager) m_distributorManager->distributeMessage(message);
             break;

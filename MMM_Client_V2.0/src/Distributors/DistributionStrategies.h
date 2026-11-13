@@ -17,8 +17,7 @@ class InstrumentControllerBase;
  */
 class RoundRobinBalanceStrategy : public DistributionStrategy {   
 public:
-    RoundRobinBalanceStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : DistributionStrategy(distributor, instrController) {}
+    using DistributionStrategy::DistributionStrategy;
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
 
@@ -34,8 +33,7 @@ public:
 
 class RoundRobinStrategy : public DistributionStrategy { 
 public:
-    RoundRobinStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : DistributionStrategy(distributor, instrController) {}
+    using DistributionStrategy::DistributionStrategy;
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
 
@@ -50,8 +48,7 @@ public:
  */
 class AscendingStrategy : public DistributionStrategy {
 public:
-    AscendingStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : DistributionStrategy(distributor, instrController) {}
+    using DistributionStrategy::DistributionStrategy;
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
 
@@ -66,8 +63,7 @@ public:
  */
 class DescendingStrategy : public DistributionStrategy {
 public:
-    DescendingStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : DistributionStrategy(distributor, instrController) {}
+    using DistributionStrategy::DistributionStrategy;
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
 
@@ -82,8 +78,7 @@ public:
  */
 class StraightThroughStrategy : public DistributionStrategy {
 public:
-    StraightThroughStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
-        : DistributionStrategy(distributor, instrController) {}
+    using DistributionStrategy::DistributionStrategy;
     void playNextInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
     void stopActiveInstrument(uint8_t note, uint8_t velocity, uint8_t channel) override;
 

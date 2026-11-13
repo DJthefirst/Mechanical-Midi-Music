@@ -10,9 +10,31 @@ void AddrLED::setup(){
 
 //Update LEDs
 void AddrLED::update(){
-    if(m_updateLEDs){
-        FastLED.show();
-        m_updateLEDs = false;
+    if(!m_updateLEDs) return;
+
+    const uint32_t now = millis();
+    if(now - m_firstChangeMs < SETTLE_MS) return;
+    if(now - m_lastShowMs < REFRESH_INTERVAL_MS) return;
+
+    FastLED.show();
+    m_lastShowMs = now;
+    m_updateLEDs = false;
+    m_notYetShown.reset();
+
+    if(m_pendingOff.any()){
+        for(size_t id = 0; id < CFG_NUM_LEDS; ++id){
+            if(m_pendingOff[id]) leds[id] = CRGB::Black;
+        }
+        m_pendingOff.reset();
+        markChanged();
+    }
+}
+
+//Request a refresh and remember when the first unsent change happened
+void AddrLED::markChanged(){
+    if(!m_updateLEDs){
+        m_updateLEDs = true;
+        m_firstChangeMs = millis();
     }
 }
 
@@ -56,7 +78,9 @@ CHSV AddrLED::getColor(uint8_t id, uint8_t channel, uint8_t note, uint8_t veloci
 void AddrLED::turnLedOn(uint8_t id,CHSV color){
     if (id >= CFG_NUM_LEDS) return;
     leds[id] = color;
-    m_updateLEDs = true;
+    m_notYetShown.set(id);
+    m_pendingOff.reset(id);
+    markChanged();
 }
 
 //Set LED on by id
@@ -65,15 +89,22 @@ void AddrLED::turnLedsOn(uint8_t idStart, uint8_t idEnd, CHSV color){
     if (idEnd >= CFG_NUM_LEDS) idEnd = CFG_NUM_LEDS - 1;
     if (idStart > idEnd) return;
 
-    for(int i=idStart; i <= idEnd; i++)leds[i] = color;
-    m_updateLEDs = true;
+    for(int i=idStart; i <= idEnd; i++){
+        leds[i] = color;
+        m_pendingOff.reset(i);
+    }
+    markChanged();
 }
 
 //Set an id LED to off
 void AddrLED::turnLedOff(uint8_t id){
     if (id >= CFG_NUM_LEDS) return;
+    if (m_notYetShown[id]) {
+        m_pendingOff.set(id);
+        return;
+    }
     leds[id] = CRGB::Black; 
-    m_updateLEDs = true;
+    markChanged();
 }
 
 //Reset Leds
@@ -81,7 +112,9 @@ void AddrLED::reset(){
     for( int i = 0; i < CFG_NUM_LEDS; ++i) {
         leds[i] = CRGB::Black;
     }
-    m_updateLEDs = true;
+    m_notYetShown.reset();
+    m_pendingOff.reset();
+    markChanged();
 }
 
 #endif

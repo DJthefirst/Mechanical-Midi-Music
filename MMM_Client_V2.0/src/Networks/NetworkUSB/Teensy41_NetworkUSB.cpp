@@ -39,6 +39,16 @@ std::optional<MidiMessage> Teensy41_NetworkUSB::readMessage() {
         return message;
     }
 
+    // System common and real-time messages (0xF1-0xFF) have no channel. usbMIDI keeps the
+    // channel of the previous channel message, so it must not be merged into the status byte.
+    if (type >= 0xF0) {
+        message.buffer[0] = type;
+        message.buffer[1] = usbMIDI.getData1();
+        message.buffer[2] = usbMIDI.getData2();
+        message.length = (type == 0xF2) ? 3 : (type == 0xF1 || type == 0xF3) ? 2 : 1;
+        return message;
+    }
+
     // ── Channel Messages: reconstruct raw MIDI bytes ────────────────
     // usbMIDI.getType() returns the status high nibble (0x80–0xE0).
     // Combine with channel (1-16 → 0-15) to form the full status byte.

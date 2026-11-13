@@ -39,9 +39,9 @@ void Dulcimer::periodic() {
 }
 
 void Dulcimer::checkSolenoidTimeouts() {
-    uint32_t currentTime = millis();
-    
     if (m_numActiveNotes == 0) return; // No active notes, skip checking
+
+    uint32_t currentTime = millis();
     for (uint8_t i = 0; i < NUM_OUTPUTS; i++) {
         // Check if this note is active
         if (m_outputStartTime[i] != 0) {

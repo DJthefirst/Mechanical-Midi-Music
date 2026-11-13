@@ -18,7 +18,6 @@
 #include <vector>
 #include <array>
 #include <cstdint>
-#include <functional>
 
 // Forward declaration
 class InstrumentControllerBase;
@@ -28,10 +27,14 @@ class InstrumentControllerBase;
  * adding, removing, configuring, and accessing distributors.
  */
 class DistributorManager {
+public:
+    // A plain function pointer is all a capture-less callback needs and is lighter than std::function
+    using DeviceChangedCallback = void (*)();
+
 private:
     std::vector<std::unique_ptr<Distributor>> m_distributors;
     std::shared_ptr<InstrumentControllerBase> m_ptrInstrumentController;
-    std::function<void()> m_deviceChangedCallback;
+    DeviceChangedCallback m_deviceChangedCallback = nullptr;
 
     /**
      * Private constructor for singleton pattern
@@ -62,7 +65,7 @@ public:
      * Set callback for distributor changes
      * @param callback Function to call when distributors are modified
      */
-    void setDeviceChangedCallback(const std::function<void()>& callback) { m_deviceChangedCallback = callback; }
+    void setDeviceChangedCallback(DeviceChangedCallback callback) { m_deviceChangedCallback = callback; }
     
     // Message processing
     void distributeMessage(const MidiMessage& message);

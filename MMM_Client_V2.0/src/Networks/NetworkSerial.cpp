@@ -66,6 +66,13 @@ std::optional<MidiMessage> NetworkSerial::readMessage() {
             return realtime;
         }
 
+        // Any other status byte ends a SysEx in progress, so a lost 0xF7 cannot swallow later messages
+        if ((m_readingSysEx || m_discardingSysEx) && (value & MSB_BITMASK) != 0 && value != 0xF7) {
+            m_readingSysEx = false;
+            m_discardingSysEx = false;
+            resetPendingMessage();
+        }
+
         if (m_discardingSysEx) {
             if (value == 0xF7) m_discardingSysEx = false;
             continue;

@@ -18,13 +18,16 @@
 #include <array>
 #include <cstdint>
 #include <optional>
-#include <functional>
 
 // Forward declaration
 class DistributorManager;
 class InstrumentControllerBase;
 
 class SysExMsgHandler {
+public:
+    // A plain function pointer is all a capture-less callback needs and is lighter than std::function
+    using DeviceChangedCallback = void (*)();
+
 private:
     DistributorManager* m_distributorManager;
     InstrumentControllerBase* m_instrumentController;
@@ -33,7 +36,7 @@ private:
     uint16_t m_destinationId = 0;
     
     // Callback for when device configuration changes
-    std::function<void()> m_deviceChangedCallback;
+    DeviceChangedCallback m_deviceChangedCallback = nullptr;
 
 public:
 
@@ -41,7 +44,7 @@ public:
 
     std::optional<MidiMessage> processSysExMessage(const MidiMessage& message);
     
-    void setDeviceChangedCallback(const std::function<void()>& callback);
+    void setDeviceChangedCallback(DeviceChangedCallback callback);
 
 private:
     bool handleDeviceCommand(const MidiMessage& message, std::optional<MidiMessage>& response);

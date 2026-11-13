@@ -24,7 +24,7 @@ static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS,
 // Define static member variables
 std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activeNotes = {};
 uint8_t Teensy41_SwPWM::m_numActiveNotes = 0;
-std::array<uint8_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_modulationWheel = {};
+std::array<uint8_t, Midi::NUM_CH> Teensy41_SwPWM::m_modulationWheel = {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_notePeriod = {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_activePeriod =  {};
 std::array<uint16_t, HardwareConfig::MAX_NUM_INSTRUMENTS> Teensy41_SwPWM::m_currentTick = {};
@@ -68,6 +68,14 @@ void Teensy41_SwPWM::resetAll()
 void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
+
+    // Pitch bend uses floating point math, so it is done before interrupts are disabled
+    #ifdef PWM_NOTES_DOUBLE
+        const uint16_t activePeriod = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
+    #else
+        const uint16_t activePeriod = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+    #endif
+
     InterruptLock lock;
 
     // Only increment counter if this instrument wasn't already playing a note
@@ -76,12 +84,7 @@ void Teensy41_SwPWM::playNote(uint8_t instrument, uint8_t note, uint8_t velocity
     m_activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
-
-    #ifdef PWM_NOTES_DOUBLE
-        m_activePeriod[instrument] = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
-    #else
-        m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
-    #endif
+    m_activePeriod[instrument] = activePeriod;
 
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
@@ -152,11 +155,11 @@ it's crucial that any computations here be kept to a minimum!
 */
 void Teensy41_SwPWM::Tick()
 {
+    // Early exit if no notes are active
+    if(m_numActiveNotes == 0) return;
+
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
-        // Early exit if no notes are active - check inside loop like original
-        if(m_numActiveNotes == 0) return;
-        
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
             // Apply vibrato if enabled (modulation wheel > 0)
@@ -206,13 +209,12 @@ uint8_t Teensy41_SwPWM::getNumActiveNotes(uint8_t instrument)
 bool Teensy41_SwPWM::isNoteActive(uint8_t instrument, uint8_t note)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
-    //Mask lower 7bits and return true if the instrument is playing the respective note.
-    return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
+    //The MSB flags an active note, so an idle instrument never matches
+    return m_activeNotes[instrument] == (MSB_BITMASK | note);
 }
 
 void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
-    InterruptLock lock;
-
+    // The floating point math runs with interrupts enabled; only the period update is locked
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
@@ -221,10 +223,13 @@ void Teensy41_SwPWM::setPitchBend(uint8_t channel, uint16_t bend){
             uint8_t note = m_activeNotes[i] & (~MSB_BITMASK);
             
             #ifdef PWM_NOTES_DOUBLE
-                m_activePeriod[i] = NoteTables::applyPitchBendToNoteDouble(note, bend);
+                const uint16_t bentPeriod = NoteTables::applyPitchBendToNoteDouble(note, bend);
             #else
-                m_activePeriod[i] = NoteTables::applyPitchBendToNote(note, bend);
+                const uint16_t bentPeriod = NoteTables::applyPitchBendToNote(note, bend);
             #endif
+
+            InterruptLock lock;
+            m_activePeriod[i] = bentPeriod;
         }
     }
 }

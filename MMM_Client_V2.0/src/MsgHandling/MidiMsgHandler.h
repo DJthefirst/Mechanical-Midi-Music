@@ -12,7 +12,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <functional>
 
 // Forward declarations
 class DistributorManager;

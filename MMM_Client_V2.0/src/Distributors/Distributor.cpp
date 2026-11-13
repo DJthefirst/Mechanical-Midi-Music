@@ -40,7 +40,7 @@ void Distributor::processMessage(const MidiMessage& message){
     uint8_t currentChannel = message.channel();
 
     // Check if this distributor handles this channel
-    if (!channelEnabled(currentChannel)) return;
+    if (!Device::OmniMode && !channelEnabled(currentChannel)) return;
 
     // Check if muted
     if(getMuted()) return;
@@ -118,14 +118,12 @@ void Distributor::stopActiveNotes() {
     for (uint8_t i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; ++i) {
         const Distributor* last = m_instrumentController->getLastDistributor(i);
         if (last == this) {
-            // If instrument is active, stop it. Use stopNote which will
-            // also clear the _lastDistributor entry in most implementations.
             if (m_instrumentController->getNumActiveNotes(i) != 0) {
                 m_instrumentController->stopNote(i, 0, 0, 0);
-            } else {
-                // Ensure the distributor tracking is cleared even if not active
-                m_instrumentController->setLastDistributor(i, nullptr, NONE);
             }
+            // Always release ownership. Polyphonic instruments do not clear it in stopNote(),
+            // and a stale pointer would be inherited by a later distributor at the same address.
+            m_instrumentController->setLastDistributor(i, nullptr, NONE);
         }
     }
 }
@@ -170,40 +168,9 @@ std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> Distributor::toSerial()
     return distributorObj;
 }
 
-uint16_t Distributor::getDistributorBoolValues() const {
-    return m_distributorBools;
-}
-
-bool Distributor::getMuted() const {
-    return m_distributorBools & DISTRIBUTOR_BOOL_MASK::MUTED;
-}
-
-bool Distributor::getNoteOverwrite() const {
-    return m_distributorBools & DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE;
-}
-
-//Returns Distributor Channels
-std::bitset<NUM_Channels> Distributor::getChannels() const {
-    return m_channels;
-}
-
-//Returns Distributor Instruments
-std::bitset<NUM_Instruments> Distributor::getInstruments() const {
-    return m_instruments;
-}
-
-//Returns Distribution Method
-DistributionMethod Distributor::getDistributionMethod() const {
-    return m_distributionMethod;
-}
-
-uint8_t Distributor::getMinNote() const {
-    return m_minNote;
-}
-
-uint8_t Distributor::getMaxNote() const {
-    return m_maxNote;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Setters
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Configures Distributor from construct (expects 7-bit MIDI format)
 void Distributor::setDistributor(const uint8_t data[]){
@@ -298,25 +265,26 @@ void Distributor::setInstruments(std::bitset<NUM_Instruments> instruments){
 //Updates the distribution strategy based on the current method
 void Distributor::updateDistributionStrategy(){
     stopActiveNotes();
+    InstrumentControllerBase* const controller = m_instrumentController.get();
     switch(m_distributionMethod) {
         case DistributionMethod::RoundRobinBalance:
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, controller);
             break;
         case DistributionMethod::RoundRobin:
-            m_distributionStrategy = std::make_unique<RoundRobinStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<RoundRobinStrategy>(this, controller);
             break;
         case DistributionMethod::Ascending:
-            m_distributionStrategy = std::make_unique<AscendingStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<AscendingStrategy>(this, controller);
             break;
         case DistributionMethod::Descending:
-            m_distributionStrategy = std::make_unique<DescendingStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<DescendingStrategy>(this, controller);
             break;
         case DistributionMethod::StraightThrough:
-            m_distributionStrategy = std::make_unique<StraightThroughStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<StraightThroughStrategy>(this, controller);
             break;
         default:
             // Fallback to RoundRobinBalance as default
-            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, m_instrumentController);
+            m_distributionStrategy = std::make_unique<RoundRobinBalanceStrategy>(this, controller);
             break;
     }
 }

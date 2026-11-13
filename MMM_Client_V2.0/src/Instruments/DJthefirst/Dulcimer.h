@@ -14,7 +14,7 @@
 #include <array>
 using std::int8_t;
 
-constexpr std::array<uint16_t, 128> NOTE_TO_SHIFT_REG_OUTPUT = {
+constexpr std::array<uint8_t, 128> NOTE_TO_SHIFT_REG_OUTPUT = {
 //  C   C#  D   D#  E   F   F#  G   G#  A   A#  B
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C-1 - B-1
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C-0 - B-0
@@ -29,7 +29,7 @@ constexpr std::array<uint16_t, 128> NOTE_TO_SHIFT_REG_OUTPUT = {
     0,  0,  0,  0,  0,  0,  0,  0   //C9 - G9
 };
 
-constexpr std::array<uint16_t, 128> NOTE_TO_LED_MAP = {
+constexpr std::array<uint8_t, 128> NOTE_TO_LED_MAP = {
 //  C   C#  D   D#  E   F   F#  G   G#  A   A#  B
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C-1 - B-1
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  //C-0 - B-0

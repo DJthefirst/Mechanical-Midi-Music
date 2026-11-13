@@ -20,7 +20,7 @@ MessageRouter::MessageRouter(
     , m_instrumentController(&instrumentController) {}
 
 // Set callback for device changed notifications
-void MessageRouter::setDeviceChangedCallback(const std::function<void(const MidiMessage&, INetwork*)>& callback)
+void MessageRouter::setDeviceChangedCallback(DeviceChangedCallback callback)
 {
     m_deviceChangedCallback = callback;
 }

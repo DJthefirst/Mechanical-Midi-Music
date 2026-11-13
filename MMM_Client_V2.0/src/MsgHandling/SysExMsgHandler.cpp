@@ -243,7 +243,7 @@ bool SysExMsgHandler::handleInstrumentCommand(const MidiMessage& message, std::o
 }
 
 // Set callback for device configuration changes
-void SysExMsgHandler::setDeviceChangedCallback(const std::function<void()>& callback)
+void SysExMsgHandler::setDeviceChangedCallback(DeviceChangedCallback callback)
 {
     m_deviceChangedCallback = callback;
 }
@@ -341,6 +341,7 @@ void SysExMsgHandler::sysExSetDeviceConstruct(const MidiMessage& message)
     if (message.sysExPayloadLength() < DEVICE_NUM_CFG_BYTES) return;
 
     if (!Device::SetDeviceConstruct(message.sysExCmdPayload(), DEVICE_NUM_CFG_BYTES)) return;
+    if (Device::Muted && m_instrumentController) m_instrumentController->stopAll();
 
     #ifdef CFG_EXTRA_LOCAL_STORAGE
         LocalStorageFactory::getInstance().setDeviceID(Device::GetDeviceID());
@@ -410,6 +411,7 @@ void SysExMsgHandler::sysExSetDeviceBoolean(const MidiMessage& message)
     Device::OmniMode = ((deviceBoolValue & DEVICE_BOOL_MASK::OMNIMODE) != 0);  // Bit 1
     Device::DamperPedal = ((deviceBoolValue & DEVICE_BOOL_MASK::DAMPER_PEDAL) != 0); // Bit 2
     Device::Vibrato = ((deviceBoolValue & DEVICE_BOOL_MASK::VIBRATO) != 0); // Bit 3
+    if (Device::Muted && m_instrumentController) m_instrumentController->stopAll();
     
     #ifdef CFG_EXTRA_LOCAL_STORAGE
         LocalStorageFactory::getInstance().setDeviceBoolean(deviceBoolValue);

@@ -32,17 +32,17 @@ public:
     virtual void reset(uint8_t instrument) = 0;
     virtual void resetAll() = 0;
     virtual void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
-    // Overloaded version with distributor tracking
-    void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, const Distributor* distributor) {
-        if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
+        // Overloaded version with distributor tracking
+        void playNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel, const Distributor* distributor) {
+            if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
 
-        // Set the distributor that sent this note
-        m_lastDistributor[instrument] = distributor;
-        m_lastChannel[instrument] = channel;
-        
-        // Default implementation just calls the base method
-        playNote(instrument, note, velocity, channel);
-    }
+            // Set the distributor that sent this note
+            m_lastDistributor[instrument] = distributor;
+            m_lastChannel[instrument] = channel;
+            
+            // Default implementation just calls the base method
+            playNote(instrument, note, velocity, channel);
+        }
     virtual void stopNote(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel) = 0;
     virtual void stopAll() = 0;
 

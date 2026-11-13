@@ -22,13 +22,18 @@ class Distributor;
 
 class DistributionStrategy {
 protected:
+    // Non-owning: the strategy is owned by its Distributor, which keeps the controller alive
     Distributor* m_distributor;
-    std::shared_ptr<InstrumentControllerBase> m_instrumentController;
+    InstrumentControllerBase* m_instrumentController;
 
     uint8_t m_currentInstrument = 0;
 
+    // Stops the note on an instrument if this distributor is the one playing it there.
+    // Returns true if the note was stopped.
+    bool stopIfPlaying(uint8_t instrument, uint8_t note, uint8_t velocity, uint8_t channel);
+
 public:
-    DistributionStrategy(Distributor* distributor, std::shared_ptr<InstrumentControllerBase> instrController) 
+    DistributionStrategy(Distributor* distributor, InstrumentControllerBase* instrController) 
         : m_distributor(distributor), m_instrumentController(instrController) {};
     virtual ~DistributionStrategy() = default;
 

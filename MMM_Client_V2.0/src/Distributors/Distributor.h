@@ -74,14 +74,15 @@ public:
     /* Returns a Byte array representing this Distributor in 7-bit MIDI format */
     std::array<uint8_t,DISTRIBUTOR_NUM_CFG_BYTES> toSerial();
 
-    uint16_t getDistributorBoolValues() const;
-    bool getMuted() const;
-    bool getNoteOverwrite() const;
-    std::bitset<NUM_Channels> getChannels() const;
-    std::bitset<NUM_Instruments> getInstruments() const;
-    DistributionMethod getDistributionMethod() const;
-    uint8_t getMinNote() const;
-    uint8_t getMaxNote() const;
+    // Defined inline: these are read for every note while routing MIDI messages
+    uint16_t getDistributorBoolValues() const { return m_distributorBools; }
+    bool getMuted() const { return m_distributorBools & DISTRIBUTOR_BOOL_MASK::MUTED; }
+    bool getNoteOverwrite() const { return m_distributorBools & DISTRIBUTOR_BOOL_MASK::NOTEOVERWRITE; }
+    std::bitset<NUM_Channels> getChannels() const { return m_channels; }
+    std::bitset<NUM_Instruments> getInstruments() const { return m_instruments; }
+    DistributionMethod getDistributionMethod() const { return m_distributionMethod; }
+    uint8_t getMinNote() const { return m_minNote; }
+    uint8_t getMaxNote() const { return m_maxNote; }
 
     void setDistributor(const uint8_t data[]);
     void setDistributionMethod(DistributionMethod);

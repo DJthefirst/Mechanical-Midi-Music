@@ -19,7 +19,7 @@ protected:
     //[Instrument][ActiveNote] MSB is set if note is Active the 7 LSBs are the Notes Value 
     static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_activeNotes;
     static uint8_t m_numActiveNotes;
-    static std::array<uint8_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_modulationWheel;
+    static std::array<uint8_t,Midi::NUM_CH> m_modulationWheel; //Indexed by MIDI channel
 
     //Instrument Attributes
     static std::array<uint16_t,HardwareConfig::MAX_NUM_INSTRUMENTS> m_notePeriod;  //Base Note

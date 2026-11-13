@@ -6,19 +6,6 @@
 
 namespace Utility{
 
-    // Convert std::bitset<N> to byte array (returns little-endian 8-bit bytes)
-    template <size_t N>
-    std::array<uint8_t, (N + 7) / 8> bitsetToBytes(const std::bitset<N>& bits) {
-        std::array<uint8_t, (N + 7) / 8> bytes{};
-        // Copy raw storage directly
-        static_assert(sizeof(unsigned long) >= 1, "Unexpected block size");
-
-        // Access internal storage (standard guarantees contiguous storage in C++11+)
-        const unsigned long* dataPtr = reinterpret_cast<const unsigned long*>(&bits);
-        memcpy(bytes.data(), dataPtr, bytes.size());
-        return bytes;
-    }
-
     // Encode N-bit value into MIDI 7-bit format
     // MIDI SysEx requires MSB=0 for all bytes, so each byte holds only 7 bits of data
     // Packs bits MSB-first: 16 bits -> 3 MIDI bytes (2+7+7 bits), 32 bits -> 5 MIDI bytes (4+7+7+7+7 bits)
@@ -26,35 +13,16 @@ namespace Utility{
     //          First byte has bits 14-15, second has bits 7-13, third has bits 0-6
     template <size_t NumBits>
     std::array<uint8_t, (NumBits + 6) / 7> encodeTo7Bit(const std::bitset<NumBits>& bits) {
-        constexpr size_t midiBytes = (NumBits + 6) / 7;
-        std::array<uint8_t, midiBytes> result{};
-        
-        // Get native byte representation (little-endian)
-        auto nativeBytes = bitsetToBytes(bits);
-        
-        // Pack bits into 7-bit MIDI bytes, MSB-first
-        // Calculate how many bits go in first byte (the remainder after dividing by 7)
-        size_t firstByteBits = (NumBits % 7 == 0) ? 7 : (NumBits % 7);
-        
-        for (size_t i = 0; i < midiBytes; i++) {
-            uint8_t midiByte = 0;
-            size_t bitsInThisByte = (i == 0) ? firstByteBits : 7;
-            
-            // Calculate starting bit position (from MSB)
-            size_t startBit = (i == 0) ? (NumBits - firstByteBits) : (NumBits - firstByteBits - i * 7);
-            
-            // Extract bits
-            for (size_t bit = 0; bit < bitsInThisByte; bit++) {
-                size_t bitPos = startBit + bit;
-                size_t byteIdx = bitPos / 8;
-                size_t bitIdx = bitPos % 8;
-                if (nativeBytes[byteIdx] & (1 << bitIdx)) {
-                    midiByte |= (1 << bit);
-                }
-            }
-            result[i] = midiByte & 0x7F;
+        static_assert(NumBits <= 32, "encodeTo7Bit supports at most 32 bits");
+        std::array<uint8_t, (NumBits + 6) / 7> result{};
+
+        // Fill from the last byte backwards, taking the lowest 7 bits each time
+        uint32_t value = static_cast<uint32_t>(bits.to_ulong());
+        for (size_t i = result.size(); i-- > 0;) {
+            result[i] = value & 0x7F;
+            value >>= 7;
         }
-        
+
         return result;
     }
 
@@ -62,27 +30,15 @@ namespace Utility{
     // Unpacks bits MSB-first
     template <size_t NumBits>
     std::bitset<NumBits> decodeFrom7Bit(const uint8_t* midiBytes) {
-        std::bitset<NumBits> result;
+        static_assert(NumBits <= 32, "decodeFrom7Bit supports at most 32 bits");
         constexpr size_t midiByteCount = (NumBits + 6) / 7;
-        
-        // Calculate how many bits are in first byte
-        size_t firstByteBits = (NumBits % 7 == 0) ? 7 : (NumBits % 7);
-        
+
+        // Shift each 7-bit group in; std::bitset keeps only the lowest NumBits
+        uint32_t value = 0;
         for (size_t i = 0; i < midiByteCount; i++) {
-            uint8_t midiByte = midiBytes[i] & 0x7F;
-            size_t bitsInThisByte = (i == 0) ? firstByteBits : 7;
-            
-            // Calculate starting bit position (from MSB)
-            size_t startBit = (i == 0) ? (NumBits - firstByteBits) : (NumBits - firstByteBits - i * 7);
-            
-            // Extract bits and place in result
-            for (size_t bit = 0; bit < bitsInThisByte; bit++) {
-                if (midiByte & (1 << bit)) {
-                    result[startBit + bit] = 1;
-                }
-            }
+            value = (value << 7) | (midiBytes[i] & 0x7F);
         }
-        
-        return result;
+
+        return std::bitset<NumBits>(value);
     }
 }

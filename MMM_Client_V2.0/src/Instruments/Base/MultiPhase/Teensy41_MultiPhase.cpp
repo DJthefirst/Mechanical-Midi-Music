@@ -17,6 +17,10 @@ struct InterruptLock {
 
 constexpr uint8_t pwmPins[] = {CFG_PINS_INSTRUMENT_PWM};
 constexpr uint8_t numPwmPins = sizeof(pwmPins) / sizeof(pwmPins[0]);
+// Each instrument owns one enable pin followed by its phase output pins
+constexpr uint8_t pinsPerInstrument = CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS + 1;
+static_assert(numPwmPins >= HardwareConfig::MAX_NUM_INSTRUMENTS * pinsPerInstrument,
+              "CFG_PINS_INSTRUMENT_PWM must provide an enable pin plus every phase pin for each instrument");
 constexpr uint8_t wavetable[CFG_MULTIPHASE_WAVE_TABLE_STEPS][CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS] = CFG_MULTIPHASE_WAVE_TABLE;
 
 // Define static member variables
@@ -63,6 +67,14 @@ void Teensy41_MultiPhase::resetAll()
 void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t velocity,  uint8_t channel)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127 || channel >= Midi::NUM_CH) return;
+
+    // Pitch bend uses floating point math, so it is done before interrupts are disabled
+    #ifdef PWM_NOTES_DOUBLE
+        const uint16_t activePeriod = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
+    #else
+        const uint16_t activePeriod = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
+    #endif
+
     InterruptLock lock;
 
     // Only increment counter if this instrument wasn't already playing a note
@@ -71,12 +83,7 @@ void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t vel
     m_activeInstruments.set(instrument);
     m_activeNotes[instrument] = (MSB_BITMASK | note);
     m_notePeriod[instrument] = NoteTables::NOTE_TICKS_DOUBLE[note];
-
-    #ifdef PWM_NOTES_DOUBLE
-        m_activePeriod[instrument] = NoteTables::applyPitchBendToNoteDouble(note, m_pitchBend[channel]);
-    #else
-        m_activePeriod[instrument] = NoteTables::applyPitchBendToNote(note, m_pitchBend[channel]);
-    #endif
+    m_activePeriod[instrument] = activePeriod;
 
     m_noteStartTime[instrument] = millis(); // Record when note started for timeout tracking
 
@@ -88,7 +95,7 @@ void Teensy41_MultiPhase::playNote(uint8_t instrument, uint8_t note, uint8_t vel
     if (!wasActive) {
         m_numActiveNotes++;
     }
-    digitalWrite(pwmPins[instrument], HIGH); // Start pin HIGH to begin waveform
+    digitalWrite(pwmPins[instrument * pinsPerInstrument], HIGH); // Start pin HIGH to begin waveform
     return;
 }
 
@@ -113,7 +120,7 @@ void Teensy41_MultiPhase::stopNote(uint8_t instrument, uint8_t note, uint8_t vel
     //m_currentState[instrument] = 0;  // Reset state f wavetable
 
     for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS+1; output++){
-        digitalWrite(pwmPins[instrument + output], LOW);
+        digitalWrite(pwmPins[instrument * pinsPerInstrument + output], LOW);
     }
     
     if (wasActive && m_numActiveNotes > 0) {
@@ -153,11 +160,11 @@ it's crucial that any computations here be kept to a minimum!
 */
 void Teensy41_MultiPhase::tick()
 {
+    // Early exit if no notes are active
+    if(m_numActiveNotes == 0) return;
+
     // Go through every Instrument
     for (int i = 0; i < CFG_NUM_INSTRUMENTS; i++) {
-        // Early exit if no notes are active - check inside loop like original
-        if(m_numActiveNotes == 0) return;
-        
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
             // Apply vibrato if enabled (modulation wheel > 0)
@@ -198,7 +205,7 @@ void Teensy41_MultiPhase::updatePhase(uint8_t instrument)
     m_currentState[instrument]+=1; if (m_currentState[instrument]>=CFG_MULTIPHASE_WAVE_TABLE_STEPS) m_currentState[instrument]=0;
     for(uint8_t output=0; output < CFG_MULTIPHASE_WAVE_TABLE_OUTPUTS; output++){
         bool pinState = (wavetable[m_currentState[instrument]][output]);
-        digitalWrite(pwmPins[instrument + output + 1], pinState);
+        digitalWrite(pwmPins[instrument * pinsPerInstrument + output + 1], pinState);
     }
 }
 // #pragma GCC pop_options (Legacy)
@@ -216,13 +223,12 @@ uint8_t Teensy41_MultiPhase::getNumActiveNotes(uint8_t instrument)
 bool Teensy41_MultiPhase::isNoteActive(uint8_t instrument, uint8_t note)
 {
     if (instrument >= HardwareConfig::MAX_NUM_INSTRUMENTS || note > 127) return false;
-    //Mask lower 7bits and return true if the instument is playing the respective note.
-    return ((m_activeNotes[instrument] & (~ MSB_BITMASK)) == note);
+    //The MSB flags an active note, so an idle instrument never matches
+    return m_activeNotes[instrument] == (MSB_BITMASK | note);
 }
 
 void Teensy41_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
-    InterruptLock lock;
-
+    // The floating point math runs with interrupts enabled; only the period update is locked
     m_pitchBend[channel] = bend; 
     for (uint8_t i = 0; i < CFG_NUM_INSTRUMENTS; i++){
         if(m_lastChannel[i] == channel){
@@ -231,10 +237,13 @@ void Teensy41_MultiPhase::setPitchBend(uint8_t channel, uint16_t bend){
             uint8_t note = m_activeNotes[i] & (~MSB_BITMASK);
             
             #ifdef PWM_NOTES_DOUBLE
-                m_activePeriod[i] = NoteTables::applyPitchBendToNoteDouble(note, bend);
+                const uint16_t bentPeriod = NoteTables::applyPitchBendToNoteDouble(note, bend);
             #else
-                m_activePeriod[i] = NoteTables::applyPitchBendToNote(note, bend);
+                const uint16_t bentPeriod = NoteTables::applyPitchBendToNote(note, bend);
             #endif
+
+            InterruptLock lock;
+            m_activePeriod[i] = bentPeriod;
         }
     }
 }

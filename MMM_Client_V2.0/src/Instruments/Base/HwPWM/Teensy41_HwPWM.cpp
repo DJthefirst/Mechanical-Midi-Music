@@ -174,8 +174,8 @@ void Teensy41_HwPWM::setPitchBend(uint8_t channel, uint16_t bend){
 
             m_noteFrequency[i] = NoteTables::noteFrequency[note];
 
-            uint16_t newFrequency = NoteTables::applyPitchBend(m_noteFrequency[i], bend);
-            if (abs(m_activeFrequency[i] - newFrequency) > 0.75) {
+            const double newFrequency = NoteTables::applyPitchBend(m_noteFrequency[i], bend);
+            if (std::fabs(m_activeFrequency[i] - newFrequency) > 0.75) {
                 m_activeFrequency[i] = newFrequency;
                 setFrequency(i, newFrequency);
             }

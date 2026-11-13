@@ -50,10 +50,11 @@ it's crucial that any computations here be kept to a minimum!
 
 void Teensy41_StepSw::tick()
 {
+    // Early exit if no notes are active
+    if(m_numActiveNotes == 0) return;
+
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)return;
-
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
             if (m_currentTick[i] >= m_activePeriod[i]) {
@@ -77,12 +78,12 @@ void Teensy41_StepSw::togglePin(uint8_t instrument)
     //Toggle Direction if the Drive Head is at a limit.
     if ((m_headPosition[instrument] == CFG_LIMITS_POS_MAX) || (m_headPosition[instrument] == CFG_LIMITS_POS_MIN)){
         m_pinStateDir[instrument] = !m_pinStateDir[instrument];
-        digitalWrite(dirPins[instrument], m_pinStateDir[instrument]);
+        digitalWriteFast(dirPins[instrument], m_pinStateDir[instrument]);
     }
 
     //Pulse the step pin.
     Teensy41_SwPWM::m_currentState.flip(instrument);
-    digitalWrite(pwmPins[instrument], m_currentState[instrument]);
+    digitalWriteFast(pwmPins[instrument], m_currentState[instrument]);
 }
 
 #endif // PLATFORM_TEENSY41 && CFG_INSTRUMENT_STEPSW && CFG_COMPONENT_PWM

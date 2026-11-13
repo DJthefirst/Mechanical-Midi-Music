@@ -49,10 +49,11 @@ it's crucial that any computations here be kept to a minimum!
 
 void Teensy41_StepSwShift::tick()
 {
+    // Early exit if no notes are active
+    if(m_numActiveNotes == 0) return;
+
     // Go through every Instrument
     for (int i = 0; i < HardwareConfig::MAX_NUM_INSTRUMENTS; i++) {
-        if(m_numActiveNotes == 0)return;
-
         //If note active increase tick until period reset and toggle pin
         if (m_activePeriod[i] > 0){
             if (m_currentTick[i] >= m_activePeriod[i]) {
@@ -82,7 +83,7 @@ void Teensy41_StepSwShift::togglePin(uint8_t instrument)
 
     //Pulse the step pin.
     Teensy41_SwPWM::m_currentState.flip(instrument);
-    digitalWrite(pwmPins[instrument], m_currentState[instrument]);
+    digitalWriteFast(pwmPins[instrument], m_currentState[instrument]);
 }
 
 void Teensy41_StepSwShift::periodic()
